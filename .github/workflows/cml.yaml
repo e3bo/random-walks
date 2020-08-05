@@ -10,6 +10,6 @@ jobs:
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          bash download-hopkins.sh >> report.md
+          bash download-hopkins.sh 2> report.md
 
           cml-send-comment report.md
