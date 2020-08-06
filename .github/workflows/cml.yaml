@@ -17,7 +17,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          dvc pull --run-cache
+          dvc pull --run-cache || true
           dvc repro > report.md
 
           git config --local user.email "actions@users.noreply.github.com"
