@@ -8,7 +8,7 @@ on:
 jobs: 
   run:
     runs-on: [ubuntu-latest]
-    container: docker://eamon/random-walks:2020-08-05
+    container: docker://eamon/random-walks:2020-08-06
     steps:
       - uses: actions/checkout@v2
       - name: cml_run
