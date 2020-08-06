@@ -1,12 +1,8 @@
 
 library(magrittr)
 
-fdt <- 
-  ini::read.ini("forecast.ini")$forecast_pars$forecast_date %>%
-  str2lang() %>% 
-  eval()
-
-fdtm <- as.POSIXct(paste(fdt + 1, "0:00:00"), tz = "EST")
+fdt <- Sys.getenv("fdt")
+fdtm <- as.POSIXct(paste(fdt, "0:00:00"), tz = "EST")
 
 xmlfile <- tempfile()
 url <- paste0("https://github.com/CSSEGISandData/COVID-19.git/trunk/",

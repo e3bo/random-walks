@@ -3,25 +3,20 @@
 tictoc::tic()
 
 suppressPackageStartupMessages(library(tidyverse))
-
+source("covidhub-common.R")
 RNGkind("L'Ecuyer-CMRG")
 set.seed(1)
 
-config_pipeline <- ini::read.ini("pipeline.ini")
-config <-
-  config_pipeline$model$config %>% ini::read.ini() %>% "[["("forecast_pars")
-mconfig <- config_pipeline$model$mconfig %>% ini::read.ini()
-
+mconfig <- ini::read.ini("model.ini")
 eval_string <- function(x){
   str2lang(x) %>% eval()
 }
 mconfig$model_pars <- map(mconfig$model_pars, eval_string)
 
-config_pipeline$model$common %>% source()
+forecast_dates <- Sys.getenv("fdt") %>% as.Date()
+hopdir <- file.path("hopkins", forecast_dates)
 
-forecast_dates <- (config$forecast_date) %>% eval_string()
-
-tdat <- load_hopkins(config_pipeline$data$targ) %>% filter(str_detect(location, "^13"))
+tdat <- load_hopkins(hopdir) %>% filter(str_detect(location, "^13"))
 
 loglik_naive <- function(y){
   res <- diff(y)
@@ -59,7 +54,7 @@ reshape_paths_like_pompout <- function(x){
                 values_from = "value")
 }
 
-sim_paths <- function(fdt, tdat, mname, tdir, odir, ...) {
+sim_paths <- function(fdt, tdat, mname, odir, ...) {
 
   tdat1 <- tdat %>% 
     filter(target_type %in% c("wk ahead inc death", "wk ahead inc case")) %>%
@@ -73,7 +68,7 @@ sim_paths <- function(fdt, tdat, mname, tdir, odir, ...) {
     nest() %>%
     mutate(paths2 = map(data, reshape_paths_like_pompout)) %>%
     select(-data) %>%
-    mutate(fcst_df = map2(paths2, location, paths_to_forecast, tdir = tdir, hop = tdat))
+    mutate(fcst_df = map2(paths2, location, paths_to_forecast, hop = tdat))
     
   full <- bind_rows(tdat1$fcst_df)
 
@@ -91,11 +86,13 @@ paths <- map(forecast_dates,
     npaths = mconfig$model_pars$npaths,
     tailn = mconfig$model_pars$tailn,
     include_drift = mconfig$model_pars$include_drift,
-    odir = config_pipeline$model$out,
-    mname = "Walk",
-    tdir = config_pipeline$data$targ)
+    odir = "forecasts",
+    mname = "Walk")
 
 ## Produce metrics
 time <- tictoc::toc()
 walltime <- list(wall = time$toc - time$tic)
-jsonlite::write_json(walltime, "forecast-calc-time.json")
+dir.create("metrics")
+mpath <- file.path("metrics", paste0(forecast_dates, 
+                                     "-forecast-calc-time.json"))
+jsonlite::write_json(walltime, mpath)

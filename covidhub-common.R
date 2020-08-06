@@ -259,7 +259,7 @@ samp_to_df <-
 
 # Take simulation trajectories and output a data frame in the format described
 # here: https://github.com/reichlab/covid19-forecast-hub/blob/6a7e5624ef540a55902770b7c17609d19e1f593a/data-processed/README.md
-paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, tdir) {
+paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop) {
   if(any(wks_ahead > 20)){
     stop("Max weeks ahead accepted is 20", .call = FALSE)
   }

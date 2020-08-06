@@ -1,18 +1,19 @@
 stages:
-  hopkins:
-    cmd: bash download-hopkins.sh
+  hopkins-2020-08-03:
+    cmd: fdt=2020-08-03 Rscript pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
     outs:
-    - hopkins
-  forecast:
-    cmd: Rscript forecast-package-covidhub-forecast.R
+    - hopkins/2020-08-03
+  forecast-2020-08-03:
+    cmd: fdt=2020-08-03 Rscript forecast-package-covidhub-forecast.R
     deps:
     - covidhub-common.R
     - forecast-package-covidhub-forecast.R
-    - forecast.ini
-    - hopkins
+    - hopkins/2020-08-03
     - model.ini
     outs:
-    - forecasts
+    - forecasts/2020-08-03-CEID-Walk.csv
     metrics:
-    - forecast-calc-time.json:
+    - metrics/2020-08-03-forecast-calc-time.json:
         cache: false

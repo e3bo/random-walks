@@ -1,23 +1,24 @@
-hopkins:
-  cmd: bash download-hopkins.sh
+hopkins-2020-08-03:
+  cmd: fdt=2020-08-03 Rscript pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: 217c03c21b30593052239976cb36b9b8
   outs:
-  - path: hopkins
-    md5: b910371eca03c6dfb9eef0c8618580d7.dir
-forecast:
-  cmd: Rscript forecast-package-covidhub-forecast.R
+  - path: hopkins/2020-08-03
+    md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
+forecast-2020-08-03:
+  cmd: fdt=2020-08-03 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 7c0dd15a526d63104f4b6c2674022833
+    md5: 57ab69b9e4b6ebb3e729560846762ca5
   - path: forecast-package-covidhub-forecast.R
-    md5: 200d69ed9764e0fe511eb45bee00bd74
-  - path: forecast.ini
-    md5: c610401af06d11dc8f976185f5907ac3
-  - path: hopkins
-    md5: b910371eca03c6dfb9eef0c8618580d7.dir
+    md5: 5b847271bd77fd2231108576053aea3a
+  - path: hopkins/2020-08-03
+    md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
   - path: model.ini
     md5: 3fdf49b0ef1f5242fd059e6e11f64034
   outs:
-  - path: forecast-calc-time.json
-    md5: 6db90b56080290e245a52f8dd8b15d7c
-  - path: forecasts
-    md5: e5a5dd7a4ab61707ad3aa95747767e90.dir
+  - path: forecasts/2020-08-03-CEID-Walk.csv
+    md5: 91a32f4ad590455b859ce42d72d2b42d
+  - path: metrics/2020-08-03-forecast-calc-time.json
+    md5: 2f10fe85b7096394bbb2372fc4ea7ea8
