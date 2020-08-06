@@ -2,4 +2,22 @@ hopkins:
   cmd: bash download-hopkins.sh
   outs:
   - path: hopkins
-    md5: 2988e807ebe27d8363107566a50bc935.dir
+    md5: b910371eca03c6dfb9eef0c8618580d7.dir
+forecast:
+  cmd: Rscript forecast-package-covidhub-forecast.R
+  deps:
+  - path: covidhub-common.R
+    md5: 7c0dd15a526d63104f4b6c2674022833
+  - path: forecast-package-covidhub-forecast.R
+    md5: 200d69ed9764e0fe511eb45bee00bd74
+  - path: forecast.ini
+    md5: c610401af06d11dc8f976185f5907ac3
+  - path: hopkins
+    md5: b910371eca03c6dfb9eef0c8618580d7.dir
+  - path: model.ini
+    md5: 3fdf49b0ef1f5242fd059e6e11f64034
+  outs:
+  - path: forecast-calc-time.json
+    md5: 493e03950d952a6089b972613b963702
+  - path: forecasts
+    md5: e5a5dd7a4ab61707ad3aa95747767e90.dir

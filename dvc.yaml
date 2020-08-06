@@ -3,3 +3,16 @@ stages:
     cmd: bash download-hopkins.sh
     outs:
     - hopkins
+  forecast:
+    cmd: Rscript forecast-package-covidhub-forecast.R
+    deps:
+    - covidhub-common.R
+    - forecast-package-covidhub-forecast.R
+    - forecast.ini
+    - hopkins
+    - model.ini
+    outs:
+    - forecasts
+    metrics:
+    - forecast-calc-time.json:
+        cache: false
