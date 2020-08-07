@@ -18,12 +18,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           dvc pull --run-cache || true
-          dvc repro > report.md
-
+          dvc repro
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
           git add dvc.lock metrics
           git commit -m "dvc repro autoupdate"
           git push
           dvc push
+          echo success > report.md
           cml-send-comment report.md
