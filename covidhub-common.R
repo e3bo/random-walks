@@ -259,7 +259,7 @@ samp_to_df <-
 
 # Take simulation trajectories and output a data frame in the format described
 # here: https://github.com/reichlab/covid19-forecast-hub/blob/6a7e5624ef540a55902770b7c17609d19e1f593a/data-processed/README.md
-paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop) {
+paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
   if(any(wks_ahead > 20)){
     stop("Max weeks ahead accepted is 20", .call = FALSE)
   }
@@ -268,7 +268,6 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop) {
     out %>% group_by(Rep) %>% arrange(Date) %>% 
     mutate(cum_deaths = cumsum(deaths),
            day_diff = c(NA, diff(Date)))
-  fdt <- out2$Date[1] - 7
   
   prior_deaths <- hop %>% 
     filter(target_end_date == fdt & location == loc & 

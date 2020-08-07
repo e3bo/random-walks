@@ -17,3 +17,21 @@ stages:
     metrics:
     - metrics/2020-08-03-forecast-calc-time.json:
         cache: false
+  hopkins-2020-07-26:
+    cmd: fdt=2020-07-26 Rscript pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-07-26
+  forecast-2020-07-26:
+    cmd: fdt=2020-07-26 Rscript forecast-package-covidhub-forecast.R
+    deps:
+    - covidhub-common.R
+    - forecast-package-covidhub-forecast.R
+    - hopkins/2020-07-26
+    - model.ini
+    outs:
+    - forecasts/2020-07-26-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-26-forecast-calc-time.json:
+        cache: false

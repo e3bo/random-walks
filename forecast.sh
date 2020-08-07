@@ -2,7 +2,7 @@
 
 set -e
 
-fdt="2020-08-03"
+fdt="2020-07-26"
 dvc run \
     -d pull-hopkins-ts-from-date.R \
     -o hopkins/$fdt \

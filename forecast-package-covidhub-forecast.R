@@ -68,7 +68,8 @@ sim_paths <- function(fdt, tdat, mname, odir, ...) {
     nest() %>%
     mutate(paths2 = map(data, reshape_paths_like_pompout)) %>%
     select(-data) %>%
-    mutate(fcst_df = map2(paths2, location, paths_to_forecast, hop = tdat))
+    mutate(fcst_df = map2(paths2, location, paths_to_forecast, hop = tdat, 
+                          fdt = fdt))
     
   full <- bind_rows(tdat1$fcst_df)
 
