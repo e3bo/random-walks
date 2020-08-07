@@ -18,13 +18,6 @@ hopdir <- file.path("hopkins", forecast_dates)
 
 tdat <- load_hopkins(hopdir) %>% filter(str_detect(location, "^13"))
 
-loglik_naive <- function(y){
-  res <- diff(y)
-  sigma <- sd(res, na.rm = TRUE)
-  densities <- dnorm(res, sd = sigma, log = TRUE)
-  sum(densities, na.rm = TRUE)
-}
-
 rw_forecast <- function(df, fdt, npaths = 100, 
                         h = 4, tailn = Inf, include_drift = FALSE){
   stopifnot(npaths > 0)

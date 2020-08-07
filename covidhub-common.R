@@ -270,9 +270,11 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
            day_diff = c(NA, diff(Date)))
   
   prior_deaths <- hop %>% 
-    filter(target_end_date == fdt & location == loc & 
-             target_type == "wk ahead cum death") %>% 
-    pull("value")
+    filter(target_end_date < fdt & location == loc & 
+             target_type == "wk ahead cum death") %>%
+    arrange(target_end_date) %>%
+    pull("value") %>%
+    tail(n = 1)
   out2$cum_deaths <- out2$cum_deaths + prior_deaths
   
   take_back_step <- lubridate::wday(fdt, label = TRUE) %in% c("Sun", "Mon")
