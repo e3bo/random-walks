@@ -35,3 +35,15 @@ stages:
     metrics:
     - metrics/2020-07-26-forecast-calc-time.json:
         cache: false
+  score-2020-08-03:
+    cmd: ddt=2020-08-03 Rscript quantile-score.R
+    deps:
+    - covidhub-common.R
+    - forecasts
+    - hopkins/2020-08-03
+    - quantile-score.R
+    outs:
+    - metrics/2020-08-03-residuals.rds
+    metrics:
+    - metrics/2020-08-03-score-summary.json:
+        cache: false
