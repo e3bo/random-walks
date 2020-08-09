@@ -51,3 +51,21 @@ stages:
         cache: false
     - metrics/2020-08-03-score-by-loc-type.csv:
         cache: false
+  hopkins-2020-07-19:
+    cmd: fdt=2020-07-19 Rscript pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-07-19
+  forecast-2020-07-19:
+    cmd: fdt=2020-07-19 Rscript forecast-package-covidhub-forecast.R
+    deps:
+    - covidhub-common.R
+    - forecast-package-covidhub-forecast.R
+    - hopkins/2020-07-19
+    - model.ini
+    outs:
+    - forecasts/2020-07-19-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-19-forecast-calc-time.json:
+        cache: false
