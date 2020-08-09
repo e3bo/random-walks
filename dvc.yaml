@@ -44,6 +44,6 @@ stages:
     - quantile-score.R
     outs:
     - metrics/2020-08-03-residuals.rds
-    metrics:
-    - metrics/2020-08-03-score-summary.json:
+    plots:
+    - metrics/2020-08-03-score-summary.csv:
         cache: false

@@ -15,7 +15,7 @@ dvc run \
     -d forecasts \
     -d covidhub-common.R \
     -d hopkins/$ddt \
-    -M metrics/$ddt-score-summary.json \
+    --plots-no-cache metrics/$ddt-score-summary.csv \
     -o metrics/$ddt-residuals.rds \
     --force \
     -n score-$ddt \

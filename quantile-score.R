@@ -69,7 +69,9 @@ summary$by_loc_type_ted <-
 
 # Create output
 
+dir.create("metrics")
 resids_path <- file.path("metrics", paste0(ddt, "-residuals.rds"))
 saveRDS(residuals, resids_path)
-summary_path <- file.path("metrics", paste0(ddt, "-score-summary.json"))
-jsonlite::toJSON(summary, pretty = TRUE) %>% cat(file = summary_path)
+
+summary_plot_path <- file.path("metrics", paste0(ddt, "-score-summary.csv"))
+write_csv(summary$by_loc_type, path = summary_plot_path)

@@ -19,10 +19,19 @@ jobs:
         run: |
           dvc pull --run-cache || true
           dvc repro
+          
+          echo "# Metrics" >> report.md
+          dvc metrics show >> report.md
+          
+          echo "# Plots" >> report.md
+          dvc plots show -t bar -x loc_type --x-label "Location type" --y-label "Quantile score" --target metrics/2020-08-03-score-summary.csv --show-vega >vega.json
+          vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+          # Push changes to git and dvc remotes
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
           git add dvc.lock metrics
           git commit -m "dvc repro autoupdate" && git push || true
           dvc push
-          echo success > report.md
+          
           cml-send-comment report.md
