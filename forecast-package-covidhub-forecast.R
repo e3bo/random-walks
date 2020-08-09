@@ -89,4 +89,4 @@ walltime <- list(wall = time$toc - time$tic)
 dir.create("metrics")
 mpath <- file.path("metrics", paste0(forecast_dates, 
                                      "-forecast-calc-time.json"))
-jsonlite::write_json(walltime, mpath)
+jsonlite::write_json(walltime, mpath, auto_unbox = TRUE)
