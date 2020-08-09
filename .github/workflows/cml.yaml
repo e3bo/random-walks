@@ -20,7 +20,7 @@ jobs:
           dvc pull --run-cache || true
           dvc repro
           
-          echo "# Metrics" > report.md
+          echo "# Running times" > report.md
           dvc metrics show >> report.md
           
           echo "# Plots" >> report.md
