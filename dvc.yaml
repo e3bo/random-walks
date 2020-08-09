@@ -45,5 +45,7 @@ stages:
     outs:
     - metrics/2020-08-03-residuals.rds
     plots:
-    - metrics/2020-08-03-score-summary.csv:
+    - metrics/2020-08-03-score-by-loc-type-targ-type.csv:
+        cache: false
+    - metrics/2020-08-03-score-by-loc-type.csv:
         cache: false

@@ -73,5 +73,12 @@ dir.create("metrics")
 resids_path <- file.path("metrics", paste0(ddt, "-residuals.rds"))
 saveRDS(residuals, resids_path)
 
-summary_plot_path <- file.path("metrics", paste0(ddt, "-score-summary.csv"))
+summary_plot_path <- file.path("metrics", paste0(ddt, "-score-by-loc-type.csv"))
 write_csv(summary$by_loc_type, path = summary_plot_path)
+
+summary_plot_path <- file.path("metrics", paste0(ddt, "-score-by-loc-type-targ-type.csv"))
+write_csv(summary$by_loc_type_targ_type, path = summary_plot_path)
+
+
+
+

@@ -5,6 +5,7 @@
     },
     "title": "<DVC_METRIC_TITLE>",
     "mark": "bar",
+    "transform": [{"calculate": "log(datum.mean_qs)", "as": "log_mean_qs"}],
     "encoding": {
         "x": {
             "field": "<DVC_METRIC_X>",
@@ -12,9 +13,9 @@
             "title": "<DVC_METRIC_X_LABEL>"
         },
         "y": {
-            "field": "<DVC_METRIC_Y>",
+            "field": "log_mean_qs",
             "type": "quantitative",
-            "title": "<DVC_METRIC_Y_LABEL>",
+            "title": "log (mean quantile score)",
             "scale": {
                 "zero": false
             }
