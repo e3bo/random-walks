@@ -69,3 +69,39 @@ stages:
     metrics:
     - metrics/2020-07-19-forecast-calc-time.json:
         cache: false
+  hopkins-2020-07-12:
+    cmd: fdt=2020-07-12 Rscript pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-07-12
+  forecast-2020-07-12:
+    cmd: fdt=2020-07-12 Rscript forecast-package-covidhub-forecast.R
+    deps:
+    - covidhub-common.R
+    - forecast-package-covidhub-forecast.R
+    - hopkins/2020-07-12
+    - model.ini
+    outs:
+    - forecasts/2020-07-12-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-12-forecast-calc-time.json:
+        cache: false
+  hopkins-2020-07-05:
+    cmd: fdt=2020-07-05 Rscript pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-07-05
+  forecast-2020-07-05:
+    cmd: fdt=2020-07-05 Rscript forecast-package-covidhub-forecast.R
+    deps:
+    - covidhub-common.R
+    - forecast-package-covidhub-forecast.R
+    - hopkins/2020-07-05
+    - model.ini
+    outs:
+    - forecasts/2020-07-05-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-05-forecast-calc-time.json:
+        cache: false
