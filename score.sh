@@ -17,6 +17,7 @@ dvc run \
     -d hopkins/$ddt \
     --plots-no-cache metrics/$ddt-score-by-loc-type.csv \
     --plots-no-cache metrics/$ddt-score-by-loc-type-targ-type.csv \
+    --plots-no-cache metrics/$ddt-score-by-loc-type-targ-type-forecast-date.csv \
     -o metrics/$ddt-residuals.rds \
     --force \
     -n score-$ddt \

@@ -57,14 +57,9 @@ summary$by_loc_type_targ_type <-
   group_by(loc_type, target_type) %>%
   summarise(mean_qs = mean(pinball_loss), .groups = "drop")
 
-summary$by_loc_type_fdt <-
+summary$by_loc_targ_fdt <-
   residuals %>%
-  group_by(loc_type, forecast_date) %>%
-  summarise(mean_qs = mean(pinball_loss), .groups = "drop")
-
-summary$by_loc_type_ted <- 
-  residuals %>%
-  group_by(loc_type, target_end_date) %>%
+  group_by(loc_type, target_type, forecast_date) %>%
   summarise(mean_qs = mean(pinball_loss), .groups = "drop")
 
 # Create output
@@ -79,6 +74,8 @@ write_csv(summary$by_loc_type, path = summary_plot_path)
 summary_plot_path <- file.path("metrics", paste0(ddt, "-score-by-loc-type-targ-type.csv"))
 write_csv(summary$by_loc_type_targ_type, path = summary_plot_path)
 
+summary_plot_path <- file.path("metrics", paste0(ddt, "-score-by-loc-type-targ-type-forecast-date.csv"))
+write_csv(summary$by_loc_targ_fdt, path = summary_plot_path)
 
 
 

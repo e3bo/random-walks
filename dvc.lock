@@ -52,14 +52,16 @@ score-2020-08-03:
   - path: covidhub-common.R
     md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
   - path: forecasts
-    md5: 01f2c75a0f92eca29d63610039308764.dir
+    md5: 43bea319d101f0e79cc1dfb916316d70.dir
   - path: hopkins/2020-08-03
     md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
   - path: quantile-score.R
-    md5: c79e5f82cca6df065262d265d8bb7614
+    md5: 8bb4e4b2ab376318d28564ac888820b4
   outs:
   - path: metrics/2020-08-03-residuals.rds
     md5: fed2f4194d64ddfcb302853620cbd5a8
+  - path: metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv
+    md5: 811480144d87ae9b3fa603290d577a1d
   - path: metrics/2020-08-03-score-by-loc-type-targ-type.csv
     md5: ce996f73ede07b2f3266eae032e507f2
   - path: metrics/2020-08-03-score-by-loc-type.csv
