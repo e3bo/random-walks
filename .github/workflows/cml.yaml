@@ -36,7 +36,7 @@ jobs:
           # Push changes to git and dvc remotes
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
-          git add dvc.lock metrics
+          git add dvc.lock metrics visuals
           git commit -m "dvc repro autoupdate" && git push || true
           dvc push
           
