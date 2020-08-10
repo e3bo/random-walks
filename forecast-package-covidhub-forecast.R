@@ -16,7 +16,7 @@ mconfig$model_pars <- map(mconfig$model_pars, eval_string)
 forecast_dates <- Sys.getenv("fdt") %>% as.Date()
 hopdir <- file.path("hopkins", forecast_dates)
 
-tdat <- load_hopkins(hopdir) %>% filter(str_detect(location, "^13"))
+tdat <- load_hopkins(hopdir) #%>% filter(str_detect(location, "^13"))
 
 rw_forecast <- function(df, fdt, npaths = 100, 
                         h = 4, tailn = Inf, include_drift = FALSE){
