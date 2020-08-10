@@ -5,6 +5,7 @@ on:
     - '.dvc/**'
     - dvc.lock
     - 'metrics/**'
+    - README.md
 jobs: 
   run:
     runs-on: [ubuntu-latest]
