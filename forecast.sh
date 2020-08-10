@@ -2,20 +2,21 @@
 
 set -e
 
-ddt="2020-08-09"
-fdt="2020-08-09"
+fdt="2020-07-26"
 dvc run \
     -d pull-hopkins-ts-from-date.R \
-    -o hopkins/$ddt \
-    -n hopkins-$ddt \
+    -o hopkins/$fdt \
+    -n hopkins-$fdt \
     --force \
-    fdt=$ddt Rscript pull-hopkins-ts-from-date.R
+    fdt=$fdt Rscript pull-hopkins-ts-from-date.R
     
 dvc run \
-    -d forecast-vis.R \
+    -d forecast-package-covidhub-forecast.R \
+    -d model.ini \
     -d covidhub-common.R \
-    -d hopkins/$ddt \
+    -d hopkins/$fdt \
+    -M metrics/$fdt-forecast-calc-time.json \
     -o forecasts/$fdt-CEID-Walk.csv \
     --force \
-    -n visualize-forecast-$fdt-and-data-$ddt \
-    ddt=$ddt fdt=$fdt Rscript forecast-vis.R
+    -n forecast-$fdt \
+    fdt=$fdt Rscript forecast-package-covidhub-forecast.R
