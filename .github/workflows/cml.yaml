@@ -1,0 +1,44 @@
+name: data-download
+on:
+  push:
+    paths-ignore:
+    - '.dvc/**'
+    - dvc.lock
+    - 'metrics/**'
+    - README.md
+jobs: 
+  run:
+    runs-on: [ubuntu-latest]
+    container: docker://eamon/random-walks:2020-08-06
+    steps:
+      - uses: actions/checkout@v2
+      - name: cml_run
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          dvc pull --run-cache || true
+          dvc repro
+          
+          echo "# Running times" > report.md
+          dvc metrics show >> report.md
+          
+          echo "# Plots" >> report.md
+          dvc plots show -t bar -x loc_type --x-label "Location type" --show-vega metrics/2020-08-03-score-by-loc-type.csv >vega.json
+          vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+          dvc plots show -t bar-loctype-panels -x target_type --show-vega metrics/2020-08-03-score-by-loc-type-targ-type.csv >vega.json
+          vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+          dvc plots show -t bar-loctype-targtype-panels -x forecast_date --show-vega metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv >vega.json
+          vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+          # Push changes to git and dvc remotes
+          git config --local user.email "actions@users.noreply.github.com"
+          git config --local user.name "Automated Publisher"
+          git add dvc.lock metrics visuals
+          git commit -m "dvc repro autoupdate" && git push || true
+          dvc push
+          
+          cml-send-comment report.md
