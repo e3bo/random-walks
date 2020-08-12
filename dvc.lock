@@ -2,7 +2,7 @@ hopkins-2020-08-03:
   cmd: fdt=2020-08-03 Rscript pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
-    md5: 217c03c21b30593052239976cb36b9b8
+    md5: d350b3ca9b344dea811f07232d0ec8d8
   outs:
   - path: hopkins/2020-08-03
     md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
@@ -26,7 +26,7 @@ hopkins-2020-07-26:
   cmd: fdt=2020-07-26 Rscript pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
-    md5: 217c03c21b30593052239976cb36b9b8
+    md5: d350b3ca9b344dea811f07232d0ec8d8
   outs:
   - path: hopkins/2020-07-26
     md5: 10aa1c52c0425eb5e20f4d0b54b82363.dir
@@ -56,7 +56,7 @@ score-2020-08-03:
   - path: hopkins/2020-08-03
     md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
   - path: quantile-score.R
-    md5: 8bb4e4b2ab376318d28564ac888820b4
+    md5: 77eda0648caa45d816d5725ec07ae05b
   outs:
   - path: metrics/2020-08-03-residuals.rds
     md5: 5db609e65626417f93d126495c7c26e1
@@ -70,7 +70,7 @@ hopkins-2020-07-19:
   cmd: fdt=2020-07-19 Rscript pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
-    md5: 217c03c21b30593052239976cb36b9b8
+    md5: d350b3ca9b344dea811f07232d0ec8d8
   outs:
   - path: hopkins/2020-07-19
     md5: d0263c2f4a24e2f471801156b461bb1c.dir
@@ -94,7 +94,7 @@ hopkins-2020-07-12:
   cmd: fdt=2020-07-12 Rscript pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
-    md5: 217c03c21b30593052239976cb36b9b8
+    md5: d350b3ca9b344dea811f07232d0ec8d8
   outs:
   - path: hopkins/2020-07-12
     md5: d4582d3c6a909ae9977b523ef2baee35.dir
@@ -118,7 +118,7 @@ hopkins-2020-07-05:
   cmd: fdt=2020-07-05 Rscript pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
-    md5: 217c03c21b30593052239976cb36b9b8
+    md5: d350b3ca9b344dea811f07232d0ec8d8
   outs:
   - path: hopkins/2020-07-05
     md5: 71c6776ac7e2c114e24ff3ffe38bbe01.dir
@@ -142,7 +142,7 @@ hopkins-2020-08-09:
   cmd: fdt=2020-08-09 Rscript pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
-    md5: 217c03c21b30593052239976cb36b9b8
+    md5: d350b3ca9b344dea811f07232d0ec8d8
   outs:
   - path: hopkins/2020-08-09
     md5: e3f72129d9532f64b25cc7a037ac767d.dir
