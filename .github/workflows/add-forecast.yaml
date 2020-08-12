@@ -14,10 +14,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           dvc pull --run-cache || true
-	  today=$(date +%F)
+          today=$(date +%F)
           fdt=$today ./forecast.sh
-	  ddt=$today ./score.sh
-	  fdt=$today ddt=$today ./visualize-forecasts.sh
+          ddt=$today ./score.sh
+          fdt=$today ddt=$today ./visualize-forecasts.sh
           
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
