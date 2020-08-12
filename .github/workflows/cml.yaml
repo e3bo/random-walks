@@ -21,24 +21,26 @@ jobs:
           dvc pull --run-cache || true
           dvc repro
           
-          echo "# Running times" > report.md
-          dvc metrics show >> report.md
-          
-          echo "# Plots" >> report.md
-          dvc plots show -t bar -x loc_type --x-label "Location type" --show-vega metrics/2020-08-03-score-by-loc-type.csv >vega.json
-          vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-          dvc plots show -t bar-loctype-panels -x target_type --show-vega metrics/2020-08-03-score-by-loc-type-targ-type.csv >vega.json
-          vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-          dvc plots show -t bar-loctype-targtype-panels -x forecast_date --show-vega metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv >vega.json
-          vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-          # Push changes to git and dvc remotes
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
           git add dvc.lock metrics visuals
-          git commit -m "dvc repro autoupdate" && git push || true
-          dvc push
+          if git commit -m "dvc repro autoupdate" && git push;
+          then
+            echo "# Running times" > report.md
+            dvc metrics show >> report.md
           
+            echo "# Plots" >> report.md
+            dvc plots show -t bar -x loc_type --x-label "Location type" --show-vega metrics/2020-08-03-score-by-loc-type.csv >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc plots show -t bar-loctype-panels -x target_type --show-vega metrics/2020-08-03-score-by-loc-type-targ-type.csv >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc plots show -t bar-loctype-targtype-panels -x forecast_date --show-vega metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc push
+          else
+            echo "No changes to outputs." > report.md
+          fi
           cml-send-comment report.md
