@@ -2,14 +2,15 @@
 
 set -e
 
-ddt="2020-08-09"
-fdt="2020-08-09"
+ddt="${ddt:-2020-08-09}"
+fdt="${fdt:-2020-08-09}"
+
 dvc run \
     -d pull-hopkins-ts-from-date.R \
     -o hopkins/$ddt \
     -n hopkins-$ddt \
     --force \
-    fdt=$ddt Rscript pull-hopkins-ts-from-date.R
+    fdt=$ddt ./pull-hopkins-ts-from-date.R
     
 dvc run \
     -d forecast-vis.R \
@@ -20,4 +21,4 @@ dvc run \
     -O visuals/fdt$fdt-ddt$ddt-inc-case-forecasts.pdf \
     --force \
     -n visualize-forecast-$fdt-and-data-$ddt \
-    ddt=$ddt fdt=$fdt Rscript forecast-vis.R
+    ddt=$ddt fdt=$fdt ./forecast-vis.R
