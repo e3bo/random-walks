@@ -1,0 +1,44 @@
+name: add-forecast
+on:
+  - cron : '0 6 * * 0' 
+jobs: 
+  run:
+    runs-on: [ubuntu-latest]
+    container: docker://eamon/random-walks:2020-08-06
+    steps:
+      - uses: actions/checkout@v2
+      - name: pipeline-adder
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          dvc pull --run-cache || true
+	  today=$(date +%F)
+          fdt=$today ./forecast.sh
+	  ddt=$today ./score.sh
+	  fdt=$today ddt=$today ./visualize-forecasts.sh
+          
+          git config --local user.email "actions@users.noreply.github.com"
+          git config --local user.name "Automated Publisher"
+          git add dvc.lock metrics visuals
+          if git commit -m "Weekly forecast, score, and plot pipeline additions" && git push;
+          then
+            echo "# Running times" > report.md
+            dvc metrics show >> report.md
+          
+            echo "# Plots" >> report.md
+            dvc plots show -t bar -x loc_type --x-label "Location type" --show-vega metrics/${today}-score-by-loc-type.csv >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc plots show -t bar-loctype-panels -x target_type --show-vega metrics/${today}-score-by-loc-type-targ-type.csv >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc plots show -t bar-loctype-targtype-panels -x forecast_date --show-vega metrics/${today}-score-by-loc-type-targ-type-forecast-date.csv >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc push
+          else
+            echo "No changes to outputs." > report.md
+          fi
+          cml-send-comment report.md
