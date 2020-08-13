@@ -21,7 +21,7 @@ forecast-2020-08-03:
   - path: forecasts/2020-08-03-CEID-Walk.csv
     md5: 84b05f3cda6ffe87b5849c72a509ad07
   - path: metrics/2020-08-03-forecast-calc-time.json
-    md5: ab0df5fa85cbd783b4b0b2baec12b7bd
+    md5: a85a85caabc4b10e54cecfc96bf65729
 hopkins-2020-07-26:
   cmd: fdt=2020-07-26 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -45,7 +45,7 @@ forecast-2020-07-26:
   - path: forecasts/2020-07-26-CEID-Walk.csv
     md5: 2f1adcdd4b17a842091bfba1f7c7f3c5
   - path: metrics/2020-07-26-forecast-calc-time.json
-    md5: 9952e09eadf6ac83afd4bbcefed3b643
+    md5: 0ebbf84cda5e7c039ca6eb1c863e6eb9
 score-2020-08-03:
   cmd: ddt=2020-08-03 Rscript quantile-score.R
   deps:
@@ -89,7 +89,7 @@ forecast-2020-07-19:
   - path: forecasts/2020-07-19-CEID-Walk.csv
     md5: 62d008cd072417c7c03ed40e495a77ec
   - path: metrics/2020-07-19-forecast-calc-time.json
-    md5: 2fa7af7fee66a8a096ddecacefc0726d
+    md5: 0d243cb7246d746da3e03e509c2ffc67
 hopkins-2020-07-12:
   cmd: fdt=2020-07-12 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -113,7 +113,7 @@ forecast-2020-07-12:
   - path: forecasts/2020-07-12-CEID-Walk.csv
     md5: 09c0ae0a173d88d4fca8f116fac1a977
   - path: metrics/2020-07-12-forecast-calc-time.json
-    md5: 73e17050f656da6c2c00ac875d7c9459
+    md5: e559f819f53ef32e0ac493dfc3f2a5aa
 hopkins-2020-07-05:
   cmd: fdt=2020-07-05 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -137,7 +137,7 @@ forecast-2020-07-05:
   - path: forecasts/2020-07-05-CEID-Walk.csv
     md5: e9aaf1b8d43e741b456f553677d60668
   - path: metrics/2020-07-05-forecast-calc-time.json
-    md5: e0015d283a6ece189c0ce92bfaffbf0e
+    md5: 69cdfaf3cebbef33078e4443f106b423
 hopkins-2020-08-09:
   cmd: fdt=2020-08-09 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -177,4 +177,4 @@ forecast-2020-08-09:
   - path: forecasts/2020-08-09-CEID-Walk.csv
     md5: d26b12b4dc49525abc9fe79a9701ebb7
   - path: metrics/2020-08-09-forecast-calc-time.json
-    md5: f3fe09e1dd9f3054f280247a2b734eb3
+    md5: 9bc07bd449b963ed483ebcf163581c01
