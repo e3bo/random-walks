@@ -1,8 +1,9 @@
+#!/usr/bin/env Rscript
 
 library(magrittr)
 
 fdt <- Sys.getenv("fdt")
-fdtm <- as.POSIXct(paste(fdt, "0:00:00"), tz = "EST")
+fdtm <- as.POSIXct(paste(fdt, "0:03:00"), tz = "EST")
 
 xmlfile <- tempfile()
 url <- paste0("https://github.com/CSSEGISandData/COVID-19.git/trunk/",

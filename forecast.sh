@@ -2,13 +2,14 @@
 
 set -e
 
-fdt="2020-07-26"
+fdt="${fdt:-2020-07-26}"
+
 dvc run \
     -d pull-hopkins-ts-from-date.R \
     -o hopkins/$fdt \
     -n hopkins-$fdt \
     --force \
-    fdt=$fdt Rscript pull-hopkins-ts-from-date.R
+    fdt=$fdt ./pull-hopkins-ts-from-date.R
     
 dvc run \
     -d forecast-package-covidhub-forecast.R \

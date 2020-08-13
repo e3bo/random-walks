@@ -3,11 +3,10 @@
     "data": {
         "values": "<DVC_METRIC_DATA>"
     },
-    "transform": [{"calculate": "log(datum.mean_qs)", "as": "log_mean_qs"}],
     "title": "<DVC_METRIC_TITLE>",
-    "mark": "bar",
+    "mark": "point",
+    "transform": [{"calculate": "log(datum.mean_qs)", "as": "log_mean_qs"}],
     "encoding": {
-        "row": {"field": "loc_type"},
         "x": {
             "field": "<DVC_METRIC_X>",
             "type": "nominal",
@@ -21,7 +20,7 @@
                 "zero": false
             }
         },
-        "color": {
+        "shape": {
             "field": "rev",
             "type": "nominal"
         }

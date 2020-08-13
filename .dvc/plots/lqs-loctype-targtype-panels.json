@@ -5,7 +5,7 @@
     },
     "transform": [{"calculate": "log(datum.mean_qs)", "as": "log_mean_qs"}],
     "title": "<DVC_METRIC_TITLE>",
-    "mark": "bar",
+    "mark": "point",
     "encoding": {
         "row": {"field": "loc_type"},
         "column" : {"field": "target_type"},
@@ -22,7 +22,7 @@
                 "zero": false
             }
         },
-        "color": {
+        "shape": {
             "field": "rev",
             "type": "nominal"
         }
