@@ -26,6 +26,7 @@ jobs:
           git add dvc.lock metrics visuals
           if git commit -m "dvc repro autoupdate" && git push;
           then
+            dvc push
             echo "# Running times" > report.md
             dvc metrics diff --all --old HEAD~1 >> report.md
           
@@ -39,7 +40,7 @@ jobs:
             dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv -- HEAD~1 >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
-            dvc push
+
           else
             echo "No changes to outputs." > report.md
           fi
