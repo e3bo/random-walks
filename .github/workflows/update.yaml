@@ -27,16 +27,16 @@ jobs:
           if git commit -m "dvc repro autoupdate" && git push;
           then
             echo "# Running times" > report.md
-            dvc metrics show >> report.md
+	    dvc metrics diff --all --old master >> report.md
           
             echo "# Plots" >> report.md
-            dvc plots show --show-vega metrics/2020-08-03-score-by-loc-type.csv >vega.json
+            dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type.csv -- master >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
-            dvc plots show --show-vega metrics/2020-08-03-score-by-loc-type-targ-type.csv >vega.json
+            dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type-targ-type.csv -- master >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
-            dvc plots show --show-vega metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv >vega.json
+            dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv -- master >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
             dvc push
