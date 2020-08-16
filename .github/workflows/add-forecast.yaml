@@ -1,7 +1,7 @@
 name: add-forecast
 on:
   schedule:
-    - cron: '0 6 * * 0' 
+    - cron: '55 22 * * 0' 
 jobs: 
   run:
     runs-on: [ubuntu-latest]
@@ -23,7 +23,7 @@ jobs:
           
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
-          git add dvc.lock metrics visuals
+          git add dvc.yaml dvc.lock metrics visuals
           if git commit -m "Weekly forecast, score, and plot pipeline additions" && git push;
           then
             echo "# Running times" > report.md
