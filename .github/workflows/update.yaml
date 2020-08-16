@@ -20,6 +20,7 @@ jobs:
         run: |
           dvc pull --run-cache || true
           dvc repro
+          dvc push
           
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
@@ -38,8 +39,6 @@ jobs:
           
             dvc plots show --show-vega metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-            dvc push
           else
             echo "No changes to outputs." > report.md
           fi
