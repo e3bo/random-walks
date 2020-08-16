@@ -76,6 +76,3 @@ write_csv(summary$by_loc_type_targ_type, path = summary_plot_path)
 
 summary_plot_path <- file.path("metrics", paste0(ddt, "-score-by-loc-type-targ-type-forecast-date.csv"))
 write_csv(summary$by_loc_targ_fdt, path = summary_plot_path)
-
-
-

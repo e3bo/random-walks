@@ -1,0 +1,47 @@
+name: update-pipeline-outputs
+on:
+  push:
+    paths-ignore:
+    - '.dvc/**'
+    - dvc.lock
+    - 'metrics/**'
+    - README.md
+jobs: 
+  run:
+    runs-on: [ubuntu-latest]
+    container: docker://eamon/random-walks:2020-08-06
+    steps:
+      - uses: actions/checkout@v2
+      - name: cml_run
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          dvc pull --run-cache || true
+          dvc repro
+          
+          git config --local user.email "actions@users.noreply.github.com"
+          git config --local user.name "Automated Publisher"
+          git add dvc.lock metrics visuals
+          if git commit -m "dvc repro autoupdate" && git push;
+          then
+            dvc push
+            echo "# Running times" > report.md
+            dvc metrics diff --all --old HEAD~1 >> report.md
+          
+            echo "# Plots" >> report.md
+            dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type.csv -- HEAD~1 >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type-targ-type.csv -- HEAD~1 >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+            dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv -- HEAD~1 >vega.json
+            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+          
+
+          else
+            echo "No changes to outputs." > report.md
+          fi
+          cml-send-comment report.md
