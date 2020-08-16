@@ -1,6 +1,7 @@
 name: add-forecast
 on:
-  push:
+  schedule:
+    - cron : '0 6 * * 0'
 jobs: 
   run:
     runs-on: [ubuntu-latest]
