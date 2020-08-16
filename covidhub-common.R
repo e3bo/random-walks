@@ -94,8 +94,9 @@ process_hopkins <- function(path){
     filter(!str_detect(location, "^900|^999|^800|^888"))
   
   hpd_state <- hpd_raw %>%  group_by(Province_State, target_end_date) %>%
+    mutate(has_id = str_detect(location, "^[0-9][0-9]")) %>%
     summarise(`day ahead cum` = sum(`day ahead cum`),
-              location = substring(location[1], 1, 2), 
+              location = substring(location[has_id][1], 1, 2), 
               n = n(), .groups = "drop") %>%
     filter(n > 1) %>%
     select(-n)
