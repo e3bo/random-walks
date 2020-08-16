@@ -1,7 +1,7 @@
 name: add-forecast
 on:
   schedule:
-    - cron : '30 14 * * 0' 
+    - cron : '50 17 * * 0' 
 jobs: 
   run:
     runs-on: [ubuntu-latest]
@@ -29,13 +29,13 @@ jobs:
             dvc metrics show >> report.md
           
             echo "# Plots" >> report.md
-            dvc plots show -t bar -x loc_type --x-label "Location type" --show-vega metrics/${today}-score-by-loc-type.csv >vega.json
+            dvc plots show --show-vega metrics/${today}-score-by-loc-type.csv >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
-            dvc plots show -t bar-loctype-panels -x target_type --show-vega metrics/${today}-score-by-loc-type-targ-type.csv >vega.json
+            dvc plots show --show-vega metrics/${today}-score-by-loc-type-targ-type.csv >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
-            dvc plots show -t bar-loctype-targtype-panels -x forecast_date --show-vega metrics/${today}-score-by-loc-type-targ-type-forecast-date.csv >vega.json
+            dvc plots show --show-vega metrics/${today}-score-by-loc-type-targ-type-forecast-date.csv >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
             dvc push
