@@ -201,7 +201,7 @@ forecast-2020-08-16:
   - path: forecasts/2020-08-16-CEID-Walk.csv
     md5: 49fca28ed47e6fc6b89ea01f342840a3
   - path: metrics/2020-08-16-forecast-calc-time.json
-    md5: 6da054977aa02a223fad82295373be20
+    md5: 33d2dfd5c8309ab6c5d5677a36b45446
 score-2020-08-16:
   cmd: ddt=2020-08-16 ./quantile-score.R
   deps:
@@ -235,6 +235,6 @@ visualize-forecast-2020-08-16-and-data-2020-08-16:
   - path: visuals/fdt2020-08-16-ddt2020-08-16-cum-death-forecasts.png
     md5: fa9e2e8461276314ebca639e271f5450
   - path: visuals/fdt2020-08-16-ddt2020-08-16-inc-case-forecasts.pdf
-    md5: 5f63cd19f274557ca89467078a077244
+    md5: 8e48f4ac71a164e0cd3edce2f6a68c48
   - path: visuals/fdt2020-08-16-ddt2020-08-16-inc-death-forecasts.png
     md5: 78f63955ee1de441ada0ee9c9b71c6c3
