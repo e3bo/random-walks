@@ -12,9 +12,9 @@ of incident cases and deaths are obtained. A distribution of cumulative deaths i
 of incident deaths. 
 
 This forecaster is far from optimal but it performs better than 
-one might guess. Its performance may serve as a useful benchmark for more advanced forecasters. Visualizations of the deaths forecasts are below, and a PDF file with forecasts of cases for national, state, and county locations, is [here](https://github.com/e3bo/random-walks/raw/dev/visuals/fdt2020-08-09-ddt2020-08-09-inc-case-forecasts.pdf). The number above each plot panel is a FIPS code for the location. We hope to provide nicer visualizations with names of the locations soon.
+one might guess. Its performance may serve as a useful benchmark for more advanced forecasters. Visualizations of the deaths forecasts are below, and a PDF file with forecasts of cases for national, state, and county locations, is [here](https://github.com/e3bo/random-walks/raw/dev/visuals/fdt2020-08-16-ddt2020-08-16-inc-case-forecasts.pdf). The number above each plot panel is a FIPS code for the location. We hope to provide nicer visualizations with names of the locations soon.
 
-![Cummulative deaths](visuals/fdt2020-08-09-ddt2020-08-09-cum-death-forecasts.png)
+![Cummulative deaths](visuals/fdt2020-08-16-ddt2020-08-16-cum-death-forecasts.png)
 
-![Incident deaths](visuals/fdt2020-08-09-ddt2020-08-09-inc-death-forecasts.png)
+![Incident deaths](visuals/fdt2020-08-16-ddt2020-08-16-inc-death-forecasts.png)
 
