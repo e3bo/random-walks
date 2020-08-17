@@ -2,10 +2,13 @@ name: update-pipeline-outputs
 on:
   push:
     paths-ignore:
-    - '.dvc/**'
-    - dvc.lock
-    - 'metrics/**'
-    - README.md
+      - '.dvc/**'
+      - dvc.lock
+      - 'metrics/**'
+      - README.md
+    branches:
+      - '*'
+      - '!master'
 jobs: 
   run:
     runs-on: [ubuntu-latest]
