@@ -1,7 +1,7 @@
 name: add-forecast
 on:
   schedule:
-    - cron : '0 6 * * 0'
+    - cron: '0 6 * * 0'
 jobs: 
   run:
     runs-on: [ubuntu-latest]
@@ -19,10 +19,11 @@ jobs:
           fdt=$today ./forecast.sh
           ddt=$today ./score.sh
           fdt=$today ddt=$today ./visualize-forecasts.sh
+          dvc push
           
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
-          git add dvc.lock metrics visuals
+          git add dvc.yaml dvc.lock metrics visuals
           if git commit -m "Weekly forecast, score, and plot pipeline additions" && git push;
           then
             echo "# Running times" > report.md
@@ -38,7 +39,6 @@ jobs:
             dvc plots show --show-vega metrics/${today}-score-by-loc-type-targ-type-forecast-date.csv >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
           
-            dvc push
           else
             echo "No changes to outputs." > report.md
           fi
