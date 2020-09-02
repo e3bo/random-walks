@@ -2,10 +2,13 @@ name: update-pipeline-outputs
 on:
   push:
     paths-ignore:
-    - '.dvc/**'
-    - dvc.lock
-    - 'metrics/**'
-    - README.md
+      - '.dvc/**'
+      - dvc.lock
+      - 'metrics/**'
+      - README.md
+    branches:
+      - '*'
+      - '!master'
 jobs: 
   run:
     runs-on: [ubuntu-latest]
@@ -20,6 +23,7 @@ jobs:
         run: |
           dvc pull --run-cache || true
           dvc repro
+          dvc push
           
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
@@ -39,8 +43,6 @@ jobs:
           
             dvc plots diff --show-vega --targets metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv -- HEAD~1 >vega.json
             vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-
           else
             echo "No changes to outputs." > report.md
           fi

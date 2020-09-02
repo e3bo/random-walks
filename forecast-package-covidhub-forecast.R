@@ -25,13 +25,13 @@ rw_forecast <- function(df, fdt, npaths = 100,
   stopifnot(fdt - last_end_date < lubridate::ddays(3))
   df1 <- df %>% filter(target_end_date <= fdt)
   y <- ts(df1$value) %>% tail(n = tailn)
-  object <- forecast::naive(y, h = 1)$model
+  object <- forecast::rwf(y, drift = include_drift, h = 1)$model
   sim <- matrix(NA, nrow = npaths, ncol = h)
   for (i in 1:npaths) {
     sim[i, ] <- simulate(object, nsim = h, bootstrap = FALSE)
   }
   sim1 <- (sim + abs(sim)) / 2 #to zero out any negative values
-  sim_dates <- seq(last_end_date + 7, last_end_date + h *7, by = 7)
+  sim_dates <- seq(last_end_date + 7, last_end_date + h * 7, by = 7)
   colnames(sim1) <- as.character(sim_dates)
   sim12 <- cbind(Rep = seq_len(nrow(sim1)), sim1) %>% as_tibble()
   simdf <- sim12 %>% pivot_longer(-Rep, names_to = "Date", 

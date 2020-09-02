@@ -23,3 +23,6 @@ dvc run \
     --force \
     -n score-$ddt \
     ddt=$ddt ./quantile-score.R
+dvc plots modify -t lqs -x loc_type --x-label "Location type" metrics/${ddt}-score-by-loc-type.csv
+dvc plots modify -t lqs-loctype-panel -x target_type metrics/${ddt}-score-by-loc-type-targ-type.csv
+dvc plots modify -t lqs-loctype-targtype-panels -x forecast_date metrics/${ddt}-score-by-loc-type-targ-type-forecast-date.csv
