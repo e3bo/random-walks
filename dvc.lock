@@ -10,18 +10,18 @@ forecast-2020-08-03:
   cmd: fdt=2020-08-03 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-08-03
     md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
   - path: model.ini
     md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-08-03-CEID-Walk.csv
-    md5: 84b05f3cda6ffe87b5849c72a509ad07
+    md5: 72eccf64df478eec7f98429314fe97f1
   - path: metrics/2020-08-03-forecast-calc-time.json
-    md5: a85a85caabc4b10e54cecfc96bf65729
+    md5: 9141b8d97761888eacf0369861de4ee1
 hopkins-2020-07-26:
   cmd: fdt=2020-07-26 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -34,38 +34,38 @@ forecast-2020-07-26:
   cmd: fdt=2020-07-26 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-07-26
     md5: 10aa1c52c0425eb5e20f4d0b54b82363.dir
   - path: model.ini
     md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-07-26-CEID-Walk.csv
-    md5: 2f1adcdd4b17a842091bfba1f7c7f3c5
+    md5: a6afe25c7c582cc93bb12225d81a9384
   - path: metrics/2020-07-26-forecast-calc-time.json
-    md5: 0ebbf84cda5e7c039ca6eb1c863e6eb9
+    md5: f87225ec5be00dbe316745f3bfb3577e
 score-2020-08-03:
   cmd: ddt=2020-08-03 Rscript quantile-score.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecasts
-    md5: b2cd2718605f9f9cc6400e4b0402a684.dir
+    md5: 1df4b48dd449d562e97a1bc921731bf3.dir
   - path: hopkins/2020-08-03
     md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
   - path: quantile-score.R
     md5: 77eda0648caa45d816d5725ec07ae05b
   outs:
   - path: metrics/2020-08-03-residuals.rds
-    md5: 24ac5561079d00200e0299c5996dfe21
+    md5: 634d4e3cb9c65a5d4c4a09e42310e363
   - path: metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv
-    md5: 0d660d4c40c1efec63eca463b7699fae
+    md5: 22252656a2ade8370d93a51dae683c15
   - path: metrics/2020-08-03-score-by-loc-type-targ-type.csv
-    md5: 09518a97a7f1084fb0ae10fad75020a4
+    md5: 27a5004d533976dfa0a475c341a7503f
   - path: metrics/2020-08-03-score-by-loc-type.csv
-    md5: 39e9068c922f3c8f1fda863d009c7d51
+    md5: ff858157e31e6196ca4fe7c0b35279c9
 hopkins-2020-07-19:
   cmd: fdt=2020-07-19 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -78,18 +78,18 @@ forecast-2020-07-19:
   cmd: fdt=2020-07-19 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-07-19
     md5: d0263c2f4a24e2f471801156b461bb1c.dir
   - path: model.ini
     md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-07-19-CEID-Walk.csv
-    md5: 62d008cd072417c7c03ed40e495a77ec
+    md5: c7c6d1aab3679dba16b27ca4dd2cdd3a
   - path: metrics/2020-07-19-forecast-calc-time.json
-    md5: 0d243cb7246d746da3e03e509c2ffc67
+    md5: 65e59d8627ed02838ef891f62b919834
 hopkins-2020-07-12:
   cmd: fdt=2020-07-12 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -102,18 +102,18 @@ forecast-2020-07-12:
   cmd: fdt=2020-07-12 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-07-12
     md5: d4582d3c6a909ae9977b523ef2baee35.dir
   - path: model.ini
     md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-07-12-CEID-Walk.csv
-    md5: 09c0ae0a173d88d4fca8f116fac1a977
+    md5: 383d28b6f04a9e6870e2bcc7d28444c3
   - path: metrics/2020-07-12-forecast-calc-time.json
-    md5: e559f819f53ef32e0ac493dfc3f2a5aa
+    md5: 1744a88455d8adb661a3e8714a7d8b72
 hopkins-2020-07-05:
   cmd: fdt=2020-07-05 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -126,18 +126,18 @@ forecast-2020-07-05:
   cmd: fdt=2020-07-05 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-07-05
     md5: 71c6776ac7e2c114e24ff3ffe38bbe01.dir
   - path: model.ini
     md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-07-05-CEID-Walk.csv
-    md5: e9aaf1b8d43e741b456f553677d60668
+    md5: d010d07baf69f2f1a4b3e9a910f291c7
   - path: metrics/2020-07-05-forecast-calc-time.json
-    md5: 69cdfaf3cebbef33078e4443f106b423
+    md5: d29a27c653e96127a057a1714b2af812
 hopkins-2020-08-09:
   cmd: fdt=2020-08-09 Rscript pull-hopkins-ts-from-date.R
   deps:
@@ -150,34 +150,34 @@ visualize-forecast-2020-08-09-and-data-2020-08-09:
   cmd: ddt=2020-08-09 fdt=2020-08-09 Rscript forecast-vis.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-vis.R
     md5: 0ae631494af9e58254c85498876fc0eb
   - path: hopkins/2020-08-09
     md5: e3f72129d9532f64b25cc7a037ac767d.dir
   outs:
   - path: visuals/fdt2020-08-09-ddt2020-08-09-cum-death-forecasts.png
-    md5: 63e4cd8630c8dbfeaa746b53ccb3933a
+    md5: d4b7bf5593caa7ddc2302c690d0318ff
   - path: visuals/fdt2020-08-09-ddt2020-08-09-inc-case-forecasts.pdf
-    md5: 774b70c15c7ebb69170e3afa9966b099
+    md5: 0b13c261e50d82a036df8e34a926956c
   - path: visuals/fdt2020-08-09-ddt2020-08-09-inc-death-forecasts.png
-    md5: 1162943e5ba3f6e7b5faacb9273647b4
+    md5: b48c1eb8bce5e85077304a1411c3156f
 forecast-2020-08-09:
   cmd: fdt=2020-08-09 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 2cc56f84ec0ea9bcd14731a2dc15acfb
+    md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-08-09
     md5: e3f72129d9532f64b25cc7a037ac767d.dir
   - path: model.ini
     md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-08-09-CEID-Walk.csv
-    md5: d26b12b4dc49525abc9fe79a9701ebb7
+    md5: ec0341e51864d0ecda8b6e8de038011f
   - path: metrics/2020-08-09-forecast-calc-time.json
-    md5: 65da9559a3850181386f7165d158246e
+    md5: e8f8bb4dbbcf9cdfdfcc290fc0397fe5
 hopkins-2020-08-16:
   cmd: fdt=2020-08-16 ./pull-hopkins-ts-from-date.R
   deps:
@@ -192,36 +192,36 @@ forecast-2020-08-16:
   - path: covidhub-common.R
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-08-16
     md5: 10d3763622098fa5697cccaee5b2b163.dir
   - path: model.ini
-    md5: 3fdf49b0ef1f5242fd059e6e11f64034
+    md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-08-16-CEID-Walk.csv
-    md5: 49fca28ed47e6fc6b89ea01f342840a3
+    md5: 126f769d2987a56abe045caf8136995d
   - path: metrics/2020-08-16-forecast-calc-time.json
-    md5: 33d2dfd5c8309ab6c5d5677a36b45446
+    md5: 449163f29641f366596a0efdbb7ea1f1
 score-2020-08-16:
   cmd: ddt=2020-08-16 ./quantile-score.R
   deps:
   - path: covidhub-common.R
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecasts
-    md5: b947f7e08286c0fac747afe9885bbd57.dir
+    md5: 1df4b48dd449d562e97a1bc921731bf3.dir
   - path: hopkins/2020-08-16
     md5: 10d3763622098fa5697cccaee5b2b163.dir
   - path: quantile-score.R
     md5: 77eda0648caa45d816d5725ec07ae05b
   outs:
   - path: metrics/2020-08-16-residuals.rds
-    md5: d5c9e99743cedf14bb369ebd16ad3a85
+    md5: d8af53a7b0354c5dc1eb8e6f64193759
   - path: metrics/2020-08-16-score-by-loc-type-targ-type-forecast-date.csv
-    md5: e22107a23d9d1f797c12e9b76dd3dd1b
+    md5: 79ce558a2d92307d2b76f355a8f7f3c8
   - path: metrics/2020-08-16-score-by-loc-type-targ-type.csv
-    md5: bb864e49ebd8c7ebbd9946a7a17258a0
+    md5: 60a13c748b240505e0b7ac27a716b4a9
   - path: metrics/2020-08-16-score-by-loc-type.csv
-    md5: d59d2f300b9ca8a81fd1ee74c939ef13
+    md5: b67ffa48ce43a54b0cb954b03d733590
 visualize-forecast-2020-08-16-and-data-2020-08-16:
   cmd: ddt=2020-08-16 fdt=2020-08-16 ./forecast-vis.R
   deps:
@@ -252,36 +252,36 @@ forecast-2020-08-23:
   - path: covidhub-common.R
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-08-23
     md5: 9850c1c1aab0c89067c7a983a29f00af.dir
   - path: model.ini
-    md5: 3fdf49b0ef1f5242fd059e6e11f64034
+    md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-08-23-CEID-Walk.csv
-    md5: 23ef34e3716c2b0dd3ee82711fe2bd9b
+    md5: d49508cf7febb240769b18792f620246
   - path: metrics/2020-08-23-forecast-calc-time.json
-    md5: 14add0877afc170959bfc682a9f2e4ba
+    md5: 9f546d58e172926d73226fba748fa4a6
 score-2020-08-23:
   cmd: ddt=2020-08-23 ./quantile-score.R
   deps:
   - path: covidhub-common.R
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecasts
-    md5: f85cf030505ef2dab0d1a3c9e5cddec6.dir
+    md5: 1df4b48dd449d562e97a1bc921731bf3.dir
   - path: hopkins/2020-08-23
     md5: 9850c1c1aab0c89067c7a983a29f00af.dir
   - path: quantile-score.R
     md5: 77eda0648caa45d816d5725ec07ae05b
   outs:
   - path: metrics/2020-08-23-residuals.rds
-    md5: 735164e45d7919ca9c3f67f903782047
+    md5: 820d9d70b954f16582738a53acc08e2e
   - path: metrics/2020-08-23-score-by-loc-type-targ-type-forecast-date.csv
-    md5: fe3ee517bd67a15d465e3c63a04dbf43
+    md5: e9330c35ad1d8a86aecb88e3c66188a5
   - path: metrics/2020-08-23-score-by-loc-type-targ-type.csv
-    md5: 623704004d889385a220f6e8f0b9524f
+    md5: aafd90a00a6b693475d31ee96ec01f58
   - path: metrics/2020-08-23-score-by-loc-type.csv
-    md5: 7fda9a15649245d07f65ddbd6e1f75f3
+    md5: fe39d2cd73220476728b9d450f2ace59
 visualize-forecast-2020-08-23-and-data-2020-08-23:
   cmd: ddt=2020-08-23 fdt=2020-08-23 ./forecast-vis.R
   deps:
@@ -312,36 +312,36 @@ forecast-2020-08-30:
   - path: covidhub-common.R
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-package-covidhub-forecast.R
-    md5: 118aa6101c7b61769b7d812456ea80be
+    md5: a0b58fd82b8f1482bcd63c4748189a15
   - path: hopkins/2020-08-30
     md5: cfa3bf229c5bb2ce5b53a2e452680b71.dir
   - path: model.ini
-    md5: 3fdf49b0ef1f5242fd059e6e11f64034
+    md5: ad3493697741a15970c5a876e15e0054
   outs:
   - path: forecasts/2020-08-30-CEID-Walk.csv
-    md5: 31799e859ae87395790053c5d5fcea13
+    md5: 4b52b0eb9c8b4b2caeb7ed472d02d7af
   - path: metrics/2020-08-30-forecast-calc-time.json
-    md5: 036e7cfaf40ce391de464bd4525531e2
+    md5: 2b88464f83ef16930177dfc4bb07b316
 score-2020-08-30:
   cmd: ddt=2020-08-30 ./quantile-score.R
   deps:
   - path: covidhub-common.R
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecasts
-    md5: 8498a0c50ee7f955737487f04f987777.dir
+    md5: 1df4b48dd449d562e97a1bc921731bf3.dir
   - path: hopkins/2020-08-30
     md5: cfa3bf229c5bb2ce5b53a2e452680b71.dir
   - path: quantile-score.R
     md5: 77eda0648caa45d816d5725ec07ae05b
   outs:
   - path: metrics/2020-08-30-residuals.rds
-    md5: 96cf4bf3a0961427928ec8f27cf765e8
+    md5: 094afc9824d130a4edc116ccb52a11f5
   - path: metrics/2020-08-30-score-by-loc-type-targ-type-forecast-date.csv
-    md5: 4875649c404d219198a22af13757d98c
+    md5: aaf406dbb3b4310451bd83c36ab7c40f
   - path: metrics/2020-08-30-score-by-loc-type-targ-type.csv
-    md5: 7c8d8c77c5066a3755fb76f78d947fe3
+    md5: 256c1d896fd409139c4a9beb8374d0f7
   - path: metrics/2020-08-30-score-by-loc-type.csv
-    md5: c01898fcb6dd144a285161d3f2bcf20b
+    md5: 7d5444738456b817771f62f20ef429ca
 visualize-forecast-2020-08-30-and-data-2020-08-30:
   cmd: ddt=2020-08-30 fdt=2020-08-30 ./forecast-vis.R
   deps:
