@@ -18,54 +18,70 @@ hopdir <- file.path("hopkins", forecast_dates)
 
 tdat <- load_hopkins(hopdir) #%>% filter(str_detect(location, "^13"))
 
-rw_forecast <- function(df, fdt, npaths = 100, 
+rw_forecast <- function(df, target_type, fdt, 
                         h = 4, tailn = Inf, include_drift = FALSE){
-  stopifnot(npaths > 0)
   last_end_date <- max(df$target_end_date)
   stopifnot(fdt - last_end_date < lubridate::ddays(3))
   df1 <- df %>% filter(target_end_date <= fdt)
   y <- ts(df1$value) %>% tail(n = tailn)
-  object <- forecast::rwf(y, drift = include_drift, h = 1)$model
-  sim <- matrix(NA, nrow = npaths, ncol = h)
-  for (i in 1:npaths) {
-    sim[i, ] <- simulate(object, nsim = h, bootstrap = FALSE)
+  object <- forecast::rwf(y, drift = include_drift, h = h)$model
+  if (target_type == "wk ahead inc case"){
+    prob <- c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)
+  } else {
+    prob <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
   }
-  sim1 <- (sim + abs(sim)) / 2 #to zero out any negative values
-  sim_dates <- seq(last_end_date + 7, last_end_date + h * 7, by = 7)
-  colnames(sim1) <- as.character(sim_dates)
-  sim12 <- cbind(Rep = seq_len(nrow(sim1)), sim1) %>% as_tibble()
-  simdf <- sim12 %>% pivot_longer(-Rep, names_to = "Date", 
-                                  values_to = "value")
-  simdf %>% mutate(Date = lubridate::ymd(Date))
+  z <- qnorm(p = prob)
+  nquantiles <- length(z)
+  
+  # start copying from forecast:::forecast.lagwalk
+  lag <- object$par$lag
+  fullperiods <- (h - 1)/lag + 1
+  steps <- rep(1:fullperiods, rep(lag, fullperiods))[1:h]
+  fc <- rep(object$future, fullperiods)[1:h] + steps * object$par$drift
+  mse <- mean(object$residuals^2, na.rm = TRUE)
+  se <- sqrt(mse * steps + (steps * object$par$drift.se)^2)
+  # end copying
+  
+  quantile_values <- matrix(NA, nrow = h, ncol = nquantiles)
+  for (i in 1:nquantiles) {
+    quantile_values[, i] <- fc + z[i] * se
+  }
+  quantile_values <- cbind(quantile_values, fc) # for point forecast
+  colnames(quantile_values) <- c(prob, "point")
+  qdw <- cbind(tibble("wks_ahead" = steps), as_tibble(quantile_values))
+  qdl <- pivot_longer(qdw, -wks_ahead, names_to = "quantile", 
+                      values_to = "value") %>%
+    mutate(value = ifelse(value < 0, 0, value)) %>%
+    mutate(type = ifelse(quantile == "point", "point", "quantile")) %>%
+    mutate(quantile = ifelse(quantile == "point", NA, quantile)) %>%
+    add_column(forecast_date = fdt) %>%
+    mutate(target = paste(wks_ahead, target_type)) %>%
+    mutate(target_end_date = wks_ahead * 7 + last_end_date) %>%
+    mutate(value = round(value)) %>%
+    select(-wks_ahead)
+  qdl
 }
 
-reshape_paths_like_pompout <- function(x){
-  x %>% mutate(target_type = recode(target_type, 
-                                    `wk ahead inc death`= "deaths",
-                                    `wk ahead inc case` = "cases")) %>% 
-    pivot_wider(id_cols = c(Rep, Date), names_from = "target_type", 
-                values_from = "value")
-}
+gen_forecasts <- function(fdt, tdat, mname, odir, ...) {
 
-sim_paths <- function(fdt, tdat, mname, odir, ...) {
-
-  tdat1 <- tdat %>% 
+  full <- tdat %>%
     filter(target_type %in% c("wk ahead inc death", "wk ahead inc case")) %>%
     group_by(location, target_type) %>%
     arrange(target_end_date) %>%
-    nest() %>% 
-    mutate(paths = map(data, rw_forecast, fdt = fdt, ...)) %>%
-    select(-data) %>%
-    unnest(cols = paths) %>%
-    group_by(location) %>%
     nest() %>%
-    mutate(paths2 = map(data, reshape_paths_like_pompout)) %>%
+    mutate(fcsts = map2(data, target_type, rw_forecast, fdt = fdt, ...)) %>%
     select(-data) %>%
-    mutate(fcst_df = map2(paths2, location, paths_to_forecast, hop = tdat, 
-                          fdt = fdt))
-    
-  full <- bind_rows(tdat1$fcst_df)
-
+    unnest(cols = fcsts) %>%
+    ungroup %>%
+    select(-target_type) %>%
+    relocate(forecast_date,
+             target,
+             target_end_date,
+             location,
+             type,
+             quantile,
+             value)
+  
   fname <- paste0(fdt, "-CEID-", mname, ".csv")
   if (!dir.exists(odir)) {
     dir.create(odir)
@@ -74,10 +90,9 @@ sim_paths <- function(fdt, tdat, mname, odir, ...) {
   write_csv(full, opath)
 }
 
-paths <- map(forecast_dates,
-    sim_paths,
+map(forecast_dates,
+    gen_forecasts,
     tdat = tdat,
-    npaths = mconfig$model_pars$npaths,
     tailn = mconfig$model_pars$tailn,
     include_drift = mconfig$model_pars$include_drift,
     odir = "forecasts",
