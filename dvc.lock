@@ -139,7 +139,7 @@ forecast-2020-07-05:
   - path: metrics/2020-07-05-forecast-calc-time.json
     md5: 29a5dbb395cae2784c4cc3cc1bb4856b
 hopkins-2020-08-09:
-  cmd: fdt=2020-08-09 Rscript pull-hopkins-ts-from-date.R
+  cmd: fdt=2020-08-09 ./pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
     md5: d350b3ca9b344dea811f07232d0ec8d8
@@ -147,21 +147,23 @@ hopkins-2020-08-09:
   - path: hopkins/2020-08-09
     md5: e3f72129d9532f64b25cc7a037ac767d.dir
 visualize-forecast-2020-08-09-and-data-2020-08-09:
-  cmd: ddt=2020-08-09 fdt=2020-08-09 Rscript forecast-vis.R
+  cmd: ddt=2020-08-09 fdt=2020-08-09 ./forecast-vis.R
   deps:
   - path: covidhub-common.R
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-vis.R
     md5: 0ae631494af9e58254c85498876fc0eb
+  - path: forecasts/2020-08-09-CEID-Walk.csv
+    md5: 9e56febae756ad9e027e2402d15a948c
   - path: hopkins/2020-08-09
     md5: e3f72129d9532f64b25cc7a037ac767d.dir
   outs:
   - path: visuals/fdt2020-08-09-ddt2020-08-09-cum-death-forecasts.png
-    md5: d4b7bf5593caa7ddc2302c690d0318ff
+    md5: 9bf0d38cc42bad107eb67956f96adec8
   - path: visuals/fdt2020-08-09-ddt2020-08-09-inc-case-forecasts.pdf
-    md5: 0b13c261e50d82a036df8e34a926956c
+    md5: 0cb61f96e03c1831922021e956b7ace9
   - path: visuals/fdt2020-08-09-ddt2020-08-09-inc-death-forecasts.png
-    md5: b48c1eb8bce5e85077304a1411c3156f
+    md5: d90fb444caa9fe96eb128daf210dd6c2
 forecast-2020-08-09:
   cmd: fdt=2020-08-09 Rscript forecast-package-covidhub-forecast.R
   deps:
@@ -229,15 +231,17 @@ visualize-forecast-2020-08-16-and-data-2020-08-16:
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-vis.R
     md5: 0ae631494af9e58254c85498876fc0eb
+  - path: forecasts/2020-08-16-CEID-Walk.csv
+    md5: 8073a6d1a85332a01d7f7b119d2d0ea6
   - path: hopkins/2020-08-16
     md5: 10d3763622098fa5697cccaee5b2b163.dir
   outs:
   - path: visuals/fdt2020-08-16-ddt2020-08-16-cum-death-forecasts.png
-    md5: fa9e2e8461276314ebca639e271f5450
+    md5: df7b1542e8d1429b5884cd6757002432
   - path: visuals/fdt2020-08-16-ddt2020-08-16-inc-case-forecasts.pdf
-    md5: 8e48f4ac71a164e0cd3edce2f6a68c48
+    md5: 4709f4076f7c15d3bcb7ff49d6125fae
   - path: visuals/fdt2020-08-16-ddt2020-08-16-inc-death-forecasts.png
-    md5: 78f63955ee1de441ada0ee9c9b71c6c3
+    md5: 5f2ab954020476b2eee35964e8be0401
 hopkins-2020-08-23:
   cmd: fdt=2020-08-23 ./pull-hopkins-ts-from-date.R
   deps:
@@ -289,15 +293,17 @@ visualize-forecast-2020-08-23-and-data-2020-08-23:
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-vis.R
     md5: 0ae631494af9e58254c85498876fc0eb
+  - path: forecasts/2020-08-23-CEID-Walk.csv
+    md5: a417b5f96aa3e7e4798a5525565cbb4b
   - path: hopkins/2020-08-23
     md5: 9850c1c1aab0c89067c7a983a29f00af.dir
   outs:
   - path: visuals/fdt2020-08-23-ddt2020-08-23-cum-death-forecasts.png
-    md5: 738112bbd26bd54b320d09287dbb575f
+    md5: b77152291f5a121b69238eaa2db6c867
   - path: visuals/fdt2020-08-23-ddt2020-08-23-inc-case-forecasts.pdf
-    md5: d14cfc87b2cc7f9d73c822aecb5b13e6
+    md5: 7f81fefcb8e0265fa4161313401a6463
   - path: visuals/fdt2020-08-23-ddt2020-08-23-inc-death-forecasts.png
-    md5: f1580d86cf73abbf2d7b0d27c0596ffb
+    md5: 57e6acf611f19724a879fb7bef87db06
 hopkins-2020-08-30:
   cmd: fdt=2020-08-30 ./pull-hopkins-ts-from-date.R
   deps:
@@ -349,12 +355,14 @@ visualize-forecast-2020-08-30-and-data-2020-08-30:
     md5: 677d29b4725267adaea2e81288793f54
   - path: forecast-vis.R
     md5: 0ae631494af9e58254c85498876fc0eb
+  - path: forecasts/2020-08-30-CEID-Walk.csv
+    md5: 95b54865c00f8dc1792b3122656f6b13
   - path: hopkins/2020-08-30
     md5: cfa3bf229c5bb2ce5b53a2e452680b71.dir
   outs:
   - path: visuals/fdt2020-08-30-ddt2020-08-30-cum-death-forecasts.png
-    md5: a05003b5144bad1fbb3b94d53f394566
+    md5: 84ae2988289884c9c696f49faa9f8523
   - path: visuals/fdt2020-08-30-ddt2020-08-30-inc-case-forecasts.pdf
-    md5: aa0923b75e1a1d1fad1e65e94c86eae8
+    md5: fdfece9c5227bf13ce2d24a19eea63d8
   - path: visuals/fdt2020-08-30-ddt2020-08-30-inc-death-forecasts.png
-    md5: 458e2ecef3c7b63f6bc6e63b123ff4aa
+    md5: febcf1e5c957874853aeaab9e5c4aff2
