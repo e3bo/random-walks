@@ -366,3 +366,26 @@ visualize-forecast-2020-08-30-and-data-2020-08-30:
     md5: fdfece9c5227bf13ce2d24a19eea63d8
   - path: visuals/fdt2020-08-30-ddt2020-08-30-inc-death-forecasts.png
     md5: febcf1e5c957874853aeaab9e5c4aff2
+weight-2020-08-03:
+  cmd: ddt=2020-08-03 ./optimally-weight.R
+  deps:
+  - path: drift/metrics/2020-08-03-residuals.rds
+    md5: 8eddae01a35e898796709c58bfa1cd97
+  - path: no-drift/metrics/2020-08-03-residuals.rds
+    md5: 63efb5f4a9df8701df43f89aa9eb415a
+  - path: optimally-weight.R
+    md5: fbf57e7a9bdfb5231def7715f835fde0
+  outs:
+  - path: model-weights/2020-08-03-weights.csv
+    md5: ff96afe30abcbdbf40d56d0e58034f10
+combine-2020-08-03:
+  cmd: fdt=2020-08-03 ./combine-forecasts.R
+  deps:
+  - path: combine-forecasts.R
+    md5: 6e1d6c9c2b7c032e7e2d351d6b1b5c02
+  - path: drift/forecasts/2020-08-03-CEID-Walk.csv
+    md5: b7e525ee7e5bba5c8f962c9d5b5768ea
+  - path: model-weights/2020-08-03-weights.csv
+    md5: ff96afe30abcbdbf40d56d0e58034f10
+  - path: no-drift/forecasts/2020-08-03-CEID-Walk.csv
+    md5: 82fd2dc81974c4c3fca853da69ca183e

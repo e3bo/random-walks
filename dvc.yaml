@@ -297,3 +297,18 @@ stages:
     - visuals/fdt2020-08-30-ddt2020-08-30-cum-death-forecasts.png
     - visuals/fdt2020-08-30-ddt2020-08-30-inc-case-forecasts.pdf
     - visuals/fdt2020-08-30-ddt2020-08-30-inc-death-forecasts.png
+  weight-2020-08-03:
+    cmd: ddt=2020-08-03 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-08-03-residuals.rds
+    - no-drift/metrics/2020-08-03-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-08-03-weights.csv
+  combine-2020-08-03:
+    cmd: fdt=2020-08-03 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-08-03-CEID-Walk.csv
+    - model-weights/2020-08-03-weights.csv
+    - no-drift/forecasts/2020-08-03-CEID-Walk.csv

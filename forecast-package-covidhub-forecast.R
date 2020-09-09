@@ -13,8 +13,8 @@ eval_string <- function(x){
 }
 mconfig$model_pars <- map(mconfig$model_pars, eval_string)
 
-forecast_dates <- Sys.getenv("fdt") %>% as.Date()
-hopdir <- file.path("hopkins", forecast_dates)
+forecast_date <- Sys.getenv("fdt") %>% as.Date()
+hopdir <- file.path("hopkins", forecast_date)
 
 tdat <- load_hopkins(hopdir) #%>% filter(str_detect(location, "^13"))
 
@@ -35,11 +35,11 @@ rw_forecast <- function(df, target_type, fdt,
   
   # start copying from forecast:::forecast.lagwalk
   lag <- object$par$lag
-  fullperiods <- (h - 1)/lag + 1
+  fullperiods <- (h - 1) / lag + 1
   steps <- rep(1:fullperiods, rep(lag, fullperiods))[1:h]
   fc <- rep(object$future, fullperiods)[1:h] + steps * object$par$drift
-  mse <- mean(object$residuals^2, na.rm = TRUE)
-  se <- sqrt(mse * steps + (steps * object$par$drift.se)^2)
+  mse <- mean(object$residuals ^ 2, na.rm = TRUE)
+  se <- sqrt(mse * steps + (steps * object$par$drift.se) ^ 2)
   # end copying
   
   quantile_values <- matrix(NA, nrow = h, ncol = nquantiles)
@@ -57,7 +57,7 @@ rw_forecast <- function(df, target_type, fdt,
     add_column(forecast_date = fdt) %>%
     mutate(target = paste(wks_ahead, target_type)) %>%
     mutate(target_end_date = wks_ahead * 7 + last_end_date) %>%
-    mutate(value = round(value)) %>%
+    mutate(value = round(value, digits = 2)) %>%
     select(-wks_ahead)
   qdl
 }
@@ -90,8 +90,7 @@ gen_forecasts <- function(fdt, tdat, mname, odir, ...) {
   write_csv(full, opath)
 }
 
-map(forecast_dates,
-    gen_forecasts,
+gen_forecasts(forecast_date,
     tdat = tdat,
     tailn = mconfig$model_pars$tailn,
     include_drift = mconfig$model_pars$include_drift,
@@ -102,6 +101,6 @@ map(forecast_dates,
 time <- tictoc::toc()
 walltime <- list(wall = time$toc - time$tic)
 dir.create("metrics")
-mpath <- file.path("metrics", paste0(forecast_dates, 
+mpath <- file.path("metrics", paste0(forecast_date, 
                                      "-forecast-calc-time.json"))
 jsonlite::write_json(walltime, mpath, auto_unbox = TRUE)

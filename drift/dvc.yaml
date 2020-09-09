@@ -1,0 +1,48 @@
+stages:
+  forecast-2020-07-26:
+    cmd: fdt=2020-07-26 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-07-26
+    - model.ini
+    outs:
+    - forecasts/2020-07-26-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-26-forecast-calc-time.json:
+        cache: false
+  score-2020-08-03:
+    cmd: ddt=2020-08-03 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-08-03
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-08-03-residuals.rds
+    plots:
+    - metrics/2020-08-03-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-08-03-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-08-03-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  forecast-2020-08-03:
+    cmd: fdt=2020-08-03 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-08-03
+    - model.ini
+    outs:
+    - forecasts/2020-08-03-CEID-Walk.csv
+    metrics:
+    - metrics/2020-08-03-forecast-calc-time.json:
+        cache: false
