@@ -1,40 +1,16 @@
 stages:
   hopkins-2020-08-03:
-    cmd: fdt=2020-08-03 Rscript pull-hopkins-ts-from-date.R
+    cmd: fdt=2020-08-03 ./pull-hopkins-ts-from-date.R
     deps:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-08-03
-  forecast-2020-08-03:
-    cmd: fdt=2020-08-03 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-08-03
-    - model.ini
-    outs:
-    - forecasts/2020-08-03-CEID-Walk.csv
-    metrics:
-    - metrics/2020-08-03-forecast-calc-time.json:
-        cache: false
   hopkins-2020-07-26:
     cmd: fdt=2020-07-26 Rscript pull-hopkins-ts-from-date.R
     deps:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-07-26
-  forecast-2020-07-26:
-    cmd: fdt=2020-07-26 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-07-26
-    - model.ini
-    outs:
-    - forecasts/2020-07-26-CEID-Walk.csv
-    metrics:
-    - metrics/2020-07-26-forecast-calc-time.json:
-        cache: false
   score-2020-08-03:
     cmd: ddt=2020-08-03 Rscript quantile-score.R
     deps:
@@ -64,72 +40,24 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-07-19
-  forecast-2020-07-19:
-    cmd: fdt=2020-07-19 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-07-19
-    - model.ini
-    outs:
-    - forecasts/2020-07-19-CEID-Walk.csv
-    metrics:
-    - metrics/2020-07-19-forecast-calc-time.json:
-        cache: false
   hopkins-2020-07-12:
     cmd: fdt=2020-07-12 Rscript pull-hopkins-ts-from-date.R
     deps:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-07-12
-  forecast-2020-07-12:
-    cmd: fdt=2020-07-12 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-07-12
-    - model.ini
-    outs:
-    - forecasts/2020-07-12-CEID-Walk.csv
-    metrics:
-    - metrics/2020-07-12-forecast-calc-time.json:
-        cache: false
   hopkins-2020-07-05:
     cmd: fdt=2020-07-05 Rscript pull-hopkins-ts-from-date.R
     deps:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-07-05
-  forecast-2020-07-05:
-    cmd: fdt=2020-07-05 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-07-05
-    - model.ini
-    outs:
-    - forecasts/2020-07-05-CEID-Walk.csv
-    metrics:
-    - metrics/2020-07-05-forecast-calc-time.json:
-        cache: false
   hopkins-2020-08-09:
     cmd: fdt=2020-08-09 ./pull-hopkins-ts-from-date.R
     deps:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-08-09
-  forecast-2020-08-09:
-    cmd: fdt=2020-08-09 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-08-09
-    - model.ini
-    outs:
-    - forecasts/2020-08-09-CEID-Walk.csv
-    metrics:
-    - metrics/2020-08-09-forecast-calc-time.json:
-        cache: false
   visualize-forecast-2020-08-09-and-data-2020-08-09:
     cmd: ddt=2020-08-09 fdt=2020-08-09 ./forecast-vis.R
     deps:
@@ -147,18 +75,6 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-08-16
-  forecast-2020-08-16:
-    cmd: fdt=2020-08-16 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-08-16
-    - model.ini
-    outs:
-    - forecasts/2020-08-16-CEID-Walk.csv
-    metrics:
-    - metrics/2020-08-16-forecast-calc-time.json:
-        cache: false
   score-2020-08-16:
     cmd: ddt=2020-08-16 ./quantile-score.R
     deps:
@@ -199,18 +115,6 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-08-23
-  forecast-2020-08-23:
-    cmd: fdt=2020-08-23 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-08-23
-    - model.ini
-    outs:
-    - forecasts/2020-08-23-CEID-Walk.csv
-    metrics:
-    - metrics/2020-08-23-forecast-calc-time.json:
-        cache: false
   score-2020-08-23:
     cmd: ddt=2020-08-23 ./quantile-score.R
     deps:
@@ -251,18 +155,6 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-08-30
-  forecast-2020-08-30:
-    cmd: fdt=2020-08-30 Rscript forecast-package-covidhub-forecast.R
-    deps:
-    - covidhub-common.R
-    - forecast-package-covidhub-forecast.R
-    - hopkins/2020-08-30
-    - model.ini
-    outs:
-    - forecasts/2020-08-30-CEID-Walk.csv
-    metrics:
-    - metrics/2020-08-30-forecast-calc-time.json:
-        cache: false
   score-2020-08-30:
     cmd: ddt=2020-08-30 ./quantile-score.R
     deps:
@@ -312,3 +204,172 @@ stages:
     - drift/forecasts/2020-08-03-CEID-Walk.csv
     - model-weights/2020-08-03-weights.csv
     - no-drift/forecasts/2020-08-03-CEID-Walk.csv
+    outs:
+    - forecasts/2020-08-03-CEID-Walk.csv
+  hopkins-2020-08-10:
+    cmd: fdt=2020-08-10 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-08-10
+  score-2020-08-10:
+    cmd: ddt=2020-08-10 ./quantile-score.R
+    deps:
+    - covidhub-common.R
+    - forecasts
+    - hopkins/2020-08-10
+    - quantile-score.R
+    outs:
+    - metrics/2020-08-10-residuals.rds
+    plots:
+    - metrics/2020-08-10-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-08-10-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-08-10-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  visualize-forecast-2020-08-03-and-data-2020-08-03:
+    cmd: ddt=2020-08-03 fdt=2020-08-03 ./forecast-vis.R
+    deps:
+    - covidhub-common.R
+    - forecast-vis.R
+    - forecasts/2020-08-03-CEID-Walk.csv
+    - hopkins/2020-08-03
+    outs:
+    - visuals/fdt2020-08-03-ddt2020-08-03-cum-death-forecasts.png
+    - visuals/fdt2020-08-03-ddt2020-08-03-inc-case-forecasts.pdf
+    - visuals/fdt2020-08-03-ddt2020-08-03-inc-death-forecasts.png
+  weight-2020-07-05:
+    cmd: ddt=2020-07-05 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-07-05-residuals.rds
+    - no-drift/metrics/2020-07-05-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-07-05-weights.csv
+  weight-2020-07-12:
+    cmd: ddt=2020-07-12 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-07-12-residuals.rds
+    - no-drift/metrics/2020-07-12-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-07-12-weights.csv
+  weight-2020-07-19:
+    cmd: ddt=2020-07-19 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-07-19-residuals.rds
+    - no-drift/metrics/2020-07-19-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-07-19-weights.csv
+  weight-2020-07-26:
+    cmd: ddt=2020-07-26 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-07-26-residuals.rds
+    - no-drift/metrics/2020-07-26-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-07-26-weights.csv
+  weight-2020-08-09:
+    cmd: ddt=2020-08-09 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-08-09-residuals.rds
+    - no-drift/metrics/2020-08-09-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-08-09-weights.csv
+  weight-2020-08-16:
+    cmd: ddt=2020-08-16 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-08-16-residuals.rds
+    - no-drift/metrics/2020-08-16-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-08-16-weights.csv
+  weight-2020-08-30:
+    cmd: ddt=2020-08-30 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-08-30-residuals.rds
+    - no-drift/metrics/2020-08-30-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-08-30-weights.csv
+  weight-2020-08-23:
+    cmd: ddt=2020-08-23 ./optimally-weight.R
+    deps:
+    - drift/metrics/2020-08-23-residuals.rds
+    - no-drift/metrics/2020-08-23-residuals.rds
+    - optimally-weight.R
+    outs:
+    - model-weights/2020-08-23-weights.csv
+  combine-2020-07-12:
+    cmd: fdt=2020-07-12 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-07-12-CEID-Walk.csv
+    - model-weights/2020-07-12-weights.csv
+    - no-drift/forecasts/2020-07-12-CEID-Walk.csv
+    outs:
+    - forecasts/2020-07-12-CEID-Walk.csv
+  combine-2020-07-19:
+    cmd: fdt=2020-07-19 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-07-19-CEID-Walk.csv
+    - model-weights/2020-07-19-weights.csv
+    - no-drift/forecasts/2020-07-19-CEID-Walk.csv
+    outs:
+    - forecasts/2020-07-19-CEID-Walk.csv
+  combine-2020-07-26:
+    cmd: fdt=2020-07-26 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-07-26-CEID-Walk.csv
+    - model-weights/2020-07-26-weights.csv
+    - no-drift/forecasts/2020-07-26-CEID-Walk.csv
+    outs:
+    - forecasts/2020-07-26-CEID-Walk.csv
+  combine-2020-08-09:
+    cmd: fdt=2020-08-09 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-08-09-CEID-Walk.csv
+    - model-weights/2020-08-09-weights.csv
+    - no-drift/forecasts/2020-08-09-CEID-Walk.csv
+    outs:
+    - forecasts/2020-08-09-CEID-Walk.csv
+  combine-2020-08-16:
+    cmd: fdt=2020-08-16 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-08-16-CEID-Walk.csv
+    - model-weights/2020-08-16-weights.csv
+    - no-drift/forecasts/2020-08-16-CEID-Walk.csv
+    outs:
+    - forecasts/2020-08-16-CEID-Walk.csv
+  combine-2020-08-30:
+    cmd: fdt=2020-08-30 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-08-30-CEID-Walk.csv
+    - model-weights/2020-08-30-weights.csv
+    - no-drift/forecasts/2020-08-30-CEID-Walk.csv
+    outs:
+    - forecasts/2020-08-30-CEID-Walk.csv
+  combine-2020-08-23:
+    cmd: fdt=2020-08-23 ./combine-forecasts.R
+    deps:
+    - combine-forecasts.R
+    - drift/forecasts/2020-08-23-CEID-Walk.csv
+    - model-weights/2020-08-23-weights.csv
+    - no-drift/forecasts/2020-08-23-CEID-Walk.csv
+    outs:
+    - forecasts/2020-08-23-CEID-Walk.csv

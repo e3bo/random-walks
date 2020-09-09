@@ -11,4 +11,5 @@ dvc run \
     -d model-weights/$fdt-weights.csv \
     --force \
     -n combine-$fdt \
+    -o forecasts/$fdt-CEID-Walk.csv \
     fdt=$fdt ./combine-forecasts.R

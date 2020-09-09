@@ -46,3 +46,271 @@ stages:
     metrics:
     - metrics/2020-08-03-forecast-calc-time.json:
         cache: false
+  forecast-2020-08-09:
+    cmd: fdt=2020-08-09 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-08-09
+    - model.ini
+    outs:
+    - forecasts/2020-08-09-CEID-Walk.csv
+    metrics:
+    - metrics/2020-08-09-forecast-calc-time.json:
+        cache: false
+  forecast-2020-07-05:
+    cmd: fdt=2020-07-05 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-07-05
+    - model.ini
+    outs:
+    - forecasts/2020-07-05-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-05-forecast-calc-time.json:
+        cache: false
+  forecast-2020-07-12:
+    cmd: fdt=2020-07-12 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-07-12
+    - model.ini
+    outs:
+    - forecasts/2020-07-12-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-12-forecast-calc-time.json:
+        cache: false
+  forecast-2020-07-19:
+    cmd: fdt=2020-07-19 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-07-19
+    - model.ini
+    outs:
+    - forecasts/2020-07-19-CEID-Walk.csv
+    metrics:
+    - metrics/2020-07-19-forecast-calc-time.json:
+        cache: false
+  forecast-2020-08-16:
+    cmd: fdt=2020-08-16 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-08-16
+    - model.ini
+    outs:
+    - forecasts/2020-08-16-CEID-Walk.csv
+    metrics:
+    - metrics/2020-08-16-forecast-calc-time.json:
+        cache: false
+  forecast-2020-08-30:
+    cmd: fdt=2020-08-30 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-08-30
+    - model.ini
+    outs:
+    - forecasts/2020-08-30-CEID-Walk.csv
+    metrics:
+    - metrics/2020-08-30-forecast-calc-time.json:
+        cache: false
+  forecast-2020-08-23:
+    cmd: fdt=2020-08-23 Rscript ../forecast-package-covidhub-forecast.R
+    deps:
+    - ../covidhub-common.R
+    - ../forecast-package-covidhub-forecast.R
+    - ../hopkins/2020-08-23
+    - model.ini
+    outs:
+    - forecasts/2020-08-23-CEID-Walk.csv
+    metrics:
+    - metrics/2020-08-23-forecast-calc-time.json:
+        cache: false
+  score-2020-07-05:
+    cmd: ddt=2020-07-05 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-07-05
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-07-05-residuals.rds
+    plots:
+    - metrics/2020-07-05-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-07-05-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-07-05-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  score-2020-07-12:
+    cmd: ddt=2020-07-12 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-07-12
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-07-12-residuals.rds
+    plots:
+    - metrics/2020-07-12-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-07-12-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-07-12-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  score-2020-07-19:
+    cmd: ddt=2020-07-19 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-07-19
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-07-19-residuals.rds
+    plots:
+    - metrics/2020-07-19-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-07-19-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-07-19-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  score-2020-07-26:
+    cmd: ddt=2020-07-26 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-07-26
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-07-26-residuals.rds
+    plots:
+    - metrics/2020-07-26-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-07-26-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-07-26-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  score-2020-08-09:
+    cmd: ddt=2020-08-09 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-08-09
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-08-09-residuals.rds
+    plots:
+    - metrics/2020-08-09-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-08-09-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-08-09-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  score-2020-08-16:
+    cmd: ddt=2020-08-16 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-08-16
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-08-16-residuals.rds
+    plots:
+    - metrics/2020-08-16-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-08-16-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-08-16-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  score-2020-08-30:
+    cmd: ddt=2020-08-30 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-08-30
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-08-30-residuals.rds
+    plots:
+    - metrics/2020-08-30-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-08-30-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-08-30-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  score-2020-08-23:
+    cmd: ddt=2020-08-23 ../quantile-score.R
+    deps:
+    - ../covidhub-common.R
+    - ../hopkins/2020-08-23
+    - ../quantile-score.R
+    - forecasts
+    outs:
+    - metrics/2020-08-23-residuals.rds
+    plots:
+    - metrics/2020-08-23-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2020-08-23-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2020-08-23-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
