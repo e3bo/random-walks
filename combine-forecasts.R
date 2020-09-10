@@ -12,6 +12,7 @@ weights <- read_csv(
   col_types = cols(
     target_type = col_character(),
     loc_type = col_character(),
+    quantile = col_double(),
     weight = col_double(),
     model = col_character()
   )
@@ -31,7 +32,7 @@ fcsts <-
   mutate(loc_type = case_when(location == "US" ~ "national", 
                               nchar(location) == 2 ~ "state", 
                               TRUE ~ "county")) %>%
-  left_join(weights, by = c("target_type", "loc_type", "model")) %>%
+  left_join(weights, by = c("target_type", "loc_type", "model", "quantile")) %>%
   mutate(weight = ifelse(is.na(weight), 0, weight)) %>%
   group_by(forecast_date, target, target_end_date, location, type, quantile) %>%
   summarise(value = sum(value * weight), .groups = "drop") %>%

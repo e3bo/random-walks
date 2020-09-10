@@ -21,7 +21,7 @@ scores_weights <-
   
 weights <- 
   scores_weights %>% 
-  group_by(target_type, loc_type) %>% 
+  group_by(target_type, loc_type, quantile) %>% 
   count(best_model, .groups = "keep") %>%
   summarise(weight = n / sum(n), 
             model = best_model, .groups = "drop")
