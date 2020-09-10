@@ -13,7 +13,8 @@ names(scores) <-  model_dirs
 
 scores_weights <- 
   bind_rows(scores, .id = "model_id") %>%
-  filter(data_date - forecast_date < 30) %>% 
+  filter(data_date - forecast_date < 30) %>%
+  filter(str_detect(target, "^1 wk")) %>%
   group_by(forecast_date, target, target_type, location, quantile, loc_type) %>% 
   summarise(n_models = n(),
             best_model = model_id[which.min(pinball_loss)],
@@ -21,7 +22,7 @@ scores_weights <-
   
 weights <- 
   scores_weights %>% 
-  group_by(target_type, loc_type, quantile) %>% 
+  group_by(target_type, location, quantile) %>% 
   count(best_model, .groups = "keep") %>%
   summarise(weight = n / sum(n), 
             model = best_model, .groups = "drop")

@@ -66,6 +66,7 @@ gen_forecasts <- function(fdt, tdat, mname, odir, ...) {
 
   full <- tdat %>%
     filter(target_type %in% c("wk ahead inc death", "wk ahead inc case")) %>%
+    filter(nchar(location) != 5 | target_type == "wk ahead inc case") %>% # only case forecasts for counties 
     group_by(location, target_type) %>%
     arrange(target_end_date) %>%
     nest() %>%
