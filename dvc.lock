@@ -1238,3 +1238,63 @@ visualize-forecast-2020-12-14-and-data-2020-12-14:
     md5: 5d254a3bc3fd8640efd0a8561d7063cf
   - path: visuals/fdt2020-12-14-ddt2020-12-14-inc-death-forecasts.png
     md5: e00020bff90f14fdf793d7d4c9fe544c
+hopkins-2020-12-21:
+  cmd: fdt=2020-12-21 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+  outs:
+  - path: hopkins/2020-12-21
+    md5: 12524dd8fbc2e6a6721278dfbdbf5474.dir
+forecast-2020-12-21:
+  cmd: fdt=2020-12-21 Rscript forecast-package-covidhub-forecast.R
+  deps:
+  - path: covidhub-common.R
+    md5: 677d29b4725267adaea2e81288793f54
+  - path: forecast-package-covidhub-forecast.R
+    md5: 118aa6101c7b61769b7d812456ea80be
+  - path: hopkins/2020-12-21
+    md5: 12524dd8fbc2e6a6721278dfbdbf5474.dir
+  - path: model.ini
+    md5: 3fdf49b0ef1f5242fd059e6e11f64034
+  outs:
+  - path: forecasts/2020-12-21-CEID-Walk.csv
+    md5: ae9bb705e7dd199be9a7924ef0e64391
+  - path: metrics/2020-12-21-forecast-calc-time.json
+    md5: 7a6fa9d6f66a546b0c6377e94ae97142
+score-2020-12-21:
+  cmd: ddt=2020-12-21 ./quantile-score.R
+  deps:
+  - path: covidhub-common.R
+    md5: 677d29b4725267adaea2e81288793f54
+  - path: forecasts
+    md5: 9201f7e46f44f2b4fd89baf9bcc946cb.dir
+  - path: hopkins/2020-12-21
+    md5: 12524dd8fbc2e6a6721278dfbdbf5474.dir
+  - path: quantile-score.R
+    md5: 77eda0648caa45d816d5725ec07ae05b
+  outs:
+  - path: metrics/2020-12-21-residuals.rds
+    md5: dfb631a270ac12410144432248545cc5
+  - path: metrics/2020-12-21-score-by-loc-type-targ-type-forecast-date.csv
+    md5: 5194980b01f86bc93c8933494a5527a6
+  - path: metrics/2020-12-21-score-by-loc-type-targ-type.csv
+    md5: 3eee931a06d0869702e97ca200260329
+  - path: metrics/2020-12-21-score-by-loc-type.csv
+    md5: a5a0660e23183f7d5f86362981b20ba9
+visualize-forecast-2020-12-21-and-data-2020-12-21:
+  cmd: ddt=2020-12-21 fdt=2020-12-21 ./forecast-vis.R
+  deps:
+  - path: covidhub-common.R
+    md5: 677d29b4725267adaea2e81288793f54
+  - path: forecast-vis.R
+    md5: 0ae631494af9e58254c85498876fc0eb
+  - path: hopkins/2020-12-21
+    md5: 12524dd8fbc2e6a6721278dfbdbf5474.dir
+  outs:
+  - path: visuals/fdt2020-12-21-ddt2020-12-21-cum-death-forecasts.png
+    md5: 9f48dfb743b937a20c14248f4c20593a
+  - path: visuals/fdt2020-12-21-ddt2020-12-21-inc-case-forecasts.pdf
+    md5: 9d93095b9009660e62e969e6274492e8
+  - path: visuals/fdt2020-12-21-ddt2020-12-21-inc-death-forecasts.png
+    md5: 656ce321ebadadfa472211240e8c15f0
