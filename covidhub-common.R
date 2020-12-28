@@ -280,8 +280,12 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
   
   take_back_step <- lubridate::wday(fdt, label = TRUE) %in% c("Sun", "Mon")
   week0 <- lubridate::epiweek(fdt) - take_back_step
-  forecast_epiweeks <- week0 + wks_ahead
-
+  if (lubridate::year(fdt) == 2020){
+    max_epiweek <- 53
+  } else {
+    max_epiweek <- 52
+  }
+  forecast_epiweeks <- ((week0 + wks_ahead - 1) %% max_epiweek) + 1
   if(any(na.omit(out2$day_diff) > 7)){
     stop("Non-continuous series of weeks, unable to compute cumulative forecasts", 
          .call = FALSE)
