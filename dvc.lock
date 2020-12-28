@@ -1310,7 +1310,7 @@ forecast-2020-12-28:
   cmd: fdt=2020-12-28 Rscript forecast-package-covidhub-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: 677d29b4725267adaea2e81288793f54
+    md5: 8ba0ff9e255d4db1b591a0cc85c81cf9
   - path: forecast-package-covidhub-forecast.R
     md5: 118aa6101c7b61769b7d812456ea80be
   - path: hopkins/2020-12-28
@@ -1319,9 +1319,9 @@ forecast-2020-12-28:
     md5: 3fdf49b0ef1f5242fd059e6e11f64034
   outs:
   - path: forecasts/2020-12-28-CEID-Walk.csv
-    md5: 762878f800e74355c10b1293f73472f9
+    md5: 4ec98c6edb30099789caffbe89ef7205
   - path: metrics/2020-12-28-forecast-calc-time.json
-    md5: 648b43b3a24525d0fce06fe167b55cb8
+    md5: 24ba81fd6d2f8c40124deb8b04e018f5
 score-2020-12-28:
   cmd: ddt=2020-12-28 ./quantile-score.R
   deps:
@@ -1346,15 +1346,15 @@ visualize-forecast-2020-12-28-and-data-2020-12-28:
   cmd: ddt=2020-12-28 fdt=2020-12-28 ./forecast-vis.R
   deps:
   - path: covidhub-common.R
-    md5: 677d29b4725267adaea2e81288793f54
+    md5: 8ba0ff9e255d4db1b591a0cc85c81cf9
   - path: forecast-vis.R
     md5: 0ae631494af9e58254c85498876fc0eb
   - path: hopkins/2020-12-28
     md5: 41293815be64e72a622d73dc5e7e41a5.dir
   outs:
   - path: visuals/fdt2020-12-28-ddt2020-12-28-cum-death-forecasts.png
-    md5: 5557ed29ff7903b6fc4b88cc326111fe
+    md5: 1c5c9677729f2bcee10f2d3bba663529
   - path: visuals/fdt2020-12-28-ddt2020-12-28-inc-case-forecasts.pdf
-    md5: e6328f9249f61ed13ad52c0ca0bda1dd
+    md5: 36079dbeed28fc52b28ce29b828cb585
   - path: visuals/fdt2020-12-28-ddt2020-12-28-inc-death-forecasts.png
-    md5: 6f32136349606fe4d16dc4b0d6091a18
+    md5: d2fd6e0ef1efb480fbc781436ace649f
