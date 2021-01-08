@@ -279,9 +279,15 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
   out2$cum_deaths <- out2$cum_deaths + prior_deaths
   
   take_back_step <- lubridate::wday(fdt, label = TRUE) %in% c("Sun", "Mon")
-  week0 <- lubridate::epiweek(fdt) - take_back_step
-  forecast_epiweeks <- week0 + wks_ahead
-
+  fdt_yr <- lubridate::year(fdt)
+  fdt_wk <- lubridate::epiweek(fdt)
+  fdt_sun <- MMWRweek::MMWRweek2Date(fdt_yr, fdt_wk)
+  if (take_back_step){
+    week0_sun <- fdt_sun - 7
+  } else {
+    week0_sun <- fdt_sun
+  }
+  forecast_epiweeks <- (week0_sun + wks_ahead * 7) %>% lubridate::epiweek()
   if(any(na.omit(out2$day_diff) > 7)){
     stop("Non-continuous series of weeks, unable to compute cumulative forecasts", 
          .call = FALSE)
@@ -297,7 +303,7 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
                                 vars = c("inc death", "cum death", "inc case"))) %>%
     select(-data) %>%
     unnest(pred_df) %>%
-    mutate(target = paste(epiweek - week0, 
+    mutate(target = paste((target_end_date - (week0_sun + 6)) / lubridate::ddays(7), 
                           "wk ahead", target)) %>%
     add_column(location = loc) %>%
     mutate(quantile = round(quantile, digits = 3),

@@ -16,6 +16,7 @@ dvc run \
     -d forecast-vis.R \
     -d covidhub-common.R \
     -d hopkins/$ddt \
+    -d forecasts/$fdt-CEID-Walk.csv \
     -O visuals/fdt$fdt-ddt$ddt-inc-death-forecasts.png \
     -O visuals/fdt$fdt-ddt$ddt-cum-death-forecasts.png \
     -O visuals/fdt$fdt-ddt$ddt-inc-case-forecasts.pdf \
