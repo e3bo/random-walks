@@ -69,7 +69,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
         subversion
 
-RUN install2.r --skipinstalled --error cdcfluview \
+RUN install2.r --skipinstalled --error bbmle \
 padr \
 tictoc \
 verification

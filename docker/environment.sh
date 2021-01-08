@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-imagename=eamon/random-walks:2020-08-06
+imagename=eamon/sir-ekf:2021-01-08
 docker build -t $imagename . 
