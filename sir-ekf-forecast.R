@@ -15,6 +15,10 @@ nyc <- tdat %>% filter(location == 36) %>% filter(target_type == "wk ahead inc c
 nyc2 <- nyc %>% mutate(time = lubridate::decimal_date(target_end_date))
 case_data <- nyc2 %>% select(time, value) %>% rename(reports = value)
 
+forecast_dates <- max(nyc2$target_end_date) + lubridate::dweeks(1:4)
+forecast_times <- lubridate::decimal_date(forecast_dates)
+
+
 cov_data0 <- tibble(time = c(case_data$time, max(case_data$time) * 1.05))
 
 bspline_basis <- pomp::periodic.bspline.basis(
@@ -222,7 +226,8 @@ kfnll <-
            xhat0 = structure(c(20e6, 99.2, 99.2, 0), .Dim = c(4L, 1L), 
                              .Dimnames = list(c("S", "E", "I", "C"), NULL)),
            Phat0 = diag(c(1, 1, 1, 0)),
-           just_nll = TRUE) {
+           just_nll = TRUE,
+           fets = NULL) {
     
     pvec["beta_mu"] <- scaled_expit(logit_beta_mu, a_beta_mu, b_beta_mu)
     pvec["b1"] <- scaled_expit(logit_b1, a_bpar, b_bpar)
@@ -302,13 +307,29 @@ kfnll <-
     
     nll <- 0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi))
     if (!just_nll){
+      if (!is.null(fets)){
+        xhat_init <- xhat_kk[, T]
+        xhat_init["C"] <- 0
+        PNinit <- P_kk[,, T]
+        PNinit[, 4] <- PNinit[4, ] <- 0
+        XP <- iterate_f_and_P(xhat_init, PN = PNinit, pvec = pvec, covf = covf,
+                             time.steps = c(cdata$time[T], fets[1]))
+        pred_means <- H %*% XP$xhat 
+        pred_cov <- H %*% XP$PN %*% t(H)
+      } else {
+        pred_means <- pred_cov <- NULL
+      }
       list(nll = nll, xhat_kkmo = xhat_kkmo, xhat_kk = xhat_kk, 
            P_kkmo = P_kkmo, P_kk = P_kk, 
-           ytilde_k = ytilde_k, S = S)
+           ytilde_k = ytilde_k, S = S, pred_means = pred_means, 
+           pred_cov = pred_cov)
     } else {
       nll
     }
   }
+
+
+
 
 library(bbmle)
 
@@ -406,7 +427,8 @@ kfret <- with(as.list(coef(m0)),
                     logit_b6 = logit_b6,
                     logit_rho = logit_rho,
                     logit_iota = logit_iota,
-                    just_nll = FALSE))
+                    just_nll = FALSE,
+                    fet = forecast_times))
 
 par(mfrow = c(1, 1))
 test <- case_data$time > 1990
