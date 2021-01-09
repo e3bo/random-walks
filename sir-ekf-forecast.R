@@ -19,7 +19,7 @@ forecast_dates <- max(nyc2$target_end_date) + lubridate::dweeks(1:4)
 forecast_times <- lubridate::decimal_date(forecast_dates)
 
 
-cov_data0 <- tibble(time = c(case_data$time, max(case_data$time) * 1.05))
+cov_data0 <- tibble(time = case_data$time)
 
 bspline_basis <- pomp::periodic.bspline.basis(
   cov_data0$time,
@@ -82,7 +82,7 @@ PsystemSEIR <- function(pvec, covf,
 }
 
 genfun <- function(y) {
-  approxfun(cov_data$time, y)
+  approxfun(cov_data$time, y, rule = 2)
 }
 covf <- apply(cov_data, 2, genfun)
 
@@ -453,7 +453,7 @@ plot(case_data$time[test], kfret$xhat_kkmo["S",])
 points(case_data$time[test], kfret$xhat_kk["S",], col = 2, pch = 2)
 
 
-tgrid <- case_data$time
+tgrid <- c(case_data$time, forecast_times)
 ximat <- cbind(covf$xi1(tgrid),
                covf$xi2(tgrid),
                covf$xi3(tgrid),
@@ -468,6 +468,6 @@ bhat <- scaled_expit(coef(m0)[is_spline_par], a_bpar, b_bpar)
 seasgrid <- 1 + exp(ximat %*% bhat)
 beta_mu_hat <- scaled_expit(coef(m0)["logit_beta_mu"], a_beta_mu, b_beta_mu)
 R0grid <- beta_mu_hat * seasgrid / (365 / 5)
-plot(tgrid[test], R0grid[test])
-
+plot(tgrid, R0grid, log = "y")
+## R0 stays constant at last value in forecast, seems like a good starting point
 
