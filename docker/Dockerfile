@@ -70,12 +70,8 @@ RUN apt-get update && \
         subversion
 
 RUN install2.r --skipinstalled --error bbmle \
+deSolve \
 padr \
+pomp \
 tictoc \
 verification
-
-RUN installGithub.r -u FALSE robjhyndman/forecast@e530f6a12497d9e931b5160bec7c6083897d6413 
-RUN installGithub.r e3bo/epidatr@c086ce099 
-RUN installGithub.r cmu-delphi/covidcast/clients/covidcastR@066ce9c088d7a685875caebffb9a680208fa518e
-
-

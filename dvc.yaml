@@ -1,0 +1,7 @@
+stages:
+  hopkins-2020-10-12:
+    cmd: fdt=2020-10-12 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-10-12

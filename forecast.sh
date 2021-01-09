@@ -17,7 +17,7 @@ dvc run \
     -d covidhub-common.R \
     -d hopkins/$fdt \
     -M metrics/$fdt-forecast-calc-time.json \
-    -o forecasts/$fdt-CEID-Walk.csv \
+    -o forecasts/$fdt-CEID-SIR_EKF.csv \
     --force \
     -n forecast-$fdt \
-    fdt=$fdt Rscript forecast-package-covidhub-forecast.R
+    fdt=$fdt Rscript sir-ekf-forecast.R
