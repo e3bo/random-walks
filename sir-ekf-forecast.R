@@ -7,10 +7,8 @@ forecast_dates <- "2020-10-12"
 hopdir <- file.path("hopkins", forecast_dates)
 tdat <- load_hopkins(hopdir) 
 
-nyc <- tdat %>% filter(location == 36) %>% filter(target_type == "wk ahead inc case")
-
-
-
+nyc <- tdat %>% filter(location == 36) %>% 
+  filter(target_type == "wk ahead inc case")
 
 nyc2 <- nyc %>% mutate(time = lubridate::decimal_date(target_end_date))
 case_data <- nyc2 %>% select(time, value) %>% rename(reports = value)
@@ -220,7 +218,6 @@ kfnll <-
            logit_b4, 
            logit_b5,
            logit_b6,
-           logit_rho,
            logit_tau,
            logit_iota,
            xhat0 = structure(c(20e6, 99.2, 99.2, 0), .Dim = c(4L, 1L), 
@@ -236,7 +233,7 @@ kfnll <-
     pvec["b4"] <- scaled_expit(logit_b4, a_bpar, b_bpar)
     pvec["b5"] <- scaled_expit(logit_b5, a_bpar, b_bpar)
     pvec["b6"] <- scaled_expit(logit_b6, a_bpar, b_bpar)
-    pvec["rho"] <- scaled_expit(logit_rho, a_rho, b_rho)
+    pvec["rho"] <- 0.4 # scaled_expit(logit_rho, a_rho, b_rho)
     pvec["iota"] <- scaled_expit(logit_iota, a_iota, b_iota)
     xhat0["S", 1] <- 20e6
     xhat0["I", 1] <- scaled_expit(logit_I0, a_I0, b_I0)
@@ -348,11 +345,8 @@ b_I0 <- 100
 a_E0 <- 0
 b_E0 <- 200
 
-a_bpar <- -9
-b_bpar <- 9
-
-a_rho <- 0
-b_rho <- 1
+a_bpar <- -11
+b_bpar <- 11
 
 a_iota <- 0
 b_iota <- 300
@@ -379,13 +373,14 @@ Phat0 <- diag(c(1e4, 1e2, 1e2, 0))
 
 
 plot(case_data$reports)
-Rt <- case_data$reports[-1] / case_data$reports[nrow(case_data)]
+Rt <- case_data$reports[-1] / case_data$reports[-nrow(case_data)]
 
 lhs <- log(Rt / 0.4 - 1)
-rhs <- cov_data[-c(1, nrow(cov_data)), -1]
+rhs <- cov_data[-1, -1]
+
 rdata <- cbind(lhs, rhs)
 
-bm <- lm(lhs~0 + xi1 + xi2 + xi3 + xi4 + xi5 + xi6, data = rdata)
+bm <- lm(lhs~0 + xi1 + xi2 + xi3 + xi4 + xi5 + xi6, data = rdata %>% filter(is.finite(lhs)))
 
 
 
@@ -393,13 +388,12 @@ system.time(m0 <- mle2(minuslogl = kfnll,
                        start = list(logit_beta_mu = scaled_logit(22, a_beta_mu, b_beta_mu), 
                                     logit_I0 = scaled_logit(85, a_I0, b_I0),
                                     logit_E0 = scaled_logit(197, a_E0, b_E0),
-                                    logit_b1 = scaled_logit(7.8, a_bpar, b_bpar),
-                                    logit_b2 = scaled_logit(7.8, a_bpar, b_bpar),
-                                    logit_b3 = scaled_logit(-8.9, a_bpar, b_bpar),
-                                    logit_b4 = scaled_logit(2, a_bpar, b_bpar),
-                                    logit_b5 = scaled_logit(-1.5, a_bpar, b_bpar),
-                                    logit_b6 = scaled_logit(2.8, a_bpar, b_bpar),
-                                    logit_rho = scaled_logit(0.84, a_rho, b_rho),
+                                    logit_b1 = scaled_logit(10, a_bpar, b_bpar),
+                                    logit_b2 = scaled_logit(4.6, a_bpar, b_bpar),
+                                    logit_b3 = scaled_logit(-1.7, a_bpar, b_bpar),
+                                    logit_b4 = scaled_logit(0.99, a_bpar, b_bpar),
+                                    logit_b5 = scaled_logit(0.062, a_bpar, b_bpar),
+                                    logit_b6 = scaled_logit(0.87, a_bpar, b_bpar),
                                     logit_tau = scaled_logit(0.005, a_tau, b_tau),
                                     logit_iota = scaled_logit(0.6, a_iota, b_iota)),
                        method = "Nelder-Mead",
@@ -425,7 +419,6 @@ kfret <- with(as.list(coef(m0)),
                     logit_b4 = logit_b4,
                     logit_b5 = logit_b5,
                     logit_b6 = logit_b6,
-                    logit_rho = logit_rho,
                     logit_iota = logit_iota,
                     just_nll = FALSE,
                     fet = forecast_times))
@@ -435,7 +428,7 @@ test <- case_data$time > 1990
 qqnorm(kfret$ytilde_k[test]/ kfret$S[test]) # evalutate departure from normality
 abline(0, 1)
 
-
+rho_hat <- 0.4
 test <- case_data$time >= 2020.18
 par(mfrow = c(4, 1))
 plot(case_data$time[test], kfret$xhat_kkmo["C",] * rho_hat)
