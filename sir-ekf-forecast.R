@@ -1,9 +1,11 @@
 #!/usr/bin/env R
 
+tictoc::tic()
+
 library(tidyverse)
 source("covidhub-common.R")
 
-forecast_date <- "2020-10-12"
+forecast_date <- Sys.getenv("fdt")
 forecast_loc <- "36"
 hopdir <- file.path("hopkins", forecast_date)
 tdat <- load_hopkins(hopdir) 
@@ -486,6 +488,15 @@ fcst <- create_forecast_df(means = kfret$pred_means,
 fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-SIR_EKF.csv"))
 if(!dir.exists("forecasts")) dir.create("forecasts")
 write_csv(x = fcst, path = fcst_path)
+
+## Produce metrics
+time <- tictoc::toc()
+walltime <- list(wall = time$toc - time$tic)
+if(!dir.exists("metrics")) dir.create("metrics")
+mpath <- file.path("metrics", paste0(forecast_date, 
+                                     "-forecast-calc-time.json"))
+jsonlite::write_json(walltime, mpath, auto_unbox = TRUE)
+
 
 q("no")
 

@@ -3,6 +3,29 @@ hopkins-2020-10-12:
   deps:
   - path: pull-hopkins-ts-from-date.R
     md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
   outs:
   - path: hopkins/2020-10-12
     md5: 7461af20726cac0df8ae8c4de261608c.dir
+    size: 6162886
+    nfiles: 8
+forecast-2020-10-12:
+  cmd: fdt=2020-10-12 Rscript sir-ekf-forecast.R
+  deps:
+  - path: covidhub-common.R
+    md5: 8ba0ff9e255d4db1b591a0cc85c81cf9
+    size: 9534
+  - path: hopkins/2020-10-12
+    md5: 7461af20726cac0df8ae8c4de261608c.dir
+    size: 6162886
+    nfiles: 8
+  - path: sir-ekf-forecast.R
+    md5: 914ebcf5499993b0f452d26a83fc45dd
+    size: 18384
+  outs:
+  - path: forecasts/2020-10-12-CEID-SIR_EKF.csv
+    md5: f54076a7b51089d40273f6230f5a9e2f
+    size: 580
+  - path: metrics/2020-10-12-forecast-calc-time.json
+    md5: fa60fe52c80788941f938d58ae32745e
+    size: 17

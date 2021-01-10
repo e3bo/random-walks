@@ -12,8 +12,7 @@ dvc run \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
     
 dvc run \
-    -d forecast-package-covidhub-forecast.R \
-    -d model.ini \
+    -d sir-ekf-forecast.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
     -M metrics/$fdt-forecast-calc-time.json \

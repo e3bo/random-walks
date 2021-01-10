@@ -5,3 +5,14 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-10-12
+  forecast-2020-10-12:
+    cmd: fdt=2020-10-12 Rscript sir-ekf-forecast.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-10-12
+    - sir-ekf-forecast.R
+    outs:
+    - forecasts/2020-10-12-CEID-SIR_EKF.csv
+    metrics:
+    - metrics/2020-10-12-forecast-calc-time.json:
+        cache: false
