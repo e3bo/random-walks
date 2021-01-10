@@ -3,19 +3,19 @@
 library(tidyverse)
 source("covidhub-common.R")
 
-forecast_dates <- "2020-10-12"
-hopdir <- file.path("hopkins", forecast_dates)
+forecast_date <- "2020-10-12"
+forecast_loc <- "36"
+hopdir <- file.path("hopkins", forecast_date)
 tdat <- load_hopkins(hopdir) 
 
-nyc <- tdat %>% filter(location == 36) %>% 
+nyc <- tdat %>% filter(location == forecast_loc) %>% 
   filter(target_type == "wk ahead inc case")
 
 nyc2 <- nyc %>% mutate(time = lubridate::decimal_date(target_end_date))
 case_data <- nyc2 %>% select(time, value) %>% rename(reports = value)
 
-forecast_dates <- max(nyc2$target_end_date) + lubridate::dweeks(1:4)
-forecast_times <- lubridate::decimal_date(forecast_dates)
-
+target_end_dates <- max(nyc2$target_end_date) + lubridate::dweeks(1:4)
+target_end_times <- lubridate::decimal_date(target_end_dates)
 
 cov_data0 <- tibble(time = case_data$time)
 
@@ -82,7 +82,7 @@ PsystemSEIR <- function(pvec, covf,
 genfun <- function(y) {
   approxfun(cov_data$time, y, rule = 2)
 }
-covf <- apply(cov_data, 2, genfun)
+covf <- apply(cov_data[, -1], 2, genfun)
 
 pvec <-   params <- c(
   N = 20e6,
@@ -102,11 +102,11 @@ pvec <-   params <- c(
   tau = 0.001
 )
 
+init.vars <- c(lS=log(3e-2 * 20e6), lE=log(1.6e-4 * 20e6), 
+               lI=log(1.6e-4 * 20e6), C = 0, Pss = 1, Pse = 0, Psi = 0, Psc = 0, 
+               Pee = 1, Pei = 0, Pec = 0, Pii = 1, Pic = 0, Pcc = 1)
 
-init.vars <- c(lS=log(3e-2 * 20e6), lE=log(1.6e-4 * 20e6), lI=log(1.6e-4 * 20e6), C = 0,
-               Pss = 1, Pse = 0, Psi = 0, Psc = 0, Pee = 1, Pei = 0, Pec = 0, Pii = 1, Pic = 0, Pcc = 1)
-
-out <- PsystemSEIR(pvec = pvec, covf = covf, init.vars = init.vars, time.steps = case_data$time)
+#out <- PsystemSEIR(pvec = pvec, covf = covf, init.vars = init.vars, time.steps = case_data$time)
 
 iterate_f_and_P <- function(xhat, PN, pvec, covf, time.steps){
   P <- PN / pvec["N"]
@@ -137,6 +137,7 @@ P <- with(as.list(init.vars[-c(1:4)]),
                 c(Psi, Pei, Pii, Pic),
                 c(Psc, Pec, Pic, Pcc)))
 
+if (FALSE){ # useful only for debugging
 iterate_f_and_P(xhat = xhat, PN = P, pvec = pvec, covf = covf, 
                 time.steps = c(2020.1, 2020.1 + 1 / 52))
 
@@ -206,6 +207,8 @@ log_lik <- function(Sigma, resids){
 
 log_lik(S, ytilde_k)
 
+}
+
 kfnll <-
   function(cdata,
            pvec,
@@ -245,7 +248,7 @@ kfnll <-
     # Initialize
     z_1 <-  cdata$reports[1]
     H <- matrix(c(0, 0, 0, pvec["rho"]), ncol = 4)
-    R <- max(5, z[1] * pvec["tau"])
+    R <- max(5, z_1 * pvec["tau"])
     #R <- max(1, z[1] * (1 - pvec["rho"]))
     #R <- max(tau2, z_1 + z_1 ^ 2 /  pvec["tau"]) 
     
@@ -325,9 +328,6 @@ kfnll <-
     }
   }
 
-
-
-
 library(bbmle)
 
 scaled_expit <- function(y, a, b){
@@ -372,7 +372,7 @@ Phat0 <- diag(c(1e4, 1e2, 1e2, 0))
 ## Find reasonable initial values for transmission terms
 
 
-plot(case_data$reports)
+#plot(case_data$reports)
 Rt <- case_data$reports[-1] / case_data$reports[-nrow(case_data)]
 
 lhs <- log(Rt / 0.4 - 1)
@@ -380,9 +380,8 @@ rhs <- cov_data[-1, -1]
 
 rdata <- cbind(lhs, rhs)
 
-bm <- lm(lhs~0 + xi1 + xi2 + xi3 + xi4 + xi5 + xi6, data = rdata %>% filter(is.finite(lhs)))
-
-
+bm <- lm(lhs~0 + xi1 + xi2 + xi3 + xi4 + xi5 + xi6, data = rdata %>% 
+           filter(is.finite(lhs)))
 
 system.time(m0 <- mle2(minuslogl = kfnll, 
                        start = list(logit_beta_mu = scaled_logit(22, a_beta_mu, b_beta_mu), 
@@ -401,13 +400,6 @@ system.time(m0 <- mle2(minuslogl = kfnll,
                        control = list(reltol = 1e-4, trace = 1, maxit = 1000),
                        data = list(cdata = case_data[-c(1,2,3,4,5),], pvec = pvec2, Phat0 = Phat0)))
 
-scaled_expit(coef(m0)["logit_I0"], a_I0, b_I0)
-scaled_expit(coef(m0)["logit_E0"], a_E0, b_E0)
-(rho_hat <- scaled_expit(coef(m0)["logit_rho"], a_rho, b_rho))
-scaled_expit(coef(m0)["logit_iota"], a_iota, b_iota)
-scaled_expit(coef(m0)["logit_tau"], a_tau, b_tau)
-scaled_expit(coef(m0)["logit_tau2"], a_tau2, b_tau2)
-
 kfret <- with(as.list(coef(m0)), 
               kfnll(cdata = case_data[-seq(1,5),], pvec = pvec2, 
                     logit_beta_mu = logit_beta_mu, 
@@ -421,7 +413,88 @@ kfret <- with(as.list(coef(m0)),
                     logit_b6 = logit_b6,
                     logit_iota = logit_iota,
                     just_nll = FALSE,
-                    fet = forecast_times))
+                    fet = target_end_times))
+
+create_forecast_df <- function(means,
+                               vars,
+                               target_type = "cases",
+                               fdt = forecast_date,
+                               location) {
+  # takes in a vector of means and variance for the normal predicted 
+  # distribution of the next n weeks, and outputs a representation of 
+  # this forecast in the standard covidhub format
+  if (target_type == "cases") {
+    probs <- c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)
+    maxn <- 8
+    targ_string <- " wk ahead inc case"
+  } else{
+    stop("not implemented")
+    probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+    if (target_type == "hosps") {
+      maxn <- 131
+    } else{
+      maxn <- 20
+    }
+  }
+  n <- length(means)
+  stopifnot(length(vars) == n)
+  stopifnot(n <= maxn)
+  wk_ahead <- seq_len(n)
+  targets <- paste0(wk_ahead, targ_string)
+  dte <- lubridate::ymd(fdt)
+  fdt_wd <- lubridate::wday(dte) # 1 = Sunday, 7 = Sat.
+  fdt_sun <- lubridate::ymd(dte) - (fdt_wd - 1)
+  take_back_step <- fdt_wd <= 2
+  if (take_back_step) {
+    week0_sun <- fdt_sun - 7
+  } else {
+    week0_sun <- fdt_sun
+  }
+  t1 <- expand_grid(quantile = probs, h = wk_ahead) %>%
+    mutate(target = paste0(h, targ_string),
+           target_end_date = week0_sun + 6 + h * 7) %>%
+    add_column(
+      location = as.character(location),
+      forecast_date = fdt,
+      type = "quantile"
+    ) %>%
+    mutate(q1 = qnorm(
+      p = quantile,
+      mean = means[h],
+      sd = sqrt(vars[h])
+    ),
+    value = ifelse(q1 < 0, 0, q1)) %>%
+    mutate(value = format(value, digits = 4),
+           quantile = as.character(quantile))
+  t2 <- t1 %>% filter(quantile == "0.5") %>%
+    mutate(type = "point",
+           quantile = NA_character_)
+  bind_rows(t1, t2) %>% select(forecast_date,
+                               target,
+                               target_end_date,
+                               location,
+                               type,
+                               quantile,
+                               value)
+}
+
+
+fcst <- create_forecast_df(means = kfret$pred_means,
+                           vars = kfret$pred_cov,
+                           location = forecast_loc)
+
+fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-SIR_EKF.csv"))
+if(!dir.exists("forecasts")) dir.create("forecasts")
+write_csv(x = fcst, path = fcst_path)
+
+q("no")
+
+scaled_expit(coef(m0)["logit_I0"], a_I0, b_I0)
+scaled_expit(coef(m0)["logit_E0"], a_E0, b_E0)
+(rho_hat <- scaled_expit(coef(m0)["logit_rho"], a_rho, b_rho))
+scaled_expit(coef(m0)["logit_iota"], a_iota, b_iota)
+scaled_expit(coef(m0)["logit_tau"], a_tau, b_tau)
+scaled_expit(coef(m0)["logit_tau2"], a_tau2, b_tau2)
 
 par(mfrow = c(1, 1))
 test <- case_data$time > 1990
