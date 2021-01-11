@@ -85,13 +85,13 @@ gamma <- 365/9
 pvec <- params <- c(
   N = 20e6,
   beta_mu = 50,
-  beta_sd = 0.001,
-  b1 = 1 * gamma,
-  b2 = 3 * gamma,
+  beta_sd = 1,
+  b1 = 7 * gamma,
+  b2 = 1 * gamma,
   b3 = 1 * gamma,
   b4 = 1 * gamma,
   b5 = 1 * gamma,
-  b6 = 1 * gamma,
+  b6 = 1.1 * gamma,
   iota = 2,
   rho = 0.5,
   S_0 = 20e6, 
@@ -285,7 +285,7 @@ a_E0 <- 0
 b_E0 <- 200
 
 a_bpar <- 0
-b_bpar <- 4 * gamma
+b_bpar <- 10 * gamma
 
 a_iota <- 0
 b_iota <- 300
@@ -435,7 +435,7 @@ q("no")
 
 scaled_expit(coef(m0)["logit_I0"], a_I0, b_I0)
 scaled_expit(coef(m0)["logit_E0"], a_E0, b_E0)
-(rho_hat <- scaled_expit(coef(m0)["logit_rho"], a_rho, b_rho))
+#(rho_hat <- scaled_expit(coef(m0)["logit_rho"], a_rho, b_rho))
 scaled_expit(coef(m0)["logit_iota"], a_iota, b_iota)
 scaled_expit(coef(m0)["logit_tau"], a_tau, b_tau)
 scaled_expit(coef(m0)["logit_tau2"], a_tau2, b_tau2)
@@ -448,7 +448,7 @@ abline(0, 1)
 rho_hat <- 0.4
 test <- case_data$time >= 2020.18
 par(mfrow = c(4, 1))
-plot(case_data$time[test], kfret$xhat_kkmo["C",] * rho_hat)
+plot(case_data$time[test], kfret$xhat_kkmo["C",] * rho_hat, ylim = c(0, 1e5))
 points(case_data$time[test], kfret$xhat_kk["C",] * rho_hat, col = 2, pch = 2)
 lines(case_data$time[test], case_data$reports[test])
 plot(case_data$time[test], kfret$S, log = "y")
@@ -464,20 +464,14 @@ points(case_data$time[test], kfret$xhat_kk["S",], col = 2, pch = 2)
 
 
 tgrid <- c(case_data$time, target_end_times)
-ximat <- cbind(covf$xi1(tgrid),
-               covf$xi2(tgrid),
-               covf$xi3(tgrid),
-               covf$xi4(tgrid),
-               covf$xi5(tgrid),
-               covf$xi6(tgrid))
+
 
 matplot(tgrid, ximat)
 
 is_spline_par <- grepl("^logit_b[1-6]$", names(coef(m0)))
 bhat <- scaled_expit(coef(m0)[is_spline_par], a_bpar, b_bpar)
-seasgrid <- 1 + exp(ximat %*% bhat)
-beta_mu_hat <- scaled_expit(coef(m0)["logit_beta_mu"], a_beta_mu, b_beta_mu)
-R0grid <- beta_mu_hat * seasgrid / (365 / 9)
+R0hat <- bhat / gamma
+
 plot(tgrid, R0grid, log = "y")
 ## R0 stays constant at last value in forecast, seems like a good starting point
 
