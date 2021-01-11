@@ -5,7 +5,7 @@ tictoc::tic()
 library(tidyverse)
 source("covidhub-common.R")
 
-forecast_date <- Sys.getenv("fdt")
+forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
 forecast_loc <- "36"
 hopdir <- file.path("hopkins", forecast_date)
 tdat <- load_hopkins(hopdir) 
@@ -316,8 +316,19 @@ kfnll <-
         PNinit[, 4] <- PNinit[4, ] <- 0
         XP <- iterate_f_and_P(xhat_init, PN = PNinit, pvec = pvec, covf = covf,
                              time.steps = c(cdata$time[T], fets[1]))
-        pred_means <- H %*% XP$xhat 
-        pred_cov <- H %*% XP$PN %*% t(H)
+        pred_means <- pred_cov <- numeric(length(fets))
+        pred_means[1] <- H %*% XP$xhat 
+        pred_cov[1] <- H %*% XP$PN %*% t(H)
+        for(i in seq_along(fets[-1])){
+          xhat_init <- XP$xhat
+          xhat_init["C"] <- 0
+          PNinit <- XP$PN
+          PNinit[, 4] <- PNinit[4, ] <- 0
+          XP <- iterate_f_and_P(xhat_init, PN = PNinit, pvec = pvec, covf = covf,
+                                time.steps = c(fets[i], fets[i + 1]))
+          pred_means[i + 1] <- H %*% XP$xhat
+          pred_cov[i + 1] <- H %*% XP$PN %*% t(H)
+        }
       } else {
         pred_means <- pred_cov <- NULL
       }
@@ -479,7 +490,6 @@ create_forecast_df <- function(means,
                                quantile,
                                value)
 }
-
 
 fcst <- create_forecast_df(means = kfret$pred_means,
                            vars = kfret$pred_cov,
