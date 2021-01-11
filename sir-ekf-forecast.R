@@ -540,7 +540,7 @@ plot(case_data$time[test], kfret$xhat_kkmo["S",])
 points(case_data$time[test], kfret$xhat_kk["S",], col = 2, pch = 2)
 
 
-tgrid <- c(case_data$time, forecast_times)
+tgrid <- c(case_data$time, target_end_times)
 ximat <- cbind(covf$xi1(tgrid),
                covf$xi2(tgrid),
                covf$xi3(tgrid),
@@ -554,7 +554,7 @@ is_spline_par <- grepl("^logit_b[1-6]$", names(coef(m0)))
 bhat <- scaled_expit(coef(m0)[is_spline_par], a_bpar, b_bpar)
 seasgrid <- 1 + exp(ximat %*% bhat)
 beta_mu_hat <- scaled_expit(coef(m0)["logit_beta_mu"], a_beta_mu, b_beta_mu)
-R0grid <- beta_mu_hat * seasgrid / (365 / 5)
+R0grid <- beta_mu_hat * seasgrid / (365 / 9)
 plot(tgrid, R0grid, log = "y")
 ## R0 stays constant at last value in forecast, seems like a good starting point
 
