@@ -152,6 +152,7 @@ kfnll <-
                              .Dimnames = list(c("S", "E", "I", "C"), NULL)),
            Phat0 = diag(c(1, 1, 1, 0)),
            just_nll = TRUE,
+           nsim = 10,
            fets = NULL) {
     pvec["b1"] <- scaled_expit(logit_b1, a_bpar, b_bpar)
     pvec["b2"] <- scaled_expit(logit_b2, a_bpar, b_bpar)
@@ -260,37 +261,42 @@ kfnll <-
     nll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) - rwlik
     if (!just_nll) {
+      sim_means <- sim_cov <- matrix(NA, nrow = (length(fets)), ncol = nsim)
       if (!is.null(fets)) {
-        xhat_init <- xhat_kk[, T]
-        xhat_init["C"] <- 0
-        PNinit <- P_kk[, , T]
-        PNinit[, 4] <- PNinit[4,] <- 0
-        XP <- iterate_f_and_P(
-          xhat_init,
-          PN = PNinit,
-          pvec = pvec,
-          beta_t = bpars[T + 1],
-          time.steps = c(cdata$time[T], fets[1])
-        )
-        pred_means <- pred_cov <- numeric(length(fets))
-        pred_means[1] <- H %*% XP$xhat
-        pred_cov[1] <- H %*% XP$PN %*% t(H)
-        for (i in seq_along(fets[-1])) {
-          xhat_init <- XP$xhat
+        for(j in seq_len(nsim)){
+          bpars_fet <- bpars[T + 1] + cumsum(rnorm(n = length(fets), mean = 0, sd = pvec["beta_sd"]))
+          xhat_init <- xhat_kk[, T]
           xhat_init["C"] <- 0
-          PNinit <- XP$PN
+          PNinit <- P_kk[, , T]
           PNinit[, 4] <- PNinit[4,] <- 0
-          XP <-
-            iterate_f_and_P(
-              xhat_init,
-              PN = PNinit,
-              pvec = pvec,
-              beta_t = bpars[T + 1],
-              time.steps = c(fets[i], fets[i + 1])
-            )
-          pred_means[i + 1] <- H %*% XP$xhat
-          pred_cov[i + 1] <- H %*% XP$PN %*% t(H)
+          XP <- iterate_f_and_P(
+            xhat_init,
+           PN = PNinit,
+            pvec = pvec,
+            beta_t = bpars_fet[1],
+            time.steps = c(cdata$time[T], fets[1])
+          )
+          sim_means[1, j] <- H %*% XP$xhat
+          sim_cov[1, j] <- H %*% XP$PN %*% t(H)
+          for (i in seq_along(fets[-1])) {
+            xhat_init <- XP$xhat
+            xhat_init["C"] <- 0
+            PNinit <- XP$PN
+            PNinit[, 4] <- PNinit[4,] <- 0
+            XP <-
+              iterate_f_and_P(
+                xhat_init,
+                PN = PNinit,
+                pvec = pvec,
+                beta_t = bpars_fet[i + 1],
+                time.steps = c(fets[i], fets[i + 1])
+              )
+            sim_means[i + 1, j] <- H %*% XP$xhat
+            sim_cov[i + 1, j] <- H %*% XP$PN %*% t(H)
+          }
         }
+        pred_means <- rowMeans(sim_means)
+        pred_cov <- rowMeans(sim_cov)
       } else {
         pred_means <- pred_cov <- NULL
       }
@@ -340,7 +346,7 @@ a_tau2 <- 0
 b_tau2 <- 20
 
 a_beta_sd <- 0
-b_beta_sd <- 1
+b_beta_sd <- 10
 
 Phat0 <- diag(c(1e4, 1e2, 1e2, 0))
 
