@@ -86,7 +86,7 @@ pvec <- params <- c(
   N = 20e6,
   beta_mu = 50,
   beta_sd = 1,
-  b1 = 7 * gamma,
+  b1 = 1 * gamma,
   b2 = 1 * gamma,
   b3 = 1 * gamma,
   b4 = 1 * gamma,
@@ -95,8 +95,8 @@ pvec <- params <- c(
   iota = 2,
   rho = 0.5,
   S_0 = 20e6, 
-  E_0 = 10,
-  I_0 = 10,
+  E_0 = 26000,
+  I_0 = 13425,
   tau = 0.001
 )
 
@@ -127,6 +127,9 @@ iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
   PN_new <- P_new * pvec["N"]
   list(xhat = xhat_new, PN = PN_new)
 }
+
+
+iterate_f_and_P(c(S=20e6, E=26e3, I=13e3, C=0), PN = diag(nrow=4), pvec = pvec, beta_t = 44, time.steps = c(0, 1 / 52))
 
 kfnll <-
   function(cdata,
@@ -280,9 +283,9 @@ a_beta_mu <- 5
 b_beta_mu <- 1000
 
 a_I0 <- 0
-b_I0 <- 100
+b_I0 <- 3e4
 a_E0 <- 0
-b_E0 <- 200
+b_E0 <- 3e4
 
 a_bpar <- 0
 b_bpar <- 10 * gamma
@@ -291,7 +294,7 @@ a_iota <- 0
 b_iota <- 300
 
 a_tau <- 0.0001
-b_tau <- 2
+b_tau <- 1e3
 
 a_tau2 <- 0
 b_tau2 <- 20
@@ -306,7 +309,7 @@ Phat0 <- diag(c(1e4, 1e2, 1e2, 0))
 Rt <- case_data$reports[-1] / case_data$reports[-nrow(case_data)]
 
 kfret_sample <-  
-              kfnll(cdata = case_data[-seq(1,5),], pvec = pvec, 
+              kfnll(cdata = tail(case_data, n = 3), pvec = pvec, 
                     logit_E0 = scaled_logit(pvec["E_0"], a_E0, b_E0),
                     logit_I0 = scaled_logit(pvec["I_0"], a_I0, b_I0),
                     logit_b1 = scaled_logit(pvec["b1"], a_bpar, b_bpar),
@@ -324,20 +327,20 @@ system.time(m0 <- mle2(minuslogl = kfnll,
                                     logit_I0 = scaled_logit(85, a_I0, b_I0),
                                     logit_E0 = scaled_logit(197, a_E0, b_E0),
                                     logit_b1 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_b2 = scaled_logit(4, a_bpar, b_bpar),
+                                    logit_b2 = scaled_logit(1, a_bpar, b_bpar),
                                     logit_b3 = scaled_logit(1, a_bpar, b_bpar),
                                     logit_b4 = scaled_logit(1, a_bpar, b_bpar),
                                     logit_b5 = scaled_logit(1, a_bpar, b_bpar),
                                     logit_b6 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_tau = scaled_logit(0.005, a_tau, b_tau),
+                                    logit_tau = scaled_logit(100, a_tau, b_tau),
                                     logit_iota = scaled_logit(0.6, a_iota, b_iota)),
                        method = "Nelder-Mead",
                        skip.hessian = TRUE,
                        control = list(reltol = 1e-4, trace = 1, maxit = 1000),
-                       data = list(cdata = case_data[-c(1,2,3,4,5),], pvec = pvec2, Phat0 = Phat0)))
+                       data = list(cdata = tail(case_data, n=6), pvec = pvec, Phat0 = Phat0)))
 
 kfret <- with(as.list(coef(m0)), 
-              kfnll(cdata = case_data[-seq(1,5),], pvec = pvec2, 
+              kfnll(cdata = tail(case_data, n = 6), pvec = pvec, 
                     logit_beta_mu = logit_beta_mu, 
                     logit_E0 = logit_E0,
                     logit_I0 = logit_I0,
@@ -438,7 +441,7 @@ scaled_expit(coef(m0)["logit_E0"], a_E0, b_E0)
 #(rho_hat <- scaled_expit(coef(m0)["logit_rho"], a_rho, b_rho))
 scaled_expit(coef(m0)["logit_iota"], a_iota, b_iota)
 scaled_expit(coef(m0)["logit_tau"], a_tau, b_tau)
-scaled_expit(coef(m0)["logit_tau2"], a_tau2, b_tau2)
+#scaled_expit(coef(m0)["logit_tau2"], a_tau2, b_tau2)
 
 par(mfrow = c(1, 1))
 test <- case_data$time > 1990
