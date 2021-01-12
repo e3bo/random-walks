@@ -129,44 +129,43 @@ iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
 }
 
 
-iterate_f_and_P(c(S=20e6, E=26e3, I=13e3, C=0), PN = diag(nrow=4), pvec = pvec, beta_t = 44, time.steps = c(0, 1 / 52))
+iterate_f_and_P(c(S=20e6, E=26e3, I=13e3, C=0), PN = diag(nrow=4), pvec = pvec, 
+                beta_t = 44, time.steps = c(0, 1 / 52))
 
 kfnll <-
   function(cdata,
            pvec,
-           logit_beta_mu,
            logit_I0,
            logit_E0,
            logit_b1,
-           logit_b2,
-           logit_b3,
-           logit_b4, 
-           logit_b5,
-           logit_b6,
            logit_tau,
            logit_iota,
-           xhat0 = structure(c(20e6, 99.2, 99.2, 0), .Dim = c(4L, 1L), 
+           t0,
+           xhat0 = structure(c(20e6, 99.2, 99.2, 0),
+                             .Dim = c(4L, 1L),
                              .Dimnames = list(c("S", "E", "I", "C"), NULL)),
            Phat0 = diag(c(1, 1, 1, 0)),
            just_nll = TRUE,
            fets = NULL) {
-
     pvec["b1"] <- scaled_expit(logit_b1, a_bpar, b_bpar)
-    pvec["b2"] <- scaled_expit(logit_b2, a_bpar, b_bpar)
-    pvec["b3"] <- scaled_expit(logit_b3, a_bpar, b_bpar)
-    pvec["b4"] <- scaled_expit(logit_b4, a_bpar, b_bpar)
-    pvec["b5"] <- scaled_expit(logit_b5, a_bpar, b_bpar)
-    pvec["b6"] <- scaled_expit(logit_b6, a_bpar, b_bpar)
+    #pvec["b2"] <- scaled_expit(logit_b2, a_bpar, b_bpar)
+    #pvec["b3"] <- scaled_expit(logit_b3, a_bpar, b_bpar)
+    #pvec["b4"] <- scaled_expit(logit_b4, a_bpar, b_bpar)
+    #pvec["b5"] <- scaled_expit(logit_b5, a_bpar, b_bpar)
+    #pvec["b6"] <- scaled_expit(logit_b6, a_bpar, b_bpar)
     pvec["rho"] <- 0.4 # scaled_expit(logit_rho, a_rho, b_rho)
     pvec["iota"] <- scaled_expit(logit_iota, a_iota, b_iota)
     xhat0["S", 1] <- 20e6
     xhat0["I", 1] <- scaled_expit(logit_I0, a_I0, b_I0)
     xhat0["E", 1] <- scaled_expit(logit_E0, a_E0, b_E0)
     
-    obs_per_b <- ceiling(length(cdata$reports) / 6)
-    bpars <- c(pvec["b1"], pvec["b2"], pvec["b3"], pvec["b4"], pvec["b5"], pvec["b6"])
-    y <- rep(bpars, each = obs_per_b)
-    beta_fun <- approxfun(x = cdata$time, y[seq_along(cdata$reports)], rule = 2)
+    #obs_per_b <- ceiling(length(cdata$reports) / 6)
+    #bpars <- c(pvec["b1"], pvec["b2"], pvec["b3"], pvec["b4"], pvec["b5"], pvec["b6"])
+    #y <- rep(bpars, each = obs_per_b)
+    #beta_fun <- approxfun(x = cdata$time, y[seq_along(cdata$reports)], rule = 2)
+    x <- c(t0, cdata$time)
+    bpars <- rep(pvec["b1"], length(x))
+    beta_fun <- approxfun(x = x, y = bpars, rule = 2)
     
     #print(c("                                     ", pvec["beta_mu"], xhat0["S", 1] / b_S0, pvec["b2"]))
     
@@ -175,13 +174,17 @@ kfnll <-
     H <- matrix(c(0, 0, 0, pvec["rho"]), ncol = 4)
     R <- max(5, z_1 * pvec["tau"])
     #R <- max(1, z[1] * (1 - pvec["rho"]))
-    #R <- max(tau2, z_1 + z_1 ^ 2 /  pvec["tau"]) 
+    #R <- max(tau2, z_1 + z_1 ^ 2 /  pvec["tau"])
     
     
     # Predict
-    XP_1_0 <- iterate_f_and_P(xhat0[, 1], PN = Phat0, pvec = pvec, 
-                              beta_t = beta_fun(cdata$time[2]),
-                              time.steps = cdata$time[c(2, 3)])
+    XP_1_0 <- iterate_f_and_P(
+      xhat0[, 1],
+      PN = Phat0,
+      pvec = pvec,
+      beta_t = beta_fun(t0),
+      time.steps = c(t0, cdata$time[1])
+    )
     xhat_1_0 <- XP_1_0$xhat
     P_1_0 <- XP_1_0$PN
     # Update
@@ -211,60 +214,87 @@ kfnll <-
     ytilde_kk[, 1] <- z[1] - H %*% xhat_kk[, 1]
     ytilde_k[, 1] <- ytilde_1
     
-    for (i in seq(2, T)){
-      xhat_init <- xhat_kk[, i - 1]
-      xhat_init["C"] <- 0
-      PNinit <- P_kk[,,i - 1]
-      PNinit[, 4] <- PNinit[4, ] <- 0
-      XP <- iterate_f_and_P(xhat_init, PN = PNinit, pvec = pvec, 
-                            beta_t = beta_fun(cdata$time[i - 1]),
-                            time.steps = cdata$time[c(i - 1, i)])
-      xhat_kkmo[, i] <- XP$xhat
-      P_kkmo[, , i] <- XP$PN
-      R <- max(5, z[i - 1] * pvec["tau"])
-      #R <- max(1, z[i - 1] * pvec["rho"]))
-      #R <- max(tau2, xhat_kkmo["C", i] * pvec["rho"] + (xhat_kkmo["C", i] * pvec["rho"]) ^ 2 / pvec["tau"])
-      S[, i] <- H %*% P_kkmo[, , i] %*% t(H) + R
-      K[, i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, i])
-      ytilde_k[, i] <- z[i] - H %*% xhat_kkmo[, i, drop = FALSE]
-      xhat_kk[, i] <- xhat_kkmo[, i, drop = FALSE] + K[, i, drop = FALSE] %*% ytilde_k[, i, drop = FALSE]
-      xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
-      P_kk[, , i] <- (diag(4) - K[, i, drop = FALSE] %*% H) %*% P_kkmo[, , i]
-      ytilde_kk[i] <- z[i] - H %*% xhat_kk[, i, drop = FALSE]
+    if (T > 1) {
+      for (i in seq(2, T)) {
+        xhat_init <- xhat_kk[, i - 1]
+        xhat_init["C"] <- 0
+        PNinit <- P_kk[, , i - 1]
+        PNinit[, 4] <- PNinit[4,] <- 0
+        XP <- iterate_f_and_P(
+          xhat_init,
+          PN = PNinit,
+          pvec = pvec,
+          beta_t = beta_fun(cdata$time[i - 1]),
+          time.steps = cdata$time[c(i - 1, i)]
+        )
+        xhat_kkmo[, i] <- XP$xhat
+        P_kkmo[, , i] <- XP$PN
+        R <- z[i - 1] * pvec["tau"]
+        #R <- max(5, z[i - 1] * pvec["tau"])
+        #R <- max(1, z[i - 1] * pvec["rho"]))
+        #R <- max(tau2, xhat_kkmo["C", i] * pvec["rho"] + (xhat_kkmo["C", i] * pvec["rho"]) ^ 2 / pvec["tau"])
+        S[, i] <- H %*% P_kkmo[, , i] %*% t(H) + R
+        K[, i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, i])
+        ytilde_k[, i] <- z[i] - H %*% xhat_kkmo[, i, drop = FALSE]
+        xhat_kk[, i] <-
+          xhat_kkmo[, i, drop = FALSE] + K[, i, drop = FALSE] %*% ytilde_k[, i, drop = FALSE]
+        xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
+        P_kk[, , i] <-
+          (diag(4) - K[, i, drop = FALSE] %*% H) %*% P_kkmo[, , i]
+        ytilde_kk[i] <- z[i] - H %*% xhat_kk[, i, drop = FALSE]
+      }
     }
     
-    rwlik <- sum(dnorm(diff(bpars), sd = pvec["beta_sd"], log = TRUE))
-    nll <- 0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) - rwlik
-    if (!just_nll){
-      if (!is.null(fets)){
+    rwlik <-
+      sum(dnorm(diff(bpars), sd = pvec["beta_sd"], log = TRUE))
+    nll <-
+      0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) - rwlik
+    if (!just_nll) {
+      if (!is.null(fets)) {
         xhat_init <- xhat_kk[, T]
         xhat_init["C"] <- 0
-        PNinit <- P_kk[,, T]
-        PNinit[, 4] <- PNinit[4, ] <- 0
-        XP <- iterate_f_and_P(xhat_init, PN = PNinit, pvec = pvec, 
-                              beta_t = beta_fun(cdata$time[T]),
-                             time.steps = c(cdata$time[T], fets[1]))
+        PNinit <- P_kk[, , T]
+        PNinit[, 4] <- PNinit[4,] <- 0
+        XP <- iterate_f_and_P(
+          xhat_init,
+          PN = PNinit,
+          pvec = pvec,
+          beta_t = beta_fun(cdata$time[T]),
+          time.steps = c(cdata$time[T], fets[1])
+        )
         pred_means <- pred_cov <- numeric(length(fets))
-        pred_means[1] <- H %*% XP$xhat 
+        pred_means[1] <- H %*% XP$xhat
         pred_cov[1] <- H %*% XP$PN %*% t(H)
-        for(i in seq_along(fets[-1])){
+        for (i in seq_along(fets[-1])) {
           xhat_init <- XP$xhat
           xhat_init["C"] <- 0
           PNinit <- XP$PN
-          PNinit[, 4] <- PNinit[4, ] <- 0
-          XP <- iterate_f_and_P(xhat_init, PN = PNinit, pvec = pvec, 
-                                beta_t = beta_fun(fets[i]),
-                                time.steps = c(fets[i], fets[i + 1]))
+          PNinit[, 4] <- PNinit[4,] <- 0
+          XP <-
+            iterate_f_and_P(
+              xhat_init,
+              PN = PNinit,
+              pvec = pvec,
+              beta_t = beta_fun(fets[i]),
+              time.steps = c(fets[i], fets[i + 1])
+            )
           pred_means[i + 1] <- H %*% XP$xhat
           pred_cov[i + 1] <- H %*% XP$PN %*% t(H)
         }
       } else {
         pred_means <- pred_cov <- NULL
       }
-      list(nll = nll, xhat_kkmo = xhat_kkmo, xhat_kk = xhat_kk, 
-           P_kkmo = P_kkmo, P_kk = P_kk, 
-           ytilde_k = ytilde_k, S = S, pred_means = pred_means, 
-           pred_cov = pred_cov)
+      list(
+        nll = nll,
+        xhat_kkmo = xhat_kkmo,
+        xhat_kk = xhat_kk,
+        P_kkmo = P_kkmo,
+        P_kk = P_kk,
+        ytilde_k = ytilde_k,
+        S = S,
+        pred_means = pred_means,
+        pred_cov = pred_cov
+      )
     } else {
       nll
     }
@@ -294,7 +324,7 @@ a_iota <- 0
 b_iota <- 300
 
 a_tau <- 0.0001
-b_tau <- 1e3
+b_tau <- 1
 
 a_tau2 <- 0
 b_tau2 <- 20
@@ -323,36 +353,32 @@ kfret_sample <-
                     fet = target_end_times)
 
 system.time(m0 <- mle2(minuslogl = kfnll, 
-                       start = list(logit_beta_mu = scaled_logit(22, a_beta_mu, b_beta_mu), 
-                                    logit_I0 = scaled_logit(85, a_I0, b_I0),
+                       start = list(logit_I0 = scaled_logit(85, a_I0, b_I0),
                                     logit_E0 = scaled_logit(197, a_E0, b_E0),
                                     logit_b1 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_b2 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_b3 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_b4 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_b5 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_b6 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_tau = scaled_logit(100, a_tau, b_tau),
+                                    logit_tau = scaled_logit(0.1, a_tau, b_tau),
                                     logit_iota = scaled_logit(0.6, a_iota, b_iota)),
                        method = "Nelder-Mead",
                        skip.hessian = TRUE,
                        control = list(reltol = 1e-4, trace = 1, maxit = 1000),
-                       data = list(cdata = tail(case_data, n=6), pvec = pvec, Phat0 = Phat0)))
+                       data = list(cdata = tail(case_data, n=1), pvec = pvec, 
+                                   Phat0 = diag(c(1, 1, 1, 0)), t0 = 2020.754)))
 
-kfret <- with(as.list(coef(m0)), 
-              kfnll(cdata = tail(case_data, n = 6), pvec = pvec, 
-                    logit_beta_mu = logit_beta_mu, 
-                    logit_E0 = logit_E0,
-                    logit_I0 = logit_I0,
-                    logit_b1 = logit_b1,
-                    logit_b2 = logit_b2, 
-                    logit_b3 = logit_b3,
-                    logit_b4 = logit_b4,
-                    logit_b5 = logit_b5,
-                    logit_b6 = logit_b6,
-                    logit_iota = logit_iota,
-                    just_nll = FALSE,
-                    fet = target_end_times))
+kfret <- with(
+  as.list(coef(m0)),
+  kfnll(
+    cdata = tail(case_data, n = 1),
+    pvec = pvec,
+    logit_E0 = logit_E0,
+    logit_I0 = logit_I0,
+    logit_b1 = logit_b1,
+    logit_iota = logit_iota,
+    t0 = 2020.754,
+    just_nll = FALSE,
+    fet = target_end_times,
+    Phat0 = diag(c(1, 1, 1, 0))
+  )
+)
 
 create_forecast_df <- function(means,
                                vars,
