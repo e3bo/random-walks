@@ -313,9 +313,9 @@ a_beta_mu <- 5
 b_beta_mu <- 1000
 
 a_I0 <- 0
-b_I0 <- 3e4
+b_I0 <- 1e5
 a_E0 <- 0
-b_E0 <- 3e4
+b_E0 <- 1e5
 
 a_bpar <- 0
 b_bpar <- 10 * gamma
@@ -352,17 +352,31 @@ kfret_sample <-
                     just_nll = FALSE,
                     fet = target_end_times)
 
-system.time(m0 <- mle2(minuslogl = kfnll, 
-                       start = list(logit_I0 = scaled_logit(85, a_I0, b_I0),
-                                    logit_E0 = scaled_logit(197, a_E0, b_E0),
-                                    logit_b1 = scaled_logit(1, a_bpar, b_bpar),
-                                    logit_tau = scaled_logit(0.1, a_tau, b_tau),
-                                    logit_iota = scaled_logit(0.6, a_iota, b_iota)),
-                       method = "Nelder-Mead",
-                       skip.hessian = TRUE,
-                       control = list(reltol = 1e-4, trace = 1, maxit = 1000),
-                       data = list(cdata = tail(case_data, n=1), pvec = pvec, 
-                                   Phat0 = diag(c(1, 1, 1, 0)), t0 = 2020.754)))
+system.time(
+  m0 <- mle2(
+    minuslogl = kfnll,
+    start = list(
+      logit_I0 = scaled_logit(28000, a_I0, b_I0),
+      logit_E0 = scaled_logit(30000, a_E0, b_E0),
+      logit_b1 = scaled_logit(40, a_bpar, b_bpar),
+      logit_tau = scaled_logit(0.1, a_tau, b_tau),
+      logit_iota = scaled_logit(0.6, a_iota, b_iota)
+    ),
+    method = "Nelder-Mead",
+    skip.hessian = TRUE,
+    control = list(
+      reltol = 1e-4,
+      trace = 1,
+      maxit = 1000
+    ),
+    data = list(
+      cdata = tail(case_data, n = 1),
+      pvec = pvec,
+      Phat0 = diag(c(1, 1, 1, 0)),
+      t0 = 2020.754
+    )
+  )
+)
 
 kfret <- with(
   as.list(coef(m0)),
