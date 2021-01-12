@@ -138,6 +138,12 @@ kfnll <-
            logit_I0,
            logit_E0,
            logit_b1,
+           logit_b2,
+           logit_b3,
+           logit_b4,
+           logit_b5,
+           logit_b6,
+           logit_beta_sd,
            logit_tau,
            logit_iota,
            t0,
@@ -148,24 +154,28 @@ kfnll <-
            just_nll = TRUE,
            fets = NULL) {
     pvec["b1"] <- scaled_expit(logit_b1, a_bpar, b_bpar)
-    #pvec["b2"] <- scaled_expit(logit_b2, a_bpar, b_bpar)
-    #pvec["b3"] <- scaled_expit(logit_b3, a_bpar, b_bpar)
-    #pvec["b4"] <- scaled_expit(logit_b4, a_bpar, b_bpar)
-    #pvec["b5"] <- scaled_expit(logit_b5, a_bpar, b_bpar)
-    #pvec["b6"] <- scaled_expit(logit_b6, a_bpar, b_bpar)
+    pvec["b2"] <- scaled_expit(logit_b2, a_bpar, b_bpar)
+    pvec["b3"] <- scaled_expit(logit_b3, a_bpar, b_bpar)
+    pvec["b4"] <- scaled_expit(logit_b4, a_bpar, b_bpar)
+    pvec["b5"] <- scaled_expit(logit_b5, a_bpar, b_bpar)
+    pvec["b6"] <- scaled_expit(logit_b6, a_bpar, b_bpar)
+    pvec["beta_sd"] <- scaled_expit(logit_beta_sd, a_beta_sd, b_beta_sd)
     pvec["rho"] <- 0.4 # scaled_expit(logit_rho, a_rho, b_rho)
     pvec["iota"] <- scaled_expit(logit_iota, a_iota, b_iota)
     xhat0["S", 1] <- 20e6
     xhat0["I", 1] <- scaled_expit(logit_I0, a_I0, b_I0)
     xhat0["E", 1] <- scaled_expit(logit_E0, a_E0, b_E0)
-    
+
+    is_spline_par <- grepl("^b[0-9]+$", names(pvec))
+    bpars <- pvec[is_spline_par]
+    stopifnot(length(bpars) == nrow(cdata) + 1)
     #obs_per_b <- ceiling(length(cdata$reports) / 6)
     #bpars <- c(pvec["b1"], pvec["b2"], pvec["b3"], pvec["b4"], pvec["b5"], pvec["b6"])
     #y <- rep(bpars, each = obs_per_b)
     #beta_fun <- approxfun(x = cdata$time, y[seq_along(cdata$reports)], rule = 2)
-    x <- c(t0, cdata$time)
-    bpars <- rep(pvec["b1"], length(x))
-    beta_fun <- approxfun(x = x, y = bpars, rule = 2)
+    #x <- c(t0, cdata$time)
+    #bpars <- rep(pvec["b1"], length(x))
+    #beta_fun <- approxfun(x = x, y = bpars, rule = 2)
     
     #print(c("                                     ", pvec["beta_mu"], xhat0["S", 1] / b_S0, pvec["b2"]))
     
@@ -182,7 +192,7 @@ kfnll <-
       xhat0[, 1],
       PN = Phat0,
       pvec = pvec,
-      beta_t = beta_fun(t0),
+      beta_t = bpars[1],
       time.steps = c(t0, cdata$time[1])
     )
     xhat_1_0 <- XP_1_0$xhat
@@ -224,7 +234,7 @@ kfnll <-
           xhat_init,
           PN = PNinit,
           pvec = pvec,
-          beta_t = beta_fun(cdata$time[i - 1]),
+          beta_t = bpars[i + 1],
           time.steps = cdata$time[c(i - 1, i)]
         )
         xhat_kkmo[, i] <- XP$xhat
@@ -259,7 +269,7 @@ kfnll <-
           xhat_init,
           PN = PNinit,
           pvec = pvec,
-          beta_t = beta_fun(cdata$time[T]),
+          beta_t = bpars[T + 1],
           time.steps = c(cdata$time[T], fets[1])
         )
         pred_means <- pred_cov <- numeric(length(fets))
@@ -275,7 +285,7 @@ kfnll <-
               xhat_init,
               PN = PNinit,
               pvec = pvec,
-              beta_t = beta_fun(fets[i]),
+              beta_t = bpars[T + 1],
               time.steps = c(fets[i], fets[i + 1])
             )
           pred_means[i + 1] <- H %*% XP$xhat
@@ -329,6 +339,9 @@ b_tau <- 1
 a_tau2 <- 0
 b_tau2 <- 20
 
+a_beta_sd <- 0
+b_beta_sd <- 1
+
 Phat0 <- diag(c(1e4, 1e2, 1e2, 0))
 
 
@@ -352,7 +365,7 @@ kfret_sample <-
                     just_nll = FALSE,
                     fet = target_end_times)
 
-the_n <- 6
+the_n <- 5
 the_t0 <- rev(case_data$time)[the_n + 1]
 system.time(
   m0 <- mle2(
@@ -361,6 +374,12 @@ system.time(
       logit_I0 = scaled_logit(14000, a_I0, b_I0),
       logit_E0 = scaled_logit(16000, a_E0, b_E0),
       logit_b1 = scaled_logit(40, a_bpar, b_bpar),
+      logit_b2 = scaled_logit(40, a_bpar, b_bpar),
+      logit_b3 = scaled_logit(40, a_bpar, b_bpar),
+      logit_b4 = scaled_logit(40, a_bpar, b_bpar),
+      logit_b5 = scaled_logit(40, a_bpar, b_bpar),
+      logit_b6 = scaled_logit(40, a_bpar, b_bpar),
+      logit_beta_sd = scaled_logit(0.01, a_beta_sd, b_beta_sd),
       logit_tau = scaled_logit(0.1, a_tau, b_tau),
       logit_iota = scaled_logit(0.6, a_iota, b_iota)
     ),
@@ -369,7 +388,7 @@ system.time(
     control = list(
       reltol = 1e-4,
       trace = 1,
-      maxit = 1000
+      maxit = 2000
     ),
     data = list(
       cdata = tail(case_data, n = the_n),
@@ -388,6 +407,12 @@ kfret <- with(
     logit_E0 = logit_E0,
     logit_I0 = logit_I0,
     logit_b1 = logit_b1,
+    logit_b2 = logit_b2,
+    logit_b3 = logit_b3,
+    logit_b4 = logit_b4,
+    logit_b5 = logit_b5,
+    logit_b6 = logit_b6,
+    logit_beta_sd = logit_beta_sd,
     logit_iota = logit_iota,
     t0 = the_t0,
     just_nll = FALSE,
@@ -483,7 +508,14 @@ scaled_expit(coef(m0)["logit_E0"], a_E0, b_E0)
 #(rho_hat <- scaled_expit(coef(m0)["logit_rho"], a_rho, b_rho))
 scaled_expit(coef(m0)["logit_iota"], a_iota, b_iota)
 scaled_expit(coef(m0)["logit_tau"], a_tau, b_tau)
+scaled_expit(coef(m0)["logit_beta_sd"], a_beta_sd, b_beta_sd)
 #scaled_expit(coef(m0)["logit_tau2"], a_tau2, b_tau2)
+
+is_spline_par <- grepl("^logit_b[1-6]$", names(coef(m0)))
+bhat <- scaled_expit(coef(m0)[is_spline_par], a_bpar, b_bpar)
+R0hat <- bhat / gamma
+
+
 
 par(mfrow = c(1, 1))
 test <- case_data$time > 1990
