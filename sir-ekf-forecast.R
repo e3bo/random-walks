@@ -352,7 +352,7 @@ kfret_sample <-
                     just_nll = FALSE,
                     fet = target_end_times)
 
-the_n <- 2
+the_n <- 6
 the_t0 <- rev(case_data$time)[the_n + 1]
 system.time(
   m0 <- mle2(
