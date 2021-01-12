@@ -352,12 +352,14 @@ kfret_sample <-
                     just_nll = FALSE,
                     fet = target_end_times)
 
+the_n <- 2
+the_t0 <- rev(case_data$time)[the_n + 1]
 system.time(
   m0 <- mle2(
     minuslogl = kfnll,
     start = list(
-      logit_I0 = scaled_logit(28000, a_I0, b_I0),
-      logit_E0 = scaled_logit(30000, a_E0, b_E0),
+      logit_I0 = scaled_logit(14000, a_I0, b_I0),
+      logit_E0 = scaled_logit(16000, a_E0, b_E0),
       logit_b1 = scaled_logit(40, a_bpar, b_bpar),
       logit_tau = scaled_logit(0.1, a_tau, b_tau),
       logit_iota = scaled_logit(0.6, a_iota, b_iota)
@@ -370,10 +372,10 @@ system.time(
       maxit = 1000
     ),
     data = list(
-      cdata = tail(case_data, n = 1),
+      cdata = tail(case_data, n = the_n),
       pvec = pvec,
       Phat0 = diag(c(1, 1, 1, 0)),
-      t0 = 2020.754
+      t0 = the_t0
     )
   )
 )
@@ -381,13 +383,13 @@ system.time(
 kfret <- with(
   as.list(coef(m0)),
   kfnll(
-    cdata = tail(case_data, n = 1),
+    cdata = tail(case_data, n = the_n),
     pvec = pvec,
     logit_E0 = logit_E0,
     logit_I0 = logit_I0,
     logit_b1 = logit_b1,
     logit_iota = logit_iota,
-    t0 = 2020.754,
+    t0 = the_t0,
     just_nll = FALSE,
     fet = target_end_times,
     Phat0 = diag(c(1, 1, 1, 0))
