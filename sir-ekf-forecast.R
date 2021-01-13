@@ -414,12 +414,12 @@ system.time(
       logit_tau = scaled_logit(10, a_tau, b_tau),
       logit_iota = scaled_logit(0.6, a_iota, b_iota)
     ),
-    method = "Nelder-Mead",
+    method = "BFGS",
     skip.hessian = TRUE,
     control = list(
       reltol = 1e-4,
       trace = 1,
-      maxit = 4000
+      maxit = 35
     ),
     data = list(
       cdata = tail(case_data, n = the_n),
@@ -559,7 +559,7 @@ scaled_expit(coef(m0)["logit_tau"], a_tau, b_tau)
 scaled_expit(coef(m0)["logit_beta_sd"], a_beta_sd, b_beta_sd)
 #scaled_expit(coef(m0)["logit_tau2"], a_tau2, b_tau2)
 
-is_spline_par <- grepl("^logit_b[1-6]$", names(coef(m0)))
+is_spline_par <- grepl("^logit_b[0-9]+$", names(coef(m0)))
 bhat <- scaled_expit(coef(m0)[is_spline_par], a_bpar, b_bpar)
 R0hat <- bhat / gamma
 
