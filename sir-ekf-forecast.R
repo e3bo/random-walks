@@ -292,7 +292,7 @@ kfnll <-
                 time.steps = c(fets[i], fets[i + 1])
               )
             sim_means[i + 1, j] <- H %*% XP$xhat
-            sim_cov[i + 1, j] <- H %*% XP$PN %*% t(H)
+            sim_cov[i + 1, j] <- H %*% XP$PN %*% t(H) + sim_means[i + 1, j] * pvec["tau"]
           }
         }
         pred_means <- rowMeans(sim_means)
