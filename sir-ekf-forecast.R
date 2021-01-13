@@ -163,6 +163,7 @@ kfnll <-
     pvec["beta_sd"] <- scaled_expit(logit_beta_sd, a_beta_sd, b_beta_sd)
     pvec["rho"] <- 0.4 # scaled_expit(logit_rho, a_rho, b_rho)
     pvec["iota"] <- scaled_expit(logit_iota, a_iota, b_iota)
+    pvec["tau"] <- scaled_expit(logit_tau, a_tau, b_tau)
     xhat0["S", 1] <- 20e6
     xhat0["I", 1] <- scaled_expit(logit_I0, a_I0, b_I0)
     xhat0["E", 1] <- scaled_expit(logit_E0, a_E0, b_E0)
@@ -340,7 +341,7 @@ a_iota <- 0
 b_iota <- 300
 
 a_tau <- 0.0001
-b_tau <- 1
+b_tau <- 100
 
 a_tau2 <- 0
 b_tau2 <- 20
@@ -405,8 +406,10 @@ system.time(
   )
 )
 
+pars <- coef(m0)
+
 kfret <- with(
-  as.list(coef(m0)),
+  as.list(pars),
   kfnll(
     cdata = tail(case_data, n = the_n),
     pvec = pvec,
@@ -420,6 +423,7 @@ kfret <- with(
     logit_b6 = logit_b6,
     logit_beta_sd = logit_beta_sd,
     logit_iota = logit_iota,
+    logit_tau = logit_tau,
     t0 = the_t0,
     just_nll = FALSE,
     fet = target_end_times,
@@ -525,7 +529,7 @@ R0hat <- bhat / gamma
 
 par(mfrow = c(1, 1))
 test <- case_data$time > 1990
-qqnorm(kfret$ytilde_k[test]/ kfret$S[test]) # evalutate departure from normality
+qqnorm(kfret$ytilde_k / sqrt(kfret$S)) # evalutate departure from normality
 abline(0, 1)
 
 rho_hat <- 0.4
