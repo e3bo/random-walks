@@ -8,13 +8,14 @@ source("covidhub-common.R")
 forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
 forecast_loc <- "36"
 hopdir <- file.path("hopkins", forecast_date)
-tdat <- load_hopkins(hopdir) 
+tdat <- load_hopkins(hopdir, weekly = FALSE) 
 
-nyc <- tdat %>% filter(location == forecast_loc) %>% 
-  filter(target_type == "wk ahead inc case")
+nys <- tdat %>% filter(location == forecast_loc) %>% 
+  filter(target_type == "day ahead inc case")
 
-nyc2 <- nyc %>% mutate(time = lubridate::decimal_date(target_end_date))
-case_data <- nyc2 %>% select(time, value) %>% rename(reports = value)
+nys2 <- nys %>% mutate(time = lubridate::decimal_date(target_end_date))
+case_data <- nys2 %>% ungroup() %>% select(time, value) %>% 
+  rename(reports = value)
 
 target_end_dates <- max(nyc2$target_end_date) + lubridate::dweeks(1:4)
 target_end_times <- lubridate::decimal_date(target_end_dates)
