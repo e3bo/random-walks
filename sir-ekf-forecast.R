@@ -138,12 +138,26 @@ kfnll <-
            pvec,
            logit_I0,
            logit_E0,
+           logit_b0,
            logit_b1,
            logit_b2,
            logit_b3,
            logit_b4,
            logit_b5,
            logit_b6,
+           logit_b7,
+           logit_b8,
+           logit_b9,
+           logit_b10,
+           logit_b11,
+           logit_b12,
+           logit_b13,
+           logit_b14,
+           logit_b15,
+           logit_b16,
+           logit_b17,
+           logit_b18,
+           logit_b19,
            logit_beta_sd,
            logit_tau,
            logit_iota,
@@ -155,12 +169,29 @@ kfnll <-
            just_nll = TRUE,
            nsim = 10,
            fets = NULL) {
+    pvec["b0"] <- scaled_expit(logit_b0, a_bpar, b_bpar)   
     pvec["b1"] <- scaled_expit(logit_b1, a_bpar, b_bpar)
     pvec["b2"] <- scaled_expit(logit_b2, a_bpar, b_bpar)
     pvec["b3"] <- scaled_expit(logit_b3, a_bpar, b_bpar)
     pvec["b4"] <- scaled_expit(logit_b4, a_bpar, b_bpar)
     pvec["b5"] <- scaled_expit(logit_b5, a_bpar, b_bpar)
     pvec["b6"] <- scaled_expit(logit_b6, a_bpar, b_bpar)
+    pvec["b7"] <- scaled_expit(logit_b7, a_bpar, b_bpar)
+    pvec["b8"] <- scaled_expit(logit_b8, a_bpar, b_bpar)
+    pvec["b9"] <- scaled_expit(logit_b9, a_bpar, b_bpar)
+    pvec["b10"] <- scaled_expit(logit_b10, a_bpar, b_bpar)   
+    pvec["b11"] <- scaled_expit(logit_b11, a_bpar, b_bpar)
+    pvec["b12"] <- scaled_expit(logit_b12, a_bpar, b_bpar)
+    pvec["b13"] <- scaled_expit(logit_b13, a_bpar, b_bpar)
+    pvec["b14"] <- scaled_expit(logit_b14, a_bpar, b_bpar)
+    pvec["b15"] <- scaled_expit(logit_b15, a_bpar, b_bpar)
+    pvec["b16"] <- scaled_expit(logit_b16, a_bpar, b_bpar)
+    pvec["b17"] <- scaled_expit(logit_b17, a_bpar, b_bpar)
+    pvec["b18"] <- scaled_expit(logit_b18, a_bpar, b_bpar)
+    pvec["b19"] <- scaled_expit(logit_b19, a_bpar, b_bpar)
+    
+    
+    
     pvec["beta_sd"] <- scaled_expit(logit_beta_sd, a_beta_sd, b_beta_sd)
     pvec["rho"] <- 0.4 # scaled_expit(logit_rho, a_rho, b_rho)
     pvec["iota"] <- scaled_expit(logit_iota, a_iota, b_iota)
@@ -171,6 +202,7 @@ kfnll <-
 
     is_spline_par <- grepl("^b[0-9]+$", names(pvec))
     bpars <- pvec[is_spline_par]
+    bpars <- bpars[order(names(bpars))]
     stopifnot(length(bpars) == nrow(cdata) + 1)
     #obs_per_b <- ceiling(length(cdata$reports) / 6)
     #bpars <- c(pvec["b1"], pvec["b2"], pvec["b3"], pvec["b4"], pvec["b5"], pvec["b6"])
@@ -350,30 +382,7 @@ b_tau2 <- 20
 a_beta_sd <- 0
 b_beta_sd <- 10
 
-Phat0 <- diag(c(1e4, 1e2, 1e2, 0))
-
-
-## Find reasonable initial values for transmission terms
-
-
-#plot(case_data$reports)
-Rt <- case_data$reports[-1] / case_data$reports[-nrow(case_data)]
-
-kfret_sample <-  
-              kfnll(cdata = tail(case_data, n = 3), pvec = pvec, 
-                    logit_E0 = scaled_logit(pvec["E_0"], a_E0, b_E0),
-                    logit_I0 = scaled_logit(pvec["I_0"], a_I0, b_I0),
-                    logit_b1 = scaled_logit(pvec["b1"], a_bpar, b_bpar),
-                    logit_b2 = scaled_logit(pvec["b2"], a_bpar, b_bpar), 
-                    logit_b3 = scaled_logit(pvec["b3"], a_bpar, b_bpar),
-                    logit_b4 = scaled_logit(pvec["b4"], a_bpar, b_bpar),
-                    logit_b5 = scaled_logit(pvec["b5"], a_bpar, b_bpar),
-                    logit_b6 = scaled_logit(pvec["b6"], a_bpar, b_bpar),
-                    logit_iota = scaled_logit(pvec["iota"], a_iota, b_iota),
-                    just_nll = FALSE,
-                    fet = target_end_times)
-
-the_n <- 5
+the_n <- 19
 the_t0 <- rev(case_data$time)[the_n + 1]
 system.time(
   m0 <- mle2(
@@ -381,12 +390,26 @@ system.time(
     start = list(
       logit_I0 = scaled_logit(14000, a_I0, b_I0),
       logit_E0 = scaled_logit(16000, a_E0, b_E0),
+      logit_b0 = scaled_logit(42, a_bpar, b_bpar),
       logit_b1 = scaled_logit(42, a_bpar, b_bpar),
       logit_b2 = scaled_logit(42, a_bpar, b_bpar),
       logit_b3 = scaled_logit(42, a_bpar, b_bpar),
       logit_b4 = scaled_logit(42, a_bpar, b_bpar),
       logit_b5 = scaled_logit(42, a_bpar, b_bpar),
       logit_b6 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b7 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b8 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b9 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b10 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b11 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b12 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b13 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b14 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b15 = scaled_logit(42, a_bpar, b_bpar),     
+      logit_b16 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b17 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b18 = scaled_logit(42, a_bpar, b_bpar),
+      logit_b19 = scaled_logit(42, a_bpar, b_bpar),
       logit_beta_sd = scaled_logit(1, a_beta_sd, b_beta_sd),
       logit_tau = scaled_logit(10, a_tau, b_tau),
       logit_iota = scaled_logit(0.6, a_iota, b_iota)
@@ -396,7 +419,7 @@ system.time(
     control = list(
       reltol = 1e-4,
       trace = 1,
-      maxit = 2000
+      maxit = 4000
     ),
     data = list(
       cdata = tail(case_data, n = the_n),
@@ -416,12 +439,26 @@ kfret <- with(
     pvec = pvec,
     logit_E0 = logit_E0,
     logit_I0 = logit_I0,
+    logit_b0 = logit_b0,
     logit_b1 = logit_b1,
     logit_b2 = logit_b2,
     logit_b3 = logit_b3,
     logit_b4 = logit_b4,
     logit_b5 = logit_b5,
     logit_b6 = logit_b6,
+    logit_b7 = logit_b7,
+    logit_b8 = logit_b8,
+    logit_b9 = logit_b9,
+    logit_b10 = logit_b10,
+    logit_b11 = logit_b11,
+    logit_b12 = logit_b12,
+    logit_b13 = logit_b13,
+    logit_b14 = logit_b14,
+    logit_b15 = logit_b15,
+    logit_b16 = logit_b16,
+    logit_b17 = logit_b17,
+    logit_b18 = logit_b18,
+    logit_b19 = logit_b19,
     logit_beta_sd = logit_beta_sd,
     logit_iota = logit_iota,
     logit_tau = logit_tau,
