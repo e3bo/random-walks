@@ -61,14 +61,22 @@ WY,56,Wyoming"
   )
 covidhub_locations <- c("District of Columbia", state.name, "All")
 
-process_hopkins <- function(path){
+process_hopkins <- function(path, weekly = TRUE){
   is_deaths <- str_detect(path, "deaths_US.csv$")
   if (is_deaths){
     targ_suffix <- " death"
-    targ_pattern <- "^wk ahead inc|^wk ahead cum"
+    if (weekly){
+      targ_pattern <- "^wk ahead inc|^wk ahead cum"
+    } else {
+      targ_pattern <- "^day ahead inc|^day ahead cum"
+    }
   } else {
     targ_suffix <- " case"
-    targ_pattern <- "^wk ahead inc"
+    if (weekly){
+      targ_pattern <- "^wk ahead inc"
+    } else {
+      targ_pattern <- "^day ahead inc"
+    }
   }
 
   ## construct a col spec to read in only the state and date columns
@@ -110,6 +118,7 @@ process_hopkins <- function(path){
     group_by(location) %>% 
     mutate(`day ahead inc`= c(NA, diff(`day ahead cum`)))    
   
+  if(weekly){
   hpd2 <- 
     hpd %>% mutate(week = lubridate::epiweek(target_end_date)) %>% 
     group_by(location, week) %>% 
@@ -120,6 +129,10 @@ process_hopkins <- function(path){
               n = n(), .groups = "drop") %>% 
     filter(n == 7) %>%
     select(-n, -week)
+  } else {
+    hpd2 <- hpd %>% select(location, `day ahead inc`, `day ahead cum`, 
+                           target_end_date)
+  }
   
   hpd3 <- 
     hpd2 %>% pivot_longer(-c(target_end_date, location), 
@@ -132,14 +145,14 @@ process_hopkins <- function(path){
   hpd3 
 }
 
-load_hopkins <- function(loc) {
+load_hopkins <- function(loc, weekly = TRUE) {
   # load and clean data
   hpp <- dir(loc, full.names = TRUE)
   hpd <- str_subset(hpp, "time_series_covid19_deaths_US.csv$")
   hpc <- str_subset(hpp, "time_series_covid19_confirmed_US.csv$")
   
-  ddat <- process_hopkins(hpd)
-  cdat <- process_hopkins(hpc)
+  ddat <- process_hopkins(hpd, weekly = weekly)
+  cdat <- process_hopkins(hpc, weekly = weekly)
   bind_rows(ddat, cdat)
 }
 
