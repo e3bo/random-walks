@@ -306,7 +306,7 @@ ans <- optim(
   method = "L-BFGS-B",
   lower = pvar_df$lower,
   upper = pvar_df$upper,
-  control = list(trace = 1, maxit = 200)
+  control = list(trace = 1, maxit = 300)
 )
 tictoc::toc()
 
