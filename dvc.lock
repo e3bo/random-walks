@@ -20,15 +20,15 @@ forecast-2020-10-12:
     size: 6162886
     nfiles: 8
   - path: sir-kf-forecast.R
-    md5: 44fb8d7f0eb7dff93506f6c4d9791ca0
-    size: 11060
+    md5: e1427ca4e7e2e4b3155b9bec653474a4
+    size: 11062
   outs:
   - path: forecasts/2020-10-12-CEID-SIR_KF.csv
-    md5: df246e1c91fa8cb4ccbc30a9e5943ea5
+    md5: 736899fd0814dc70cb08f50c232f02ed
     size: 2090
   - path: metrics/2020-10-12-forecast-calc-time.json
-    md5: 771709fa067a27a0383415eeef7be5ab
-    size: 15
+    md5: d6083ac5290c98532206aa4141166fb0
+    size: 17
 hopkins-2021-01-11:
   cmd: fdt=2021-01-11 ./pull-hopkins-ts-from-date.R
   deps:
@@ -47,9 +47,9 @@ score-2021-01-11:
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
     size: 9912
   - path: forecasts
-    md5: 6cef6efcdbe396191ab27435bdceec6b.dir
-    size: 4244
-    nfiles: 2
+    md5: 60cfc5be503a470cf583eefdbac3ac87.dir
+    size: 2090
+    nfiles: 1
   - path: hopkins/2021-01-11
     md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
     size: 8678408
@@ -59,14 +59,14 @@ score-2021-01-11:
     size: 2716
   outs:
   - path: metrics/2021-01-11-residuals.rds
-    md5: 5b7de7cb88b9555f4362a13f3a681e2f
-    size: 878
+    md5: 0785812f3f59b19707b8c8c6cd1d1608
+    size: 883
   - path: metrics/2021-01-11-score-by-loc-type-targ-type-forecast-date.csv
-    md5: 28e2de726417a268efb6739e48cf3698
+    md5: 02910796488b85fc5669f5d469ce5761
     size: 96
   - path: metrics/2021-01-11-score-by-loc-type-targ-type.csv
-    md5: d9a64a43710d113adc9cd7c52928def0
+    md5: 65ef7cfc42fe812132fc0b00f0e860a6
     size: 71
   - path: metrics/2021-01-11-score-by-loc-type.csv
-    md5: e4053abd7e4b4c69c796dbca43e4b87a
+    md5: 75c8c03bdd21a431b03c8aa178584a4f
     size: 41
