@@ -79,7 +79,9 @@ nys <- tdat %>% filter(location == forecast_loc) %>%
   filter(target_type == "day ahead inc case")
 
 nys2 <- nys %>% mutate(time = lubridate::decimal_date(target_end_date))
-case_data <- nys2 %>% ungroup() %>% select(time, value) %>% 
+case_data <- nys2 %>% ungroup() %>% 
+  mutate(wday = lubridate::wday(target_end_date)) %>%
+  select(time, wday, value) %>% 
   rename(reports = value)
 
 target_end_dates <- max(nys2$target_end_date) + lubridate::dweeks(1:4)
@@ -138,6 +140,11 @@ kfnll <-
     bpars <- tmp[order(names(tmp))]
     stopifnot(length(bpars) == nrow(cdata) + 1)
     
+    is_wday_par <- grepl("rho[1-7]")
+    tmp <- p[is_wday_par]
+    wpars <- tmp[order(names(tmp))]
+    stopifnot(length(wpars) == 7)
+    
     xhat0 = c(p[c("S_0", "E_0", "I_0")], 0)
     names(xhat0) <- c("S", "E", "I", "C")
     
@@ -145,12 +152,16 @@ kfnll <-
     stopifnot(T > 0)
     z <- cdata$reports
     times <- cdata$time
+    wday <- cdata$wday
     
     ytilde_kk <- ytilde_k <- S <- array(NA_real_, dim = c(1, T))
     K <- xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(4, T))
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(4, 4, T))
-    H <- matrix(c(0, 0, 0, p["rho"]), ncol = 4)
+    Hfun <- function(w, par = p){
+      name <- paste0("rho", w)
+      matrix(c(0, 0, 0, par[name]), ncol = 4)
+    }
     for (i in seq(1, T)) {
       if (i == 1) {
         xhat_init <- xhat0
@@ -165,7 +176,7 @@ kfnll <-
         R <- max(5, z[i - 1] * p["tau"])
       }
       xhat_init["C"] <- 0
-      
+      H <- Hfun(wday[i])
       XP <- iterate_f_and_P(
         xhat_init,
         PN = PNinit,
@@ -255,7 +266,7 @@ kfnll <-
     }
   }
 
-the_n <- 40
+the_n <- 80
 the_t0 <- rev(case_data$time)[the_n + 1]
 gamma <- 365/9
 
@@ -290,7 +301,7 @@ ans <- optim(
   method = "L-BFGS-B",
   lower = pvar_df$lower,
   upper = pvar_df$upper,
-  control = list(trace = 1, maxit = 1000)
+  control = list(trace = 1, maxit = 2000)
 )
 tictoc::toc()
 
@@ -328,9 +339,9 @@ abline(0, 1)
 
 par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = the_n)
-plot(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho"], xlab = "Time", ylab = "Cases", type = "l")
+plot(tgrid, tail(case_data$reports, n = the_n), xlab = "Time", ylab = "Cases")
+lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho"])
 lines(tgrid, kfret$xhat_kk["C",] * pfixed["rho"], col = 2)
-points(tgrid, tail(case_data$reports, n = the_n))
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
