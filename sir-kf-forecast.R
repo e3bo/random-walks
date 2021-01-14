@@ -290,7 +290,7 @@ ans <- optim(
   method = "L-BFGS-B",
   lower = pvar_df$lower,
   upper = pvar_df$upper,
-  control = list(trace = 1, maxit = 10)
+  control = list(trace = 1, maxit = 1000)
 )
 tictoc::toc()
 
@@ -336,7 +336,11 @@ plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
 plot(tgrid, kfret$ytilde_k / sqrt(kfret$S), xlab = "Time", ylab = "Standardized residual")
 
-par(mfrow = c(2, 1))
+par(mfrow = c(3, 1))
+
+plot(tgrid, kfret$xhat_kkmo["E",], xlab = "Time", ylab = "Predicted exposed")
+points(tgrid, kfret$xhat_kk["E", ], xlab = "Time", col = 2)
+
 plot(tgrid, kfret$xhat_kkmo["I",], xlab = "Time", ylab = "Predicted infected")
 points(tgrid, kfret$xhat_kk["I", ], xlab = "Time", col = 2)
 
