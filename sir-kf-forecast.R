@@ -140,7 +140,7 @@ kfnll <-
     bpars <- tmp[order(names(tmp))]
     stopifnot(length(bpars) == nrow(cdata) + 1)
     
-    is_wday_par <- grepl("rho[1-7]")
+    is_wday_par <- grepl("rho[1-7]", names(p))
     tmp <- p[is_wday_par]
     wpars <- tmp[order(names(tmp))]
     stopifnot(length(wpars) == 7)
@@ -275,8 +275,13 @@ pvar_df <- tribble(
   "beta_sd",  1, 0.01, 10,
   "E_0", 1e4, 10, 1e5,
   "I_0", 1e4, 10, 1e5,
-  "tau", 1e-2, 1e-4, 1e2,
-) %>% bind_rows(tibble(par = paste0("b", seq_len(the_n + 1)),
+  "tau", 1e-2, 1e-4, 1e2
+) %>% 
+  bind_rows(tibble(par = paste0("rho", seq(2, 7)),
+            init = 0.4,
+            lower = 0,
+            upper = 1)) %>%
+  bind_rows(tibble(par = paste0("b", seq_len(the_n + 1)),
                 init = gamma,
                 lower = 0.1 * gamma,
                 upper = 4 * gamma))
@@ -287,7 +292,7 @@ names(pvar) <- pvar_df$par
 pfixed <- c(
   N = 20e6,
   S_0 = 19e6,
-  rho = 0.4,
+  rho1 = 0.4,
   iota = 2
 )
 
@@ -301,7 +306,7 @@ ans <- optim(
   method = "L-BFGS-B",
   lower = pvar_df$lower,
   upper = pvar_df$upper,
-  control = list(trace = 1, maxit = 2000)
+  control = list(trace = 1, maxit = 2)
 )
 tictoc::toc()
 

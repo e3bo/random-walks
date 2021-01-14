@@ -20,12 +20,73 @@ forecast-2020-10-12:
     size: 6162886
     nfiles: 8
   - path: sir-kf-forecast.R
-    md5: c75e1afc4a8728a38c17f33a09976467
-    size: 10483
+    md5: 44fb8d7f0eb7dff93506f6c4d9791ca0
+    size: 11060
   outs:
   - path: forecasts/2020-10-12-CEID-SIR_KF.csv
-    md5: 98c4ad533a49796f195666c02263a2e3
+    md5: df246e1c91fa8cb4ccbc30a9e5943ea5
     size: 2090
   - path: metrics/2020-10-12-forecast-calc-time.json
-    md5: 4ebb830939396568cc38e5e4708564bb
+    md5: 771709fa067a27a0383415eeef7be5ab
+    size: 15
+hopkins-2021-01-11:
+  cmd: fdt=2021-01-11 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
+  outs:
+  - path: hopkins/2021-01-11
+    md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
+    size: 8678408
+    nfiles: 8
+forecast-2021-01-11:
+  cmd: fdt=2021-01-11 Rscript sir-kf-forecast.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2021-01-11
+    md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
+    size: 8678408
+    nfiles: 8
+  - path: sir-kf-forecast.R
+    md5: 44fb8d7f0eb7dff93506f6c4d9791ca0
+    size: 11060
+  outs:
+  - path: forecasts/2021-01-11-CEID-SIR_KF.csv
+    md5: c3e5d7a4c3d275b0e82f017390c87a8a
+    size: 2154
+  - path: metrics/2021-01-11-forecast-calc-time.json
+    md5: ea4ae5d2d0ab837eae4303e8c245e256
     size: 16
+score-2021-01-11:
+  cmd: ddt=2021-01-11 ./quantile-score.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: forecasts
+    md5: 6cef6efcdbe396191ab27435bdceec6b.dir
+    size: 4244
+    nfiles: 2
+  - path: hopkins/2021-01-11
+    md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
+    size: 8678408
+    nfiles: 8
+  - path: quantile-score.R
+    md5: 118719d48914df291c3f05d27d430bad
+    size: 2716
+  outs:
+  - path: metrics/2021-01-11-residuals.rds
+    md5: 5b7de7cb88b9555f4362a13f3a681e2f
+    size: 878
+  - path: metrics/2021-01-11-score-by-loc-type-targ-type-forecast-date.csv
+    md5: 28e2de726417a268efb6739e48cf3698
+    size: 96
+  - path: metrics/2021-01-11-score-by-loc-type-targ-type.csv
+    md5: d9a64a43710d113adc9cd7c52928def0
+    size: 71
+  - path: metrics/2021-01-11-score-by-loc-type.csv
+    md5: e4053abd7e4b4c69c796dbca43e4b87a
+    size: 41
