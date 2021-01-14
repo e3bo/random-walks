@@ -109,29 +109,44 @@ init.vars <- c(lS=log(3e-2 * 20e6), lE=log(1.6e-4 * 20e6),
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
   P <- PN / pvec["N"]
-  xhat_trans <- c(log(xhat[c("S", "E", "I")]), xhat["C"])
-  if(!all(is.finite(xhat_trans))) {
-    browser()
-  }
-  names(xhat_trans)[1:3] <- c("lS", "lE", "lI")
-  init.vars <- c(xhat_trans, Pss = P[1,1], Pse = P[1,2], 
-                 Psi = P[1,3], Psc = P[1,4], Pee = P[2,2], Pei = P[2,3], Pec = P[2,4], 
-                 Pii = P[3,3], Pic = P[3,4], Pcc = P[4,4])
-  ret <- PsystemSEIR(pvec = pvec, init.vars = init.vars, beta_t = beta_t, time.steps)[2, ]
-  xhat_new <- c(exp(ret[c("lS", "lE", "lI")]), ret["C"])
-  names(xhat_new)[1:3] <- c("S", "E", "I")
-  P_new  <- with(as.list(ret),        
-                 rbind(c(Pss, Pse, Psi, Psc),
-                       c(Pse, Pee, Pei, Pec),
-                       c(Psi, Pei, Pii, Pic),
-                       c(Psc, Pec, Pic, Pcc)))
+  dt <- diff(time.steps)
+  vf <-  with(as.list(c(pvec, xhat, beta_t)), {
+      eta <- 365 / 4
+      gamma <- 365 / 9
+      F <- rbind(
+        c(-beta_t * I / N,    0,-beta_t * S / N, 0),
+        c(beta_t * I / N,-eta,  beta_t * S / N, 0),
+        c(0,  eta,-gamma, 0),
+        c(0,    0,             gamma, 0)
+      )
+      
+      f <-
+        c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N)
+      Q <- rbind(c(f[1] + f[2],-f[2],           0,     0),
+                 c(-f[2], f[2] + f[3],-f[3],     0),
+                 c(0,-f[3], f[3] + f[4],-f[4]),
+                 c(0,           0,-f[4],  f[4]))
+      
+      dS <- (-beta_t * S * I / N)
+      dE <- (beta_t * S * I / N - eta * E)
+      dI <- (iota + eta * E -  gamma * I)
+      dC <- (gamma * I)
+      dP <-  F %*% P + P %*% t(F) + Q
+      
+      list(vf = c(dS, dE, dI, dC),
+           dP = dP)
+    })
+  xhat_new <- xhat + vf$vf * dt
+  xhat_new[xhat_new < 0] <- 0
+  P_new <- P + vf$dP * dt
+  names(xhat_new) <- c("S", "E", "I", "C")
   PN_new <- P_new * pvec["N"]
   list(xhat = xhat_new, PN = PN_new)
 }
 
 
 iterate_f_and_P(c(S=20e6, E=26e3, I=13e3, C=0), PN = diag(nrow=4), pvec = pvec, 
-                beta_t = 44, time.steps = c(0, 1 / 52))
+                beta_t = 44, time.steps = c(0, 1 / 365))
 
 kfnll <-
   function(cdata,
@@ -419,7 +434,7 @@ system.time(
     control = list(
       reltol = 1e-4,
       trace = 1,
-      maxit = 35
+      maxit = 1000
     ),
     data = list(
       cdata = tail(case_data, n = the_n),
@@ -536,7 +551,7 @@ fcst <- create_forecast_df(means = kfret$pred_means,
                            vars = kfret$pred_cov,
                            location = forecast_loc)
 
-fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-SIR_EKF.csv"))
+fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-SIR_KF.csv"))
 if(!dir.exists("forecasts")) dir.create("forecasts")
 write_csv(x = fcst, path = fcst_path)
 
@@ -563,12 +578,13 @@ is_spline_par <- grepl("^logit_b[0-9]+$", names(coef(m0)))
 bhat <- scaled_expit(coef(m0)[is_spline_par], a_bpar, b_bpar)
 R0hat <- bhat / gamma
 
-
-
 par(mfrow = c(1, 1))
-test <- case_data$time > 1990
 qqnorm(kfret$ytilde_k / sqrt(kfret$S)) # evalutate departure from normality
 abline(0, 1)
+
+
+
+
 
 rho_hat <- 0.4
 test <- case_data$time >= 2020.18
