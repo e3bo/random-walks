@@ -12,11 +12,11 @@ dvc run \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
     
 dvc run \
-    -d sir-ekf-forecast.R \
+    -d sir-kf-forecast.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
     -M metrics/$fdt-forecast-calc-time.json \
-    -o forecasts/$fdt-CEID-SIR_EKF.csv \
+    -o forecasts/$fdt-CEID-SIR_KF.csv \
     --force \
     -n forecast-$fdt \
-    fdt=$fdt Rscript sir-ekf-forecast.R
+    fdt=$fdt Rscript sir-kf-forecast.R

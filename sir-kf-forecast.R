@@ -2,7 +2,7 @@
 
 tictoc::tic()
 
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
 create_forecast_df <- function(means,
@@ -68,12 +68,12 @@ create_forecast_df <- function(means,
                                value)
 }
 
-
-
 forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
 forecast_loc <- "36"
 hopdir <- file.path("hopkins", forecast_date)
+tictoc::tic("data loading")
 tdat <- load_hopkins(hopdir, weekly = FALSE) 
+tictoc::toc()
 
 nys <- tdat %>% filter(location == forecast_loc) %>% 
   filter(target_type == "day ahead inc case")
@@ -82,7 +82,7 @@ nys2 <- nys %>% mutate(time = lubridate::decimal_date(target_end_date))
 case_data <- nys2 %>% ungroup() %>% select(time, value) %>% 
   rename(reports = value)
 
-target_end_dates <- max(nyc2$target_end_date) + lubridate::dweeks(1:4)
+target_end_dates <- max(nys2$target_end_date) + lubridate::dweeks(1:4)
 target_end_times <- lubridate::decimal_date(target_end_dates)
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
@@ -122,9 +122,6 @@ iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
   list(xhat = xhat_new, PN = PN_new)
 }
 
-iterate_f_and_P(c(S=20e6, E=26e3, I=13e3, C=0), PN = diag(nrow=4), pvec = pvec, 
-                beta_t = 44, time.steps = c(0, 1 / 365))
-
 kfnll <-
   function(pvar,
            pfixed,
@@ -134,7 +131,6 @@ kfnll <-
            just_nll = TRUE,
            nsim = 10,
            fets = NULL) {
-    
     p <- c(pvar, pfixed)
     
     is_spline_par <- grepl("^b[0-9]+$", names(p))
@@ -142,78 +138,54 @@ kfnll <-
     bpars <- tmp[order(names(tmp))]
     stopifnot(length(bpars) == nrow(cdata) + 1)
     
-    xhat0 = structure(c(p["S_0"], p["E_0"], p["I_0"], 0),
-                      .Dim = c(4L, 1L),
-                      .Dimnames = list(c("S", "E", "I", "C"), NULL))
-    
-    # Initialize
-    z_1 <-  cdata$reports[1]
-    H <- matrix(c(0, 0, 0, p["rho"]), ncol = 4)
-    R <- max(5, z_1 * p["tau"])
-
-    # Predict
-    XP_1_0 <- iterate_f_and_P(
-      xhat0[, 1],
-      PN = Phat0,
-      pvec = p,
-      beta_t = bpars[1],
-      time.steps = c(t0, cdata$time[1])
-    )
-    xhat_1_0 <- XP_1_0$xhat
-    P_1_0 <- XP_1_0$PN
-    
-    # Update
-    K_1 <- P_1_0 %*% t(H) %*% solve(H %*% P_1_0 %*% t(H) + R)
-    ytilde_1 <- z_1 - H %*% xhat_1_0
-    xhat_1_1 <- xhat_1_0 + K_1 %*% ytilde_1
-    xhat_1_1[xhat_1_1 < 0] <- 1e-4
-    P_1_1 <- (diag(4) - K_1 %*% H) %*% P_1_0
-    
-    ## Now calculate for each step in time series
+    xhat0 = c(p[c("S_0", "E_0", "I_0")], 0)
+    names(xhat0) <- c("S", "E", "I", "C")
     
     T <- nrow(cdata)
+    stopifnot(T > 0)
     z <- cdata$reports
+    times <- cdata$time
     
     ytilde_kk <- ytilde_k <- S <- array(NA_real_, dim = c(1, T))
     K <- xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(4, T))
-    rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat)
+    rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(4, 4, T))
-    
-    K[, 1] <- K_1
-    xhat_kkmo[, 1] <- xhat_1_0
-    xhat_kk[, 1] <- xhat_1_1
-    P_kk[, , 1] <- P_1_1
-    P_kkmo[, , 1] <- P_1_0
-    S[, 1] <- H %*% P_kkmo[, , 1] %*% t(H) + R
-    ytilde_kk[, 1] <- z[1] - H %*% xhat_kk[, 1]
-    ytilde_k[, 1] <- ytilde_1
-    
-    if (T > 1) {
-      for (i in seq(2, T)) {
+    H <- matrix(c(0, 0, 0, p["rho"]), ncol = 4)
+    for (i in seq(1, T)) {
+      if (i == 1) {
+        xhat_init <- xhat0
+        PNinit <- Phat0
+        time.steps <- c(t0, times[1])
+        R <- max(5, z[1] * p["tau"])
+      } else {
         xhat_init <- xhat_kk[, i - 1]
-        xhat_init["C"] <- 0
         PNinit <- P_kk[, , i - 1]
-        PNinit[, 4] <- PNinit[4,] <- 0
-        XP <- iterate_f_and_P(
-          xhat_init,
-          PN = PNinit,
-          pvec = p,
-          beta_t = bpars[i + 1],
-          time.steps = cdata$time[c(i - 1, i)]
-        )
-        xhat_kkmo[, i] <- XP$xhat
-        P_kkmo[, , i] <- XP$PN
-        R <- z[i - 1] * p["tau"]
-        S[, i] <- H %*% P_kkmo[, , i] %*% t(H) + R
-        K[, i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, i])
-        ytilde_k[, i] <- z[i] - H %*% xhat_kkmo[, i, drop = FALSE]
-        xhat_kk[, i] <-
-          xhat_kkmo[, i, drop = FALSE] + K[, i, drop = FALSE] %*% ytilde_k[, i, drop = FALSE]
-        xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
-        P_kk[, , i] <-
-          (diag(4) - K[, i, drop = FALSE] %*% H) %*% P_kkmo[, , i]
-        ytilde_kk[i] <- z[i] - H %*% xhat_kk[, i, drop = FALSE]
+        PNinit[, 4] <- PNinit[4, ] <- 0
+        time.steps <- c(times[i - 1], times[i])
+        R <- max(5, z[i - 1] * p["tau"])
       }
+      xhat_init["C"] <- 0
+      
+      XP <- iterate_f_and_P(
+        xhat_init,
+        PN = PNinit,
+        pvec = p,
+        beta_t = bpars[i + 1],
+        time.steps = time.steps
+      )
+      xhat_kkmo[, i] <- XP$xhat
+      P_kkmo[, , i] <- XP$PN
+      
+      S[, i] <- H %*% P_kkmo[, , i] %*% t(H) + R
+      K[, i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, i])
+      ytilde_k[, i] <- z[i] - H %*% xhat_kkmo[, i, drop = FALSE]
+      xhat_kk[, i] <-
+        xhat_kkmo[, i, drop = FALSE] + 
+        K[, i, drop = FALSE] %*% ytilde_k[, i, drop = FALSE]
+      xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
+      P_kk[, , i] <-
+        (diag(4) - K[, i, drop = FALSE] %*% H) %*% P_kkmo[, , i]
+      ytilde_kk[i] <- z[i] - H %*% xhat_kk[, i, drop = FALSE]
     }
     
     rwlik <-
@@ -221,20 +193,26 @@ kfnll <-
     nll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) - rwlik
     if (!just_nll) {
-      sim_means <- sim_cov <- matrix(NA, nrow = (length(fets)), ncol = nsim)
+      sim_means <-
+        sim_cov <- matrix(NA, nrow = (length(fets)), ncol = nsim)
       if (!is.null(fets)) {
-        for(j in seq_len(nsim)){
-          bpars_fet <- bpars[T + 1] + cumsum(rnorm(n = length(fets), mean = 0, sd = p["beta_sd"]))
+        for (j in seq_len(nsim)) {
+          bpars_fet <-
+            bpars[T + 1] + cumsum(rnorm(
+              n = length(fets),
+              mean = 0,
+              sd = p["beta_sd"]
+            ))
           xhat_init <- xhat_kk[, T]
           xhat_init["C"] <- 0
           PNinit <- P_kk[, , T]
-          PNinit[, 4] <- PNinit[4,] <- 0
+          PNinit[, 4] <- PNinit[4, ] <- 0
           XP <- iterate_f_and_P(
             xhat_init,
-           PN = PNinit,
+            PN = PNinit,
             pvec = p,
             beta_t = bpars_fet[1],
-            time.steps = c(cdata$time[T], fets[1])
+            time.steps = c(times[T], fets[1])
           )
           sim_means[1, j] <- H %*% XP$xhat
           sim_cov[1, j] <- H %*% XP$PN %*% t(H)
@@ -242,7 +220,7 @@ kfnll <-
             xhat_init <- XP$xhat
             xhat_init["C"] <- 0
             PNinit <- XP$PN
-            PNinit[, 4] <- PNinit[4,] <- 0
+            PNinit[, 4] <- PNinit[4, ] <- 0
             XP <-
               iterate_f_and_P(
                 xhat_init,
@@ -252,7 +230,8 @@ kfnll <-
                 time.steps = c(fets[i], fets[i + 1])
               )
             sim_means[i + 1, j] <- H %*% XP$xhat
-            sim_cov[i + 1, j] <- H %*% XP$PN %*% t(H) + sim_means[i + 1, j] * p["tau"]
+            sim_cov[i + 1, j] <-
+              H %*% XP$PN %*% t(H) + sim_means[i + 1, j] * p["tau"]
           }
         }
         pred_means <- rowMeans(sim_means)
@@ -301,12 +280,7 @@ pfixed <- c(
   iota = 2
 )
 
-kfnll(pvar = pvar,
-      pfixed = pfixed,
-      cdata = tail(case_data, n = the_n),
-      t0 = the_t0)
-
-tictoc::tic()
+tictoc::tic("optimization")
 ans <- optim(
   par = pvar,
   fn = kfnll,
@@ -316,7 +290,7 @@ ans <- optim(
   method = "L-BFGS-B",
   lower = pvar_df$lower,
   upper = pvar_df$upper,
-  control = list(trace = 1, maxit = 1000)
+  control = list(trace = 1, maxit = 10)
 )
 tictoc::toc()
 
