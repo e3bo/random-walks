@@ -22,17 +22,6 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2021-01-11
-  forecast-2021-01-11:
-    cmd: fdt=2021-01-11 Rscript sir-kf-forecast.R
-    deps:
-    - covidhub-common.R
-    - hopkins/2021-01-11
-    - sir-kf-forecast.R
-    outs:
-    - forecasts/2021-01-11-CEID-SIR_KF.csv
-    metrics:
-    - metrics/2021-01-11-forecast-calc-time.json:
-        cache: false
   score-2021-01-11:
     cmd: ddt=2021-01-11 ./quantile-score.R
     deps:

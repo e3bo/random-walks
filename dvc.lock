@@ -40,26 +40,6 @@ hopkins-2021-01-11:
     md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
     size: 8678408
     nfiles: 8
-forecast-2021-01-11:
-  cmd: fdt=2021-01-11 Rscript sir-kf-forecast.R
-  deps:
-  - path: covidhub-common.R
-    md5: 61115b4ee2b6253254dc75c5dc0fde3f
-    size: 9912
-  - path: hopkins/2021-01-11
-    md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
-    size: 8678408
-    nfiles: 8
-  - path: sir-kf-forecast.R
-    md5: 44fb8d7f0eb7dff93506f6c4d9791ca0
-    size: 11060
-  outs:
-  - path: forecasts/2021-01-11-CEID-SIR_KF.csv
-    md5: c3e5d7a4c3d275b0e82f017390c87a8a
-    size: 2154
-  - path: metrics/2021-01-11-forecast-calc-time.json
-    md5: ea4ae5d2d0ab837eae4303e8c245e256
-    size: 16
 score-2021-01-11:
   cmd: ddt=2021-01-11 ./quantile-score.R
   deps:
