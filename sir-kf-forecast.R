@@ -266,7 +266,7 @@ kfnll <-
     }
   }
 
-the_n <- 80
+the_n <- 5
 the_t0 <- rev(case_data$time)[the_n + 1]
 gamma <- 365/9
 
@@ -295,6 +295,35 @@ pfixed <- c(
   rho1 = 0.4,
   iota = 2
 )
+
+kfnllad <-
+  function(pvar,
+           pfixed,
+           cdata,
+           t0,
+           Phat0 = diag(c(1, 1, 1, 0)),
+           just_nll = TRUE,
+           nsim = 10,
+           fets = NULL){
+  pvar["tau"]
+}
+
+wrapper <- function(x){
+  kfnllad(pvar = x,
+        pfixed = pfixed,
+  cdata = tail(case_data, n = the_n),
+  t0 = the_t0)
+}
+
+is_spline_par <- grepl("^b[0-9]+$", names(pvar))
+wrapper(pvar)
+
+library(autodiffr)
+ad_setup()
+
+g <- makeGradFunc(wrapper)
+
+g(pvar)
 
 tictoc::tic("optimization")
 ans <- optim(
