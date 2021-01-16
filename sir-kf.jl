@@ -9,6 +9,7 @@ s = similar(times)
 n = length(z)
 
 using LinearAlgebra
+using Optim
 
 function obj(a)
     # prior for time 0
@@ -52,5 +53,7 @@ function obj(a)
         pkk[:,:,i] = (I - reshape(k[:,i], 2, 1) * h) * pkkmo[:,:,i]
     end
     nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ s[1,1,:] + map(log, s[1,1,:])) + n * log(2 * pi))
-    (nll, ytkkmo, xkkmo)
+    nll
 end
+
+optimize(obj, 0.2, BFGS())
