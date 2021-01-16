@@ -1,7 +1,7 @@
 using LinearAlgebra
 using Optim
 
-function obj(x::AbstractArray{T}) where {T}
+function obj(x::Vector)
     # prior for time 0
     x0 = [-1., 1.]
     p0 = Matrix(1.0I, 2, 2)
@@ -21,13 +21,13 @@ function obj(x::AbstractArray{T}) where {T}
     # filter (assuming first observation at time 1)
     n = length(z)
 
-    s = Array{T}(undef, 1, 1, n)
-    ytkkmo = Array{T}(undef, 1, n)
-    k = Array{T}(undef, 2, n)
-    xkk = Array{T}(undef, 2, n)
-    xkkmo = Array{T}(undef, 2, n)
-    pkk = Array{T}(undef, 2, 2, n)
-    pkkmo = Array{T}(undef, 2, 2, n)
+    s = Array{eltype(x)}(undef, 1, 1, n)
+    ytkkmo = Array{eltype(x)}(undef, 1, n)
+    k = Array{eltype(x)}(undef, 2, n)
+    xkk = Array{eltype(x)}(undef, 2, n)
+    xkkmo = Array{eltype(x)}(undef, 2, n)
+    pkk = Array{eltype(x)}(undef, 2, 2, n)
+    pkkmo = Array{eltype(x)}(undef, 2, 2, n)
     
     for i in 1:n
         if (i == 1)
