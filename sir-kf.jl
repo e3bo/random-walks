@@ -55,6 +55,16 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
         end
         xkkmo[:,i] = xnext
         
+        f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N]
+        q = [  f[1]+f[2]     -f[2]            0      0
+                   -f[2] f[2]+f[3]        -f[3]      0
+                       0     -f[3]    f[3]+f[4]  -f[4]
+                       0         0        -f[4]   f[4]]
+        F = [-β*y/N    0 -β*x/N 0
+            c(beta_t * I / N,-eta,  beta_t * S / N, 0),
+        c(0,  eta,-gamma, 0),
+        c(0,    0,             gamma, 0)
+      )
         r[1,1] = z[i][1] * τ 
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
