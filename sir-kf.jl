@@ -44,8 +44,9 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
         x = xlast[1]
         l = xlast[2]
         y = xlast[3]
+        xlast[4] = 0
         vf = [-β*x*y/N - ι*x, β*x*y/N + ι*x - η*l, η*l - γ*y, γ*y]
-        xnext = dt * vf .* xlast
+        xnext = xlast + dt * vf .* xlast
         
         for j in 1:dstate
             if xnext[j] < 0
@@ -68,4 +69,4 @@ end
 ans0 = optimize(obj, [0], [100], [0.3], Fminbox(BFGS())) # works, but no autodiff
 ans1 = optimize(obj, [100.0], LBFGS()) # works if init is close to minimizer
 ans2 = optimize(obj, [1.0], LBFGS(); autodiff = :forward) # reduced iterations
-ans3 = optimize(obj, [0], [100], [8.], Fminbox(LBFGS()); autodiff = :forward) # can start far away 
+ans3 = optimize(obj, [0], [500], [8.], Fminbox(LBFGS()); autodiff = :forward) # can start far away 
