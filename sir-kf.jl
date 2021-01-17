@@ -1,7 +1,7 @@
 using LinearAlgebra
 using Optim
 
-function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0.1, η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4)
+function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0.1, η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, τ::Float64 = 0.01)
     # prior for time 0
     x0 = [19e6; 1e4; 1e4; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
@@ -14,7 +14,7 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     # observation
     h = [0 0 0 ρ]
     dobs = size(h, 1)
-    r = Matrix(0.3I, dobs, dobs)
+    r = Matrix(undef, dobs, dobs)
 
     # data
     z = [[1393], [1360], [1836], [1592], [1447], [1143]]
@@ -54,6 +54,7 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
         end
         xkkmo[:,i] = xnext
         
+        r[1,1] = z[i][1] * τ 
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
         ytkkmo[:,i] = z[i] + h * reshape(xkkmo[:,i], dstate, 1)
