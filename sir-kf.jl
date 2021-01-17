@@ -1,35 +1,36 @@
 using LinearAlgebra
 using Optim
 
-function obj(x::Vector)
+function obj(x::Vector; γ::Float64 = 365 / 9)
     # prior for time 0
-    x0 = [-1., 1.]
-    p0 = Matrix(1.0I, 2, 2)
+    x0 = [19e6; 1e4; 1e4; 0]
+    p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
 
+    dstate = size(x0, 1)
     # dynamics
-    Φ = [0.8 0.2; -0.1 x[1]]
-    q = [0.2 0.0; 0.0 0.5]
+    Φ = Matrix(x[1] * I, dstate, dstate)
+    q = Matrix(γ*I, dstate, dstate)
 
     # observation
-    h = [1.0 0.0]
-    r = Matrix(0.3I, 1, 1)
+    h = [0 0 0 1]
+    dobs = size(h, 1)
+    r = Matrix(0.3I, dobs, dobs)
 
-    
-    # (mock) data
-    z = [[-1.77], [-0.78], [-1.28], [-1.06], [-3.65], [-2.47], [-0.06], [-0.91], [-0.80], [1.48]]
+    # data
+    z = [[1393], [1360], [1836], [1592], [1447], [1143]]
 
     # filter (assuming first observation at time 1)
-    n = length(z)
+    nobs = length(z)
 
-    s = Array{eltype(x)}(undef, 1, 1, n)
-    ytkkmo = Array{eltype(x)}(undef, 1, n)
-    k = Array{eltype(x)}(undef, 2, n)
-    xkk = Array{eltype(x)}(undef, 2, n)
-    xkkmo = Array{eltype(x)}(undef, 2, n)
-    pkk = Array{eltype(x)}(undef, 2, 2, n)
-    pkkmo = Array{eltype(x)}(undef, 2, 2, n)
+    s = Array{eltype(x)}(undef, dobs, dobs, nobs)
+    ytkkmo = Array{eltype(x)}(undef, dobs, nobs)
+    k = Array{eltype(x)}(undef, dstate, nobs)
+    xkk = Array{eltype(x)}(undef, dstate, nobs)
+    xkkmo = Array{eltype(x)}(undef, dstate, nobs)
+    pkk = Array{eltype(x)}(undef, dstate, dstate, nobs)
+    pkkmo = Array{eltype(x)}(undef, dstate, dstate, nobs)
     
-    for i in 1:n
+    for i in 1:nobs
         if (i == 1)
             xkkmo[:,i] = Φ*x0
             pkkmo[:,:,i] = Φ*p0*Φ' + q
@@ -39,11 +40,11 @@ function obj(x::Vector)
         end
         s[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / s[:,:,i]
-        ytkkmo[:,i] = z[i] + h * reshape(xkkmo[:,i], 2, 1)
-        xkk[:,i] = reshape(xkkmo[:,i], 2, 1) + reshape(k[:,i], 2, 1) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,i], 2, 1) * h) * pkkmo[:,:,i]
+        ytkkmo[:,i] = z[i] + h * reshape(xkkmo[:,i], dstate, 1)
+        xkk[:,i] = reshape(xkkmo[:,i], dstate, 1) + reshape(k[:,i], dstate, 1) * ytkkmo[:,i]
+        pkk[:,:,i] = (I - reshape(k[:,i], dstate, 1) * h) * pkkmo[:,:,i]
     end        
-    nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ s[1,1,:] + map(log, s[1,1,:])) + n * log(2 * pi))
+    nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ s[1,1,:] + map(log, s[1,1,:])) + nobs * log(2 * pi))
     nll
 end
 
