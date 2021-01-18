@@ -4,7 +4,11 @@ using Distributions
 using LinearAlgebra
 using Optim
 
-function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, τ::Float64 = 0.01, beta_sd::Float64 = 0.1)
+cdata = DataFrame(load("data--2020-10-12--36.csv"))
+wsize = 40
+z = [[el] for el in cdata.reports[end-wsize+1:end]]
+
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, τ::Float64 = 0.01, beta_sd::Float64 = 0.1, just_nll::Bool = true)
     # prior for time 0
     x0 = [19e6; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
@@ -15,9 +19,6 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     h = [0 0 0 ρ]
     dobs = size(h, 1)
     r = Matrix(undef, dobs, dobs)
-
-    # data
-    z = [[754], [665], [955], [908], [1005], [866], [834], [1189], [1000], [1382], [1598], [1731], [1222], [933], [1393], [1360], [1836], [1592], [1447], [1143]]
 
     # filter (assuming first observation at time 1)
     nobs = length(z)
@@ -30,7 +31,8 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     pkk = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     
-    bvec = pvar[3:22]
+    bvec = pvar[3:end]
+    @assert length(bvec) == nobs "length of bvec should equal number of observations"
     
     for i in 1:nobs
         β = bvec[i]
@@ -87,19 +89,16 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     end
     
     nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ Σ[1,1,:] + map(log, Σ[1,1,:])) + nobs * log(2 * pi)) - rwlik
-    #nll, ytkkmo, Σ, xkkmo
-    nll
+    if just_nll
+       return nll
+    else
+       return nll, ytkkmo, Σ, xkkmo
+    end
 end
 
-cdata = DataFrame(load("data--2020-10-12--36.csv"))
+init = [1e3; 1e3; fill(42., wsize)]
+lower = [1e2; 1e2; fill(0., wsize)] 
+upper = [1e5; 1e5; fill(420., wsize)]
 
-init = [1e3; 1e3; [42. for i in 1:20]]
-lower = [1e2; 1e2; [0. for i in 1:20]]
-upper = [1e5; 1e5; [420. for i in 1:20]]
-
-
-
-ans0 = optimize(obj, lower, upper, init, Fminbox(BFGS())) # works, but no autodiff
-#ans1 = optimize(obj, [100.0], LBFGS()) # works if init is close to minimizer
-#ans2 = optimize(obj, [1.0], LBFGS(); autodiff = :forward) # reduced iterations
-ans3 = optimize(obj, lower, upper, init, Fminbox(LBFGS()); autodiff = :forward) # can start far away 
+ans1 = optimize(pvar -> obj(pvar, z), lower, upper, init, Fminbox(BFGS()))
+ans2 = optimize(pvar -> obj(pvar, z), lower, upper, init, Fminbox(LBFGS()); autodiff = :forward) 
