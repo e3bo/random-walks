@@ -1,7 +1,8 @@
+using Distributions
 using LinearAlgebra
 using Optim
 
-function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, τ::Float64 = 0.01)
+function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, τ::Float64 = 0.01, beta_sd::Float64 = 0.1)
     # prior for time 0
     x0 = [19e6; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
@@ -74,8 +75,16 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
         ytkkmo[:,i] = z[i] - h * reshape(xkkmo[:,i], dstate, 1)
         xkk[:,i] = reshape(xkkmo[:,i], dstate, 1) + reshape(k[:,i], dstate, 1) * ytkkmo[:,i]
         pkk[:,:,i] = (I - reshape(k[:,i], dstate, 1) * h) * pkkmo[:,:,i]
-    end        
-    nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ Σ[1,1,:] + map(log, Σ[1,1,:])) + nobs * log(2 * pi))
+    end
+    
+    jumpdensity = Normal(0, beta_sd)
+    dbeta = [bvec[i] - bvec[i - 1] for i in 2:length(bvec)]
+    rwlik = 0
+    for diff in dbeta
+        rwlik += logpdf(jumpdensity, diff)
+    end
+    
+    nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ Σ[1,1,:] + map(log, Σ[1,1,:])) + nobs * log(2 * pi)) - rwlik
     #nll, ytkkmo, Σ, xkkmo
     nll
 end
