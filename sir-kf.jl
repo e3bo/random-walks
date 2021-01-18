@@ -3,7 +3,7 @@ using Optim
 
 function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, τ::Float64 = 0.01)
     # prior for time 0
-    x0 = [19e6; pvar[2]; pvar[3]; 0]
+    x0 = [19e6; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
 
     dstate = size(x0, 1)
@@ -27,9 +27,10 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     pkk = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     
-    β = pvar[1]
+    bvec = pvar[3:22]
     
     for i in 1:nobs
+        β = bvec[i]
         if (i == 1)
             xlast =  x0
             plast = p0
@@ -79,7 +80,12 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     nll
 end
 
-ans0 = optimize(obj, [0, 100, 100], [500, 1e5, 1e5], [8., 1e3, 1e3], Fminbox(BFGS())) # works, but no autodiff
+
+init = [1e3; 1e3; [42. for i in 1:20]]
+lower = [1e2; 1e2; [0. for i in 1:20]]
+upper = [1e5; 1e5; [420. for i in 1:20]]
+
+ans0 = optimize(obj, lower, upper, init, Fminbox(BFGS())) # works, but no autodiff
 #ans1 = optimize(obj, [100.0], LBFGS()) # works if init is close to minimizer
 #ans2 = optimize(obj, [1.0], LBFGS(); autodiff = :forward) # reduced iterations
-ans3 = optimize(obj, [0, 100, 100], [500, 1e5, 1e5], [8., 1e3, 1e3], Fminbox(LBFGS()); autodiff = :forward) # can start far away 
+ans3 = optimize(obj, lower, upper, init, Fminbox(LBFGS()); autodiff = :forward) # can start far away 
