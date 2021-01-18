@@ -8,11 +8,13 @@ cdata = DataFrame(load("data--2020-10-12--36.csv"))
 wsize = 40
 z = [[el] for el in cdata.reports[end-wsize+1:end]]
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, τ::Float64 = 0.01, beta_sd::Float64 = 0.1, just_nll::Bool = true)
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, betasd::Float64 = 0.1, just_nll::Bool = true)
     # prior for time 0
     x0 = [19e6; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
-
+    
+    τ = pvar[3]
+    
     dstate = size(x0, 1)
 
     # observation
@@ -31,7 +33,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25
     pkk = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     
-    bvec = pvar[3:end]
+    bvec = pvar[4:end]
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
     
     for i in 1:nobs
@@ -81,7 +83,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25
         pkk[:,:,i] = (I - reshape(k[:,i], dstate, 1) * h) * pkkmo[:,:,i]
     end
     
-    jumpdensity = Normal(0, beta_sd)
+    jumpdensity = Normal(0, betasd)
     dbeta = [bvec[i] - bvec[i - 1] for i in 2:length(bvec)]
     rwlik = 0
     for diff in dbeta
@@ -96,9 +98,15 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25
     end
 end
 
-init = [1e3; 1e3; fill(42., wsize)]
-lower = [1e2; 1e2; fill(0., wsize)] 
-upper = [1e5; 1e5; fill(420., wsize)]
+init = [1793; 18640; 10; fill(50., wsize)]
+lower = [1e1; 1e2; 1e-4; fill(0., wsize)] 
+upper = [1e5; 1e5; 1e3; fill(420., wsize)]
 
 ans1 = optimize(pvar -> obj(pvar, z), lower, upper, init, Fminbox(BFGS()))
-ans2 = optimize(pvar -> obj(pvar, z), lower, upper, init, Fminbox(LBFGS()); autodiff = :forward) 
+ans2 = optimize(pvar -> obj(pvar, z; betasd = 1.), lower, upper, init, Fminbox(LBFGS()), Optim.Options(show_trace = true, time_limit = 120); autodiff = :forward) 
+
+
+n, r, s, x = obj(ans2.minimizer, z; betasd = 1., just_nll = false)
+
+rstd = r ./  (s[1,1,:]' .^ 0.5)
+
