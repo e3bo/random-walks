@@ -7,9 +7,6 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
 
     dstate = size(x0, 1)
-    # dynamics
-    Φ = Matrix(pvar[1] * I, dstate, dstate)
-    q = Matrix(γ*I, dstate, dstate)
 
     # observation
     h = [0 0 0 ρ]
@@ -35,10 +32,10 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
     for i in 1:nobs
         if (i == 1)
             xlast =  x0
-            pkkmo[:,:,i] = Φ*p0*Φ' + q
+            plast = p0
         else
             xlast = xkk[:,i - 1]
-            pkkmo[:,:,i] = Φ*pkk[:,:,i-1]*Φ' + q
+            plast = pkk[:,:,i-1]
         end
         
         x = xlast[1]
@@ -46,7 +43,7 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
         y = xlast[3]
         xlast[4] = 0
         vf = [-β*x*y/N - ι*x, β*x*y/N + ι*x - η*l, η*l - γ*y, γ*y]
-        xnext = xlast + dt * vf .* xlast
+        xnext = xlast + dt * vf
         
         for j in 1:dstate
             if xnext[j] < 0
@@ -56,15 +53,20 @@ function obj(pvar::Vector; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, �
         xkkmo[:,i] = xnext
         
         f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N]
+        
         q = [  f[1]+f[2]     -f[2]            0      0
                    -f[2] f[2]+f[3]        -f[3]      0
                        0     -f[3]    f[3]+f[4]  -f[4]
                        0         0        -f[4]   f[4]]
-        F = [-β*y/N    0 -β*x/N 0
-            c(beta_t * I / N,-eta,  beta_t * S / N, 0),
-        c(0,  eta,-gamma, 0),
-        c(0,    0,             gamma, 0)
-      )
+                       
+        jac= [-β*y/N    0    -β*x/N     0
+              β*y/N   -η     β*x/N     0
+                  0    η        -γ     0
+                  0    0         γ     0]
+        
+        dp = jac * plast + plast * jac' + q
+        pkkmo[:,:,i] = plast + dp * dt
+        
         r[1,1] = z[i][1] * τ 
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
