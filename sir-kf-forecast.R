@@ -84,6 +84,9 @@ case_data <- nys2 %>% ungroup() %>%
   select(time, wday, value) %>% 
   rename(reports = value)
 
+data_fname = paste0("data--", forecast_date, "--", forecast_loc, ".csv")
+write_csv(case_data, path = data_fname)
+
 target_end_dates <- max(nys2$target_end_date) + lubridate::dweeks(1:4)
 target_end_times <- lubridate::decimal_date(target_end_dates)
 

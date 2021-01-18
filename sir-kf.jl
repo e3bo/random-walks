@@ -1,3 +1,5 @@
+using CSVFiles
+using DataFrames
 using Distributions
 using LinearAlgebra
 using Optim
@@ -89,10 +91,13 @@ function obj(pvar::Vector; Î³::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, Î
     nll
 end
 
+cdata = DataFrame(load("data--2020-10-12--36.csv"))
 
 init = [1e3; 1e3; [42. for i in 1:20]]
 lower = [1e2; 1e2; [0. for i in 1:20]]
 upper = [1e5; 1e5; [420. for i in 1:20]]
+
+
 
 ans0 = optimize(obj, lower, upper, init, Fminbox(BFGS())) # works, but no autodiff
 #ans1 = optimize(obj, [100.0], LBFGS()) # works if init is close to minimizer
