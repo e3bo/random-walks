@@ -269,18 +269,17 @@ kfnll <-
     }
   }
 
-the_n <- 5
+the_n <- 30
 the_t0 <- rev(case_data$time)[the_n + 1]
 gamma <- 365/9
 
 pvar_df <- tribble(
   ~par, ~init, ~lower, ~upper,
-  "beta_sd",  1, 0.01, 10,
   "E_0", 1e4, 10, 1e5,
   "I_0", 1e4, 10, 1e5,
-  "tau", 1e-2, 1e-4, 1e2
+  "tau", 1e-2, 1e-4, 1e3
 ) %>% 
-  bind_rows(tibble(par = paste0("rho", seq(2, 7)),
+  bind_rows(tibble(par = paste0("rho", seq(2, 2)),
             init = 0.4,
             lower = 0,
             upper = 1)) %>%
@@ -288,6 +287,11 @@ pvar_df <- tribble(
                 init = gamma,
                 lower = 0.1 * gamma,
                 upper = 4 * gamma))
+
+init_fname = paste0("initial-pars--", forecast_date, "--", forecast_loc, ".csv")
+write_csv(pvar_df, path = init_fname)
+
+
 
 pvar <- pvar_df$init
 names(pvar) <- pvar_df$par
@@ -320,13 +324,6 @@ wrapper <- function(x){
 
 is_spline_par <- grepl("^b[0-9]+$", names(pvar))
 wrapper(pvar)
-
-library(autodiffr)
-ad_setup()
-
-g <- makeGradFunc(wrapper)
-
-g(pvar)
 
 tictoc::tic("optimization")
 ans <- optim(

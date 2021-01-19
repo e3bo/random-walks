@@ -5,8 +5,10 @@ using ForwardDiff
 using LinearAlgebra
 using Optim
 
+pdata = DataFrame(load("initial-pars--2020-10-12--36.csv"))
 cdata = DataFrame(load("data--2020-10-12--36.csv"))
-wsize = 60
+
+wsize = size(pdata)[1] - 4
 z = [[el] for el in cdata.reports[end-wsize+1:end]]
 w = [el for el in cdata.wday[end-wsize+1:end]]
 
@@ -109,11 +111,14 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365
     end
 end
 
-init = [6093; 18640; 10; 0.4; fill(43., wsize)]
-lower = [1e1; 1e2; 1e-4; 0; fill(0., wsize)] 
-upper = [1e5; 1e5; 1e3; 1; fill(420., wsize)]
+#init = [6093; 18640; 10; 0.4; fill(43., wsize)]
+#lower = [1e1; 1e2; 1e-4; 0; fill(0., wsize)] 
+#upper = [1e5; 1e5; 1e3; 1; fill(420., wsize)]
 
-ans2 = optimize(pvar -> obj(pvar, z, w), lower, upper, init, Fminbox(LBFGS()), Optim.Options(show_trace = true, time_limit = 300); autodiff = :forward) 
+ans2 = optimize(pvar -> obj(pvar, z, w), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = true, time_limit = 300); autodiff = :forward) 
+
+pdata.minimizer = ans2.minimizer
+save("minimizer.csv", pdata)
 
 function hess(par, z, w)
     @time h = ForwardDiff.hessian(pvar -> obj(pvar, z, w), par)
@@ -121,9 +126,9 @@ function hess(par, z, w)
 end
 
 h = hess(ans2.minimizer, z, w)
-diag(inv(h)) .^ .5
 
-n, r, s, x, pk, pkk = obj(ans2.minimizer, z; betasd = .1, just_nll = false)
+save("hessian.csv", DataFrame(h))
 
-rstd = r ./  (s[1,1,:]' .^ 0.5)
-
+#diag(inv(h)) .^ .5
+#n, r, s, x, pk, pkk = obj(ans2.minimizer, z; betasd = .1, just_nll = false)
+#rstd = r ./  (s[1,1,:]' .^ 0.5)
