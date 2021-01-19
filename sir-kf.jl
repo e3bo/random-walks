@@ -1,6 +1,7 @@
 using CSVFiles
 using DataFrames
 using Distributions
+using ForwardDiff
 using LinearAlgebra
 using Optim
 
@@ -8,13 +9,13 @@ cdata = DataFrame(load("data--2020-10-12--36.csv"))
 wsize = 40
 z = [[el] for el in cdata.reports[end-wsize+1:end]]
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, betasd::Float64 = 0.1, just_nll::Bool = true)
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ::Float64 = 0.4, betasd::Float64 = 1, just_nll::Bool = true)
     # prior for time 0
     x0 = [19e6; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
     
     τ = pvar[3]
-    
+
     dstate = size(x0, 1)
 
     # observation
@@ -94,19 +95,26 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25
     if just_nll
        return nll
     else
-       return nll, ytkkmo, Σ, xkkmo
+       return nll, ytkkmo, Σ, xkkmo, pkkmo, pkk
     end
 end
 
-init = [1793; 18640; 10; fill(50., wsize)]
-lower = [1e1; 1e2; 1e-4; fill(0., wsize)] 
-upper = [1e5; 1e5; 1e3; fill(420., wsize)]
+init = [6093; 18640; 10; 1; fill(43., wsize)]
+lower = [1e1; 1e2; 1e-4; 0.1; fill(0., wsize)] 
+upper = [1e5; 1e5; 1e3; 5; fill(420., wsize)]
 
-ans1 = optimize(pvar -> obj(pvar, z), lower, upper, init, Fminbox(BFGS()))
-ans2 = optimize(pvar -> obj(pvar, z; betasd = 1.), lower, upper, init, Fminbox(LBFGS()), Optim.Options(show_trace = true, time_limit = 120); autodiff = :forward) 
+#ans1 = optimize(pvar -> obj(pvar, z), lower, upper, init, Fminbox(BFGS()))
+ans2 = optimize(pvar -> obj(pvar, z), lower, upper, init, Fminbox(LBFGS()), Optim.Options(show_trace = true, time_limit = 300); autodiff = :forward) 
 
+function hess(par, data)
+    @time h = ForwardDiff.hessian(pvar -> obj(pvar, data), par)
+    h
+end
 
-n, r, s, x = obj(ans2.minimizer, z; betasd = 1., just_nll = false)
+h = hess(ans2.minimizer, z)
+diag(inv(h)) .^ .5
+
+n, r, s, x, pk, pkk = obj(ans2.minimizer, z; betasd = .1, just_nll = false)
 
 rstd = r ./  (s[1,1,:]' .^ 0.5)
 
