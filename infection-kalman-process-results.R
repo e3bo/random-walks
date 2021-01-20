@@ -56,7 +56,7 @@ create_forecast_df <- function(means,
         mean = means[.y,],
         sd = sqrt(vars[.y,]),
         pro = rep(1, ncol(means)),
-        expand = 0.98
+        expand = 0.0
       )
     ),
     value = ifelse(q1 < 0, 0, q1)) %>%
