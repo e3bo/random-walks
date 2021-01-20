@@ -1,3 +1,5 @@
+module InfectionKalman
+
 using CSVFiles
 using DataFrames
 using Distributions
@@ -5,12 +7,7 @@ using ForwardDiff
 using LinearAlgebra
 using Optim
 
-pdata = DataFrame(load("initial-pars--2020-10-12--36.csv"))
-cdata = DataFrame(load("data--2020-10-12--36.csv"))
-
-wsize = size(pdata)[1] - 4
-z = [[el] for el in cdata.reports[end-wsize+1:end]]
-w = [el for el in cdata.wday[end-wsize+1:end]]
+export fit
 
 function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ1::Float64 = 0.4, betasd::Float64 = 1., just_nll::Bool = true)
     # prior for time 0
@@ -22,7 +19,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365
 
     dstate = size(x0, 1)
 
-    # observation
+    # cyclic observation matrix
     hm = [0 0 0 ρ2
          0 0 0 ρ2
          0 0 0 ρ2
@@ -111,23 +108,27 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365
     end
 end
 
-#init = [6093; 18640; 10; 0.4; fill(43., wsize)]
-#lower = [1e1; 1e2; 1e-4; 0; fill(0., wsize)] 
-#upper = [1e5; 1e5; 1e3; 1; fill(420., wsize)]
-
-ans2 = optimize(pvar -> obj(pvar, z, w), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = true, time_limit = 300); autodiff = :forward) 
-
-pdata.minimizer = ans2.minimizer
-save("minimizer.csv", pdata)
-
 function hess(par, z, w)
     @time h = ForwardDiff.hessian(pvar -> obj(pvar, z, w), par)
     h
 end
 
+function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false) 
+
+    wsize = size(pdata)[1] - 4
+    z = [[el] for el in cdata.reports[end-wsize+1:end]]
+    w = [el for el in cdata.wday[end-wsize+1:end]]
+
+    res = optimize(pvar -> obj(pvar, z, w), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward) 
+
+    pdata.minimizer = res.minimizer
+
+
+
+
 h = hess(ans2.minimizer, z, w)
 
-save("hessian.csv", DataFrame(h))
+save(string("hessian--", fdt, "--", loc, ".csv"), DataFrame(h))
 
 #diag(inv(h)) .^ .5
 #n, r, s, x, pk, pkk = obj(ans2.minimizer, z; betasd = .1, just_nll = false)
