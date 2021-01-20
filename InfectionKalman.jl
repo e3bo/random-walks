@@ -1,6 +1,5 @@
 module InfectionKalman
 
-using CSVFiles
 using DataFrames
 using Distributions
 using ForwardDiff
@@ -119,17 +118,18 @@ function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false
     z = [[el] for el in cdata.reports[end-wsize+1:end]]
     w = [el for el in cdata.wday[end-wsize+1:end]]
 
-    res = optimize(pvar -> obj(pvar, z, w), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward) 
+    res = optimize(pvar -> obj(pvar, z, w), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward)
 
-    pdata.minimizer = res.minimizer
+    if hessian 
+        h = hess(res.minimizer, z, w)
+        res = [res, h]
+    end
+    
+    if detailed_results
+        n, r, s, x, pk, pkk = obj(res.minimizer, z; just_nll = false)
+        res = [res, n, r, s, x, pk, pkk]
+    end
+    res
+end
 
-
-
-
-h = hess(ans2.minimizer, z, w)
-
-save(string("hessian--", fdt, "--", loc, ".csv"), DataFrame(h))
-
-#diag(inv(h)) .^ .5
-#n, r, s, x, pk, pkk = obj(ans2.minimizer, z; betasd = .1, just_nll = false)
-#rstd = r ./  (s[1,1,:]' .^ 0.5)
+end

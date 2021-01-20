@@ -1,6 +1,12 @@
-module InfectionKalmanTest
+module InfectionKalmanMain
 
+using CSVFiles
+using DataFrames
 
+include("InfectionKalman.jl")
+
+import .InfectionKalman
+export res
 
 if length(ARGS) == 0
     fdt = "2020-10-12"
@@ -13,6 +19,10 @@ end
 pdata = DataFrame(load(string("initial-pars--", fdt, "--", loc, ".csv")))
 cdata = DataFrame(load(string("data--", fdt, "--", loc, ".csv")))
 
+res = InfectionKalman.fit(cdata, pdata; show_trace = true)
+pdata.minimizer = res.minimizer
+
 save(string("minimizer--", fdt, "--", loc, ".csv"), pdata)
+#save(string("hessian--", fdt, "--", loc, ".csv"), DataFrame(h))
 
 end

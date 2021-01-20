@@ -5,6 +5,48 @@ tictoc::tic()
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
+forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
+forecast_loc <- "36"
+hopdir <- file.path("hopkins", forecast_date)
+tictoc::tic("data loading")
+tdat <- load_hopkins(hopdir, weekly = FALSE) 
+tictoc::toc()
+
+nys <- tdat %>% filter(location == forecast_loc) %>% 
+  filter(target_type == "day ahead inc case")
+
+nys2 <- nys %>% mutate(time = lubridate::decimal_date(target_end_date))
+case_data <- nys2 %>% ungroup() %>% 
+  mutate(wday = lubridate::wday(target_end_date)) %>%
+  select(time, wday, value) %>% 
+  rename(reports = value)
+
+data_fname = paste0("data--", forecast_date, "--", forecast_loc, ".csv")
+write_csv(case_data, path = data_fname)
+
+wsize <- 5
+gamma <- 365/9
+
+pvar_df <- tribble(
+  ~par, ~init, ~lower, ~upper,
+  "E_0", 1e4, 10, 1e5,
+  "I_0", 1e4, 10, 1e5,
+  "tau", 1e-2, 1e-4, 1e3
+) %>% 
+  bind_rows(tibble(par = paste0("rho", seq(2, 2)),
+                   init = 0.4,
+                   lower = 0,
+                   upper = 1)) %>%
+  bind_rows(tibble(par = paste0("b", seq_len(wsize + 1)),
+                   init = gamma,
+                   lower = 0.1 * gamma,
+                   upper = 4 * gamma))
+
+init_fname <- paste0("initial-pars--", forecast_date, "--", forecast_loc, ".csv")
+write_csv(pvar_df, path = init_fname)
+
+### file break
+
 create_forecast_df <- function(means,
                                vars,
                                target_type = "cases",
@@ -68,27 +110,21 @@ create_forecast_df <- function(means,
                                value)
 }
 
+
 forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
 forecast_loc <- "36"
-hopdir <- file.path("hopkins", forecast_date)
-tictoc::tic("data loading")
-tdat <- load_hopkins(hopdir, weekly = FALSE) 
-tictoc::toc()
-
-nys <- tdat %>% filter(location == forecast_loc) %>% 
-  filter(target_type == "day ahead inc case")
-
-nys2 <- nys %>% mutate(time = lubridate::decimal_date(target_end_date))
-case_data <- nys2 %>% ungroup() %>% 
-  mutate(wday = lubridate::wday(target_end_date)) %>%
-  select(time, wday, value) %>% 
-  rename(reports = value)
-
-data_fname = paste0("data--", forecast_date, "--", forecast_loc, ".csv")
-write_csv(case_data, path = data_fname)
+data_fname <- paste0("data--", forecast_date, "--", forecast_loc, ".csv")
+case_data <- read_csv(data_fname)
 
 target_end_dates <- max(nys2$target_end_date) + lubridate::dweeks(1:4)
 target_end_times <- lubridate::decimal_date(target_end_dates)
+
+init_fname <- paste0("initial-pars--", forecast_date, "--", forecast_loc, ".csv")
+pvar_df <- read_csv(init_fname)
+
+wsize <- nrow(pvar_df) - 4L
+the_t0 <- rev(case_data$time)[wsize + 1]
+
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
   P <- PN / pvec["N"]
@@ -268,28 +304,6 @@ kfnll <-
       nll
     }
   }
-
-the_n <- 30
-the_t0 <- rev(case_data$time)[the_n + 1]
-gamma <- 365/9
-
-pvar_df <- tribble(
-  ~par, ~init, ~lower, ~upper,
-  "E_0", 1e4, 10, 1e5,
-  "I_0", 1e4, 10, 1e5,
-  "tau", 1e-2, 1e-4, 1e3
-) %>% 
-  bind_rows(tibble(par = paste0("rho", seq(2, 2)),
-            init = 0.4,
-            lower = 0,
-            upper = 1)) %>%
-  bind_rows(tibble(par = paste0("b", seq_len(the_n + 1)),
-                init = gamma,
-                lower = 0.1 * gamma,
-                upper = 4 * gamma))
-
-init_fname = paste0("initial-pars--", forecast_date, "--", forecast_loc, ".csv")
-write_csv(pvar_df, path = init_fname)
 
 
 
