@@ -174,12 +174,12 @@ kfnll <-
         xhat_init <- xhat0
         PNinit <- Phat0
         time.steps <- c(t0, times[1])
-        R <- max(5, z[1] * p["tau"])
+        R <- z[1] * p["tau"]
       } else {
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
         time.steps <- c(times[i - 1], times[i])
-        R <- max(5, z[i] * p["tau"])
+        R <- z[i] * p["tau"]
       }
       if (zero_cases == "daily" || wday[i] == 1){
         xhat_init["C"] <- 0
