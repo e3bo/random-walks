@@ -79,8 +79,9 @@ forecast_loc <- "36"
 data_fname <- paste0("data--", forecast_date, "--", forecast_loc, ".csv")
 case_data <- read_csv(data_fname)
 
-target_end_dates <- max(case_data$target_end_date) + lubridate::dweeks(1:4)
+target_end_dates <- max(case_data$target_end_date) + lubridate::ddays(1) * seq(1, 28)
 target_end_times <- lubridate::decimal_date(target_end_dates)
+target_wday <- lubridate::wday(target_end_dates)
 
 res_fname <- paste0("minimizer--", forecast_date, "--", forecast_loc, ".csv")
 pvar_df <- read_csv(res_fname)
@@ -133,7 +134,8 @@ kfnll <-
            Phat0 = diag(c(1, 1, 1, 0)),
            just_nll = TRUE,
            nsim = 10,
-           fets = NULL) {
+           fets = NULL,
+           zero_cases = "daily") {
     p <- c(pvar, pfixed)
     
     is_spline_par <- grepl("^b[0-9]+$", names(p))
@@ -176,11 +178,13 @@ kfnll <-
       } else {
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
-        PNinit[, 4] <- PNinit[4, ] <- 0
         time.steps <- c(times[i - 1], times[i])
-        R <- max(5, z[i - 1] * p["tau"])
+        R <- max(5, z[i] * p["tau"])
       }
-      xhat_init["C"] <- 0
+      if (zero_cases == "daily" || wday[i] == 1){
+        xhat_init["C"] <- 0
+        PNinit[, 4] <- PNinit[4, ] <- 0
+      }
       H <- Hfun(wday[i])
       XP <- iterate_f_and_P(
         xhat_init,
@@ -210,42 +214,48 @@ kfnll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) - rwlik
     if (!just_nll) {
       sim_means <-
-        sim_cov <- matrix(NA, nrow = (length(fets)), ncol = nsim)
+        sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
       if (!is.null(fets)) {
         for (j in seq_len(nsim)) {
           bpars_fet <-
             bpars[T] + cumsum(rnorm(
-              n = length(fets),
+              n = nrow(fets),
               mean = 0,
-              sd = p["betasd"] * 7
+              sd = p["betasd"]
             ))
           bpars_fet[bpars_fet < 0] <- 0
           xhat_init <- xhat_kk[, T]
-          xhat_init["C"] <- 0
           PNinit <- P_kk[, , T]
-          PNinit[, 4] <- PNinit[4, ] <- 0
+          if (zero_cases == "daily" || fets$target_wday[1] == 1){
+            xhat_init["C"] <- 0
+            PNinit[, 4] <- PNinit[4, ] <- 0
+          }
           XP <- iterate_f_and_P(
             xhat_init,
             PN = PNinit,
             pvec = p,
             beta_t = bpars_fet[1],
-            time.steps = c(times[T], fets[1])
+            time.steps = c(times[T], fets$target_end_times[1])
           )
+          H <- Hfun(fet$target_wday[1])
           sim_means[1, j] <- H %*% XP$xhat
           sim_cov[1, j] <- H %*% XP$PN %*% t(H)
-          for (i in seq_along(fets[-1])) {
+          for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
-            xhat_init["C"] <- 0
             PNinit <- XP$PN
-            PNinit[, 4] <- PNinit[4, ] <- 0
+            if (zero_cases == "daily" || fets$target_wday[i + 1] == 1){
+              xhat_init["C"] <- 0
+              PNinit[, 4] <- PNinit[4, ] <- 0
+            }
             XP <-
               iterate_f_and_P(
                 xhat_init,
                 PN = PNinit,
                 pvec = p,
                 beta_t = bpars_fet[i + 1],
-                time.steps = c(fets[i], fets[i + 1])
+                time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1])
               )
+            H <- Hfun(fet$target_wday[i + 1])
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
               H %*% XP$PN %*% t(H) + sim_means[i + 1, j] * p["tau"]
@@ -299,18 +309,26 @@ ans <- optim(
 tictoc::toc()
 }
 
+
+fet <- tibble(target_end_times, target_wday, target_end_dates)
+
 kfret <- kfnll(pvar = pvar,
       pfixed = pfixed,
       cdata = tail(case_data, n = wsize),
       t0 = the_t0,
       just_nll = FALSE,
-      fet = target_end_times)
+      fet = fet, 
+      zero_cases = "weekly")
 
-fcst <- create_forecast_df(means = kfret$sim_means,
-                           vars = kfret$sim_cov,
+inds <- which(fet$target_wday == 7)
+
+fcst <- create_forecast_df(means = kfret$sim_means[inds,],
+                           vars = kfret$sim_cov[inds,],
                            location = forecast_loc)
 
-fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-SIR_KF.csv"))
+stopifnot(setequal(fet$target_end_dates[inds], fcst$target_end_date %>% unique()))
+
+fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-InfectionKalman.csv"))
 if(!dir.exists("forecasts")) dir.create("forecasts")
 write_csv(x = fcst, path = fcst_path)
 
@@ -323,6 +341,9 @@ mpath <- file.path("metrics", paste0(forecast_date,
 jsonlite::write_json(walltime, mpath, auto_unbox = TRUE)
 
 q("no")
+
+fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line()
+
 
 is_spline_par <- grepl("^b[0-9]+$", names(ans$par))
 bhat <- ans$par[is_spline_par]
