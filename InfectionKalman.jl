@@ -81,7 +81,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365
                   0    η        -γ     0
                   0    0         γ     0]
         
-        dp = jac * plast + plast * jac' + q
+        dp = jac * plast + plast * jac' + q * N
         pkkmo[:,:,i] = plast + dp * dt
         
         r[1,1] = z[i][1] * τ 
@@ -126,7 +126,7 @@ function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false
     end
     
     if detailed_results
-        n, r, s, x, pk, pkk = obj(res.minimizer, z; just_nll = false)
+        n, r, s, x, pk, pkk = obj(res.minimizer, z, w; just_nll = false)
         res = [res, n, r, s, x, pk, pkk]
     end
     res

@@ -6,7 +6,7 @@ using DataFrames
 include("InfectionKalman.jl")
 
 import .InfectionKalman
-export res
+export res, n, r, s, x, pk, pkk
 
 if length(ARGS) == 0
     fdt = "2020-10-12"
@@ -19,7 +19,7 @@ end
 pdata = DataFrame(load(string("initial-pars--", fdt, "--", loc, ".csv")))
 cdata = DataFrame(load(string("data--", fdt, "--", loc, ".csv")))
 
-res = InfectionKalman.fit(cdata, pdata; show_trace = true)
+res, n, r, s, x, pk, pkk = InfectionKalman.fit(cdata, pdata; show_trace = true, detailed_results = true)
 pdata.minimizer = res.minimizer
 
 save(string("minimizer--", fdt, "--", loc, ".csv"), pdata)

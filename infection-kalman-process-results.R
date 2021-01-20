@@ -213,9 +213,9 @@ kfnll <-
     nll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) - rwlik
     if (!just_nll) {
-      sim_means <-
-        sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
       if (!is.null(fets)) {
+        sim_means <-
+          sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
           bpars_fet <-
             bpars[T] + cumsum(rnorm(
@@ -291,8 +291,6 @@ pfixed <- c(
   betasd = 1
 )
 
-is_spline_par <- grepl("^b[0-9]+$", names(pvar))
-
 if(FALSE){
 tictoc::tic("optimization")
 ans <- optim(
@@ -308,7 +306,6 @@ ans <- optim(
 )
 tictoc::toc()
 }
-
 
 fet <- tibble(target_end_times, target_wday, target_end_dates)
 
@@ -343,6 +340,17 @@ jsonlite::write_json(walltime, mpath, auto_unbox = TRUE)
 q("no")
 
 fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line()
+
+
+kfret2 <- kfnll(pvar = pvar,
+               pfixed = pfixed,
+               cdata = tail(case_data, n = wsize),
+               t0 = the_t0,
+               just_nll = FALSE,
+               fet = NULL, 
+               zero_cases = "daily")
+
+
 
 
 is_spline_par <- grepl("^b[0-9]+$", names(ans$par))
