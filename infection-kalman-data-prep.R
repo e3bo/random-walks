@@ -24,8 +24,8 @@ case_data <- nys2 %>% ungroup() %>%
 data_fname = paste0("data--", forecast_date, "--", forecast_loc, ".csv")
 write_csv(case_data, path = data_fname)
 
-wsize <- 5
-gamma <- 365/9
+wsize <- 60
+gamma <- 365.25/9
 
 pvar_df <- tribble(
   ~par, ~init, ~lower, ~upper,

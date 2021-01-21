@@ -140,7 +140,7 @@ kfnll <-
     
     is_spline_par <- grepl("^b[0-9]+$", names(p))
     tmp <- p[is_spline_par]
-    bpars <- tmp[order(names(tmp))]
+    bpars <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
     stopifnot(length(bpars) == nrow(cdata))
     
     is_wday_par <- grepl("rho[1-7]", names(p))
@@ -339,7 +339,7 @@ jsonlite::write_json(walltime, mpath, auto_unbox = TRUE)
 
 q("no")
 
-fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line()
+fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line() + geom_point()
 
 
 kfret2 <- kfnll(pvar = pvar,
@@ -357,13 +357,14 @@ is_spline_par <- grepl("^b[0-9]+$", names(ans$par))
 bhat <- ans$par[is_spline_par]
 R0hat <- bhat / gamma
 
-qqnorm(kfret$ytilde_k / sqrt(kfret$S))
+qqnorm(kfret2$ytilde_k / sqrt(kfret2$S))
 abline(0, 1)
 
 par(mfrow = c(4, 1))
-tgrid <- tail(case_data$time, n = the_n)
-plot(tgrid, tail(case_data$reports, n = the_n), xlab = "Time", ylab = "Cases")
-lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho"])
+tgrid <- tail(case_data$time, n = wsize)
+
+plot(tgrid, tail(case_data$reports, n = wsize), xlab = "Time", ylab = "Cases")
+lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
 lines(tgrid, kfret$xhat_kk["C",] * pfixed["rho"], col = 2)
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
