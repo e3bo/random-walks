@@ -30,7 +30,7 @@ dvc run \
     -o minimizer--$fdt--$loc.csv \
     --force \
     -n data-fit-$fdt-$loc \
-    julia InfectionKalmanMain.jl $fdt $loc
+    JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl $fdt $loc
     
 dvc run \
     -d minimizer--$fdt--$loc.csv \
