@@ -86,7 +86,7 @@ target_wday <- lubridate::wday(target_end_dates)
 res_fname <- paste0("minimizer--", forecast_date, "--", forecast_loc, ".csv")
 pvar_df <- read_csv(res_fname)
 
-wsize <- nrow(pvar_df) - 4L
+wsize <- nrow(pvar_df) - 5L
 the_t0 <- rev(case_data$time)[wsize + 1]
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
@@ -135,7 +135,7 @@ kfnll <-
            just_nll = TRUE,
            nsim = 10,
            fets = NULL,
-           zero_cases = "daily") {
+           fet_zero_cases = "daily") {
     p <- c(pvar, pfixed)
     
     is_spline_par <- grepl("^b[0-9]+$", names(p))
@@ -181,7 +181,7 @@ kfnll <-
         time.steps <- c(times[i - 1], times[i])
         R <- z[i] * p["tau"]
       }
-      if (zero_cases == "daily" || wday[i] == 1){
+      if (TRUE){
         xhat_init["C"] <- 0
         PNinit[, 4] <- PNinit[4, ] <- 0
       }
@@ -226,7 +226,7 @@ kfnll <-
           bpars_fet[bpars_fet < 0] <- 0
           xhat_init <- xhat_kk[, T]
           PNinit <- P_kk[, , T]
-          if (zero_cases == "daily" || fets$target_wday[1] == 1){
+          if (fet_zero_cases == "daily" || fets$target_wday[1] == 1){
             xhat_init["C"] <- 0
             PNinit[, 4] <- PNinit[4, ] <- 0
           }
@@ -243,7 +243,7 @@ kfnll <-
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
-            if (zero_cases == "daily" || fets$target_wday[i + 1] == 1){
+            if (fet_zero_cases == "daily" || fets$target_wday[i + 1] == 1){
               xhat_init["C"] <- 0
               PNinit[, 4] <- PNinit[4, ] <- 0
             }
@@ -287,8 +287,7 @@ pfixed <- c(
   N = 20e6,
   S_0 = 19e6,
   rho1 = 0.4,
-  iota = 0,
-  betasd = 1
+  iota = 0
 )
 
 if(FALSE){
@@ -315,7 +314,7 @@ kfret <- kfnll(pvar = pvar,
       t0 = the_t0,
       just_nll = FALSE,
       fet = fet, 
-      zero_cases = "weekly")
+      fet_zero_cases = "weekly")
 
 inds <- which(fet$target_wday == 7)
 
@@ -329,14 +328,6 @@ fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-InfectionKalman
 if(!dir.exists("forecasts")) dir.create("forecasts")
 write_csv(x = fcst, path = fcst_path)
 
-## Produce metrics
-time <- tictoc::toc()
-walltime <- list(wall = time$toc - time$tic)
-if(!dir.exists("metrics")) dir.create("metrics")
-mpath <- file.path("metrics", paste0(forecast_date, 
-                                     "-forecast-calc-time.json"))
-jsonlite::write_json(walltime, mpath, auto_unbox = TRUE)
-
 q("no")
 
 fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line() + geom_point()
@@ -348,7 +339,7 @@ kfret2 <- kfnll(pvar = pvar,
                t0 = the_t0,
                just_nll = FALSE,
                fet = NULL, 
-               zero_cases = "daily")
+               fet_zero_cases = "daily")
 
 
 

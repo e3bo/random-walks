@@ -31,13 +31,14 @@ pvar_df <- tribble(
   ~par, ~init, ~lower, ~upper,
   "E_0", 1e4, 10, 1e5,
   "I_0", 1e4, 10, 1e5,
-  "tau", 1e-2, 1e-4, 1e3
+  "tau", 1e-2, 1e-4, 1e3,
+  "betasd", 1, 1e-8, 5
 ) %>% 
   bind_rows(tibble(par = paste0("rho", seq(2, 2)),
                    init = 0.4,
                    lower = 0,
                    upper = 1)) %>%
-  bind_rows(tibble(par = paste0("b", seq_len(wsize + 1)),
+  bind_rows(tibble(par = paste0("b", seq_len(wsize)),
                    init = gamma,
                    lower = 0.1 * gamma,
                    upper = 4 * gamma))
