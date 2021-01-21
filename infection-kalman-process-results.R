@@ -356,7 +356,7 @@ tgrid <- tail(case_data$time, n = wsize)
 
 plot(tgrid, tail(case_data$reports, n = wsize), xlab = "Time", ylab = "Cases")
 lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
-lines(tgrid, kfret$xhat_kk["C",] * pfixed["rho"], col = 2)
+lines(tgrid, kfret$xhat_kkmo["C",] * pvar["rho2"], col = 2)
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")

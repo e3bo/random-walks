@@ -69,9 +69,18 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
         subversion
 
-RUN install2.r --skipinstalled --error bbmle \
-deSolve \
+RUN install2.r --skipinstalled --error \
+KScorrect \
 padr \
-pomp \
 tictoc \
 verification
+
+WORKDIR /opt
+RUN wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.3-linux-x86_64.tar.gz
+RUN tar zxvf julia-1.5.3-linux-x86_64.tar.gz
+ENV PATH="${PATH}:/opt/julia-1.5.3/bin"
+USER rstudio
+RUN /opt/julia-1.5.3/bin/julia -e 'using Pkg; Pkg.add(name = "MbedTLS", version = "0.7.0"); Pkg.add.(["CSVFiles", "DataFrames", "Distributions", "ForwardDiff", "LinearAlgebra", "Optim"])'
+USER root
+WORKDIR ${RUNNER_PATH}
+RUN apt-get update && apt-get install --only-upgrade dvc

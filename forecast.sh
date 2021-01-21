@@ -3,6 +3,7 @@
 set -e
 
 fdt="${fdt:-2020-07-26}"
+loc="36"
 
 dvc run \
     -d pull-hopkins-ts-from-date.R \
@@ -12,11 +13,11 @@ dvc run \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
     
 dvc run \
-    -d sir-kf-forecast.R \
+    -d infection-kalman-data-prep.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
-    -M metrics/$fdt-forecast-calc-time.json \
-    -o forecasts/$fdt-CEID-SIR_KF.csv \
+    -o data--$fdt--$loc.csv \
+    -o initial-pars--$fdt--$loc.csv \
     --force \
-    -n forecast-$fdt \
-    fdt=$fdt Rscript sir-kf-forecast.R
+    -n data-prep-$fdt-$loc \
+    fdt=$fdt Rscript infection-kalman-data-prep.R

@@ -7,4 +7,4 @@ docker run \
 	-e USERID=1005 \
 	-e DISABLE_AUTH=true \
 	--mount type=bind,src=$HOME/src/random-walks,dst=/home/rstudio/work \
-	eamon/sir-ekf:2021-01-08 /init
+	eamon/sir-ekf:2021-01-21 /init

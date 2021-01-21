@@ -9,26 +9,6 @@ hopkins-2020-10-12:
     md5: 7461af20726cac0df8ae8c4de261608c.dir
     size: 6162886
     nfiles: 8
-forecast-2020-10-12:
-  cmd: fdt=2020-10-12 Rscript sir-kf-forecast.R
-  deps:
-  - path: covidhub-common.R
-    md5: 61115b4ee2b6253254dc75c5dc0fde3f
-    size: 9912
-  - path: hopkins/2020-10-12
-    md5: 7461af20726cac0df8ae8c4de261608c.dir
-    size: 6162886
-    nfiles: 8
-  - path: sir-kf-forecast.R
-    md5: c42d59b14dbcad7270c0dafa07e961a8
-    size: 11062
-  outs:
-  - path: forecasts/2020-10-12-CEID-SIR_KF.csv
-    md5: e89a70de81d0f20465a6985fa40108b7
-    size: 2090
-  - path: metrics/2020-10-12-forecast-calc-time.json
-    md5: 78a3305efa26089cce9674f3676271e7
-    size: 17
 hopkins-2021-01-11:
   cmd: fdt=2021-01-11 ./pull-hopkins-ts-from-date.R
   deps:
@@ -70,3 +50,23 @@ score-2021-01-11:
   - path: metrics/2021-01-11-score-by-loc-type.csv
     md5: d23c250387bd1ff00dbe5a79155113f0
     size: 42
+data-prep-2020-10-12-36:
+  cmd: fdt=2020-10-12 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-10-12
+    md5: 7461af20726cac0df8ae8c4de261608c.dir
+    size: 6162886
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 7c1e852e2c8bfda908be4bff59787924
+    size: 1399
+  outs:
+  - path: data--2020-10-12--36.csv
+    md5: ed7e23d3005b26ad86ea0b0ed40e469a
+    size: 9462
+  - path: initial-pars--2020-10-12--36.csv
+    md5: 9b7baeaf3c974a74791820fa28f32402
+    size: 3700
