@@ -322,3 +322,69 @@ stages:
     - minimizer--2020-11-09--36.csv
     outs:
     - forecasts/2020-11-09-CEID-InfectionKalman.csv
+  hopkins-2020-11-16:
+    cmd: fdt=2020-11-16 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-11-16
+  data-prep-2020-11-16-36:
+    cmd: fdt=2020-11-16 loc=36 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-11-16
+    - infection-kalman-data-prep.R
+    outs:
+    - data--2020-11-16--36.csv
+    - initial-pars--2020-11-16--36.csv
+  data-fit-2020-11-16-36:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-11-16
+      36
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data--2020-11-16--36.csv
+    - initial-pars--2020-11-16--36.csv
+    outs:
+    - minimizer--2020-11-16--36.csv
+  write-forecast-2020-11-16-36:
+    cmd: fdt=2020-11-16 loc=36 Rscript infection-kalman-process-results.R
+    deps:
+    - data--2020-11-16--36.csv
+    - infection-kalman-process-results.R
+    - minimizer--2020-11-16--36.csv
+    outs:
+    - forecasts/2020-11-16-CEID-InfectionKalman.csv
+  hopkins-2020-11-23:
+    cmd: fdt=2020-11-23 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-11-23
+  data-prep-2020-11-23-36:
+    cmd: fdt=2020-11-23 loc=36 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-11-23
+    - infection-kalman-data-prep.R
+    outs:
+    - data--2020-11-23--36.csv
+    - initial-pars--2020-11-23--36.csv
+  data-fit-2020-11-23-36:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-11-23
+      36
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data--2020-11-23--36.csv
+    - initial-pars--2020-11-23--36.csv
+    outs:
+    - minimizer--2020-11-23--36.csv
+  write-forecast-2020-11-23-36:
+    cmd: fdt=2020-11-23 loc=36 Rscript infection-kalman-process-results.R
+    deps:
+    - data--2020-11-23--36.csv
+    - infection-kalman-process-results.R
+    - minimizer--2020-11-23--36.csv
+    outs:
+    - forecasts/2020-11-23-CEID-InfectionKalman.csv
