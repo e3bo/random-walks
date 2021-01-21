@@ -60,3 +60,35 @@ stages:
     - minimizer--2020-10-12--36.csv
     outs:
     - forecasts/2020-10-12-CEID-InfectionKalman.csv
+  hopkins-2020-10-05:
+    cmd: fdt=2020-10-05 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-10-05
+  data-prep-2020-10-05-36:
+    cmd: fdt=2020-10-05 loc=36 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-10-05
+    - infection-kalman-data-prep.R
+    outs:
+    - data--2020-10-05--36.csv
+    - initial-pars--2020-10-05--36.csv
+  data-fit-2020-10-05-36:
+    cmd: julia InfectionKalmanMain.jl 2020-10-05 36
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data--2020-10-05--36.csv
+    - initial-pars--2020-10-05--36.csv
+    outs:
+    - minimizer--2020-10-05--36.csv
+  write-forecast-2020-10-05-36:
+    cmd: fdt=2020-10-05 loc=36 Rscript infection-kalman-process-results.R
+    deps:
+    - data--2020-10-05--36.csv
+    - infection-kalman-process-results.R
+    - minimizer--2020-10-05--36.csv
+    outs:
+    - forecasts/2020-10-05-CEID-InfectionKalman.csv

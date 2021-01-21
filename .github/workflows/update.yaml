@@ -30,18 +30,7 @@ jobs:
           git add dvc.lock metrics
           if git commit -m "dvc repro autoupdate" && git push;
           then
-            echo "# Running times" > report.md
-            dvc metrics show >> report.md
-          
-            echo "# Plots" >> report.md
-            dvc plots show --show-vega metrics/2021-01-11-score-by-loc-type.csv >vega.json
-            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-            dvc plots show --show-vega metrics/2021-01-11-score-by-loc-type-targ-type.csv >vega.json
-            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-            dvc plots show --show-vega metrics/2021-01-11-score-by-loc-type-targ-type-forecast-date.csv >vega.json
-            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+            echo "Pushed changes." > report.md         
           else
             echo "No changes to outputs." > report.md
           fi
