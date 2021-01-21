@@ -35,7 +35,7 @@ stages:
         x: loc_type
         x_label: Location type
   data-prep-2020-10-12-36:
-    cmd: fdt=2020-10-12 Rscript infection-kalman-data-prep.R
+    cmd: fdt=2020-10-12 loc=36 Rscript infection-kalman-data-prep.R
     deps:
     - covidhub-common.R
     - hopkins/2020-10-12
@@ -43,3 +43,20 @@ stages:
     outs:
     - data--2020-10-12--36.csv
     - initial-pars--2020-10-12--36.csv
+  data-fit-2020-10-12-36:
+    cmd: julia InfectionKalmanMain.jl 2020-10-12 36
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data--2020-10-12--36.csv
+    - initial-pars--2020-10-12--36.csv
+    outs:
+    - minimizer--2020-10-12--36.csv
+  write-forecast-2020-10-12-36:
+    cmd: fdt=2020-10-12 loc=36 Rscript infection-kalman-process-results.R
+    deps:
+    - data--2020-10-12--36.csv
+    - infection-kalman-process-results.R
+    - minimizer--2020-10-12--36.csv
+    outs:
+    - forecasts/2020-10-12-CEID-InfectionKalman.csv

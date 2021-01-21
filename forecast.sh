@@ -20,4 +20,23 @@ dvc run \
     -o initial-pars--$fdt--$loc.csv \
     --force \
     -n data-prep-$fdt-$loc \
-    fdt=$fdt Rscript infection-kalman-data-prep.R
+    fdt=$fdt loc=$loc Rscript infection-kalman-data-prep.R
+    
+dvc run \
+    -d data--$fdt--$loc.csv \
+    -d initial-pars--$fdt--$loc.csv \
+    -d InfectionKalman.jl \
+    -d InfectionKalmanMain.jl \
+    -o minimizer--$fdt--$loc.csv \
+    --force \
+    -n data-fit-$fdt-$loc \
+    julia InfectionKalmanMain.jl $fdt $loc
+    
+dvc run \
+    -d minimizer--$fdt--$loc.csv \
+    -d data--$fdt--$loc.csv \
+    -d infection-kalman-process-results.R \
+    -o forecasts/$fdt-CEID-InfectionKalman.csv \
+    --force \
+    -n write-forecast-$fdt-$loc \
+    fdt=$fdt loc=$loc Rscript infection-kalman-process-results.R
