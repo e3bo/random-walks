@@ -288,7 +288,7 @@ pfixed <- c(
   S_0 = 19e6,
   rho1 = 0.4,
   iota = 0,
-  betasd = 1
+  betasd = 1.5
 )
 
 if(FALSE){
