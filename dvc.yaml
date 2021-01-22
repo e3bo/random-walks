@@ -520,3 +520,12 @@ stages:
     - minimizer--2020-12-21--36.csv
     outs:
     - forecasts/2020-12-21-CEID-InfectionKalman.csv
+  evaluate:
+    cmd: Rscript -e "knitr::spin(\"evaluate-forecasts.R\")"
+    deps:
+    - evaluate-forecasts.R
+    - forecasts
+    outs:
+    - case-trajectories-vs-cef.png
+    - case-trajectories-vs-rwf.png
+    - evaluate-forecasts.html

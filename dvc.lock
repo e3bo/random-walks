@@ -1041,3 +1041,23 @@ write-forecast-2020-12-21-36:
   - path: forecasts/2020-12-21-CEID-InfectionKalman.csv
     md5: 82dbfcc7751e6b26710cbe70ad5ce3ce
     size: 2154
+evaluate:
+  cmd: Rscript -e "knitr::spin(\"evaluate-forecasts.R\")"
+  deps:
+  - path: evaluate-forecasts.R
+    md5: 339096603a7334d8e76033544d68a464
+    size: 3721
+  - path: forecasts
+    md5: dc018c40b93fd120a7ec21415d57ff33.dir
+    size: 31862
+    nfiles: 15
+  outs:
+  - path: case-trajectories-vs-cef.png
+    md5: 6c5e1fb5d8405978cb718a8abdb8ea3f
+    size: 127392
+  - path: case-trajectories-vs-rwf.png
+    md5: 448b2da154f17ea4f2bda906dd1e26e0
+    size: 122465
+  - path: evaluate-forecasts.html
+    md5: 30afda9174ea9cc5c56bc95ca12e4638
+    size: 694443
