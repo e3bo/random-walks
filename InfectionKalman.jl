@@ -8,15 +8,14 @@ using Optim
 
 export fit
 
-function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ1::Float64 = 0.4, just_nll::Bool = true)
+function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 1.)
     # prior for time 0
     x0 = [19e6; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
     
     τ = pvar[3]
-    ρ2 = pvar[5]
-    betasd = pvar[4]
-
+    ρ2 = pvar[4]
+    
     dstate = size(x0, 1)
 
     # cyclic observation matrix
@@ -42,7 +41,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     pkk = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     
-    bvec = pvar[6:end]
+    bvec = pvar[5:end]
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
     
     for i in 1:nobs
@@ -117,7 +116,7 @@ end
 
 function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false) 
 
-    wsize = size(pdata)[1] - 5
+    wsize = size(pdata)[1] - 4
     z = [[el] for el in cdata.reports[end-wsize+1:end]]
     w = [el for el in cdata.wday[end-wsize+1:end]]
 

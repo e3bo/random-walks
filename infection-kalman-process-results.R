@@ -86,7 +86,7 @@ target_wday <- lubridate::wday(target_end_dates)
 res_fname <- paste0("minimizer--", forecast_date, "--", forecast_loc, ".csv")
 pvar_df <- read_csv(res_fname)
 
-wsize <- nrow(pvar_df) - 5L
+wsize <- nrow(pvar_df) - 4L
 the_t0 <- rev(case_data$time)[wsize + 1]
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
@@ -287,7 +287,8 @@ pfixed <- c(
   N = 20e6,
   S_0 = 19e6,
   rho1 = 0.4,
-  iota = 0
+  iota = 0,
+  betasd = 1
 )
 
 if(FALSE){

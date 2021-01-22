@@ -18,7 +18,7 @@ fdtsrw <- c(paste0("2020-12-", c("07", "14", "21")),
 cpred$rwf <- get_covidhub_predictions("CEID-Walk",
                                       forecast_dates = fdtsrw)
 cpred$cef <- get_covidhub_predictions("COVIDhub-ensemble",
-                                          forecast_dates = fdts)
+                                      forecast_dates = fdts)
 
 cpred2 <- map(cpred, filter_predictions, geo_type = "state")
 
