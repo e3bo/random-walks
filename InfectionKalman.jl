@@ -8,14 +8,14 @@ using Optim
 
 export fit
 
-function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 2.0)
+function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 2.0, rzzero::Float64 = 5e2)
     # prior for time 0
     x0 = [19e6; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
     
     τ = pvar[3]
     ρ2 = pvar[4]
-    
+    #println(pvar)
     dstate = size(x0, 1)
 
     # cyclic observation matrix
@@ -47,7 +47,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     for i in 1:nobs
         h = reshape(hm[w[i],:], dobs, dstate)
         β = bvec[i]
-        if (i == 1)
+        if i == 1
             xlast =  x0
             plast = p0
         else
@@ -86,7 +86,11 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
         dp = jac * plast + plast * jac' + q * N
         pkkmo[:,:,i] = plast + dp * dt
         
-        r[1,1] = z[i][1] * τ 
+        if z[i][1] < 1
+          r[1,1] = rzzero
+        else
+          r[1,1] = z[i][1] * τ
+        end
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
         ytkkmo[:,i] = z[i] - h * reshape(xkkmo[:,i], dstate, 1)
