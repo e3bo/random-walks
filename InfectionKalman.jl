@@ -8,24 +8,31 @@ using Optim
 
 export fit
 
-function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 20e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 2.0, rzzero::Float64 = 5e2)
+function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 2.0, rzzero::Float64 = 1e6)
     # prior for time 0
-    x0 = [19e6; pvar[1]; pvar[2]; 0]
+    x0 = [N - pvar[1] - pvar[2]; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
     
     τ = pvar[3]
     ρ2 = pvar[4]
+    ρ3 = pvar[5]
+    ρ4 = pvar[6]
+    ρ5 = pvar[7]
+    ρ6 = pvar[8]
+    ρ7 = pvar[9]   
+    
+    
     #println(pvar)
     dstate = size(x0, 1)
 
     # cyclic observation matrix
-    hm = [0 0 0 ρ2
+    hm = [0 0 0 ρ1
          0 0 0 ρ2
-         0 0 0 ρ2
-         0 0 0 ρ1
-         0 0 0 ρ1
-         0 0 0 ρ1
-         0 0 0 ρ1]
+         0 0 0 ρ3
+         0 0 0 ρ4
+         0 0 0 ρ5
+         0 0 0 ρ6
+         0 0 0 ρ7]
     
     dobs = 1
     r = Matrix(undef, dobs, dobs)
@@ -89,7 +96,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
         if z[i][1] < 1
           r[1,1] = rzzero
         else
-          r[1,1] = z[i][1] * τ
+          r[1,1] = τ
         end
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]

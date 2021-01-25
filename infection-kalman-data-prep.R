@@ -6,17 +6,17 @@ suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
-forecast_loc <- "36"
+forecast_loc <- Sys.getenv("loc", unset = "36")
 hopdir <- file.path("hopkins", forecast_date)
 tictoc::tic("data loading")
 tdat <- load_hopkins(hopdir, weekly = FALSE) 
 tictoc::toc()
 
-nys <- tdat %>% filter(location == forecast_loc) %>% 
+ltdat <- tdat %>% filter(location == forecast_loc) %>% 
   filter(target_type == "day ahead inc case")
 
-nys2 <- nys %>% mutate(time = lubridate::decimal_date(target_end_date))
-case_data <- nys2 %>% ungroup() %>% 
+ltdat2 <- ltdat %>% mutate(time = lubridate::decimal_date(target_end_date))
+case_data <- ltdat2 %>% ungroup() %>% 
   mutate(wday = lubridate::wday(target_end_date)) %>%
   select(target_end_date, time, wday, value) %>% 
   rename(reports = value)
@@ -33,7 +33,7 @@ pvar_df <- tribble(
   "I_0", 1e4, 10, 1e5,
   "tau", 1e-2, 1e-4, 1e3
 ) %>% 
-  bind_rows(tibble(par = paste0("rho", seq(2, 2)),
+  bind_rows(tibble(par = paste0("rho", seq(2, 7)),
                    init = 0.4,
                    lower = 0,
                    upper = 1)) %>%

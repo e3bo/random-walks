@@ -3,7 +3,6 @@
 tictoc::tic()
 
 suppressPackageStartupMessages(library(tidyverse))
-source("covidhub-common.R")
 
 create_forecast_df <- function(means,
                                vars,
@@ -75,7 +74,7 @@ create_forecast_df <- function(means,
 }
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
-forecast_loc <- "36"
+forecast_loc <- Sys.getenv("loc", unset = "36")
 data_fname <- paste0("data--", forecast_date, "--", forecast_loc, ".csv")
 case_data <- read_csv(data_fname)
 
@@ -86,7 +85,7 @@ target_wday <- lubridate::wday(target_end_dates)
 res_fname <- paste0("minimizer--", forecast_date, "--", forecast_loc, ".csv")
 pvar_df <- read_csv(res_fname)
 
-wsize <- nrow(pvar_df) - 4L
+wsize <- nrow(pvar_df) - 9L
 the_t0 <- rev(case_data$time)[wsize + 1]
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
@@ -135,6 +134,7 @@ kfnll <-
            just_nll = TRUE,
            nsim = 10,
            fets = NULL,
+           Rzzero = 1e6,
            fet_zero_cases = "daily") {
     p <- c(pvar, pfixed)
     
@@ -146,7 +146,7 @@ kfnll <-
     is_wday_par <- grepl("rho[1-7]", names(p))
     tmp <- p[is_wday_par]
     wpars <- tmp[order(names(tmp))]
-    stopifnot(length(wpars) == 2)
+    stopifnot(length(wpars) == 7)
     
     xhat0 = c(p[c("S_0", "E_0", "I_0")], 0)
     names(xhat0) <- c("S", "E", "I", "C")
@@ -162,11 +162,7 @@ kfnll <-
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(4, 4, T))
     Hfun <- function(w, par = p){
-      if (w <= 3){
-        name <- "rho2"
-      } else {
-        name <- "rho1"
-      }
+        name <- paste0("rho", 1)
       matrix(c(0, 0, 0, par[name]), ncol = 4)
     }
     for (i in seq(1, T)) {
@@ -180,6 +176,9 @@ kfnll <-
         PNinit <- P_kk[, , i - 1]
         time.steps <- c(times[i - 1], times[i])
         R <- z[i] * p["tau"]
+      }
+      if (z[i] < 1){
+        R <- Rzzero
       }
       if (TRUE){
         xhat_init["C"] <- 0
@@ -284,8 +283,8 @@ pvar <- pvar_df$minimizer
 names(pvar) <- pvar_df$par
 
 pfixed <- c(
-  N = 20e6,
-  S_0 = 19e6,
+  N = 7e6,
+  S_0 = 7e6 - unname(pvar["E_0"] - pvar["I_0"]),
   rho1 = 0.4,
   iota = 0,
   betasd = 2.0
@@ -325,7 +324,7 @@ fcst <- create_forecast_df(means = kfret$sim_means[inds,],
 
 stopifnot(setequal(fet$target_end_dates[inds], fcst$target_end_date %>% unique()))
 
-fcst_path <- file.path("forecasts", paste0(forecast_date, "-CEID-InfectionKalman.csv"))
+fcst_path <- file.path("forecasts", paste0(forecast_date, "-", loc, "-CEID-InfectionKalman.csv"))
 if(!dir.exists("forecasts")) dir.create("forecasts")
 write_csv(x = fcst, path = fcst_path)
 
@@ -356,8 +355,11 @@ par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = wsize)
 
 plot(tgrid, tail(case_data$reports, n = wsize), xlab = "Time", ylab = "Cases")
-lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
-lines(tgrid, kfret$xhat_kkmo["C",] * pvar["rho2"], col = 2)
+rhot <- tail(c(pvar, pfixed)[paste0("rho", case_data$wday)], n = wsize)
+lines(tgrid, kfret$xhat_kkmo["C",] * rhot)
+
+
+
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")

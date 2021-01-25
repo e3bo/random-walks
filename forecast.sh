@@ -3,7 +3,7 @@
 set -e
 
 fdt="${fdt:-2020-07-26}"
-loc="36"
+loc="${loc:-36}"
 
 dvc run \
     -d pull-hopkins-ts-from-date.R \
@@ -36,7 +36,7 @@ dvc run \
     -d minimizer--$fdt--$loc.csv \
     -d data--$fdt--$loc.csv \
     -d infection-kalman-process-results.R \
-    -o forecasts/$fdt-CEID-InfectionKalman.csv \
+    -o forecasts/$fdt-$loc-CEID-InfectionKalman.csv \
     --force \
     -n write-forecast-$fdt-$loc \
     fdt=$fdt loc=$loc Rscript infection-kalman-process-results.R

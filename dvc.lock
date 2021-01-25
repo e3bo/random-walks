@@ -1062,3 +1062,23 @@ evaluate:
     md5: 06b35ad0088baf1ef1c6d4a292428e80.dir
     size: 493950
     nfiles: 13
+data-prep-2020-10-12-53:
+  cmd: fdt=2020-10-12 loc=53 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-10-12
+    md5: 7461af20726cac0df8ae8c4de261608c.dir
+    size: 6162886
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 838b9c3d6139f76064439c7a830ef3e2
+    size: 1410
+  outs:
+  - path: data--2020-10-12--53.csv
+    md5: b862a98cbc9934a7bf20f54a16366714
+    size: 9357
+  - path: initial-pars--2020-10-12--53.csv
+    md5: 05a2e903c42881489dc5283642518407
+    size: 3684
