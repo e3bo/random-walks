@@ -26,12 +26,13 @@ write_csv(case_data, path = data_fname)
 
 wsize <- 60
 gamma <- 365.25/9
+tau_init <- case_data$reports %>% tail(n = wsize) %>% var()
 
 pvar_df <- tribble(
   ~par, ~init, ~lower, ~upper,
   "E_0", 1e4, 10, 1e5,
   "I_0", 1e4, 10, 1e5,
-  "tau", 1e-2, 1e-4, 1e3
+  "tau", tau_init, tau_init * 1e-2, tau_init * 10
 ) %>% 
   bind_rows(tibble(par = paste0("rho", seq(2, 7)),
                    init = 0.4,

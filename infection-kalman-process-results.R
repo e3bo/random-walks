@@ -162,7 +162,7 @@ kfnll <-
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(4, 4, T))
     Hfun <- function(w, par = p){
-        name <- paste0("rho", 1)
+        name <- paste0("rho", w)
       matrix(c(0, 0, 0, par[name]), ncol = 4)
     }
     for (i in seq(1, T)) {
@@ -170,15 +170,14 @@ kfnll <-
         xhat_init <- xhat0
         PNinit <- Phat0
         time.steps <- c(t0, times[1])
-        R <- z[1] * p["tau"]
       } else {
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
         time.steps <- c(times[i - 1], times[i])
-        R <- z[i] * p["tau"]
       }
+      R <- p["tau"]
       if (z[i] < 1){
-        R <- Rzzero
+        R <- Rzzero * p["tau"]
       }
       if (TRUE){
         xhat_init["C"] <- 0
@@ -238,7 +237,7 @@ kfnll <-
           )
           H <- Hfun(fet$target_wday[1])
           sim_means[1, j] <- H %*% XP$xhat
-          sim_cov[1, j] <- H %*% XP$PN %*% t(H)
+          sim_cov[1, j] <- H %*% XP$PN %*% t(H) + p["tau"]
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
@@ -257,7 +256,7 @@ kfnll <-
             H <- Hfun(fet$target_wday[i + 1])
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
-              H %*% XP$PN %*% t(H) + sim_means[i + 1, j] * p["tau"]
+              H %*% XP$PN %*% t(H) + p["tau"]
           }
         }
       } else {
@@ -284,7 +283,7 @@ names(pvar) <- pvar_df$par
 
 pfixed <- c(
   N = 7e6,
-  S_0 = 7e6 - unname(pvar["E_0"] - pvar["I_0"]),
+  S_0 = 7e6 - unname(pvar["E_0"] + pvar["I_0"]),
   rho1 = 0.4,
   iota = 0,
   betasd = 2.0
@@ -341,13 +340,6 @@ kfret2 <- kfnll(pvar = pvar,
                fet = NULL, 
                fet_zero_cases = "daily")
 
-
-
-
-is_spline_par <- grepl("^b[0-9]+$", names(ans$par))
-bhat <- ans$par[is_spline_par]
-R0hat <- bhat / gamma
-
 qqnorm(kfret2$ytilde_k / sqrt(kfret2$S))
 abline(0, 1)
 
@@ -357,9 +349,6 @@ tgrid <- tail(case_data$time, n = wsize)
 plot(tgrid, tail(case_data$reports, n = wsize), xlab = "Time", ylab = "Cases")
 rhot <- tail(c(pvar, pfixed)[paste0("rho", case_data$wday)], n = wsize)
 lines(tgrid, kfret$xhat_kkmo["C",] * rhot)
-
-
-
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")

@@ -48,7 +48,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     pkk = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     
-    bvec = pvar[5:end]
+    bvec = pvar[10:end]
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
     
     for i in 1:nobs
@@ -94,7 +94,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
         pkkmo[:,:,i] = plast + dp * dt
         
         if z[i][1] < 1
-          r[1,1] = rzzero
+          r[1,1] = τ * rzzero
         else
           r[1,1] = τ
         end
@@ -127,7 +127,7 @@ end
 
 function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false) 
 
-    wsize = size(pdata)[1] - 4
+    wsize = size(pdata)[1] - 9
     z = [[el] for el in cdata.reports[end-wsize+1:end]]
     w = [el for el in cdata.wday[end-wsize+1:end]]
 
