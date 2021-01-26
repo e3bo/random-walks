@@ -1806,3 +1806,30 @@ score-2021-01-25:
   - path: metrics/2021-01-25-score-by-loc-type.csv
     md5: d1ca62990d919bd2839d84abc551b65c
     size: 41
+pull-archived-forecasts:
+  cmd: ./pull-other-forecasts.R
+  deps:
+  - path: pull-other-forecasts.R
+    md5: 70337a9dc5ae1a56f2be60a98dc07180
+    size: 533
+  outs:
+  - path: other-model-forecasts.rds
+    md5: 203c03639fb313e052c3470bdbba3196
+    size: 8544
+make-trajectory-plots:
+  cmd: ./make-trajectory-plots.R
+  deps:
+  - path: CEID-InfectionKalman
+    md5: 39ca1bb5032ad4f1cb43c0fddb2da748.dir
+    size: 49812
+    nfiles: 12
+  - path: make-trajectory-plots.R
+    md5: 10b14b6d086e28b6dd9c37a827ab05ed
+    size: 675
+  - path: other-model-forecasts.rds
+    md5: 203c03639fb313e052c3470bdbba3196
+    size: 8544
+  outs:
+  - path: trajectories.png
+    md5: ce9dca09ce45d4b94ca8798e14001abb
+    size: 354387

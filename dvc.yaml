@@ -781,3 +781,17 @@ stages:
         template: lqs
         x: loc_type
         x_label: Location type
+  pull-archived-forecasts:
+    cmd: ./pull-other-forecasts.R
+    deps:
+    - pull-other-forecasts.R
+    outs:
+    - other-model-forecasts.rds
+  make-trajectory-plots:
+    cmd: ./make-trajectory-plots.R
+    deps:
+    - CEID-InfectionKalman
+    - make-trajectory-plots.R
+    - other-model-forecasts.rds
+    outs:
+    - trajectories.png
