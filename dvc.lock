@@ -950,36 +950,6 @@ data-fit-2020-10-12-53:
   - path: minimizer--2020-10-12--53.csv
     md5: b2458b403652b3708593448b573b7f6b
     size: 5241
-score-2021-01-25:
-  cmd: ddt=2021-01-25 ./quantile-score.R
-  deps:
-  - path: covidhub-common.R
-    md5: 61115b4ee2b6253254dc75c5dc0fde3f
-    size: 9912
-  - path: forecasts
-    md5: 213c9f8ab30f03ce1fa1d5068e89a58d.dir
-    size: 74238
-    nfiles: 35
-  - path: hopkins/2021-01-25
-    md5: c1a1887563595ac0c0dea6347ab8ff29.dir
-    size: 9130826
-    nfiles: 8
-  - path: quantile-score.R
-    md5: 118719d48914df291c3f05d27d430bad
-    size: 2716
-  outs:
-  - path: metrics/2021-01-25-residuals.rds
-    md5: 5b70244f5e4ee54f008b429e470db3e7
-    size: 8581
-  - path: metrics/2021-01-25-score-by-loc-type-targ-type-forecast-date.csv
-    md5: ad980684e5c505458c68a7ead9427e5e
-    size: 685
-  - path: metrics/2021-01-25-score-by-loc-type-targ-type.csv
-    md5: b7bb351efdf97b6dee421456bd3e55bc
-    size: 72
-  - path: metrics/2021-01-25-score-by-loc-type.csv
-    md5: 6d52fac8afc7cdbcfbde6be1d1e0d652
-    size: 42
 write-forecast-2020-09-14-36:
   cmd: fdt=2020-09-14 loc=36 Rscript infection-kalman-process-results.R
   deps:
@@ -1788,3 +1758,51 @@ write-forecast-2020-11-30-53:
   - path: forecasts/2020-11-30-53-CEID-InfectionKalman.csv
     md5: c704bbb9d6dadd0415dafd097fe4c771
     size: 2122
+combine:
+  cmd: ./combine-location-forecasts.R
+  deps:
+  - path: combine-location-forecasts.R
+    md5: f5c4662f0e0871d74ad271ec3a309f6a
+    size: 792
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: forecasts
+    md5: 1d1eea5e866b51b582ccdb0bf9d0c3a4.dir
+    size: 50864
+    nfiles: 24
+  outs:
+  - path: CEID-InfectionKalman
+    md5: 39ca1bb5032ad4f1cb43c0fddb2da748.dir
+    size: 49812
+    nfiles: 12
+score-2021-01-25:
+  cmd: ddt=2021-01-25 ./quantile-score.R
+  deps:
+  - path: CEID-InfectionKalman
+    md5: 39ca1bb5032ad4f1cb43c0fddb2da748.dir
+    size: 49812
+    nfiles: 12
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2021-01-25
+    md5: c1a1887563595ac0c0dea6347ab8ff29.dir
+    size: 9130826
+    nfiles: 8
+  - path: quantile-score.R
+    md5: 79a32e343cc4883f157c0eaed7e521e8
+    size: 2727
+  outs:
+  - path: metrics/2021-01-25-residuals.rds
+    md5: 4578f3a8b15281d77cb27c411c944f74
+    size: 6385
+  - path: metrics/2021-01-25-score-by-loc-type-targ-type-forecast-date.csv
+    md5: 8627aedfe87e3d340a40458645b948d2
+    size: 678
+  - path: metrics/2021-01-25-score-by-loc-type-targ-type.csv
+    md5: f4b65cfa174c82f742ed32f0bc9ba49e
+    size: 71
+  - path: metrics/2021-01-25-score-by-loc-type.csv
+    md5: d1ca62990d919bd2839d84abc551b65c
+    size: 41

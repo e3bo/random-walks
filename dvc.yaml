@@ -349,29 +349,6 @@ stages:
     - initial-pars--2020-10-12--53.csv
     outs:
     - minimizer--2020-10-12--53.csv
-  score-2021-01-25:
-    cmd: ddt=2021-01-25 ./quantile-score.R
-    deps:
-    - covidhub-common.R
-    - forecasts
-    - hopkins/2021-01-25
-    - quantile-score.R
-    outs:
-    - metrics/2021-01-25-residuals.rds
-    plots:
-    - metrics/2021-01-25-score-by-loc-type-targ-type-forecast-date.csv:
-        cache: false
-        template: lqs-loctype-targtype-panels
-        x: forecast_date
-    - metrics/2021-01-25-score-by-loc-type-targ-type.csv:
-        cache: false
-        template: lqs-loctype-panel
-        x: target_type
-    - metrics/2021-01-25-score-by-loc-type.csv:
-        cache: false
-        template: lqs
-        x: loc_type
-        x_label: Location type
   write-forecast-2020-09-14-36:
     cmd: fdt=2020-09-14 loc=36 Rscript infection-kalman-process-results.R
     deps:
@@ -773,3 +750,34 @@ stages:
     - minimizer--2020-11-30--53.csv
     outs:
     - forecasts/2020-11-30-53-CEID-InfectionKalman.csv
+  combine:
+    cmd: ./combine-location-forecasts.R
+    deps:
+    - combine-location-forecasts.R
+    - covidhub-common.R
+    - forecasts
+    outs:
+    - CEID-InfectionKalman
+  score-2021-01-25:
+    cmd: ddt=2021-01-25 ./quantile-score.R
+    deps:
+    - CEID-InfectionKalman
+    - covidhub-common.R
+    - hopkins/2021-01-25
+    - quantile-score.R
+    outs:
+    - metrics/2021-01-25-residuals.rds
+    plots:
+    - metrics/2021-01-25-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2021-01-25-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2021-01-25-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type

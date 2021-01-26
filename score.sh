@@ -10,10 +10,19 @@ dvc run \
     -n hopkins-$ddt \
     --force \
     fdt=$ddt ./pull-hopkins-ts-from-date.R
-    
+
+dvc run \
+    -d forecasts \
+    -d covidhub-common.R \
+    -d combine-location-forecasts.R \
+    -n combine \
+    -o CEID-InfectionKalman \
+    --force \
+    ./combine-location-forecasts.R
+
 dvc run \
     -d quantile-score.R \
-    -d forecasts \
+    -d CEID-InfectionKalman \
     -d covidhub-common.R \
     -d hopkins/$ddt \
     --plots-no-cache metrics/$ddt-score-by-loc-type.csv \

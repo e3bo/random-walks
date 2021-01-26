@@ -3,7 +3,9 @@
 set -e
 
 dvc run \
-    -d forecasts \
+    -d CEID-InfectionKalman \
+    -d CEID-Walk \
+    -d COVIDhub-Ensemble \
     -d evaluate-forecasts.R \
     -o figure \
     -o evaluate-forecasts.md \

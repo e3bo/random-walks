@@ -6,7 +6,7 @@ suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 ddt <- Sys.getenv("ddt")
 targ_dir <- file.path("hopkins", ddt)
-output_dir <- "forecasts"
+output_dir <- "CEID-InfectionKalman"
 datf <- load_hopkins(targ_dir) %>% rename(true_value = "value")
 forecast_paths <- dir(output_dir, full.names = TRUE)
 
