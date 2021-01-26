@@ -323,7 +323,7 @@ fcst <- create_forecast_df(means = kfret$sim_means[inds,],
 
 stopifnot(setequal(fet$target_end_dates[inds], fcst$target_end_date %>% unique()))
 
-fcst_path <- file.path("forecasts", paste0(forecast_date, "-", loc, "-CEID-InfectionKalman.csv"))
+fcst_path <- file.path("forecasts", paste0(forecast_date, "-", forecast_loc, "-CEID-InfectionKalman.csv"))
 if(!dir.exists("forecasts")) dir.create("forecasts")
 write_csv(x = fcst, path = fcst_path)
 
