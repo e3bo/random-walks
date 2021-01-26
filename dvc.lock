@@ -1824,12 +1824,24 @@ make-trajectory-plots:
     size: 49812
     nfiles: 12
   - path: make-trajectory-plots.R
-    md5: 10b14b6d086e28b6dd9c37a827ab05ed
-    size: 675
+    md5: 1300c409944bc0044ad35f22b11a2292
+    size: 1201
   - path: other-model-forecasts.rds
     md5: 203c03639fb313e052c3470bdbba3196
     size: 8544
   outs:
-  - path: trajectories.png
-    md5: ce9dca09ce45d4b94ca8798e14001abb
-    size: 354387
+  - path: trajectories-0.png
+    md5: 7d7a65c03fb2065526661d4fe7e7d26b
+    size: 292463
+  - path: trajectories-1.png
+    md5: 1020ccf49cd001f255be72c26b50a61c
+    size: 304620
+  - path: trajectories-2.png
+    md5: d83b6b3a767e32fa4299253f50b147e9
+    size: 279511
+  - path: trajectories-3.png
+    md5: fb4cb6a2c43da0039ab4ca4a55083271
+    size: 289067
+  - path: trajectories-all.png
+    md5: d60b551a4d5cc560875c0123847556b2
+    size: 332548

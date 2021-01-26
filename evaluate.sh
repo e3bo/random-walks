@@ -13,7 +13,11 @@ dvc run \
     -d other-model-forecasts.rds \
     -d CEID-InfectionKalman \
     -d make-trajectory-plots.R \
-    -o trajectories.png \
+    -o trajectories-all.png \
+    -o trajectories-0.png \
+    -o trajectories-1.png \
+    -o trajectories-2.png \
+    -o trajectories-3.png \
     --force \
     -n make-trajectory-plots \
     ./make-trajectory-plots.R
