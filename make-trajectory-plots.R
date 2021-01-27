@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
 
-
 library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -16,6 +15,7 @@ plotter <- function(dat) {
     truth_source = "JHU",
     intervals = c(.5, .95),
     facet = location ~ model,
+    facet_scales = "free_y",
     fill_by_model = TRUE,
     plot = FALSE
   )

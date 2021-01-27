@@ -799,3 +799,13 @@ stages:
     - trajectories-2.png
     - trajectories-3.png
     - trajectories-all.png
+  analyze-scores:
+    cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
+    deps:
+    - CEID-InfectionKalman
+    - analyze-scores.R
+    - other-model-forecasts.rds
+    outs:
+    - analyze-scores.html
+    - analyze-scores.md
+    - figure

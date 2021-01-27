@@ -21,3 +21,14 @@ dvc run \
     --force \
     -n make-trajectory-plots \
     ./make-trajectory-plots.R
+    
+dvc run \
+    -d other-model-forecasts.rds \
+    -d CEID-InfectionKalman \
+    -d analyze-scores.R \
+    -o figure \
+    -o analyze-scores.md \
+    -o analyze-scores.html \
+    --force \
+    -n analyze-scores \
+    'Rscript -e "knitr::spin(\"analyze-scores.R\")"'

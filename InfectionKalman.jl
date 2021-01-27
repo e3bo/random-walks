@@ -8,7 +8,7 @@ using Optim
 
 export fit
 
-function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 2.0, rzzero::Float64 = 1e6)
+function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 1.0, rzzero::Float64 = 1e6)
     # prior for time 0
     x0 = [N - pvar[1] - pvar[2]; pvar[1]; pvar[2]; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]

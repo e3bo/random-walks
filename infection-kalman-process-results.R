@@ -286,7 +286,7 @@ pfixed <- c(
   S_0 = 7e6 - unname(pvar["E_0"] + pvar["I_0"]),
   rho1 = 0.4,
   iota = 0,
-  betasd = 2.0
+  betasd = 1.0
 )
 
 if(FALSE){
