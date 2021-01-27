@@ -85,7 +85,7 @@ target_wday <- lubridate::wday(target_end_dates)
 res_fname <- paste0("minimizer/", forecast_date, "--", forecast_loc, ".csv")
 pvar_df <- read_csv(res_fname)
 
-wsize <- nrow(pvar_df) - 9L
+wsize <- nrow(pvar_df) - 3L
 the_t0 <- rev(case_data$time)[wsize + 1]
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
@@ -146,14 +146,14 @@ kfnll <-
     is_wday_par <- grepl("rho[1-7]", names(p))
     tmp <- p[is_wday_par]
     wpars <- tmp[order(names(tmp))]
-    stopifnot(length(wpars) == 7)
+    stopifnot(length(wpars) == 1)
     
     xhat0 = c(p[c("S_0", "E_0", "I_0")], 0)
     names(xhat0) <- c("S", "E", "I", "C")
     
     T <- nrow(cdata)
     stopifnot(T > 0)
-    z <- cdata$reports
+    z <- cdata$smooth
     times <- cdata$time
     wday <- cdata$wday
     
@@ -161,10 +161,8 @@ kfnll <-
     K <- xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(4, T))
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(4, 4, T))
-    Hfun <- function(w, par = p){
-        name <- paste0("rho", w)
-      matrix(c(0, 0, 0, par[name]), ncol = 4)
-    }
+
+    H <-matrix(c(0, 0, 0, p["rho1"]), ncol = 4)
     for (i in seq(1, T)) {
       if (i == 1) {
         xhat_init <- xhat0
@@ -183,7 +181,6 @@ kfnll <-
         xhat_init["C"] <- 0
         PNinit[, 4] <- PNinit[4, ] <- 0
       }
-      H <- Hfun(wday[i])
       XP <- iterate_f_and_P(
         xhat_init,
         PN = PNinit,
@@ -235,7 +232,6 @@ kfnll <-
             beta_t = bpars_fet[1],
             time.steps = c(times[T], fets$target_end_times[1])
           )
-          H <- Hfun(fet$target_wday[1])
           sim_means[1, j] <- H %*% XP$xhat
           sim_cov[1, j] <- H %*% XP$PN %*% t(H) + p["tau"]
           for (i in seq_along(fets$target_end_times[-1])) {
@@ -253,7 +249,6 @@ kfnll <-
                 beta_t = bpars_fet[i + 1],
                 time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1])
               )
-            H <- Hfun(fet$target_wday[i + 1])
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
               H %*% XP$PN %*% t(H) + p["tau"]
@@ -281,12 +276,13 @@ kfnll <-
 pvar <- pvar_df$minimizer
 names(pvar) <- pvar_df$par
 
+pfixed <- unlist(read_csv(paste0("initial-pars/", forecast_loc, ".csv"))[1,])
+
 pfixed <- c(
-  N = 7e6,
+  pfixed, 
   S_0 = 7e6 - unname(pvar["E_0"] + pvar["I_0"]),
   rho1 = 0.4,
-  iota = 0,
-  betasd = 0.5
+  iota = 0
 )
 
 if(FALSE){
@@ -346,9 +342,8 @@ abline(0, 1)
 par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = wsize)
 
-plot(tgrid, tail(case_data$reports, n = wsize), xlab = "Time", ylab = "Cases")
-rhot <- tail(c(pvar, pfixed)[paste0("rho", case_data$wday)], n = wsize)
-lines(tgrid, kfret$xhat_kkmo["C",] * rhot)
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
+lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")

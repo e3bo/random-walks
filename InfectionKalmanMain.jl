@@ -18,8 +18,9 @@ end
 
 pdata = DataFrame(load(string("initial-pars/", fdt, "--", loc, ".csv")))
 cdata = DataFrame(load(string("data/", fdt, "--", loc, ".csv")))
+pfixed = DataFrame(load(string("initial-pars/", loc, ".csv")))
 
-res, n, r, s, x, pk, pkk = InfectionKalman.fit(cdata, pdata; show_trace = true, detailed_results = true, time_limit = 600)
+res, n, r, s, x, pk, pkk = InfectionKalman.fit(cdata, pdata; betasd = pfixed.betasd[1], N = pfixed.N[1], show_trace = true, detailed_results = true, time_limit = 600)
 pdata.minimizer = res.minimizer
 
 save(string("minimizer/", fdt, "--", loc, ".csv"), pdata)

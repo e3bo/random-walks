@@ -14,25 +14,12 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
     
     τ = pvar[3]
-    ρ2 = pvar[4]
-    ρ3 = pvar[5]
-    ρ4 = pvar[6]
-    ρ5 = pvar[7]
-    ρ6 = pvar[8]
-    ρ7 = pvar[9]   
-    
-    
+
     #println(pvar)
     dstate = size(x0, 1)
 
     # cyclic observation matrix
-    hm = [0 0 0 ρ1
-         0 0 0 ρ2
-         0 0 0 ρ3
-         0 0 0 ρ4
-         0 0 0 ρ5
-         0 0 0 ρ6
-         0 0 0 ρ7]
+    h = [0 0 0 ρ1]
     
     dobs = 1
     r = Matrix(undef, dobs, dobs)
@@ -48,11 +35,10 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     pkk = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     
-    bvec = pvar[10:end]
+    bvec = pvar[4:end]
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
     
     for i in 1:nobs
-        h = reshape(hm[w[i],:], dobs, dstate)
         β = bvec[i]
         if i == 1
             xlast =  x0
@@ -125,13 +111,13 @@ function hess(par, z, w)
     h
 end
 
-function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false) 
+function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false, betasd::Float64 = 1., N::Float64 = 1e7) 
 
-    wsize = size(pdata)[1] - 9
-    z = [[el] for el in cdata.reports[end-wsize+1:end]]
+    wsize = size(pdata)[1] - 3
+    z = [[el] for el in cdata.smooth[end-wsize+1:end]]
     w = [el for el in cdata.wday[end-wsize+1:end]]
 
-    res = optimize(pvar -> obj(pvar, z, w), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward)
+    res = optimize(pvar -> obj(pvar, z, w; betasd = betasd, N = N), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward)
 
     if hessian 
         h = hess(res.minimizer, z, w)

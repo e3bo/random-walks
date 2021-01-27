@@ -21,6 +21,13 @@ case_data <- ltdat2 %>% ungroup() %>%
   select(target_end_date, time, wday, value) %>% 
   rename(reports = value)
 
+moving_average <- function(x, n = 7) {
+  stats::filter(x, rep(1 / n, n), sides = 1)
+}
+
+case_data$smooth <- moving_average(case_data$reports)
+
+
 data_fname = paste0(forecast_date, "--", forecast_loc, ".csv")
 if(!dir.exists("data")) dir.create("data")
 write_csv(case_data, path = file.path("data", data_fname))
@@ -35,10 +42,6 @@ pvar_df <- tribble(
   "I_0", 1e4, 10, 1e5,
   "tau", tau_init, tau_init * 1e-2, tau_init * 10
 ) %>% 
-  bind_rows(tibble(par = paste0("rho", seq(2, 7)),
-                   init = 0.4,
-                   lower = 0,
-                   upper = 1)) %>%
   bind_rows(tibble(par = paste0("b", seq_len(wsize)),
                    init = gamma,
                    lower = 0.1 * gamma,

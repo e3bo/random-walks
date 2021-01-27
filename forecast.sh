@@ -25,6 +25,7 @@ dvc run \
 dvc run \
     -d data/$fdt--$loc.csv \
     -d initial-pars/$fdt--$loc.csv \
+    -d initial-pars/$loc.csv \
     -d InfectionKalman.jl \
     -d InfectionKalmanMain.jl \
     -o minimizer/$fdt--$loc.csv \
