@@ -21,8 +21,9 @@ case_data <- ltdat2 %>% ungroup() %>%
   select(target_end_date, time, wday, value) %>% 
   rename(reports = value)
 
-data_fname = paste0("data--", forecast_date, "--", forecast_loc, ".csv")
-write_csv(case_data, path = data_fname)
+data_fname = paste0(forecast_date, "--", forecast_loc, ".csv")
+if(!dir.exists("data")) dir.create("data")
+write_csv(case_data, path = file.path("data", data_fname))
 
 wsize <- 60
 gamma <- 365.25/9
@@ -43,5 +44,6 @@ pvar_df <- tribble(
                    lower = 0.1 * gamma,
                    upper = 4 * gamma))
 
-init_fname <- paste0("initial-pars--", forecast_date, "--", forecast_loc, ".csv")
-write_csv(pvar_df, path = init_fname)
+init_fname <- paste0(forecast_date, "--", forecast_loc, ".csv")
+if(!dir.exists("initial-pars")) dir.create("initial-pars")
+write_csv(pvar_df, path = file.path("initial-pars", init_fname))

@@ -16,25 +16,25 @@ dvc run \
     -d infection-kalman-data-prep.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
-    -o data--$fdt--$loc.csv \
-    -o initial-pars--$fdt--$loc.csv \
+    -o data/$fdt--$loc.csv \
+    -o initial-pars/$fdt--$loc.csv \
     --force \
     -n data-prep-$fdt-$loc \
     fdt=$fdt loc=$loc Rscript infection-kalman-data-prep.R
     
 dvc run \
-    -d data--$fdt--$loc.csv \
-    -d initial-pars--$fdt--$loc.csv \
+    -d data/$fdt--$loc.csv \
+    -d initial-pars/$fdt--$loc.csv \
     -d InfectionKalman.jl \
     -d InfectionKalmanMain.jl \
-    -o minimizer--$fdt--$loc.csv \
+    -o minimizer/$fdt--$loc.csv \
     --force \
     -n data-fit-$fdt-$loc \
     JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl $fdt $loc
     
 dvc run \
-    -d minimizer--$fdt--$loc.csv \
-    -d data--$fdt--$loc.csv \
+    -d minimizer/$fdt--$loc.csv \
+    -d data/$fdt--$loc.csv \
     -d infection-kalman-process-results.R \
     -o forecasts/$fdt-$loc-CEID-InfectionKalman.csv \
     --force \

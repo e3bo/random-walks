@@ -75,14 +75,14 @@ create_forecast_df <- function(means,
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
 forecast_loc <- Sys.getenv("loc", unset = "36")
-data_fname <- paste0("data--", forecast_date, "--", forecast_loc, ".csv")
+data_fname <- paste0("data/", forecast_date, "--", forecast_loc, ".csv")
 case_data <- read_csv(data_fname)
 
 target_end_dates <- max(case_data$target_end_date) + lubridate::ddays(1) * seq(1, 28)
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
 
-res_fname <- paste0("minimizer--", forecast_date, "--", forecast_loc, ".csv")
+res_fname <- paste0("minimizer/", forecast_date, "--", forecast_loc, ".csv")
 pvar_df <- read_csv(res_fname)
 
 wsize <- nrow(pvar_df) - 9L
@@ -286,7 +286,7 @@ pfixed <- c(
   S_0 = 7e6 - unname(pvar["E_0"] + pvar["I_0"]),
   rho1 = 0.4,
   iota = 0,
-  betasd = 1.0
+  betasd = 0.5
 )
 
 if(FALSE){
