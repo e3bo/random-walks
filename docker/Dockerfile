@@ -85,4 +85,4 @@ RUN /opt/julia-1.5.3/bin/julia -e 'using Pkg; Pkg.add(name = "MbedTLS", version 
 USER root
 WORKDIR ${RUNNER_PATH}
 RUN apt-get update && apt-get install --only-upgrade dvc
-RUN installGithub.r e3bo/covidcast/R-packages/evalcast@93e56fd
+RUN installGithub.r reichlab/zoltr epiforecasts/scoringutils reichlab/covidHubUtils
