@@ -8,12 +8,14 @@ using Optim
 
 export fit
 
-function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 0.5, rzzero::Float64 = 1e6)
+function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 0.5, rzzero::Float64 = 1e6, a::Float64 = 1.)
     # prior for time 0
-    x0 = [N - pvar[1] - pvar[2]; pvar[1]; pvar[2]; 0]
+    l0 = pvar[1]
+    y0 = l0 * γ / η
+    x0 = [N - l0 - y0; l0; y0; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
     
-    τ = pvar[3]
+    τ = pvar[2]
 
     #println(pvar)
     dstate = size(x0, 1)
@@ -35,7 +37,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     pkk = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(pvar)}(undef, dstate, dstate, nobs)
     
-    bvec = pvar[4:end]
+    bvec = pvar[3:end]
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
     
     for i in 1:nobs
@@ -92,8 +94,9 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     end
     
     jumpdensity = Normal(0, betasd)
-    dbeta = [bvec[i] - bvec[i - 1] for i in 2:length(bvec)]
-    rwlik = 0
+    dbeta = [(bvec[i] - γ) - a * (bvec[i - 1] - γ)  for i in 2:length(bvec)]
+    statsd = (betasd ^ 2 / (1 - a^2)) ^ 0.5
+    rwlik = logpdf(Normal(γ, statsd), bvec[1])
     for diff in dbeta
         rwlik += logpdf(jumpdensity, diff)
     end
@@ -111,13 +114,13 @@ function hess(par, z, w)
     h
 end
 
-function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false, betasd::Float64 = 1., N::Float64 = 1e7) 
+function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false, betasd::Float64 = 1., N::Float64 = 1e7, a::Float64 = 1.) 
 
-    wsize = size(pdata)[1] - 3
+    wsize = size(pdata)[1] - 2
     z = [[el] for el in cdata.smooth[end-wsize+1:end]]
     w = [el for el in cdata.wday[end-wsize+1:end]]
 
-    res = optimize(pvar -> obj(pvar, z, w; betasd = betasd, N = N), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward)
+    res = optimize(pvar -> obj(pvar, z, w; betasd = betasd, N = N, a = a), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward)
 
     if hessian 
         h = hess(res.minimizer, z, w)

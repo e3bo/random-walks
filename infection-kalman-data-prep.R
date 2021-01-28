@@ -38,7 +38,6 @@ tau_init <- case_data$reports %>% tail(n = wsize) %>% var()
 
 pvar_df <- tribble(
   ~par, ~init, ~lower, ~upper,
-  "E_0", 1e4, 10, 1e5,
   "I_0", 1e4, 10, 1e5,
   "tau", tau_init, tau_init * 1e-2, tau_init * 10
 ) %>% 

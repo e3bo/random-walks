@@ -85,15 +85,15 @@ target_wday <- lubridate::wday(target_end_dates)
 res_fname <- paste0("minimizer/", forecast_date, "--", forecast_loc, ".csv")
 pvar_df <- read_csv(res_fname)
 
-wsize <- nrow(pvar_df) - 3L
+wsize <- nrow(pvar_df) - 2L
 the_t0 <- rev(case_data$time)[wsize + 1]
 
 iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
   P <- PN / pvec["N"]
   dt <- diff(time.steps)
   vf <-  with(as.list(c(pvec, xhat, beta_t)), {
-      eta <- 365.25 / 4
-      gamma <- 365.25 / 9
+      eta <- pvec["eta"]
+      gamma <- pvec["gamma"]
       F <- rbind(
         c(-beta_t * I / N,    0,-beta_t * S / N, 0),
         c(beta_t * I / N,-eta,  beta_t * S / N, 0),
@@ -202,9 +202,11 @@ kfnll <-
         (diag(4) - K[, i, drop = FALSE] %*% H) %*% P_kkmo[, , i]
       ytilde_kk[i] <- z[i] - H %*% xhat_kk[, i, drop = FALSE]
     }
+    diff_ar <- (bpars[-1] - p["gamma"]) - p["a"] * (bpars[-length(bpars)] - p["gamma"])
+    stat_sd = sqrt(p["betasd"]^2 / (1 - p["a"]^2))
     
     rwlik <-
-      sum(dnorm(diff(bpars), sd = p["betasd"], log = TRUE))
+      dnorm(bpars[1], mean = p["gamma"], sd = stat_sd, log = TRUE) + sum(dnorm(diff_ar, sd = p["betasd"], log = TRUE))
     nll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) - rwlik
     if (!just_nll) {
@@ -212,12 +214,13 @@ kfnll <-
         sim_means <-
           sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
-          bpars_fet <-
-            bpars[T] + cumsum(rnorm(
-              n = nrow(fets),
-              mean = 0,
-              sd = p["betasd"]
-            ))
+          bpars_fet <- numeric(nrow(fets))
+          bpars_fet[1] <- p["gamma"] + (bpars[T] - p["gamma"] )* p["a"] + rnorm(n = 1, sd = p["betasd"])
+          if (length(bpars_fet) > 1){
+            for (jj in seq(2, length(bpars_fet))){
+              bpars_fet[jj] <- p["gamma"] + (bpars_fet[jj - 1]  - p["gamma"]) * p["a"] + rnorm(n = 1, sd = p["betasd"])
+            }
+          }
           bpars_fet[bpars_fet < 0] <- 0
           xhat_init <- xhat_kk[, T]
           PNinit <- P_kk[, , T]
@@ -280,10 +283,14 @@ pfixed <- unlist(read_csv(paste0("initial-pars/", forecast_loc, ".csv"))[1,])
 
 pfixed <- c(
   pfixed, 
-  S_0 = 7e6 - unname(pvar["E_0"] + pvar["I_0"]),
   rho1 = 0.4,
+  gamma = 365.25 / 9, 
+  eta = 365.25 / 4,
   iota = 0
 )
+
+pfixed["E_0"] <- pvar["I_0"] * pfixed["gamma"] / pfixed["eta"]
+pfixed["S_0"] <- pfixed["N"] - pfixed["E_0"] - pvar["I_0"]
 
 if(FALSE){
 tictoc::tic("optimization")
@@ -342,7 +349,7 @@ abline(0, 1)
 par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = wsize)
 
-plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases", ylim =c(0, 3000))
 lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
