@@ -343,6 +343,7 @@ kfret2 <- kfnll(pvar = pvar,
                fet = NULL, 
                fet_zero_cases = "daily")
 
+par(mfrow = c(1,1))
 qqnorm(kfret2$ytilde_k / sqrt(kfret2$S))
 abline(0, 1)
 
@@ -356,7 +357,9 @@ plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
 plot(tgrid, kfret$ytilde_k / sqrt(kfret$S), xlab = "Time", ylab = "Standardized residual")
 
-par(mfrow = c(3, 1))
+par(mfrow = c(4, 1))
+
+plot(tgrid, pvar[-c(1,2)] / pfixed["gamma"], xlab = "Time", ylab = expression(R[t]))
 
 plot(tgrid, kfret$xhat_kkmo["E",], xlab = "Time", ylab = "Predicted exposed")
 points(tgrid, kfret$xhat_kk["E", ], xlab = "Time", col = 2)
@@ -366,3 +369,5 @@ points(tgrid, kfret$xhat_kk["I", ], xlab = "Time", col = 2)
 
 plot(tgrid, kfret$xhat_kkmo["S",], xlab = "Time", ylab = "Predicted susceptible")
 points(tgrid, kfret$xhat_kk["S", ], xlab = "Time", col = 2)
+
+
