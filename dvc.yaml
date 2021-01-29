@@ -341,17 +341,6 @@ stages:
     outs:
     - data/2021-01-25--53.csv
     - initial-pars/2021-01-25--53.csv
-  data-fit-2021-01-25-53:
-    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2021-01-25
-      53
-    deps:
-    - InfectionKalman.jl
-    - InfectionKalmanMain.jl
-    - data/2021-01-25--53.csv
-    - initial-pars/2021-01-25--53.csv
-    - initial-pars/53.csv
-    outs:
-    - minimizer/2021-01-25--53.csv
   data-fit-2020-10-12-53:
     cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-10-12
       53
@@ -834,14 +823,6 @@ stages:
     - analyze-scores.html
     - analyze-scores.md
     - figure
-  write-forecast-2021-01-25-53:
-    cmd: fdt=2021-01-25 loc=53 Rscript infection-kalman-process-results.R
-    deps:
-    - data/2021-01-25--53.csv
-    - infection-kalman-process-results.R
-    - minimizer/2021-01-25--53.csv
-    outs:
-    - forecasts/2021-01-25-53-CEID-InfectionKalman.csv
   hopkins-2020-09-07:
     cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
     deps:
@@ -1114,3 +1095,227 @@ stages:
     - minimizer/2020-08-31--36.csv
     outs:
     - forecasts/2020-08-31-36-CEID-InfectionKalman.csv
+  data-prep-2020-07-20-53:
+    cmd: fdt=2020-07-20 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-07-20
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-07-20--53.csv
+    - initial-pars/2020-07-20--53.csv
+  data-fit-2020-07-20-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-07-20
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-07-20--53.csv
+    - initial-pars/2020-07-20--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-07-20--53.csv
+  write-forecast-2020-07-20-53:
+    cmd: fdt=2020-07-20 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-07-20--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-07-20--53.csv
+    outs:
+    - forecasts/2020-07-20-53-CEID-InfectionKalman.csv
+  data-prep-2020-07-27-53:
+    cmd: fdt=2020-07-27 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-07-27
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-07-27--53.csv
+    - initial-pars/2020-07-27--53.csv
+  data-fit-2020-07-27-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-07-27
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-07-27--53.csv
+    - initial-pars/2020-07-27--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-07-27--53.csv
+  write-forecast-2020-07-27-53:
+    cmd: fdt=2020-07-27 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-07-27--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-07-27--53.csv
+    outs:
+    - forecasts/2020-07-27-53-CEID-InfectionKalman.csv
+  data-prep-2020-08-03-53:
+    cmd: fdt=2020-08-03 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-08-03
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-08-03--53.csv
+    - initial-pars/2020-08-03--53.csv
+  data-fit-2020-08-03-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-03
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-08-03--53.csv
+    - initial-pars/2020-08-03--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-08-03--53.csv
+  write-forecast-2020-08-03-53:
+    cmd: fdt=2020-08-03 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-08-03--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-08-03--53.csv
+    outs:
+    - forecasts/2020-08-03-53-CEID-InfectionKalman.csv
+  data-prep-2020-08-10-53:
+    cmd: fdt=2020-08-10 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-08-10
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-08-10--53.csv
+    - initial-pars/2020-08-10--53.csv
+  data-fit-2020-08-10-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-10
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-08-10--53.csv
+    - initial-pars/2020-08-10--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-08-10--53.csv
+  write-forecast-2020-08-10-53:
+    cmd: fdt=2020-08-10 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-08-10--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-08-10--53.csv
+    outs:
+    - forecasts/2020-08-10-53-CEID-InfectionKalman.csv
+  data-prep-2020-08-17-53:
+    cmd: fdt=2020-08-17 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-08-17
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-08-17--53.csv
+    - initial-pars/2020-08-17--53.csv
+  data-fit-2020-08-17-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-17
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-08-17--53.csv
+    - initial-pars/2020-08-17--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-08-17--53.csv
+  write-forecast-2020-08-17-53:
+    cmd: fdt=2020-08-17 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-08-17--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-08-17--53.csv
+    outs:
+    - forecasts/2020-08-17-53-CEID-InfectionKalman.csv
+  data-prep-2020-08-24-53:
+    cmd: fdt=2020-08-24 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-08-24
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-08-24--53.csv
+    - initial-pars/2020-08-24--53.csv
+  data-fit-2020-08-24-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-24
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-08-24--53.csv
+    - initial-pars/2020-08-24--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-08-24--53.csv
+  write-forecast-2020-08-24-53:
+    cmd: fdt=2020-08-24 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-08-24--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-08-24--53.csv
+    outs:
+    - forecasts/2020-08-24-53-CEID-InfectionKalman.csv
+  data-prep-2020-08-31-53:
+    cmd: fdt=2020-08-31 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-08-31
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-08-31--53.csv
+    - initial-pars/2020-08-31--53.csv
+  data-fit-2020-08-31-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-31
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-08-31--53.csv
+    - initial-pars/2020-08-31--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-08-31--53.csv
+  write-forecast-2020-08-31-53:
+    cmd: fdt=2020-08-31 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-08-31--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-08-31--53.csv
+    outs:
+    - forecasts/2020-08-31-53-CEID-InfectionKalman.csv
+  data-prep-2020-09-07-53:
+    cmd: fdt=2020-09-07 loc=53 Rscript infection-kalman-data-prep.R
+    deps:
+    - covidhub-common.R
+    - hopkins/2020-09-07
+    - infection-kalman-data-prep.R
+    outs:
+    - data/2020-09-07--53.csv
+    - initial-pars/2020-09-07--53.csv
+  data-fit-2020-09-07-53:
+    cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-09-07
+      53
+    deps:
+    - InfectionKalman.jl
+    - InfectionKalmanMain.jl
+    - data/2020-09-07--53.csv
+    - initial-pars/2020-09-07--53.csv
+    - initial-pars/53.csv
+    outs:
+    - minimizer/2020-09-07--53.csv
+  write-forecast-2020-09-07-53:
+    cmd: fdt=2020-09-07 loc=53 Rscript infection-kalman-process-results.R
+    deps:
+    - data/2020-09-07--53.csv
+    - infection-kalman-process-results.R
+    - minimizer/2020-09-07--53.csv
+    outs:
+    - forecasts/2020-09-07-53-CEID-InfectionKalman.csv
