@@ -350,7 +350,7 @@ abline(0, 1)
 par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = wsize)
 
-plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases", ylim =c(0, 3000))
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
 lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
 
 plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
