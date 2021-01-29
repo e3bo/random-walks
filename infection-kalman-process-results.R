@@ -88,7 +88,7 @@ pvar_df <- read_csv(res_fname)
 wsize <- nrow(pvar_df) - 2L
 the_t0 <- rev(case_data$time)[wsize + 1]
 
-iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
+iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps, vif = 10){
   P <- PN / pvec["N"]
   dt <- diff(time.steps)
   vf <-  with(as.list(c(pvec, xhat, beta_t)), {
@@ -102,7 +102,7 @@ iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
       )
       
       f <-
-        c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N)
+        c(0, beta_t * (S / N) * (I / N) * vif, eta * E / N, gamma * I / N)
       Q <- rbind(c(f[1] + f[2],-f[2],           0,     0),
                  c(-f[2], f[2] + f[3],-f[3],     0),
                  c(0,-f[3], f[3] + f[4],-f[4]),
