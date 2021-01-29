@@ -216,8 +216,11 @@ kfnll <-
         for (j in seq_len(nsim)) {
           bpars_fet <- numeric(nrow(fets))
           bpars_fet[1] <- p["gamma"] + (bpars[T] - p["gamma"] )* p["a"] + rnorm(n = 1, sd = p["betasd"])
-          if (runif(1) > 0.5){
+          rand <- runif(1)
+          if (rand > 0.66){
             bpars_fet[1] <- bpars_fet[1] * 1.5
+          } else if (rand < 0.33){
+            bpars_fet[1] <- bpars_fet[1] * 0.5
           }
           if (length(bpars_fet) > 1){
             for (jj in seq(2, length(bpars_fet))){
