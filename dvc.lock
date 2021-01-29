@@ -651,12 +651,12 @@ data-fit-2020-11-30-36:
     md5: 21abb8bd98fbe45c0bba764302e7f6c9
     size: 3691
   - path: initial-pars/36.csv
-    md5: 9d56ec85ff9e1a2cf646bddfaaa10801
+    md5: 6d6e14588cc6cddd58c95d17984ac4c7
     size: 29
   outs:
   - path: minimizer/2020-11-30--36.csv
-    md5: ea4ed8dc82c363d2b7738e6280fd990f
-    size: 4970
+    md5: 9bc1d6975b8a0b6b8356efa201167655
+    size: 4969
 write-forecast-2020-11-30-36:
   cmd: fdt=2020-11-30 loc=36 Rscript infection-kalman-process-results.R
   deps:
@@ -664,15 +664,15 @@ write-forecast-2020-11-30-36:
     md5: e74b9e013c1391cf6e45c2fd2fc0b12f
     size: 15456
   - path: infection-kalman-process-results.R
-    md5: 7f816f8c198c75df82d2733311eb11eb
-    size: 11587
+    md5: f96a93458fc56e78bed10fb4a7966825
+    size: 11695
   - path: minimizer/2020-11-30--36.csv
-    md5: ea4ed8dc82c363d2b7738e6280fd990f
-    size: 4970
+    md5: 9bc1d6975b8a0b6b8356efa201167655
+    size: 4969
   outs:
   - path: forecasts/2020-11-30-36-CEID-InfectionKalman.csv
-    md5: 5c1a51abb7b4d41d0910b52fa025f299
-    size: 2122
+    md5: 70ef6bcdac973c4122b33cb8a3c4c70d
+    size: 2154
 hopkins-2020-12-07:
   cmd: fdt=2020-12-07 ./pull-hopkins-ts-from-date.R
   deps:
@@ -1843,20 +1843,20 @@ combine:
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
     size: 9912
   - path: forecasts
-    md5: 0468ff588059d559f0acf9d39530cc42.dir
-    size: 54916
+    md5: 935791e4b0af0712d47d3514beca943f.dir
+    size: 54948
     nfiles: 26
   outs:
   - path: CEID-InfectionKalman
-    md5: 6aaa7cc9d87a6731fec70f7f0eff0639.dir
-    size: 53963
+    md5: 7f71af6af514e17afa41147fda5f169c.dir
+    size: 53969
     nfiles: 14
 score-2021-01-25:
   cmd: ddt=2021-01-25 ./quantile-score.R
   deps:
   - path: CEID-InfectionKalman
-    md5: 6aaa7cc9d87a6731fec70f7f0eff0639.dir
-    size: 53963
+    md5: 7f71af6af514e17afa41147fda5f169c.dir
+    size: 53969
     nfiles: 14
   - path: covidhub-common.R
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
@@ -1870,17 +1870,17 @@ score-2021-01-25:
     size: 2727
   outs:
   - path: metrics/2021-01-25-residuals.rds
-    md5: 8a9c26f7d776753a448295d371fa6716
-    size: 6418
+    md5: b8f008290f34bc8e1605ff471fe956a6
+    size: 6434
   - path: metrics/2021-01-25-score-by-loc-type-targ-type-forecast-date.csv
-    md5: c12bc046d4a2d8d9655f20d3a3dfaf1e
-    size: 737
+    md5: 6eec78e9791aaebe9a6193acb0a74333
+    size: 738
   - path: metrics/2021-01-25-score-by-loc-type-targ-type.csv
-    md5: 98c4be1e3801385bc9bce4b6348c9d2f
-    size: 71
+    md5: eef1a651455e469ea0ae64940029222b
+    size: 72
   - path: metrics/2021-01-25-score-by-loc-type.csv
-    md5: 64e35ac86636a6b29d4e485681186b03
-    size: 41
+    md5: 363bc2183e0c61ec3231d681e931ef9c
+    size: 42
 pull-archived-forecasts:
   cmd: ./pull-other-forecasts.R
   deps:
@@ -1895,8 +1895,8 @@ make-trajectory-plots:
   cmd: ./make-trajectory-plots.R
   deps:
   - path: CEID-InfectionKalman
-    md5: 6aaa7cc9d87a6731fec70f7f0eff0639.dir
-    size: 53963
+    md5: 7f71af6af514e17afa41147fda5f169c.dir
+    size: 53969
     nfiles: 14
   - path: make-trajectory-plots.R
     md5: 555dc9dfc4a621a9e93818e0f4ec8604
@@ -1909,8 +1909,8 @@ make-trajectory-plots:
     md5: 51eb03fc04d156d2f106a6c9b657f5bc
     size: 314609
   - path: trajectories-1.png
-    md5: 18a090b103bc4c08d25253f220cdfcf4
-    size: 323361
+    md5: 25de434b20c09884dfee801f679fb0e0
+    size: 322799
   - path: trajectories-2.png
     md5: a0c7af3e432cbfba32ee4641f8a6274a
     size: 307801
@@ -1918,14 +1918,14 @@ make-trajectory-plots:
     md5: b01d2032613a23f7f8cb67654b59453f
     size: 312232
   - path: trajectories-all.png
-    md5: 1945d2829bc9399e1a0b8a84bac4efb5
-    size: 353084
+    md5: cc75198c6789aaec0bba8e5e9bb26e6f
+    size: 343624
 analyze-scores:
   cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
   deps:
   - path: CEID-InfectionKalman
-    md5: 6aaa7cc9d87a6731fec70f7f0eff0639.dir
-    size: 53963
+    md5: 7f71af6af514e17afa41147fda5f169c.dir
+    size: 53969
     nfiles: 14
   - path: analyze-scores.R
     md5: 9c974c8fd0dc31bc9f3d829af82ae686
@@ -1935,14 +1935,14 @@ analyze-scores:
     size: 8544
   outs:
   - path: analyze-scores.html
-    md5: d0c27c57ea11a3bdfb3abb5ee481f28c
-    size: 94075
+    md5: 53eda06b6ff1869c2005e15bb88db54e
+    size: 94055
   - path: analyze-scores.md
-    md5: 1dbfada85f4a03b8983bb12e64d012c7
+    md5: 45c626d745d7a40e31f61414a69e12b6
     size: 4306
   - path: figure
-    md5: 2b6415688d6b5e79621175fd941293b8.dir
-    size: 56849
+    md5: e594b378d4f3e07e04f411afee556575.dir
+    size: 56833
     nfiles: 4
 write-forecast-2021-01-25-53:
   cmd: fdt=2021-01-25 loc=53 Rscript infection-kalman-process-results.R
