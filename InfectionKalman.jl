@@ -8,7 +8,7 @@ using Optim
 
 export fit
 
-function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 0.5, rzzero::Float64 = 1e6, a::Float64 = 1., vif::Float64 = 10.)
+function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ1::Float64 = 0.4, just_nll::Bool = true, betasd::Float64 = 0.5, rzzero::Float64 = 1e6, a::Float64 = 1.)
     # prior for time 0
     l0 = pvar[1]
     y0 = l0 * γ / η
@@ -20,7 +20,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
     #println(pvar)
     dstate = size(x0, 1)
 
-    # cyclic observation matrix
+    # observation matrix
     h = [0 0 0 ρ1]
     
     dobs = 1
@@ -66,7 +66,7 @@ function obj(pvar::Vector, z, w; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273
         end
         xkkmo[:,i] = xnext
         
-        f = [0, (β*x/N*y/N + ι*x/N)*vif, η*l/N, γ*y/N]
+        f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N]
         
         q = [  f[1]+f[2]     -f[2]            0      0
                    -f[2] f[2]+f[3]        -f[3]      0
