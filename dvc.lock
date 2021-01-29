@@ -1843,14 +1843,14 @@ combine:
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
     size: 9912
   - path: forecasts
-    md5: 969e6b5b7cbc8f5e70383922c203e41f.dir
-    size: 54980
-    nfiles: 26
+    md5: 846118d4f6632a10c345a2261ccd6731.dir
+    size: 65494
+    nfiles: 31
   outs:
   - path: CEID-InfectionKalman
-    md5: fc0714096660790c465881471890ebfa.dir
-    size: 53934
-    nfiles: 14
+    md5: ee5581ec68fe6fc45da8b4e109b54904.dir
+    size: 64386
+    nfiles: 19
 score-2021-01-25:
   cmd: ddt=2021-01-25 ./quantile-score.R
   deps:
@@ -1885,64 +1885,64 @@ pull-archived-forecasts:
   cmd: ./pull-other-forecasts.R
   deps:
   - path: pull-other-forecasts.R
-    md5: 70337a9dc5ae1a56f2be60a98dc07180
-    size: 533
+    md5: c6a98bfa76eff490841a89b7624f4790
+    size: 568
   outs:
   - path: other-model-forecasts.rds
-    md5: 203c03639fb313e052c3470bdbba3196
-    size: 8544
+    md5: 1008af31afc8a5d638f67a8a8af77182
+    size: 11456
 make-trajectory-plots:
   cmd: ./make-trajectory-plots.R
   deps:
   - path: CEID-InfectionKalman
-    md5: fc0714096660790c465881471890ebfa.dir
-    size: 53934
-    nfiles: 14
+    md5: ee5581ec68fe6fc45da8b4e109b54904.dir
+    size: 64386
+    nfiles: 19
   - path: make-trajectory-plots.R
-    md5: 555dc9dfc4a621a9e93818e0f4ec8604
+    md5: fecde44670817a5d04d3118c7978171c
     size: 1229
   - path: other-model-forecasts.rds
-    md5: 203c03639fb313e052c3470bdbba3196
-    size: 8544
+    md5: 1008af31afc8a5d638f67a8a8af77182
+    size: 11456
   outs:
   - path: trajectories-0.png
-    md5: d83cd32e2f00e4caeb5f7481fdd09d49
-    size: 321034
+    md5: 37aa87ec309d1102ed745c2956e8aba0
+    size: 326716
   - path: trajectories-1.png
-    md5: cf8ddcdc940a4cef347693afccc172b7
-    size: 324077
+    md5: aa651b74b38811dbff0288768ffe0900
+    size: 331282
   - path: trajectories-2.png
-    md5: 9d26a551a5baeb78792b5f68ef9a724d
-    size: 303313
+    md5: 529563a303e711553cc6636298336669
+    size: 312372
   - path: trajectories-3.png
-    md5: 591b250a616cbebb32e704b082fc15fa
-    size: 313784
+    md5: 79a1c477c06acd01e2df72a89ce8ee05
+    size: 323979
   - path: trajectories-all.png
-    md5: 8eecb759c50221e9c3b93f65649c50ed
-    size: 342502
+    md5: 7072b7e0ef8b926fd2a65cf53308662a
+    size: 344228
 analyze-scores:
   cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
   deps:
   - path: CEID-InfectionKalman
-    md5: fc0714096660790c465881471890ebfa.dir
-    size: 53934
-    nfiles: 14
+    md5: ee5581ec68fe6fc45da8b4e109b54904.dir
+    size: 64386
+    nfiles: 19
   - path: analyze-scores.R
     md5: 9c974c8fd0dc31bc9f3d829af82ae686
     size: 1563
   - path: other-model-forecasts.rds
-    md5: 203c03639fb313e052c3470bdbba3196
-    size: 8544
+    md5: 1008af31afc8a5d638f67a8a8af77182
+    size: 11456
   outs:
   - path: analyze-scores.html
-    md5: 1d930fa0bc848894fea6ba431ee81006
-    size: 93939
+    md5: 656d6ea17482fd877c6655ba073112b8
+    size: 97571
   - path: analyze-scores.md
-    md5: f767f8da0b8a5a007a2ad31e6f971567
+    md5: 3298e03bf936c9531289b99c36017c24
     size: 4306
   - path: figure
-    md5: 196f4971e57519a9f361298b352c8cb2.dir
-    size: 56750
+    md5: f7553c4518b148b5465ebb013eb3678e.dir
+    size: 59472
     nfiles: 4
 write-forecast-2021-01-25-53:
   cmd: fdt=2021-01-25 loc=53 Rscript infection-kalman-process-results.R
@@ -2030,3 +2030,384 @@ write-forecast-2020-09-07-36:
   - path: forecasts/2020-09-07-36-CEID-InfectionKalman.csv
     md5: 0fd1d70dedfeebd017da6bc0ad5c7742
     size: 2122
+hopkins-2020-07-20:
+  cmd: fdt=2020-07-20 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
+  outs:
+  - path: hopkins/2020-07-20
+    md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
+    size: 4049279
+    nfiles: 8
+data-prep-2020-07-20-36:
+  cmd: fdt=2020-07-20 loc=36 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-07-20
+    md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
+    size: 4049279
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 55744066c37ce55aa8882e5d3939973b
+    size: 1588
+  outs:
+  - path: data/2020-07-20--36.csv
+    md5: daeeebdf34f1b7e4fb65cf682a9b308a
+    size: 8684
+  - path: initial-pars/2020-07-20--36.csv
+    md5: 35a93c858f2e109963dabc7f728cb75c
+    size: 3696
+data-fit-2020-07-20-36:
+  cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-07-20
+    36
+  deps:
+  - path: InfectionKalman.jl
+    md5: 0ae3ed4e43782e2597c6a26796aa1b24
+    size: 4267
+  - path: InfectionKalmanMain.jl
+    md5: ba1174d6cd578378b79eaf4784045298
+    size: 800
+  - path: data/2020-07-20--36.csv
+    md5: daeeebdf34f1b7e4fb65cf682a9b308a
+    size: 8684
+  - path: initial-pars/2020-07-20--36.csv
+    md5: 35a93c858f2e109963dabc7f728cb75c
+    size: 3696
+  - path: initial-pars/36.csv
+    md5: e0e04f2d881806a4e9073fd44f470ae2
+    size: 28
+  outs:
+  - path: minimizer/2020-07-20--36.csv
+    md5: 0d1edfdba6d9ad0f4df924b6b070d843
+    size: 4991
+write-forecast-2020-07-20-36:
+  cmd: fdt=2020-07-20 loc=36 Rscript infection-kalman-process-results.R
+  deps:
+  - path: data/2020-07-20--36.csv
+    md5: daeeebdf34f1b7e4fb65cf682a9b308a
+    size: 8684
+  - path: infection-kalman-process-results.R
+    md5: 627aa7b9c8ab8ef410cf2a387aa303a5
+    size: 11873
+  - path: minimizer/2020-07-20--36.csv
+    md5: 0d1edfdba6d9ad0f4df924b6b070d843
+    size: 4991
+  outs:
+  - path: forecasts/2020-07-20-36-CEID-InfectionKalman.csv
+    md5: 9c73d4cfb09c14154695f20eebc193bf
+    size: 2122
+hopkins-2020-07-27:
+  cmd: fdt=2020-07-27 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
+  outs:
+  - path: hopkins/2020-07-27
+    md5: 13dc696d512db6d01cf50e17d5e8fbc0.dir
+    size: 4238629
+    nfiles: 8
+data-prep-2020-07-27-36:
+  cmd: fdt=2020-07-27 loc=36 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-07-27
+    md5: 13dc696d512db6d01cf50e17d5e8fbc0.dir
+    size: 4238629
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 55744066c37ce55aa8882e5d3939973b
+    size: 1588
+  outs:
+  - path: data/2020-07-27--36.csv
+    md5: 342ec78096fcc131fa2a98a13225ef23
+    size: 9106
+  - path: initial-pars/2020-07-27--36.csv
+    md5: 3d231c12e07158bbbe9858993b1f4ebc
+    size: 3690
+data-fit-2020-07-27-36:
+  cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-07-27
+    36
+  deps:
+  - path: InfectionKalman.jl
+    md5: 0ae3ed4e43782e2597c6a26796aa1b24
+    size: 4267
+  - path: InfectionKalmanMain.jl
+    md5: ba1174d6cd578378b79eaf4784045298
+    size: 800
+  - path: data/2020-07-27--36.csv
+    md5: 342ec78096fcc131fa2a98a13225ef23
+    size: 9106
+  - path: initial-pars/2020-07-27--36.csv
+    md5: 3d231c12e07158bbbe9858993b1f4ebc
+    size: 3690
+  - path: initial-pars/36.csv
+    md5: e0e04f2d881806a4e9073fd44f470ae2
+    size: 28
+  outs:
+  - path: minimizer/2020-07-27--36.csv
+    md5: b4fe3778e1b6348658554b70526092b9
+    size: 4982
+write-forecast-2020-07-27-36:
+  cmd: fdt=2020-07-27 loc=36 Rscript infection-kalman-process-results.R
+  deps:
+  - path: data/2020-07-27--36.csv
+    md5: 342ec78096fcc131fa2a98a13225ef23
+    size: 9106
+  - path: infection-kalman-process-results.R
+    md5: 627aa7b9c8ab8ef410cf2a387aa303a5
+    size: 11873
+  - path: minimizer/2020-07-27--36.csv
+    md5: b4fe3778e1b6348658554b70526092b9
+    size: 4982
+  outs:
+  - path: forecasts/2020-07-27-36-CEID-InfectionKalman.csv
+    md5: 9ff62e86ba27b1b4e36b1da9cba99689
+    size: 2090
+hopkins-2020-08-03:
+  cmd: fdt=2020-08-03 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
+  outs:
+  - path: hopkins/2020-08-03
+    md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
+    size: 4404607
+    nfiles: 8
+data-prep-2020-08-03-36:
+  cmd: fdt=2020-08-03 loc=36 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-08-03
+    md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
+    size: 4404607
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 55744066c37ce55aa8882e5d3939973b
+    size: 1588
+  outs:
+  - path: data/2020-08-03--36.csv
+    md5: 8f2a9a5ae2ca5d75ef91a9e9e3bf651e
+    size: 9450
+  - path: initial-pars/2020-08-03--36.csv
+    md5: dbd1ad28f1711267c8eaa25a9c2af107
+    size: 3696
+data-fit-2020-08-03-36:
+  cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-03
+    36
+  deps:
+  - path: InfectionKalman.jl
+    md5: 0ae3ed4e43782e2597c6a26796aa1b24
+    size: 4267
+  - path: InfectionKalmanMain.jl
+    md5: ba1174d6cd578378b79eaf4784045298
+    size: 800
+  - path: data/2020-08-03--36.csv
+    md5: 8f2a9a5ae2ca5d75ef91a9e9e3bf651e
+    size: 9450
+  - path: initial-pars/2020-08-03--36.csv
+    md5: dbd1ad28f1711267c8eaa25a9c2af107
+    size: 3696
+  - path: initial-pars/36.csv
+    md5: e0e04f2d881806a4e9073fd44f470ae2
+    size: 28
+  outs:
+  - path: minimizer/2020-08-03--36.csv
+    md5: 876a247c23aeb6e30ccd54757911e118
+    size: 4977
+write-forecast-2020-08-03-36:
+  cmd: fdt=2020-08-03 loc=36 Rscript infection-kalman-process-results.R
+  deps:
+  - path: data/2020-08-03--36.csv
+    md5: 8f2a9a5ae2ca5d75ef91a9e9e3bf651e
+    size: 9450
+  - path: infection-kalman-process-results.R
+    md5: 627aa7b9c8ab8ef410cf2a387aa303a5
+    size: 11873
+  - path: minimizer/2020-08-03--36.csv
+    md5: 876a247c23aeb6e30ccd54757911e118
+    size: 4977
+  outs:
+  - path: forecasts/2020-08-03-36-CEID-InfectionKalman.csv
+    md5: 4a227d95254648c4aeb4b903c0db81f5
+    size: 2090
+hopkins-2020-08-10:
+  cmd: fdt=2020-08-10 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
+  outs:
+  - path: hopkins/2020-08-10
+    md5: 13afccd4aa4b42b21d84325788c3a7f0.dir
+    size: 4577299
+    nfiles: 8
+data-prep-2020-08-10-36:
+  cmd: fdt=2020-08-10 loc=36 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-08-10
+    md5: 13afccd4aa4b42b21d84325788c3a7f0.dir
+    size: 4577299
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 55744066c37ce55aa8882e5d3939973b
+    size: 1588
+  outs:
+  - path: data/2020-08-10--36.csv
+    md5: bceb74f08e8f55095aaa1f4dc59b42a7
+    size: 9794
+  - path: initial-pars/2020-08-10--36.csv
+    md5: dec0c1d136e07aad69001734fea41c40
+    size: 3694
+data-fit-2020-08-10-36:
+  cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-10
+    36
+  deps:
+  - path: InfectionKalman.jl
+    md5: 0ae3ed4e43782e2597c6a26796aa1b24
+    size: 4267
+  - path: InfectionKalmanMain.jl
+    md5: ba1174d6cd578378b79eaf4784045298
+    size: 800
+  - path: data/2020-08-10--36.csv
+    md5: bceb74f08e8f55095aaa1f4dc59b42a7
+    size: 9794
+  - path: initial-pars/2020-08-10--36.csv
+    md5: dec0c1d136e07aad69001734fea41c40
+    size: 3694
+  - path: initial-pars/36.csv
+    md5: e0e04f2d881806a4e9073fd44f470ae2
+    size: 28
+  outs:
+  - path: minimizer/2020-08-10--36.csv
+    md5: 1cdbdfd5a96bbdc5ba2abad11a5fee04
+    size: 4972
+write-forecast-2020-08-10-36:
+  cmd: fdt=2020-08-10 loc=36 Rscript infection-kalman-process-results.R
+  deps:
+  - path: data/2020-08-10--36.csv
+    md5: bceb74f08e8f55095aaa1f4dc59b42a7
+    size: 9794
+  - path: infection-kalman-process-results.R
+    md5: 627aa7b9c8ab8ef410cf2a387aa303a5
+    size: 11873
+  - path: minimizer/2020-08-10--36.csv
+    md5: 1cdbdfd5a96bbdc5ba2abad11a5fee04
+    size: 4972
+  outs:
+  - path: forecasts/2020-08-10-36-CEID-InfectionKalman.csv
+    md5: a7b067bc5dacefbb12f3b97c3f8c49a3
+    size: 2090
+hopkins-2020-08-17:
+  cmd: fdt=2020-08-17 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
+  outs:
+  - path: hopkins/2020-08-17
+    md5: dd6e23a30766101df60d6f41fd909679.dir
+    size: 4743866
+    nfiles: 8
+data-prep-2020-08-17-36:
+  cmd: fdt=2020-08-17 loc=36 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-08-17
+    md5: dd6e23a30766101df60d6f41fd909679.dir
+    size: 4743866
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 55744066c37ce55aa8882e5d3939973b
+    size: 1588
+  outs:
+  - path: data/2020-08-17--36.csv
+    md5: 4ae004b438a394f5651af70e4528e6f3
+    size: 10150
+  - path: initial-pars/2020-08-17--36.csv
+    md5: 30beed278b9707870043455a5bae6755
+    size: 3695
+data-fit-2020-08-17-36:
+  cmd: JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl 2020-08-17
+    36
+  deps:
+  - path: InfectionKalman.jl
+    md5: 0ae3ed4e43782e2597c6a26796aa1b24
+    size: 4267
+  - path: InfectionKalmanMain.jl
+    md5: ba1174d6cd578378b79eaf4784045298
+    size: 800
+  - path: data/2020-08-17--36.csv
+    md5: 4ae004b438a394f5651af70e4528e6f3
+    size: 10150
+  - path: initial-pars/2020-08-17--36.csv
+    md5: 30beed278b9707870043455a5bae6755
+    size: 3695
+  - path: initial-pars/36.csv
+    md5: e0e04f2d881806a4e9073fd44f470ae2
+    size: 28
+  outs:
+  - path: minimizer/2020-08-17--36.csv
+    md5: e86ce1fcc2cbf038de7082c618bd6c9f
+    size: 4979
+write-forecast-2020-08-17-36:
+  cmd: fdt=2020-08-17 loc=36 Rscript infection-kalman-process-results.R
+  deps:
+  - path: data/2020-08-17--36.csv
+    md5: 4ae004b438a394f5651af70e4528e6f3
+    size: 10150
+  - path: infection-kalman-process-results.R
+    md5: 627aa7b9c8ab8ef410cf2a387aa303a5
+    size: 11873
+  - path: minimizer/2020-08-17--36.csv
+    md5: e86ce1fcc2cbf038de7082c618bd6c9f
+    size: 4979
+  outs:
+  - path: forecasts/2020-08-17-36-CEID-InfectionKalman.csv
+    md5: eea8c40019ebe6d20ba69dae4ed66a7b
+    size: 2122
+hopkins-2020-08-24:
+  cmd: fdt=2020-08-24 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+    size: 803
+  outs:
+  - path: hopkins/2020-08-24
+    md5: 25ca9b41da3e586516ce152aa29d3ef9.dir
+    size: 4920102
+    nfiles: 8
+data-prep-2020-08-24-36:
+  cmd: fdt=2020-08-24 loc=36 Rscript infection-kalman-data-prep.R
+  deps:
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-08-24
+    md5: 25ca9b41da3e586516ce152aa29d3ef9.dir
+    size: 4920102
+    nfiles: 8
+  - path: infection-kalman-data-prep.R
+    md5: 55744066c37ce55aa8882e5d3939973b
+    size: 1588
+  outs:
+  - path: data/2020-08-24--36.csv
+    md5: e2d3eaf81644bbed60571501eb37d16d
+    size: 10519
+  - path: initial-pars/2020-08-24--36.csv
+    md5: 347df40fed089b980cf0de30d6101c05
+    size: 3696

@@ -25,7 +25,7 @@ plotter <- function(dat) {
       name = NULL,
       date_breaks = "1 months",
       date_labels = "%b",
-      limits = lubridate::ymd(c("2020-09-01", "2020-12-31")),
+      limits = lubridate::ymd(c("2020-07-01", "2020-12-31")),
       expand = expansion()
     ) +
     theme(
