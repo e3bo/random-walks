@@ -1820,20 +1820,20 @@ combine:
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
     size: 9912
   - path: forecasts
-    md5: 55ec5e87358c7d13699452b1e939042a.dir
+    md5: b723483177c617e48b3fbfa03d1aa212.dir
     size: 86714
     nfiles: 41
   outs:
   - path: CEID-InfectionKalman
-    md5: cdfc68acf072a472374f4007f1cee26c.dir
-    size: 84877
+    md5: f34219e393535f5d72fe330a2124c71a.dir
+    size: 84878
     nfiles: 21
 score-2021-01-25:
   cmd: ddt=2021-01-25 ./quantile-score.R
   deps:
   - path: CEID-InfectionKalman
-    md5: cdfc68acf072a472374f4007f1cee26c.dir
-    size: 84877
+    md5: f34219e393535f5d72fe330a2124c71a.dir
+    size: 84878
     nfiles: 21
   - path: covidhub-common.R
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
@@ -1847,16 +1847,16 @@ score-2021-01-25:
     size: 2727
   outs:
   - path: metrics/2021-01-25-residuals.rds
-    md5: 22195a0249d00702a480d58c3776a1a3
-    size: 9867
+    md5: 04e82f57ffb80079c1fcb5190c2b8b70
+    size: 9871
   - path: metrics/2021-01-25-score-by-loc-type-targ-type-forecast-date.csv
-    md5: 97b7f4073fe92a6795bfdff3d0984c01
+    md5: aa250ac08e038343da98f0d99c12c1da
     size: 1092
   - path: metrics/2021-01-25-score-by-loc-type-targ-type.csv
-    md5: a596004a4b251f958c82005f2e60ac6b
+    md5: efe995935a29aa1f025b6a014160d97b
     size: 68
   - path: metrics/2021-01-25-score-by-loc-type.csv
-    md5: a29fa5c53d7380107dee8d7e92795520
+    md5: 5de672ca3a56075141d9a1b5667f1aeb
     size: 38
 pull-archived-forecasts:
   cmd: ./pull-other-forecasts.R
@@ -1872,8 +1872,8 @@ make-trajectory-plots:
   cmd: ./make-trajectory-plots.R
   deps:
   - path: CEID-InfectionKalman
-    md5: cdfc68acf072a472374f4007f1cee26c.dir
-    size: 84877
+    md5: f34219e393535f5d72fe330a2124c71a.dir
+    size: 84878
     nfiles: 21
   - path: make-trajectory-plots.R
     md5: fecde44670817a5d04d3118c7978171c
@@ -1892,17 +1892,17 @@ make-trajectory-plots:
     md5: e4df8e99baae4107d3957724a1862493
     size: 321756
   - path: trajectories-3.png
-    md5: 1dc4de1f3b559ab121b3d96e185e4092
-    size: 324705
+    md5: 10697d632e9bf378d6d75f690bf00447
+    size: 324847
   - path: trajectories-all.png
-    md5: 30823a17e35e41ac2df9aa39c35b4369
-    size: 345728
+    md5: 61ab8f10227640ee24fbb529e1d424e1
+    size: 345601
 analyze-scores:
   cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
   deps:
   - path: CEID-InfectionKalman
-    md5: cdfc68acf072a472374f4007f1cee26c.dir
-    size: 84877
+    md5: f34219e393535f5d72fe330a2124c71a.dir
+    size: 84878
     nfiles: 21
   - path: analyze-scores.R
     md5: 9c974c8fd0dc31bc9f3d829af82ae686
@@ -1912,14 +1912,14 @@ analyze-scores:
     size: 11456
   outs:
   - path: analyze-scores.html
-    md5: 854ecff4da1f3d50b28336f03aa73367
-    size: 98523
+    md5: d7751b3c0a1bad909f90b88ce60e3f8e
+    size: 98527
   - path: analyze-scores.md
-    md5: 5484cc8b55545d797e72e0fc03eae51f
+    md5: 937036ed987f8bdccdba412966357b1c
     size: 4306
   - path: figure
-    md5: 82cd16a407f17b94384a68a08bcdbd59.dir
-    size: 60183
+    md5: 7f1c20f942eb9872298901ce763bd84c.dir
+    size: 60188
     nfiles: 4
 hopkins-2020-09-07:
   cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
@@ -2577,12 +2577,12 @@ data-fit-2020-07-27-53:
     md5: 724f8f0574bbb9b8d5b65cb032c61023
     size: 3693
   - path: initial-pars/53.csv
-    md5: f8c04822f7782e9283d70b486f5d5d6f
-    size: 27
+    md5: 0d1cab161951ff8e065b7344b3508be0
+    size: 28
   outs:
   - path: minimizer/2020-07-27--53.csv
-    md5: b18891ca9e57f71066fd444571385e81
-    size: 4972
+    md5: d205162bb7088df513c71a6dbbc9c7fc
+    size: 4979
 write-forecast-2020-07-27-53:
   cmd: fdt=2020-07-27 loc=53 Rscript infection-kalman-process-results.R
   deps:
@@ -2593,11 +2593,11 @@ write-forecast-2020-07-27-53:
     md5: 627aa7b9c8ab8ef410cf2a387aa303a5
     size: 11873
   - path: minimizer/2020-07-27--53.csv
-    md5: b18891ca9e57f71066fd444571385e81
-    size: 4972
+    md5: d205162bb7088df513c71a6dbbc9c7fc
+    size: 4979
   outs:
   - path: forecasts/2020-07-27-53-CEID-InfectionKalman.csv
-    md5: dbf6d86ef18441a56af7ce3da975289a
+    md5: d19652de12b6c032a899b0bbecbb9501
     size: 2122
 data-prep-2020-08-03-53:
   cmd: fdt=2020-08-03 loc=53 Rscript infection-kalman-data-prep.R
