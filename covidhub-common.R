@@ -111,15 +111,16 @@ process_hopkins <- function(path){
     mutate(`day ahead inc`= c(NA, diff(`day ahead cum`)))    
   
   hpd2 <- 
-    hpd %>% mutate(week = lubridate::epiweek(target_end_date)) %>% 
-    group_by(location, week) %>% 
-    arrange(location, week, target_end_date) %>% 
+    hpd %>% mutate(week = lubridate::epiweek(target_end_date),
+                   year = lubridate::epiyear(target_end_date)) %>% 
+    group_by(location, week, year) %>% 
+    arrange(location, week, year, target_end_date) %>% 
     summarise(`wk ahead inc` = sum(`day ahead inc`),
               `wk ahead cum` = tail(`day ahead cum`, n = 1),
               target_end_date = tail(target_end_date, n = 1), 
               n = n(), .groups = "drop") %>% 
     filter(n == 7) %>%
-    select(-n, -week)
+    select(-n, -week, -year)
   
   hpd3 <- 
     hpd2 %>% pivot_longer(-c(target_end_date, location), 
