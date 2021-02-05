@@ -119,20 +119,19 @@ gpnet <- function(x, y, calc_convex_nll, param_map, alpha, nobs, nvars, jd, vp,
   parInds <- seq(dim)
   I <- diag(nrow=dim)
   nll <- function(w){
-    calc_convex_nll(w=w, x=x, y=y, param_map=param_map)
+    calc_convex_nll(w=w, x=x, y=y, pm=param_map)
   }
-  ll_no_penalty <- function(w_nopen){
+  nll_no_penalty <- function(w_nopen){
     w <- winit
     pen_ind <- vp > .Machine$double.eps
     w[!pen_ind] <- w_nopen
-    -calc_convex_nll(w=w, x=x, y=y, param_map=param_map)
+    calc_convex_nll(w=w, x=x, y=y, pm=param_map)
   }
-  logfile <- tempfile(pattern="optim.rphast", fileext = ".log")
   is_unpenalized <- vp < .Machine$double.eps
   init <- winit[is_unpenalized]
-  upper <- rep(4, length(init))
-  lower <- rep(-4, length(init))
-  ans <- rphast::optim.rphast(ll_no_penalty, init, lower = lower, upper=upper, logfile = logfile)
+  upper <- c(11.5, 18.2, 5)
+  lower <- c(2.3, -2.5, 1.4)
+  ans <- optim(init, nll_no_penalty, lower = lower, upper=upper, method = "L-BFGS-B")
   if (make_log) {
     logfile <- tempfile(pattern="gpnet", fileext = ".log")
     record <- function(...) cat(..., file = logfile, append = TRUE)
@@ -248,7 +247,7 @@ gpnet <- function(x, y, calc_convex_nll, param_map, alpha, nobs, nvars, jd, vp,
               M <- M / as.numeric(t(sColVec) %*% G %*% sColVec)
               M <- G - M
               G <- M + yColVec %*% t(yColVec) / as.numeric(t(yColVec) %*% sColVec)
-              if (any(diag(G) <= 0)) browser()
+              if (any(diag(G) < 0)) browser()
             } else {
               if(make_log) record('resetting Hessian: ys <= 0', '\n')
               if (isTRUE(all.equal(ys, 0))) {

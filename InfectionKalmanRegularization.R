@@ -82,32 +82,6 @@ iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps){
   list(xhat = xhat_new, PN = PN_new)
 }
 
-param_map <- function(x, w){
-  ret <- list()
-  is_spline_par <- grepl("^b[0-9]+$", names(w))
-  tmp <- w[is_spline_par]
-  bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
-  bpars_diff[1] <- exp(bpars_diff[1]) ## transform
-  stopifnot(length(bpars_diff) == nrow(x))
-  ret$bpars <- cumsum(bpars_diff)
-  
-  I_0 <- exp(w["logI_0"])
-  E_0 <- I_0 * w["gamma"] / w["eta"]
-  S_0 <- w["N"] - E_0 - I_0
-  
-  ret$xhat0 = c(S_0, E_0, I_0, 0)
-  names(ret$xhat0) <- c("S", "E", "I", "C")
-  
-  ret$rho1 <- w["rho1"]
-  ret$tau <- exp(w["logtau"])
-  ret$times <- x[, 1]
-  ret$eta <- w["eta"]
-  ret$gamma <- w["gamma"]
-  ret$N <- w["N"]
-  ret$t0 <- w["t0"]
-  ret
-}
-
 kfnll <-
   function(bpars,
            xhat0,
@@ -189,16 +163,42 @@ kfnll <-
     }
   }
 
-winit0 <- pvar_df$init
-names(winit0) <- pvar_df$par
+winit <- pvar_df$init
+names(winit) <- pvar_df$par
 
-winit <- c(winit0,
+wfixed <- c(
   N = 20e6,
   rho1 = 0.4,
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
   t0 = rev(case_data$time)[wsize + 1]
 )
+
+param_map <- function(x, w, fixed = wfixed){
+  ret <- list()
+  is_spline_par <- grepl("^b[0-9]+$", names(w))
+  tmp <- w[is_spline_par]
+  bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
+  bpars_diff[1] <- exp(bpars_diff[1]) ## transform
+  stopifnot(length(bpars_diff) == nrow(x))
+  ret$bpars <- cumsum(bpars_diff)
+  
+  I_0 <- exp(w["logI_0"])
+  E_0 <- I_0 * fixed["gamma"] / fixed["eta"]
+  S_0 <- fixed["N"] - E_0 - I_0
+  
+  ret$xhat0 = c(S_0, E_0, I_0, 0)
+  names(ret$xhat0) <- c("S", "E", "I", "C")
+  
+  ret$rho1 <- fixed["rho1"]
+  ret$tau <- exp(w["logtau"])
+  ret$times <- x[, 1]
+  ret$eta <- fixed["eta"]
+  ret$gamma <- fixed["gamma"]
+  ret$N <- fixed["N"]
+  ret$t0 <- fixed["t0"]
+  ret
+}
 
 wind <- tail(case_data, n = wsize)
 y <- wind$smooth
@@ -222,25 +222,20 @@ calc_kf_nll <- function(w, x, y, pm) {
   nll
 }
 
-
 calc_kf_nll(winit, x, y, param_map)
+pen_factor <- rep(1, length(winit))
+pen_factor[1:3] <- 0
 
-get_gpnet()
-
-
-
-if(FALSE){
-  tictoc::tic("optimization")
-  ans <- optim(
-    par = pvar,
-    fn = kfnll,
-    pfixed = pfixed,
-    cdata = tail(case_data, n = wsize),
-    t0 = the_t0,
-    method = "L-BFGS-B",
-    lower = pvar_df$lower,
-    upper = pvar_df$upper,
-    control = list(trace = 1, maxit = 300)
+rpath <-
+  get_gpnet(
+    x = x,
+    y = y,
+    calc_convex_nll = calc_kf_nll,
+    param_map = param_map,
+    nlambda = 2,
+    penalty.factor = pen_factor,
+    winit = winit,
+    make_log = TRUE
   )
-  tictoc::toc()
-}
+
+
