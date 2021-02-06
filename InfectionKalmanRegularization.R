@@ -154,9 +154,7 @@ kfnll <-
         P_kkmo = P_kkmo,
         P_kk = P_kk,
         ytilde_k = ytilde_k,
-        S = S,
-        sim_means = sim_means,
-        sim_cov = sim_cov
+        S = S
       )
     } else {
       nll
@@ -226,16 +224,55 @@ calc_kf_nll(winit, x, y, param_map)
 pen_factor <- rep(1, length(winit))
 pen_factor[1:3] <- 0
 
+tictoc::tic("optimization")
 rpath <-
   get_gpnet(
     x = x,
     y = y,
     calc_convex_nll = calc_kf_nll,
     param_map = param_map,
-    nlambda = 2,
+    nlambda = 30,
     penalty.factor = pen_factor,
     winit = winit,
     make_log = TRUE
   )
+tictoc::toc()
 
+# View diagonostics
+
+wfit <- c(rpath$a0[,30], rpath$beta[,30])
+names(wfit)[4:length(wfit)] <- paste0("b", 2:60)
+
+kf_nll_details <- function(w, x, y, pm) {
+  p <- pm(x, w)
+  nll <- kfnll(
+    bpars = p$bpars,
+    xhat0 = p$xhat0,
+    rho1 = p$rho1,
+    tau = p$tau,
+    eta = p$eta,
+    gamma = p$gamma,
+    N = p$N,
+    z = y,
+    t0 = p$t0,
+    times = p$times,
+    just_nll = FALSE
+  )
+  nll
+}
+
+dets <- kf_nll_details(wfit, x, y, param_map)
+par(mfrow = c(1,1))
+qqnorm(kfret2$ytilde_k / sqrt(kfret2$S))
+abline(0, 1)
+
+par(mfrow = c(4, 1))
+tgrid <- tail(case_data$time, n = wsize)
+
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
+lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
+
+plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
+plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
+plot(tgrid, kfret$ytilde_k / sqrt(kfret$S), xlab = "Time", ylab = "Standardized residual")
 
