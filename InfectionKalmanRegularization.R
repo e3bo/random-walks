@@ -94,6 +94,8 @@ kfnll <-
            t0,
            times, 
            Phat0 = diag(c(1, 1, 1, 0)),
+           fets = NULL,
+           lambda = 100,
            just_nll = TRUE) {
     
     T <- length(z)
@@ -147,6 +149,63 @@ kfnll <-
     nll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) 
     if (!just_nll) {
+      if (!is.null(fets)) {
+        sim_means <-
+          sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
+        for (j in seq_len(nsim)) {
+          bpars_fet <- numeric(nrow(fets))
+          bpars_fet[1] <- bpars[T] + rexp(n = 1, rate = lambda)
+          rand <- runif(1)
+          if (rand > 0.66){
+            bpars_fet[1] <- bpars_fet[1] * 1.5
+          } else if (rand < 0.33){
+            bpars_fet[1] <- bpars_fet[1] * 0.5
+          }
+          if (length(bpars_fet) > 1){
+            for (jj in seq(2, length(bpars_fet))){
+              bpars_fet[jj] <- p["gamma"] + (bpars_fet[jj - 1]  - p["gamma"]) * p["a"] + rnorm(n = 1, sd = p["betasd"])
+            }
+          }
+          bpars_fet[bpars_fet < 0] <- 0
+          xhat_init <- xhat_kk[, T]
+          PNinit <- P_kk[, , T]
+          if (fet_zero_cases == "daily" || fets$target_wday[1] == 1){
+            xhat_init["C"] <- 0
+            PNinit[, 4] <- PNinit[4, ] <- 0
+          }
+          XP <- iterate_f_and_P(
+            xhat_init,
+            PN = PNinit,
+            pvec = p,
+            beta_t = bpars_fet[1],
+            time.steps = c(times[T], fets$target_end_times[1])
+          )
+          sim_means[1, j] <- H %*% XP$xhat
+          sim_cov[1, j] <- H %*% XP$PN %*% t(H) + p["tau"]
+          for (i in seq_along(fets$target_end_times[-1])) {
+            xhat_init <- XP$xhat
+            PNinit <- XP$PN
+            if (fet_zero_cases == "daily" || fets$target_wday[i + 1] == 1){
+              xhat_init["C"] <- 0
+              PNinit[, 4] <- PNinit[4, ] <- 0
+            }
+            XP <-
+              iterate_f_and_P(
+                xhat_init,
+                PN = PNinit,
+                pvec = p,
+                beta_t = bpars_fet[i + 1],
+                time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1])
+              )
+            sim_means[i + 1, j] <- H %*% XP$xhat
+            sim_cov[i + 1, j] <-
+              H %*% XP$PN %*% t(H) + p["tau"]
+          }
+        }
+      } else {
+        sim_means <- sim_cov <- NULL
+      }
+      
       list(
         nll = nll,
         xhat_kkmo = xhat_kkmo,
@@ -154,7 +213,9 @@ kfnll <-
         P_kkmo = P_kkmo,
         P_kk = P_kk,
         ytilde_k = ytilde_k,
-        S = S
+        S = S, 
+        sim_means = sim_means,
+        sim_cov = sim_cov
       )
     } else {
       nll
@@ -175,11 +236,10 @@ wfixed <- c(
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
   is_spline_par <- grepl("^b[0-9]+$", names(w))
-  tmp <- w[is_spline_par]
+  tmp <- exp(w[is_spline_par]) # tranform from log scale
   bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
-  bpars_diff[1] <- exp(bpars_diff[1]) ## transform
   stopifnot(length(bpars_diff) == nrow(x))
-  ret$bpars <- cumsum(bpars_diff)
+  ret$bpars <- cumprod(bpars_diff)
   
   I_0 <- exp(w["logI_0"])
   E_0 <- I_0 * fixed["gamma"] / fixed["eta"]
@@ -231,17 +291,19 @@ rpath <-
     y = y,
     calc_convex_nll = calc_kf_nll,
     param_map = param_map,
-    nlambda = 30,
+    nlambda = 2,
+    lambda.min.ratio = 0.1,
     penalty.factor = pen_factor,
     winit = winit,
     make_log = TRUE
   )
 tictoc::toc()
 
-# View diagonostics
+# View diagnostics
 
-wfit <- c(rpath$a0[,30], rpath$beta[,30])
-names(wfit)[4:length(wfit)] <- paste0("b", 2:60)
+penind <- 2
+wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
+names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
 kf_nll_details <- function(w, x, y, pm) {
   p <- pm(x, w)
@@ -263,16 +325,15 @@ kf_nll_details <- function(w, x, y, pm) {
 
 dets <- kf_nll_details(wfit, x, y, param_map)
 par(mfrow = c(1,1))
-qqnorm(kfret2$ytilde_k / sqrt(kfret2$S))
+qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
 
 par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = wsize)
 
 plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
-lines(tgrid, kfret$xhat_kkmo["C",] * pfixed["rho1"])
+lines(tgrid, dets$xhat_kkmo["C",] * fixed["rho1"])
 
-plot(tgrid, kfret$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
-plot(tgrid, kfret$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
-plot(tgrid, kfret$ytilde_k / sqrt(kfret$S), xlab = "Time", ylab = "Standardized residual")
-
+plot(tgrid, dets$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
+plot(tgrid, dets$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
+plot(tgrid, dets$ytilde_k / sqrt(dets$S), xlab = "Time", ylab = "Standardized residual")
