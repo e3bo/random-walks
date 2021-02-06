@@ -23,6 +23,11 @@ case_data <- ltdat2 %>% ungroup() %>%
   select(target_end_date, time, wday, value) %>% 
   rename(reports = value)
 
+target_end_dates <- max(case_data$target_end_date) + lubridate::ddays(1) * seq(1, 28)
+target_end_times <- lubridate::decimal_date(target_end_dates)
+target_wday <- lubridate::wday(target_end_dates)
+
+
 moving_average <- function(x, n = 7) {
   stats::filter(x, rep(1 / n, n), sides = 1)
 }
@@ -95,7 +100,9 @@ kfnll <-
            times, 
            Phat0 = diag(c(1, 1, 1, 0)),
            fets = NULL,
-           lambda = 100,
+           fet_zero_cases = "daily",
+           lambda,
+           nsim,
            just_nll = TRUE) {
     
     T <- length(z)
@@ -154,19 +161,12 @@ kfnll <-
           sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
           bpars_fet <- numeric(nrow(fets))
-          bpars_fet[1] <- bpars[T] + rexp(n = 1, rate = lambda)
-          rand <- runif(1)
-          if (rand > 0.66){
-            bpars_fet[1] <- bpars_fet[1] * 1.5
-          } else if (rand < 0.33){
-            bpars_fet[1] <- bpars_fet[1] * 0.5
-          }
+          bpars_fet[1] <- bpars[T] * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
           if (length(bpars_fet) > 1){
             for (jj in seq(2, length(bpars_fet))){
-              bpars_fet[jj] <- p["gamma"] + (bpars_fet[jj - 1]  - p["gamma"]) * p["a"] + rnorm(n = 1, sd = p["betasd"])
+              bpars_fet[jj] <- bpars_fet[jj - 1] * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
             }
           }
-          bpars_fet[bpars_fet < 0] <- 0
           xhat_init <- xhat_kk[, T]
           PNinit <- P_kk[, , T]
           if (fet_zero_cases == "daily" || fets$target_wday[1] == 1){
@@ -176,12 +176,14 @@ kfnll <-
           XP <- iterate_f_and_P(
             xhat_init,
             PN = PNinit,
-            pvec = p,
+            eta = eta,
+            gamma = gamma,
+            N = N,
             beta_t = bpars_fet[1],
             time.steps = c(times[T], fets$target_end_times[1])
           )
           sim_means[1, j] <- H %*% XP$xhat
-          sim_cov[1, j] <- H %*% XP$PN %*% t(H) + p["tau"]
+          sim_cov[1, j] <- H %*% XP$PN %*% t(H) + tau
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
@@ -193,13 +195,15 @@ kfnll <-
               iterate_f_and_P(
                 xhat_init,
                 PN = PNinit,
-                pvec = p,
+                eta = eta,
+                gamma = gamma,
+                N = N,
                 beta_t = bpars_fet[i + 1],
                 time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1])
               )
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
-              H %*% XP$PN %*% t(H) + p["tau"]
+              H %*% XP$PN %*% t(H) + tau
           }
         }
       } else {
@@ -305,7 +309,10 @@ penind <- 2
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
-kf_nll_details <- function(w, x, y, pm) {
+
+fet <- tibble(target_end_times, target_wday, target_end_dates)
+
+kf_nll_details <- function(w, x, y, pm, lambda) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
@@ -318,12 +325,16 @@ kf_nll_details <- function(w, x, y, pm) {
     z = y,
     t0 = p$t0,
     times = p$times,
-    just_nll = FALSE
+    fet = fet,
+    lambda = lambda,
+    just_nll = FALSE,
+    fet_zero_cases = "weekly",
+    nsim = 10
   )
   nll
 }
 
-dets <- kf_nll_details(wfit, x, y, param_map)
+dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind])
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
@@ -337,3 +348,81 @@ lines(tgrid, dets$xhat_kkmo["C",] * fixed["rho1"])
 plot(tgrid, dets$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, dets$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
 plot(tgrid, dets$ytilde_k / sqrt(dets$S), xlab = "Time", ylab = "Standardized residual")
+
+create_forecast_df <- function(means,
+                               vars,
+                               target_type = "cases",
+                               fdt = forecast_date,
+                               location) {
+  # takes in a vector of means and variance for the normal predicted
+  # distribution of the next n weeks, and outputs a representation of
+  # this forecast in the standard covidhub format
+  if (target_type == "cases") {
+    probs <- c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)
+    maxn <- 8
+    targ_string <- " wk ahead inc case"
+  } else{
+    stop("not implemented")
+    probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+    if (target_type == "hosps") {
+      maxn <- 131
+    } else{
+      maxn <- 20
+    }
+  }
+  n <- nrow(means)
+  stopifnot(nrow(vars) == n)
+  stopifnot(n <= maxn)
+  wk_ahead <- seq_len(n)
+  targets <- paste0(wk_ahead, targ_string)
+  dte <- lubridate::ymd(fdt)
+  fdt_wd <- lubridate::wday(dte) # 1 = Sunday, 7 = Sat.
+  fdt_sun <- lubridate::ymd(dte) - (fdt_wd - 1)
+  take_back_step <- fdt_wd <= 2
+  if (take_back_step) {
+    week0_sun <- fdt_sun - 7
+  } else {
+    week0_sun <- fdt_sun
+  }
+  t1 <- expand_grid(quantile = probs, h = wk_ahead) %>%
+    mutate(target = paste0(h, targ_string),
+           target_end_date = week0_sun + 6 + h * 7) %>%
+    add_column(
+      location = as.character(location),
+      forecast_date = fdt,
+      type = "quantile"
+    ) %>%
+    mutate(q1 = map2_dbl(
+      quantile,
+      h,
+      ~ KScorrect::qmixnorm(
+        p = .x,
+        mean = means[.y,],
+        sd = sqrt(vars[.y,]),
+        pro = rep(1, ncol(means)),
+        expand = 0.0
+      )
+    ),
+    value = ifelse(q1 < 0, 0, q1)) %>%
+    mutate(value = format(value, digits = 4),
+           quantile = as.character(quantile))
+  t2 <- t1 %>% filter(quantile == "0.5") %>%
+    mutate(type = "point",
+           quantile = NA_character_)
+  bind_rows(t1, t2) %>% select(forecast_date,
+                               target,
+                               target_end_date,
+                               location,
+                               type,
+                               quantile,
+                               value)
+}
+
+inds <- which(fet$target_wday == 7)
+
+fcst <- create_forecast_df(means = dets$sim_means[inds,],
+                           vars = dets$sim_cov[inds,],
+                           location = forecast_loc)
+
+
+fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line() + geom_point()
