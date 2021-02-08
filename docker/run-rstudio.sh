@@ -5,6 +5,6 @@ docker run \
 	--rm \
 	-p 8788:8787 \
 	-e USERID=1005 \
-	-e DISABLE_AUTH=true \
+	-e PASSWORD=foo \
 	--mount type=bind,src=$HOME/src/random-walks,dst=/home/rstudio/work \
-	eamon/sir-kf:2021-01-27 /init
+	eamon/sir-kf:2021-02-08 /init

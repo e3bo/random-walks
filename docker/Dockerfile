@@ -72,6 +72,7 @@ RUN apt-get update && \
 RUN install2.r --skipinstalled --error \
 KScorrect \
 lme4 \
+numDeriv \
 padr \
 tictoc \
 verification
