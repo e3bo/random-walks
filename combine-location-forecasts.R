@@ -3,21 +3,6 @@
 library(tidyverse)
 source("covidhub-common.R")
 
-covid_hub_forecaster_name <- "CEID-InfectionKalman"
-out <-
-  dir("forecasts") %>% stringr::str_match_all(sprintf(
-    "(20\\d{2}-\\d{2}-\\d{2})-\\d{2}-%s.csv",
-    covid_hub_forecaster_name
-  ))
-fdt <- purrr::map_chr(out, 2) %>% lubridate::as_date()
-fname <- purrr::map_chr(out, 1)
-
-splt <- split(fname, fdt)
-
-if (!dir.exists(covid_hub_forecaster_name)){
-  dir.create(covid_hub_forecaster_name)
-}
-
 combine <- function(date, fnames, chubname){
   outname <- paste0(date, "-", chubname, ".csv")
   srcs <- file.path("forecasts", fnames)
@@ -26,4 +11,23 @@ combine <- function(date, fnames, chubname){
   write_csv(comb, dest)
 }
 
-map2(names(splt), splt, combine, chubname = covid_hub_forecaster_name)
+lambdas <- c(125.89, 158.49)
+covid_hub_forecaster_name <- paste0("lambda", lambdas, "-CEID-InfectionKalman")
+
+agg_fcsts <- function(chname) {
+  pat <- sprintf("(20\\d{2}-\\d{2}-\\d{2})-fips\\d{2}-%s.csv", chname)
+  out <- dir("forecasts") %>% 
+    str_subset(chname) %>% 
+    stringr::str_match_all(pat)
+    
+  fdt <- purrr::map_chr(out, 2) %>% lubridate::as_date()
+  fname <- purrr::map_chr(out, 1)
+  
+  splt <- split(fname, fdt)
+  if (!dir.exists(chname)) {
+    dir.create(chname)
+  }
+  map2(names(splt), splt, combine, chubname = chname)
+}
+
+map(covid_hub_forecaster_name, agg_fcsts)

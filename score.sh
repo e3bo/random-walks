@@ -16,22 +16,7 @@ dvc run \
     -d covidhub-common.R \
     -d combine-location-forecasts.R \
     -n combine \
-    -o CEID-InfectionKalman \
+    -o lambda125.89-CEID-InfectionKalman \
+    -o lambda158.49-CEID-InfectionKalman \
     --force \
     ./combine-location-forecasts.R
-
-dvc run \
-    -d quantile-score.R \
-    -d CEID-InfectionKalman \
-    -d covidhub-common.R \
-    -d hopkins/$ddt \
-    --plots-no-cache metrics/$ddt-score-by-loc-type.csv \
-    --plots-no-cache metrics/$ddt-score-by-loc-type-targ-type.csv \
-    --plots-no-cache metrics/$ddt-score-by-loc-type-targ-type-forecast-date.csv \
-    -o metrics/$ddt-residuals.rds \
-    --force \
-    -n score-$ddt \
-    ddt=$ddt ./quantile-score.R
-dvc plots modify -t lqs -x loc_type --x-label "Location type" metrics/${ddt}-score-by-loc-type.csv
-dvc plots modify -t lqs-loctype-panel -x target_type metrics/${ddt}-score-by-loc-type-targ-type.csv
-dvc plots modify -t lqs-loctype-targtype-panels -x forecast_date metrics/${ddt}-score-by-loc-type-targ-type-forecast-date.csv
