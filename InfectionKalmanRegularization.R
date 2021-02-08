@@ -274,7 +274,7 @@ calc_kf_nll <- function(w, x, y, pm) {
   nll
 }
 
-kf_nll_details <- function(w, x, y, pm, lambda) {
+kf_nll_details <- function(w, x, y, pm, lambda, fet) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
@@ -296,6 +296,40 @@ kf_nll_details <- function(w, x, y, pm, lambda) {
   nll
 }
 
+write_forecasts <- function(gpnet, fet) {
+  nlam <- length(gpnet$lambda)
+  for (penind in 1:nlam) {
+    wfit <- c(rpath$a0[, penind], rpath$beta[, penind])
+    names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
+    dets <-
+      kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet)
+    inds <- which(fet$target_wday == 7)
+    fcst <- create_forecast_df(
+      means = dets$sim_means[inds, ],
+      vars = dets$sim_cov[inds, ],
+      location = forecast_loc
+    )
+    
+    stopifnot(setequal(fet$target_end_dates[inds], 
+                       fcst$target_end_date %>% unique()))
+    lambda <- rpath$lambda[penind]
+    fcst_path <-
+      file.path(
+        "forecasts",
+        paste0(
+          forecast_date,
+          "-fips",
+          forecast_loc,
+          "-lambda",
+          lambda,
+          "-CEID-InfectionKalman.csv"
+        )
+      )
+    if (!dir.exists("forecasts"))
+      dir.create("forecasts")
+    write_csv(x = fcst, path = fcst_path)
+  }
+}
 ## main script
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-10-12")
@@ -382,6 +416,13 @@ x <- matrix(wind$time, ncol = 1)
 pen_factor <- rep(1, length(winit))
 pen_factor[1:3] <- 0
 
+max_lambda <- 2.2
+log_dec <- 0.1
+len_lambda <- 2
+lambda <-
+  10 ^ (seq(max_lambda, max_lambda - log_dec, length.out = len_lambda)) %>% 
+  round(2)
+
 tictoc::tic("optimization")
 rpath <-
   get_gpnet(
@@ -389,14 +430,18 @@ rpath <-
     y = y,
     calc_convex_nll = calc_kf_nll,
     param_map = param_map,
-    nlambda = 10,
-    lambda.min.ratio = 0.1,
+    lambda = lambda,
     penalty.factor = pen_factor,
     winit = winit,
     make_log = TRUE
   )
 tictoc::toc()
 
+fet <- tibble(target_end_times, target_wday, target_end_dates)
+
+write_forecasts(rpath, fet)
+
+q("no")
 # View diagnostics
 
 penind <- 10
