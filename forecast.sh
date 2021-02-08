@@ -11,33 +11,13 @@ dvc run \
     -n hopkins-$fdt \
     --force \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
-    
+
 dvc run \
-    -d infection-kalman-data-prep.R \
+    -d InfectionKalmanRegularization.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
-    -o data/$fdt--$loc.csv \
-    -o initial-pars/$fdt--$loc.csv \
+    -o forecasts/${fdt}-fips${loc}-lambda158.49-CEID-InfectionKalman.csv \
+    -o forecasts/${fdt}-fips${loc}-lambda125.89-CEID-InfectionKalman.csv \
     --force \
-    -n data-prep-$fdt-$loc \
-    fdt=$fdt loc=$loc Rscript infection-kalman-data-prep.R
-    
-dvc run \
-    -d data/$fdt--$loc.csv \
-    -d initial-pars/$fdt--$loc.csv \
-    -d initial-pars/$loc.csv \
-    -d InfectionKalman.jl \
-    -d InfectionKalmanMain.jl \
-    -o minimizer/$fdt--$loc.csv \
-    --force \
-    -n data-fit-$fdt-$loc \
-    JULIA_DEPOT_PATH=/home/rstudio/.julia julia InfectionKalmanMain.jl $fdt $loc
-    
-dvc run \
-    -d minimizer/$fdt--$loc.csv \
-    -d data/$fdt--$loc.csv \
-    -d infection-kalman-process-results.R \
-    -o forecasts/$fdt-$loc-CEID-InfectionKalman.csv \
-    --force \
-    -n write-forecast-$fdt-$loc \
-    fdt=$fdt loc=$loc Rscript infection-kalman-process-results.R
+    -n forecast-$fdt-$loc \
+    fdt=$fdt loc=$loc Rscript InfectionKalmanRegularization.R
