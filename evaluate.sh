@@ -14,14 +14,26 @@ dvc run \
     -d covidhub-common.R \
     -d combine-location-forecasts.R \
     -n combine \
-    -o lambda125.89-CEID-InfectionKalman \
+    -o lambda10.8-CEID-InfectionKalman \
+    -o lambda15.85-CEID-InfectionKalman \
+    -o lambda23.26-CEID-InfectionKalman \
+    -o lambda34.15-CEID-InfectionKalman \
+    -o lambda50.12-CEID-InfectionKalman \
+    -o lambda73.56-CEID-InfectionKalman \
+    -o lambda107.98-CEID-InfectionKalman \
     -o lambda158.49-CEID-InfectionKalman \
     --force \
     ./combine-location-forecasts.R
     
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda125.89-CEID-InfectionKalman \
+    -d lambda10.8-CEID-InfectionKalman \
+    -d lambda15.85-CEID-InfectionKalman \
+    -d lambda23.26-CEID-InfectionKalman \
+    -d lambda34.15-CEID-InfectionKalman \
+    -d lambda50.12-CEID-InfectionKalman \
+    -d lambda73.56-CEID-InfectionKalman \
+    -d lambda107.98-CEID-InfectionKalman \
     -d lambda158.49-CEID-InfectionKalman \
     -d make-trajectory-plots.R \
     -o trajectories-all.png \
@@ -35,7 +47,13 @@ dvc run \
     
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda125.89-CEID-InfectionKalman \
+    -d lambda10.8-CEID-InfectionKalman \
+    -d lambda15.85-CEID-InfectionKalman \
+    -d lambda23.26-CEID-InfectionKalman \
+    -d lambda34.15-CEID-InfectionKalman \
+    -d lambda50.12-CEID-InfectionKalman \
+    -d lambda73.56-CEID-InfectionKalman \
+    -d lambda107.98-CEID-InfectionKalman \
     -d lambda158.49-CEID-InfectionKalman \
     -d analyze-scores.R \
     -o figure \

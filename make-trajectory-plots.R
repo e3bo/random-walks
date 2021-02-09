@@ -4,13 +4,14 @@ library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 
 fdat0 <- readRDS("other-model-forecasts.rds")
-fdat1 <-
-  dir("lambda125.89-CEID-InfectionKalman", full.names = TRUE) %>% 
-  load_forecast_files_repo()
-fdat11 <-
-  dir("lambda158.49-CEID-InfectionKalman", full.names = TRUE) %>% 
-  load_forecast_files_repo()  
-fdat2 <- bind_rows(fdat0, fdat1, fdat11)
+lambda <- c(158.49, 107.98, 73.56, 50.12, 34.15, 23.26, 15.85, 10.8)
+dirnames <- paste0("lambda", lambda, "-CEID-InfectionKalman")
+
+load_from_dir <- function(dname){
+  dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
+}
+fdat1 <- map_dfr(dirnames, load_from_dir)
+fdat2 <- bind_rows(fdat0, fdat1)
 
 plotter <- function(dat) {
   p <- plot_forecast(
@@ -42,7 +43,7 @@ plotter <- function(dat) {
 
 pall <- plotter(fdat2)
 
-ggsave("trajectories-all.png", pall, width = 8)
+ggsave("trajectories-all.png", pall, height = 18, width = 24)
 
 fdat3 <- fdat2 %>% mutate(ewk = lubridate::epiweek(forecast_date),
                           wkcyc = ewk %% 4)
@@ -51,4 +52,4 @@ splt <- split(fdat3, fdat3$wkcyc)
 plots_staggered <- map(splt, plotter)
 
 pnames <- paste0("trajectories-", names(plots_staggered), ".png")
-map2(pnames, plots_staggered, ggsave, width = 8)
+map2(pnames, plots_staggered, ggsave, height = 18, width = 24)

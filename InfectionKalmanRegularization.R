@@ -417,8 +417,8 @@ pen_factor <- rep(1, length(winit))
 pen_factor[1:3] <- 0
 
 max_lambda <- 2.2
-log_dec <- 0.1
-len_lambda <- 2
+log_dec <- 1.5
+len_lambda <- 10
 lambda <-
   10 ^ (seq(max_lambda, max_lambda - log_dec, length.out = len_lambda)) %>% 
   round(2)
@@ -430,7 +430,7 @@ rpath <-
     y = y,
     calc_convex_nll = calc_kf_nll,
     param_map = param_map,
-    lambda = lambda,
+    lambda = lambda[1:8],
     penalty.factor = pen_factor,
     winit = winit,
     make_log = TRUE
@@ -452,7 +452,7 @@ names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 fet <- tibble(target_end_times, target_wday, target_end_dates)
 
 
-dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind])
+dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)

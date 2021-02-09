@@ -11,7 +11,7 @@ combine <- function(date, fnames, chubname){
   write_csv(comb, dest)
 }
 
-lambdas <- c(125.89, 158.49)
+lambdas <- c(158.49, 107.98, 73.56, 50.12, 34.15, 23.26, 15.85, 10.8)
 covid_hub_forecaster_name <- paste0("lambda", lambdas, "-CEID-InfectionKalman")
 
 agg_fcsts <- function(chname) {

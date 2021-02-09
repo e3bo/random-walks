@@ -4,13 +4,15 @@ library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 
 fdat0 <- readRDS("other-model-forecasts.rds")
-fdat1 <-
-  dir("lambda125.89-CEID-InfectionKalman", full.names = TRUE) %>% 
-  load_forecast_files_repo()
-fdat11 <-
-  dir("lambda158.49-CEID-InfectionKalman", full.names = TRUE) %>% 
-  load_forecast_files_repo()  
-fdat2 <- bind_rows(fdat0, fdat1, fdat11)
+
+lambda <- c(158.49, 107.98, 73.56, 50.12, 34.15, 23.26, 15.85, 10.8)
+dirnames <- paste0("lambda", lambda, "-CEID-InfectionKalman")
+
+load_from_dir <- function(dname){
+  dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
+}
+fdat1 <- map_dfr(dirnames, load_from_dir)
+fdat2 <- bind_rows(fdat0, fdat1)
 
 truth_data <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
@@ -26,6 +28,7 @@ ws1 <-
 ws1
 ws1 %>% ggplot(aes(x = target_end_date, y = meanscore, color = model)) + 
   geom_point() + facet_grid(location ~ horizon, scales = "free_y") + 
+  scale_x_date(guide = guide_axis(angle = 90)) + 
   labs(x = "target date", y = "wis")
 
 ws2 <- ws %>% group_by(horizon, location, model) %>%
@@ -45,4 +48,5 @@ ws3 %>% ggplot(aes(x = location, y = meanscore, color = model)) +
 ws4 <- ws %>% group_by(model) %>% 
   summarize(meanscore = mean(score_value), .groups = "drop")
 ws4
-ws4 %>% ggplot(aes(x = model, y = meanscore)) + geom_col() + labs(y = "wis")
+ws4 %>% ggplot(aes(x = model, y = meanscore)) + geom_col() + labs(y = "wis") +
+  scale_x_discrete(guide = guide_axis(angle = 45))
