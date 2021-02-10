@@ -491,8 +491,8 @@ analyze-scores:
   cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
   deps:
   - path: analyze-scores.R
-    md5: 819dce88b6b7e2133ae3def8c77323fb
-    size: 1873
+    md5: 781abe3af1336d70f60372bb70660737
+    size: 2533
   - path: lambda010.80-CEID-InfectionKalman
     md5: 866f7d647738febc792d99c38e67924c.dir
     size: 83313
@@ -530,15 +530,15 @@ analyze-scores:
     size: 17327
   outs:
   - path: analyze-scores.html
-    md5: ebe2831bfa366239372827ea66f33965
-    size: 142675
+    md5: 81db5ea2adf2bd7edca6751203342211
+    size: 256984
   - path: analyze-scores.md
-    md5: ecf888ff2d583e548fc8a0341a0ec9f2
-    size: 5574
+    md5: ae8661d0abf5c57a5c3d32b76abf8a08
+    size: 6307
   - path: figure
-    md5: e54f95f0171913b79385db41b54fe333.dir
-    size: 92291
-    nfiles: 4
+    md5: e25e6d79c396da6c2fa5d4bb815fb361.dir
+    size: 177340
+    nfiles: 5
 hopkins-2020-09-07:
   cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
   deps:
