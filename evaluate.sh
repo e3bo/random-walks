@@ -14,12 +14,12 @@ dvc run \
     -d covidhub-common.R \
     -d combine-location-forecasts.R \
     -n combine \
-    -o lambda10.8-CEID-InfectionKalman \
-    -o lambda15.85-CEID-InfectionKalman \
-    -o lambda23.26-CEID-InfectionKalman \
-    -o lambda34.15-CEID-InfectionKalman \
-    -o lambda50.12-CEID-InfectionKalman \
-    -o lambda73.56-CEID-InfectionKalman \
+    -o lambda010.80-CEID-InfectionKalman \
+    -o lambda015.85-CEID-InfectionKalman \
+    -o lambda023.26-CEID-InfectionKalman \
+    -o lambda034.15-CEID-InfectionKalman \
+    -o lambda050.12-CEID-InfectionKalman \
+    -o lambda073.56-CEID-InfectionKalman \
     -o lambda107.98-CEID-InfectionKalman \
     -o lambda158.49-CEID-InfectionKalman \
     --force \
@@ -27,12 +27,12 @@ dvc run \
     
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda10.8-CEID-InfectionKalman \
-    -d lambda15.85-CEID-InfectionKalman \
-    -d lambda23.26-CEID-InfectionKalman \
-    -d lambda34.15-CEID-InfectionKalman \
-    -d lambda50.12-CEID-InfectionKalman \
-    -d lambda73.56-CEID-InfectionKalman \
+    -d lambda010.80-CEID-InfectionKalman \
+    -d lambda015.85-CEID-InfectionKalman \
+    -d lambda023.26-CEID-InfectionKalman \
+    -d lambda034.15-CEID-InfectionKalman \
+    -d lambda050.12-CEID-InfectionKalman \
+    -d lambda073.56-CEID-InfectionKalman \
     -d lambda107.98-CEID-InfectionKalman \
     -d lambda158.49-CEID-InfectionKalman \
     -d make-trajectory-plots.R \
@@ -47,12 +47,12 @@ dvc run \
     
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda10.8-CEID-InfectionKalman \
-    -d lambda15.85-CEID-InfectionKalman \
-    -d lambda23.26-CEID-InfectionKalman \
-    -d lambda34.15-CEID-InfectionKalman \
-    -d lambda50.12-CEID-InfectionKalman \
-    -d lambda73.56-CEID-InfectionKalman \
+    -d lambda010.80-CEID-InfectionKalman \
+    -d lambda015.85-CEID-InfectionKalman \
+    -d lambda023.26-CEID-InfectionKalman \
+    -d lambda034.15-CEID-InfectionKalman \
+    -d lambda050.12-CEID-InfectionKalman \
+    -d lambda073.56-CEID-InfectionKalman \
     -d lambda107.98-CEID-InfectionKalman \
     -d lambda158.49-CEID-InfectionKalman \
     -d analyze-scores.R \

@@ -6,7 +6,8 @@ suppressPackageStartupMessages(library(tidyverse))
 fdat0 <- readRDS("other-model-forecasts.rds")
 
 lambda <- c(158.49, 107.98, 73.56, 50.12, 34.15, 23.26, 15.85, 10.8)
-dirnames <- paste0("lambda", lambda, "-CEID-InfectionKalman")
+
+dirnames <- paste0("lambda", sprintf("%06.2f", lambda), "-CEID-InfectionKalman")
 
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 

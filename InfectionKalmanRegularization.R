@@ -129,6 +129,7 @@ kfnll <-
            fet_zero_cases = "daily",
            lambda,
            nsim,
+           bmax = 3 * gamma,
            just_nll = TRUE) {
     
     T <- length(z)
@@ -193,6 +194,7 @@ kfnll <-
               bpars_fet[jj] <- bpars_fet[jj - 1] * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
             }
           }
+          bpars_fet[bpars_fet > bmax] <- bmax
           xhat_init <- xhat_kk[, T]
           PNinit <- P_kk[, , T]
           if (fet_zero_cases == "daily" || fets$target_wday[1] == 1){
@@ -321,7 +323,7 @@ write_forecasts <- function(gpnet, fet) {
           "-fips",
           forecast_loc,
           "-lambda",
-          lambda,
+          sprintf("%06.2f", lambda),
           "-CEID-InfectionKalman.csv"
         )
       )
