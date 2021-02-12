@@ -78,7 +78,7 @@ create_forecast_df <- function(means,
 }
 
 
-iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps){
+iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps, vif = 1){
   P <- PN / N
   dt <- diff(time.steps)
   vf <-  with(as.list(c(xhat, beta_t)), {
@@ -90,7 +90,7 @@ iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps){
     )
     
     f <-
-      c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N)
+      c(0, beta_t * (S / N) * (I / N) * vif, eta * E / N, gamma * I / N)
     Q <- rbind(c(f[1] + f[2],-f[2],           0,     0),
                c(-f[2], f[2] + f[3],-f[3],     0),
                c(0,-f[3], f[3] + f[4],-f[4]),
@@ -130,6 +130,7 @@ kfnll <-
            lambda,
            nsim,
            bmax = 3 * gamma,
+           vif = 1,
            just_nll = TRUE) {
     
     T <- length(z)
@@ -163,7 +164,8 @@ kfnll <-
         gamma = gamma,
         N = N,
         beta_t = bpars[i],
-        time.steps = time.steps
+        time.steps = time.steps,
+        vif = vif
       )
       xhat_kkmo[, i] <- XP$xhat
       P_kkmo[, , i] <- XP$PN
@@ -208,7 +210,8 @@ kfnll <-
             gamma = gamma,
             N = N,
             beta_t = bpars_fet[1],
-            time.steps = c(times[T], fets$target_end_times[1])
+            time.steps = c(times[T], fets$target_end_times[1]),
+            vif = vif
           )
           sim_means[1, j] <- H %*% XP$xhat
           sim_cov[1, j] <- H %*% XP$PN %*% t(H) + tau
@@ -227,7 +230,8 @@ kfnll <-
                 gamma = gamma,
                 N = N,
                 beta_t = bpars_fet[i + 1],
-                time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1])
+                time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1]),
+                vif = vif
               )
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
@@ -271,6 +275,7 @@ calc_kf_nll <- function(w, x, y, pm) {
     z = y,
     t0 = p$t0,
     times = p$times,
+    vif = p$vif,
     just_nll = TRUE
   )
   nll
@@ -289,6 +294,7 @@ kf_nll_details <- function(w, x, y, pm, lambda, fet) {
     z = y,
     t0 = p$t0,
     times = p$times,
+    vif = p$vif,
     fet = fet,
     lambda = lambda,
     just_nll = FALSE,
@@ -382,13 +388,14 @@ wfixed <- c(
   rho1 = 0.4,
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
+  vif = 10,
   t0 = rev(case_data$time)[wsize + 1]
 )
 
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
   is_spline_par <- grepl("^b[0-9]+$", names(w))
-  tmp <- exp(w[is_spline_par]) # tranform from log scale
+  tmp <- exp(w[is_spline_par]) # transform from log scale
   bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
   stopifnot(length(bpars_diff) == nrow(x))
   ret$bpars <- cumprod(bpars_diff)
@@ -407,6 +414,7 @@ param_map <- function(x, w, fixed = wfixed){
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
   ret$t0 <- fixed["t0"]
+  ret$vif <- fixed["vif"]
   ret
 }
 
@@ -484,3 +492,9 @@ fcst_path <- file.path("forecasts", paste0(forecast_date, "-", forecast_loc, "-C
 if(!dir.exists("forecasts")) dir.create("forecasts")
 write_csv(x = fcst, path = fcst_path)
 
+## plot Rt and cases
+par(mfrow = c(2, 1))
+#plot(tgrid, tail(case_data$reports, n = wsize), xlab = "", ylab = "cases", type = 'h')
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "", ylab = " cases (7-day moving average)")
+bmat <- cbind(exp(rpath$a0[3,]), exp(rpath$a0[3,]) * t(apply(exp(rpath$beta), 2, cumprod)))
+matplot(tgrid, t(bmat) / gamma, type = 'l', ylab = expression(R[t]), xlab = "Year")
