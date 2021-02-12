@@ -383,8 +383,10 @@ pvar_df <- tribble(
 winit <- pvar_df$init
 names(winit) <- pvar_df$par
 
+N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
+  pull(population)
 wfixed <- c(
-  N = 20e6,
+  N = N,
   rho1 = 0.4,
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
