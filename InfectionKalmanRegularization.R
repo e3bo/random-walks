@@ -388,7 +388,7 @@ wfixed <- c(
   rho1 = 0.4,
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
-  vif = 10,
+  vif = 1,
   t0 = rev(case_data$time)[wsize + 1]
 )
 
