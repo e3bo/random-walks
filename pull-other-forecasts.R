@@ -11,8 +11,7 @@ fdts_sun <- fdts_mon - 1
 
 fdat <- load_forecasts(models = models,
                        forecast_dates = c(fdts_sun, fdts_mon, fdts_tue),
-                       locations = locs,
-                       types = c("quantile"), 
+                       locations = locs, 
                        targets = paste(1:4, "wk ahead inc case"))
 
 saveRDS(fdat, file = "other-model-forecasts.rds")

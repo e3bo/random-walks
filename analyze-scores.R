@@ -21,7 +21,7 @@ truth_data <- load_truth(truth_source = "JHU",
 
 scores <- score_forecasts(fdat2, truth_data, return_format = "long")
 ws <- scores %>% filter(score_name == "wis")
-
+as <- scores %>% filter(score_name == "abs_error")
 
 ws1 <-
   ws %>% group_by(horizon, location, model, target_end_date) %>% 
@@ -40,6 +40,16 @@ ws2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) +
   geom_col(position = position_dodge()) + 
   facet_grid(location ~ ., scales = "free_y") + 
   labs(y = "WIS")
+
+as2 <- as %>% group_by(horizon, location, model) %>%
+  summarize(meanscore = mean(score_value), .groups = "drop")
+as2
+as2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) + 
+  geom_col(position = position_dodge()) + 
+  facet_grid(location ~ ., scales = "free_y") + 
+  labs(y = "MAE")
+
+
 
 ws3 <- ws %>% group_by(location, model) %>%
   summarize(meanscore = mean(score_value), .groups = "drop")
