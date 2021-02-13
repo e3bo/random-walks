@@ -131,6 +131,7 @@ kfnll <-
            nsim,
            bmax = 3 * gamma,
            vif = 1,
+           btsd = 1,
            just_nll = TRUE) {
     
     T <- length(z)
@@ -190,7 +191,7 @@ kfnll <-
           sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
           bpars_fet <- numeric(nrow(fets))
-          bpars_fet[1] <- bpars[T] * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
+          bpars_fet[1] <- bpars[T] * exp(rnorm(n = 1, sd = btsd)) * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
           if (length(bpars_fet) > 1){
             for (jj in seq(2, length(bpars_fet))){
               bpars_fet[jj] <- bpars_fet[jj - 1] * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
@@ -281,7 +282,7 @@ calc_kf_nll <- function(w, x, y, pm) {
   nll
 }
 
-kf_nll_details <- function(w, x, y, pm, lambda, fet) {
+kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
@@ -299,18 +300,19 @@ kf_nll_details <- function(w, x, y, pm, lambda, fet) {
     lambda = lambda,
     just_nll = FALSE,
     fet_zero_cases = "weekly",
-    nsim = 10
+    nsim = 10,
+    btsd = btsd
   )
   nll
 }
 
-write_forecasts <- function(gpnet, fet) {
+write_forecasts <- function(gpnet, fet, btsd = 0) {
   nlam <- length(gpnet$lambda)
   for (penind in 1:nlam) {
     wfit <- c(rpath$a0[, penind], rpath$beta[, penind])
     names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
     dets <-
-      kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet)
+      kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet, btsd = btsd)
     inds <- which(fet$target_wday == 7)
     fcst <- create_forecast_df(
       means = dets$sim_means[inds, ],
@@ -385,6 +387,7 @@ names(winit) <- pvar_df$par
 
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
+
 wfixed <- c(
   N = N,
   rho1 = 0.4,
@@ -442,7 +445,7 @@ rpath <-
     y = y,
     calc_convex_nll = calc_kf_nll,
     param_map = param_map,
-    lambda = lambda[1:8],
+    lambda = lambda,
     penalty.factor = pen_factor,
     winit = winit,
     make_log = TRUE
@@ -451,12 +454,12 @@ tictoc::toc()
 
 fet <- tibble(target_end_times, target_wday, target_end_dates)
 
-write_forecasts(rpath, fet)
+write_forecasts(rpath, fet, btsd = 0.3)
 
 q("no")
 # View diagnostics
 
-penind <- 10
+penind <- 8
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
@@ -464,7 +467,7 @@ names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 fet <- tibble(target_end_times, target_wday, target_end_dates)
 
 
-dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet)
+dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet, btsd = 0.3)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
