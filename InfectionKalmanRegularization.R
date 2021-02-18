@@ -130,6 +130,7 @@ kfnll <-
            lambda,
            nsim,
            bmax = 3 * gamma,
+           a = .98, 
            vif = 1,
            btsd = 1,
            just_nll = TRUE) {
@@ -137,20 +138,24 @@ kfnll <-
     T <- length(z)
     stopifnot(T > 0)
     
-    ytilde_kk <- ytilde_k <- S <- array(NA_real_, dim = c(1, T))
+    logbeta <- ytilde_kk <- ytilde_k <- S <- array(NA_real_, dim = c(1, T))
+    
     K <- xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(4, T))
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(4, 4, T))
     
     H <-matrix(c(0, 0, 0, rho1), ncol = 4)
+
     for (i in seq(1, T)) {
       if (i == 1) {
         xhat_init <- xhat0
         PNinit <- Phat0
+        logbeta[i] <- bpars[i]
         time.steps <- c(t0, times[1])
       } else {
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
+        logbeta[i] <- log(gamma) + a * (logbeta[i - 1] - log(gamma)) + bpars[i]
         time.steps <- c(times[i - 1], times[i])
       }
       R <- tau
@@ -164,7 +169,7 @@ kfnll <-
         eta = eta,
         gamma = gamma,
         N = N,
-        beta_t = bpars[i],
+        beta_t = exp(logbeta[i]),
         time.steps = time.steps,
         vif = vif
       )
@@ -190,14 +195,14 @@ kfnll <-
         sim_means <-
           sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
-          bpars_fet <- numeric(nrow(fets))
-          bpars_fet[1] <- bpars[T] * exp(rnorm(n = 1, sd = btsd)) * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
-          if (length(bpars_fet) > 1){
-            for (jj in seq(2, length(bpars_fet))){
-              bpars_fet[jj] <- bpars_fet[jj - 1] * exp(sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda))
+          logbeta_fet <- numeric(nrow(fets))
+          logbeta_fet[1] <- log(gamma) + a * (logbeta[T] - log(gamma)) +  sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda)
+          if (length(logbeta_fet) > 1){
+            for (jj in seq(2, length(logbeta_fet))){
+              logbeta_fet[jj] <- log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda)
             }
           }
-          bpars_fet[bpars_fet > bmax] <- bmax
+          #logbeta_fet[bpars_fet > bmax] <- bmax
           xhat_init <- xhat_kk[, T]
           PNinit <- P_kk[, , T]
           if (fet_zero_cases == "daily" || fets$target_wday[1] == 1){
@@ -210,7 +215,7 @@ kfnll <-
             eta = eta,
             gamma = gamma,
             N = N,
-            beta_t = bpars_fet[1],
+            beta_t = exp(logbeta_fet[1]),
             time.steps = c(times[T], fets$target_end_times[1]),
             vif = vif
           )
@@ -230,7 +235,7 @@ kfnll <-
                 eta = eta,
                 gamma = gamma,
                 N = N,
-                beta_t = bpars_fet[i + 1],
+                beta_t = exp(logbeta_fet[i + 1]),
                 time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1]),
                 vif = vif
               )
@@ -252,7 +257,8 @@ kfnll <-
         ytilde_k = ytilde_k,
         S = S, 
         sim_means = sim_means,
-        sim_cov = sim_cov
+        sim_cov = sim_cov,
+        logbeta = logbeta
       )
     } else {
       nll
@@ -400,10 +406,10 @@ wfixed <- c(
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
   is_spline_par <- grepl("^b[0-9]+$", names(w))
-  tmp <- exp(w[is_spline_par]) # transform from log scale
+  tmp <- w[is_spline_par]
   bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
   stopifnot(length(bpars_diff) == nrow(x))
-  ret$bpars <- cumprod(bpars_diff)
+  ret$bpars <- bpars_diff
   
   I_0 <- exp(w["logI_0"])
   E_0 <- I_0 * fixed["gamma"] / fixed["eta"]
@@ -445,7 +451,7 @@ rpath <-
     y = y,
     calc_convex_nll = calc_kf_nll,
     param_map = param_map,
-    lambda = lambda,
+    lambda = lambda[1:8],
     penalty.factor = pen_factor,
     winit = winit,
     make_log = TRUE
@@ -454,12 +460,12 @@ tictoc::toc()
 
 fet <- tibble(target_end_times, target_wday, target_end_dates)
 
-write_forecasts(rpath, fet, btsd = 0.3)
+write_forecasts(rpath, fet, btsd = 0.)
 
 q("no")
 # View diagnostics
 
-penind <- 8
+penind <- 2
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
@@ -467,7 +473,7 @@ names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 fet <- tibble(target_end_times, target_wday, target_end_dates)
 
 
-dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet, btsd = 0.3)
+dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet, btsd = 0.)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
