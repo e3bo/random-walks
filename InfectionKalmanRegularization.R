@@ -5,6 +5,8 @@ tictoc::tic()
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 source("regularization.R")
+JuliaCall::julia_setup()
+JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
 
 ## main functions
 
@@ -271,20 +273,18 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, pm) {
   p <- pm(x, w)
-  nll <- kfnll(
-    bpars = p$bpars,
-    xhat0 = p$xhat0,
-    rho1 = p$rho1,
-    tau = p$tau,
-    eta = p$eta,
-    gamma = p$gamma,
-    N = p$N,
-    z = y,
-    t0 = p$t0,
-    times = p$times,
-    vif = p$vif,
-    just_nll = TRUE
-  )
+  JuliaCall::julia_assign("bvec", p$bpars)
+  JuliaCall::julia_assign("l0", p$xhat0["E"])
+  JuliaCall::julia_assign("logτ", p$logtau)
+  JuliaCall::julia_assign("η", p$eta)
+  JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("N", p$N)
+  JuliaCall::julia_assign("ρ", p$rho1)
+  JuliaCall::julia_assign("η", p$eta)
+  JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("z", map(y, list))
+  JuliaCall::julia_assign("a", p$a)
+  nll <- JuliaCall::julia_eval("InfectionKalman.obj(l0, logτ, bvec, z; ρ = ρ, N = N, η = η, γ = γ, a = a)")
   nll
 }
 
@@ -400,7 +400,8 @@ wfixed <- c(
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
   vif = 1,
-  t0 = rev(case_data$time)[wsize + 1]
+  t0 = rev(case_data$time)[wsize + 1],
+  a = 0.98
 )
 
 param_map <- function(x, w, fixed = wfixed){
@@ -419,13 +420,14 @@ param_map <- function(x, w, fixed = wfixed){
   names(ret$xhat0) <- c("S", "E", "I", "C")
   
   ret$rho1 <- fixed["rho1"]
-  ret$tau <- exp(w["logtau"])
+  ret$logtau <- w["logtau"]
   ret$times <- x[, 1]
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
   ret$t0 <- fixed["t0"]
   ret$vif <- fixed["vif"]
+  ret$a <- fixed["a"]
   ret
 }
 
