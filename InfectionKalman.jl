@@ -9,8 +9,13 @@ using Optim
 export fit
 export obj
 
-function obj(l0, logτ, bvec::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., just_nll::Bool = true)
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., just_nll::Bool = true)
+
     # prior for time 0
+    l0 = pvar[1]
+    logτ = pvar[2]
+    bvec = pvar[3:end]
+    
     y0 = l0 * η / γ
     x0 = [N - l0 - y0; l0; y0; 0]
     p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
@@ -94,6 +99,15 @@ function obj(l0, logτ, bvec::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 =
     else
        return nll, ytkkmo, Σ, xkkmo, pkkmo, pkk
     end
+end
+
+
+function objunary
+
+end
+
+function grad(par, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1.)
+    g = ForwardDiff.gradient(pvar -> obju(par; ))
 end
 
 function hess(par, z, w)

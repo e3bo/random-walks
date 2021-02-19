@@ -273,6 +273,22 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, pm) {
   p <- pm(x, w)
+  pvar <- c(p$xhat0["E"], p$logtau, p$bpars)
+  JuliaCall::julia_assign("pvar", pvar)
+  JuliaCall::julia_assign("η", p$eta)
+  JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("N", p$N)
+  JuliaCall::julia_assign("ρ", p$rho1)
+  JuliaCall::julia_assign("η", p$eta)
+  JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("z", map(y, list))
+  JuliaCall::julia_assign("a", p$a)
+  nll <- JuliaCall::julia_eval("InfectionKalman.obj(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a)")
+  nll
+}
+
+calc_kf_nll_grad <- function(w, x, y, pm) {
+  p <- pm(x, w)
   JuliaCall::julia_assign("bvec", p$bpars)
   JuliaCall::julia_assign("l0", p$xhat0["E"])
   JuliaCall::julia_assign("logτ", p$logtau)
@@ -284,9 +300,11 @@ calc_kf_nll <- function(w, x, y, pm) {
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", map(y, list))
   JuliaCall::julia_assign("a", p$a)
+  browser()
   nll <- JuliaCall::julia_eval("InfectionKalman.obj(l0, logτ, bvec, z; ρ = ρ, N = N, η = η, γ = γ, a = a)")
   nll
 }
+
 
 kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
   p <- pm(x, w)
