@@ -119,7 +119,7 @@ kfnll <-
   function(bpars,
            xhat0,
            rho1, 
-           tau,
+           logtau,
            eta,
            gamma,
            N,
@@ -160,7 +160,7 @@ kfnll <-
         logbeta[i] <- log(gamma) + a * (logbeta[i - 1] - log(gamma)) + bpars[i]
         time.steps <- c(times[i - 1], times[i])
       }
-      R <- tau
+      R <- exp(logtau)
       
       xhat_init["C"] <- 0
       PNinit[, 4] <- PNinit[4, ] <- 0
@@ -222,7 +222,7 @@ kfnll <-
             vif = vif
           )
           sim_means[1, j] <- H %*% XP$xhat
-          sim_cov[1, j] <- H %*% XP$PN %*% t(H) + tau
+          sim_cov[1, j] <- H %*% XP$PN %*% t(H) + exp(logtau)
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
@@ -243,7 +243,7 @@ kfnll <-
               )
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
-              H %*% XP$PN %*% t(H) + tau
+              H %*% XP$PN %*% t(H) + exp(logtau)
           }
         }
       } else {
@@ -294,7 +294,7 @@ kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
     bpars = p$bpars,
     xhat0 = p$xhat0,
     rho1 = p$rho1,
-    tau = p$tau,
+    logtau = p$logtau,
     eta = p$eta,
     gamma = p$gamma,
     N = p$N,
@@ -307,7 +307,8 @@ kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
     just_nll = FALSE,
     fet_zero_cases = "weekly",
     nsim = 10,
-    btsd = btsd
+    btsd = btsd,
+    a = p$a
   )
   nll
 }
@@ -467,7 +468,7 @@ write_forecasts(rpath, fet, btsd = 0.)
 q("no")
 # View diagnostics
 
-penind <- 2
+penind <- 1
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
