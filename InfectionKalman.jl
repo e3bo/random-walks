@@ -8,6 +8,7 @@ using Optim
 
 export fit
 export obj
+export grad
 
 function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., just_nll::Bool = true)
 
@@ -101,13 +102,9 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     end
 end
 
-
-function objunary
-
-end
-
-function grad(par, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1.)
-    g = ForwardDiff.gradient(pvar -> obju(par; ))
+function grad(pvar, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1.)
+    g = ForwardDiff.gradient(par -> obj(par, z), pvar)
+    g
 end
 
 function hess(par, z, w)

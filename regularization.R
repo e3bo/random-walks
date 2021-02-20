@@ -3,6 +3,7 @@
 #' @param x matrix of predictors for linear model
 #' @param y response data that will be used to fit the model
 #' @param calc_convex_nll function that will be used to calculate the likelihood of the data
+#' @param calc_grad function that will be used to calculate the gradient of the likelihood
 #' @param param_map function that maps vector of parameters into named list for likelihood function
 #' @param alpha proportion of penalty function that is L1 instead of L2
 #' @param nlambda number of penalty values to on regularization path
@@ -24,7 +25,7 @@
 #' @param winit parameter values used to initialize optimization
 #'
 #' @export
-get_gpnet <- function(x, y, calc_convex_nll, param_map, alpha=1, nlambda=100,
+get_gpnet <- function(x, y, calc_convex_nll, calc_grad, param_map, alpha=1, nlambda=100,
                       lambda.min.ratio=0.01, lambda=NULL, standardize=TRUE,
                       thresh=1e-4, dfmax=nvars + 1,
                       pmax=min(dfmax*2 + 20,nvars), exclude,
@@ -100,7 +101,7 @@ get_gpnet <- function(x, y, calc_convex_nll, param_map, alpha=1, nlambda=100,
     ulam <- as.double(rev(sort(lambda)))
     nlam <- as.integer(length(lambda))
   }
-  fit <- gpnet(x, y, calc_convex_nll, param_map, alpha, nobs=NULL, nvars, jd, vp,
+  fit <- gpnet(x, y, calc_convex_nll, calc_grad, param_map, alpha, nobs=NULL, nvars, jd, vp,
                cl, ne, nx, nlam, flmin, ulam, thresh, isd, intr, vnames,
                maxit, make_log = make_log, winit = winit)
   fit$call <- this.call
@@ -109,10 +110,11 @@ get_gpnet <- function(x, y, calc_convex_nll, param_map, alpha=1, nlambda=100,
   fit
 }
 
-gpnet <- function(x, y, calc_convex_nll, param_map, alpha, nobs, nvars, jd, vp,
-                  cl, ne, nx, nlam, flmin, ulam, thresh, isd, intr, vnames,
-                  maxit, a=0.1, r=0.01, relStart=0.0, mubar=1, beta=0.1,
-                  make_log = FALSE, debug = TRUE, initFactor=20, winit){
+gpnet <- function(x, y, calc_convex_nll, calc_grad, param_map, alpha, nobs, 
+                  nvars, jd, vp, cl, ne, nx, nlam, flmin, ulam, thresh, isd, 
+                  intr, vnames, maxit, a=0.1, r=0.01, relStart=0.0, mubar=1, 
+                  beta=0.1, make_log = FALSE, debug = TRUE, initFactor=20, 
+                  winit){
   maxit <- as.integer(maxit)
   niter <- 0
   dim <- nvars + intr
@@ -120,6 +122,9 @@ gpnet <- function(x, y, calc_convex_nll, param_map, alpha, nobs, nvars, jd, vp,
   I <- diag(nrow=dim)
   nll <- function(w){
     calc_convex_nll(w=w, x=x, y=y, pm=param_map)
+  }
+  grad <- function(w){
+    calc_grad(w=w, x=x, y=y, pm=param_map)
   }
   nll_no_penalty <- function(w_nopen){
     w <- winit
@@ -138,8 +143,7 @@ gpnet <- function(x, y, calc_convex_nll, param_map, alpha, nobs, nvars, jd, vp,
   }
   par <- winit
   par[is_unpenalized] <- ans$par
-  nderv <- function(f, p) numDeriv::grad(f, x = p, method = "simple", method.args=list(eps=1e-3))
-  gnll <- nderv(nll, par)
+  gnll <- grad(par)
   mu <- mubar
   stopifnot(beta>0, beta<1)
   G <- diag(initFactor * abs(gnll), ncol=dim)
@@ -226,7 +230,7 @@ gpnet <- function(x, y, calc_convex_nll, param_map, alpha, nobs, nvars, jd, vp,
             if (mu < 1e-8) {
               if(make_log) record("problem: mu < 1e-8", "\n")
               browser()
-              gnll <- nderv(nll, par2)
+              gnll <- grad(par2)
               G <- diag(initFactor * abs(gnll), ncol=dim)
               mu <- mubar
             }
@@ -235,7 +239,7 @@ gpnet <- function(x, y, calc_convex_nll, param_map, alpha, nobs, nvars, jd, vp,
               if(make_log) record('increasing step size: sufficient decrease', '\n')
               mu <- mu / sqrt(beta)
             }
-            gnll2 <- nderv(nll, par2)
+            gnll2 <- grad(par2)
             yvec <- gnll2 - gnll
             s <- d
             ys <- yvec %*% s

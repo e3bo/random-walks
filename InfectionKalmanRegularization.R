@@ -287,11 +287,10 @@ calc_kf_nll <- function(w, x, y, pm) {
   nll
 }
 
-calc_kf_nll_grad <- function(w, x, y, pm) {
+calc_kf_grad <- function(w, x, y, pm) {
   p <- pm(x, w)
-  JuliaCall::julia_assign("bvec", p$bpars)
-  JuliaCall::julia_assign("l0", p$xhat0["E"])
-  JuliaCall::julia_assign("logτ", p$logtau)
+  pvar <- c(p$xhat0["E"], p$logtau, p$bpars)
+  JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("N", p$N)
@@ -300,11 +299,9 @@ calc_kf_nll_grad <- function(w, x, y, pm) {
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", map(y, list))
   JuliaCall::julia_assign("a", p$a)
-  browser()
-  nll <- JuliaCall::julia_eval("InfectionKalman.obj(l0, logτ, bvec, z; ρ = ρ, N = N, η = η, γ = γ, a = a)")
-  nll
+  g <- JuliaCall::julia_eval("InfectionKalman.grad(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a)")
+  g
 }
-
 
 kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
   p <- pm(x, w)
@@ -471,9 +468,11 @@ rpath <-
     x = x,
     y = y,
     calc_convex_nll = calc_kf_nll,
+    calc_grad = calc_kf_grad,
     param_map = param_map,
     lambda = lambda[1:8],
     penalty.factor = pen_factor,
+    thresh = 1e-6,
     winit = winit,
     make_log = TRUE
   )
@@ -486,7 +485,7 @@ write_forecasts(rpath, fet, btsd = 0.)
 q("no")
 # View diagnostics
 
-penind <- 1
+penind <- 8
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
