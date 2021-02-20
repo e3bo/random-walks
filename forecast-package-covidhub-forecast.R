@@ -24,7 +24,14 @@ rw_forecast <- function(df, fdt, npaths = 100,
   last_end_date <- max(df$target_end_date)
   stopifnot(fdt - last_end_date < lubridate::ddays(3))
   df1 <- df %>% filter(target_end_date <= fdt)
-  y <- ts(df1$value) %>% tail(n = tailn)
+  ## remove oobservations more that 2 sds away from mean
+  win <- ts(df1$value) %>% tail(n = max(tailn, 14))
+  sigma <- sd(win)
+  m <- mean(win)
+  is_outlier <- abs(win - m) / (2 * sigma) > 1
+  win[is_outlier] <- NA
+  y <- tail(win[!is.na(win)], n = tailn)
+  stopifnot(length(y) == tailn)
   object <- forecast::naive(y, h = 1)$model
   sim <- matrix(NA, nrow = npaths, ncol = h)
   for (i in 1:npaths) {
