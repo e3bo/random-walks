@@ -132,11 +132,17 @@ gpnet <- function(x, y, calc_convex_nll, calc_grad, param_map, alpha, nobs,
     w[!pen_ind] <- w_nopen
     calc_convex_nll(w=w, x=x, y=y, pm=param_map)
   }
+  grad_no_penalty <- function(w_nopen){
+    w <- winit
+    pen_ind <- vp > .Machine$double.eps
+    w[!pen_ind] <- w_nopen
+    calc_grad(w=w, x=x, y=y, pm=param_map)[!pen_ind]
+  }
   is_unpenalized <- vp < .Machine$double.eps
   init <- winit[is_unpenalized]
   upper <- c(11.5, 18.2, 5)
-  lower <- c(2.3, -2.5, 1.4)
-  ans <- optim(init, nll_no_penalty, lower = lower, upper=upper, method = "L-BFGS-B")
+  lower <- c(2.3, 2.5, 1.4)
+  ans <- optim(init, nll_no_penalty, gr = grad_no_penalty, lower = lower, upper=upper, method = "L-BFGS-B")
   if (make_log) {
     logfile <- tempfile(pattern="gpnet", fileext = ".log")
     record <- function(...) cat(..., file = logfile, append = TRUE)
@@ -144,6 +150,7 @@ gpnet <- function(x, y, calc_convex_nll, calc_grad, param_map, alpha, nobs,
   par <- winit
   par[is_unpenalized] <- ans$par
   gnll <- grad(par)
+
   mu <- mubar
   stopifnot(beta>0, beta<1)
   G <- diag(initFactor * abs(gnll), ncol=dim)
@@ -224,10 +231,10 @@ gpnet <- function(x, y, calc_convex_nll, calc_grad, param_map, alpha, nobs,
           nlp <- nll(par2)
           F2 <- nlp + penFunc(par2)
           steplen <- sqrt(sum(d^2))
-          if (F2 - F1 > r * (Fmod - F1) && steplen > 1e-3){
+          if (F2 - F1 > r * (Fmod - F1)){
             if(make_log) record('backtracking: insufficient decrease', '\n')
             mu <- mu * beta
-            if (mu < 1e-8) {
+            if (mu < 1e-14) {
               if(make_log) record("problem: mu < 1e-8", "\n")
               browser()
               gnll <- grad(par2)

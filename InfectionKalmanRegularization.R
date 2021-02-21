@@ -117,7 +117,7 @@ iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps, vif = 1
 
 kfnll <-
   function(bpars,
-           xhat0,
+           logE0,
            rho1, 
            logtau,
            eta,
@@ -136,6 +136,10 @@ kfnll <-
            vif = 1,
            btsd = 1,
            just_nll = TRUE) {
+    
+    E0 = exp(logE0)
+    I0 = E0 * eta / gamma
+    xhat0 = c(S = N - E0 - I0, E = E0, I = I0, C = 0)
     
     T <- length(z)
     stopifnot(T > 0)
@@ -273,7 +277,7 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, pm) {
   p <- pm(x, w)
-  pvar <- c(p$xhat0["E"], p$logtau, p$bpars)
+  pvar <- c(p$logE0, p$logtau, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -289,7 +293,7 @@ calc_kf_nll <- function(w, x, y, pm) {
 
 calc_kf_grad <- function(w, x, y, pm) {
   p <- pm(x, w)
-  pvar <- c(p$xhat0["E"], p$logtau, p$bpars)
+  pvar <- c(p$logE0, p$logtau, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -307,7 +311,7 @@ kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
-    xhat0 = p$xhat0,
+    logE0 = p$logE0,
     rho1 = p$rho1,
     logtau = p$logtau,
     eta = p$eta,
@@ -392,7 +396,7 @@ tau_init <- case_data$reports %>% tail(n = wsize) %>% var()
 
 pvar_df <- tribble(
   ~par, ~init, ~lower, ~upper,
-  "logI_0", log(1e4), log(10), log(1e5),
+  "logE0", log(1e4), log(10), log(1e5),
   "logtau", log(tau_init), log(tau_init * 1e-8), log(tau_init * 10)
 ) %>% 
   bind_rows(tibble(par = "b1",
@@ -428,13 +432,7 @@ param_map <- function(x, w, fixed = wfixed){
   stopifnot(length(bpars_diff) == nrow(x))
   ret$bpars <- bpars_diff
   
-  I_0 <- exp(w["logI_0"])
-  E_0 <- I_0 * fixed["gamma"] / fixed["eta"]
-  S_0 <- fixed["N"] - E_0 - I_0
-  
-  ret$xhat0 = c(S_0, E_0, I_0, 0)
-  names(ret$xhat0) <- c("S", "E", "I", "C")
-  
+  ret$logE0 <- w["logE0"]
   ret$rho1 <- fixed["rho1"]
   ret$logtau <- w["logtau"]
   ret$times <- x[, 1]
@@ -457,7 +455,7 @@ pen_factor[1:3] <- 0
 
 max_lambda <- 2.2
 log_dec <- 1.5
-len_lambda <- 10
+len_lambda <- 20
 lambda <-
   10 ^ (seq(max_lambda, max_lambda - log_dec, length.out = len_lambda)) %>% 
   round(2)
@@ -470,9 +468,10 @@ rpath <-
     calc_convex_nll = calc_kf_nll,
     calc_grad = calc_kf_grad,
     param_map = param_map,
-    lambda = lambda[1:8],
+    lambda = lambda,
     penalty.factor = pen_factor,
-    thresh = 1e-6,
+    thresh = 1e-4,
+    maxit = 1e4,
     winit = winit,
     make_log = TRUE
   )
@@ -485,7 +484,7 @@ write_forecasts(rpath, fet, btsd = 0.)
 q("no")
 # View diagnostics
 
-penind <- 8
+penind <- 10
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 

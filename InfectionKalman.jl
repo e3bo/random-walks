@@ -13,8 +13,8 @@ export grad
 function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., just_nll::Bool = true)
 
     # prior for time 0
-    l0 = pvar[1]
-    logτ = pvar[2]
+    l0 = exp(pvar[1])
+    τ = exp(pvar[2])
     bvec = pvar[3:end]
     
     y0 = l0 * η / γ
@@ -85,8 +85,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         dp = jac * plast + plast * jac' + q * N
         pkkmo[:,:,i] = plast + dp * dt
         
-
-        r[1,1] = exp(logτ)
+        r[1,1] = τ
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
         ytkkmo[:,i] = z[i] - h * reshape(xkkmo[:,i], dstate, 1)
@@ -103,7 +102,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
 end
 
 function grad(pvar, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1.)
-    g = ForwardDiff.gradient(par -> obj(par, z), pvar)
+    g = ForwardDiff.gradient(par -> obj(par, z; ρ = ρ, N = N, η = η, γ = γ, a = a), pvar)
     g
 end
 
