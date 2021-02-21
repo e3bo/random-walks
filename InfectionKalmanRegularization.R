@@ -139,7 +139,8 @@ kfnll <-
     
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
-    xhat0 = c(S = N - E0 - I0, E = E0, I = I0, C = 0)
+    xhat0 = c(N - E0 - I0, E0, I0, 0)
+    names(xhat0) <- c("S", "E", "I", "C")
     
     T <- length(z)
     stopifnot(T > 0)
@@ -426,15 +427,15 @@ wfixed <- c(
 
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
-  is_spline_par <- grepl("^b[0-9]+$", names(w))
-  tmp <- w[is_spline_par]
-  bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
-  stopifnot(length(bpars_diff) == nrow(x))
-  ret$bpars <- bpars_diff
+  #is_spline_par <- grepl("^b[0-9]+$", names(w))
+  #tmp <- w[is_spline_par]
+  #bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
+  #stopifnot(length(bpars_diff) == nrow(x))
+  ret$bpars <- w[seq(3, length(w))]
   
-  ret$logE0 <- w["logE0"]
+  ret$logE0 <- w[1]
   ret$rho1 <- fixed["rho1"]
-  ret$logtau <- w["logtau"]
+  ret$logtau <- w[2]
   ret$times <- x[, 1]
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
@@ -455,7 +456,7 @@ pen_factor[1:3] <- 0
 
 max_lambda <- 2.2
 log_dec <- 1.5
-len_lambda <- 20
+len_lambda <- 1000
 lambda <-
   10 ^ (seq(max_lambda, max_lambda - log_dec, length.out = len_lambda)) %>% 
   round(2)
@@ -471,7 +472,7 @@ rpath <-
     lambda = lambda,
     penalty.factor = pen_factor,
     thresh = 1e-4,
-    maxit = 1e4,
+    maxit = 1e3,
     winit = winit,
     make_log = TRUE
   )
@@ -484,7 +485,7 @@ write_forecasts(rpath, fet, btsd = 0.)
 q("no")
 # View diagnostics
 
-penind <- 10
+penind <- 1
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
@@ -507,14 +508,11 @@ plot(tgrid, dets$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
 plot(tgrid, dets$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
 plot(tgrid, dets$ytilde_k / sqrt(dets$S), xlab = "Time", ylab = "Standardized residual")
 
-
-
 inds <- which(fet$target_wday == 7)
 
 fcst <- create_forecast_df(means = dets$sim_means[inds,],
                            vars = dets$sim_cov[inds,],
                            location = forecast_loc)
-
 
 fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line() + geom_point()
 
@@ -528,3 +526,42 @@ par(mfrow = c(2, 1))
 plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "", ylab = " cases (7-day moving average)")
 bmat <- cbind(exp(rpath$a0[3,]), exp(rpath$a0[3,]) * t(apply(exp(rpath$beta), 2, cumprod)))
 matplot(tgrid, t(bmat) / gamma, type = 'l', ylab = expression(R[t]), xlab = "Year")
+
+fits <- list()
+library(lbfgs)
+
+fits[[1]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, winit, orthantwise_c = lambda[1], orthantwise_start = 3)
+fitlambda <- lambda
+for(i in seq(2, length(lambda))){
+  tictoc::tic()
+  fitlambda[i] <- lambda[i]
+  fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
+                     fits[[i - 1]]$par, orthantwise_c = fitlambda[i], orthantwise_start = 3, invisible = 1)
+  while (!fits[[i]]$convergence %in% c(0, 2)) {
+    print(paste("failed to converge on ", fitlambda[i]))
+    fitlambda[i] <- (fitlambda[i - 1] - fitlambda[i]) / 2 + fitlambda[i - 1]
+    print(paste("trying", fitlambda[i]))
+    fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
+                       fits[[i - 1]]$par, orthantwise_c = fitlambda[i], orthantwise_start = 3, invisible = 1)
+  }
+  tictoc::toc()
+}
+
+fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
+                   fits[[i - 1]]$par, orthantwise_c = newlambda, orthantwise_start = 3, invisible = 0)
+
+
+
+lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
+      fits[[i - 1]]$par, 
+      gtol = 1e-3,
+      linesearch_algorithm = "LBFGS_LINESEARCH_BACKTRACKING_WOLFE",
+      orthantwise_c = lambda[i], orthantwise_start = 3)
+
+
+
+o2 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, winit, orthantwise_c = 104, orthantwise_start = 3)
+o3 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, o2$par, orthantwise_c = 100.7, orthantwise_start = 3)
+o4 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, o2$par, orthantwise_c = lambda[15], orthantwise_start = 3)
+
+o5 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, o2$par, orthantwise_c = lambda[16], orthantwise_start = 3)

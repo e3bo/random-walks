@@ -142,6 +142,7 @@ gpnet <- function(x, y, calc_convex_nll, calc_grad, param_map, alpha, nobs,
   init <- winit[is_unpenalized]
   upper <- c(11.5, 18.2, 5)
   lower <- c(2.3, 2.5, 1.4)
+  browser()
   ans <- optim(init, nll_no_penalty, gr = grad_no_penalty, lower = lower, upper=upper, method = "L-BFGS-B")
   if (make_log) {
     logfile <- tempfile(pattern="gpnet", fileext = ".log")
