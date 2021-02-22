@@ -203,10 +203,10 @@ kfnll <-
           sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
           logbeta_fet <- numeric(nrow(fets))
-          logbeta_fet[1] <- log(gamma) + a * (logbeta[T] - log(gamma)) +  sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda)
+          logbeta_fet[1] <- log(gamma) + a * (logbeta[T] - log(gamma)) +  rnorm(1, betasd)
           if (length(logbeta_fet) > 1){
             for (jj in seq(2, length(logbeta_fet))){
-              logbeta_fet[jj] <- log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + sample(c(-1, 1), 1) * rexp(n = 1, rate = lambda)
+              logbeta_fet[jj] <- log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + rnorm(1, betasd)
             }
           }
           #logbeta_fet[bpars_fet > bmax] <- bmax
@@ -487,7 +487,7 @@ write_forecasts(rpath, fet, btsd = 0.)
 q("no")
 # View diagnostics
 
-penind <- 1
+penind <- 20
 wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
 names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
 
@@ -503,7 +503,7 @@ abline(0, 1)
 par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = wsize)
 
-plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases", ylim = c(0, 1600))
 lines(tgrid, dets$xhat_kkmo["C",] * wfixed["rho1"])
 
 plot(tgrid, dets$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
@@ -533,7 +533,7 @@ fits <- list()
 library(lbfgs)
 
 
-betagrid <- seq(0.16, 2, len = 20)
+betagrid <- seq(0.16, 1, len = 20)
 
 fits[[1]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[1], y = y, pm = param_map, winit)
 fitlambda <- lambda
@@ -549,8 +549,8 @@ for(i in seq(2, length(betagrid))){
 fitssamp <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = 1/lambda[945], y = y, pm = param_map, 
                    fits[[945 - 1]]$par, invisible = 0)
 
-fitind <- 1
-dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, betasd = betagrid[4], fet)
+fitind <- 10
+dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, betasd = betagrid[fitind], fet)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
