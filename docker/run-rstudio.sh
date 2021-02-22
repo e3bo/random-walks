@@ -7,4 +7,4 @@ docker run \
 	-e USERID=1005 \
 	-e PASSWORD=foo \
 	--mount type=bind,src=$HOME/src/random-walks,dst=/home/rstudio/work \
-	eamon/sir-kf:2021-02-08 /init
+	eamon/sir-kf:2021-02-22 /init

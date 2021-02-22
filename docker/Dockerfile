@@ -70,9 +70,10 @@ RUN apt-get update && \
         subversion
 
 RUN install2.r --skipinstalled --error \
+JuliaCall \
 KScorrect \
+lbfgs \
 lme4 \
-numDeriv \
 padr \
 tictoc \
 verification

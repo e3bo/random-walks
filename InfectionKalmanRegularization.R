@@ -4,7 +4,7 @@ tictoc::tic()
 
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
-source("regularization.R")
+
 JuliaCall::julia_setup()
 JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
 
@@ -80,7 +80,7 @@ create_forecast_df <- function(means,
 }
 
 
-iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps, vif = 1){
+iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps){
   P <- PN / N
   dt <- diff(time.steps)
   vf <-  with(as.list(c(xhat, beta_t)), {
@@ -92,7 +92,7 @@ iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps, vif = 1
     )
     
     f <-
-      c(0, beta_t * (S / N) * (I / N) * vif, eta * E / N, gamma * I / N)
+      c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N)
     Q <- rbind(c(f[1] + f[2],-f[2],           0,     0),
                c(-f[2], f[2] + f[3],-f[3],     0),
                c(0,-f[3], f[3] + f[4],-f[4]),
@@ -118,24 +118,21 @@ iterate_f_and_P <- function(xhat, PN, eta, gamma, N, beta_t, time.steps, vif = 1
 kfnll <-
   function(bpars,
            logE0,
-           rho1, 
+           rho1,
            logtau,
            eta,
            gamma,
            N,
            z,
            t0,
-           times, 
+           times,
            Phat0 = diag(c(1, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases = "daily",
            nsim,
-           bmax = 3 * gamma,
-           a = .98, 
-           vif = 1,
+           a = .98,
            betasd = 1,
            just_nll = TRUE) {
-    
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
     xhat0 = c(N - E0 - I0, E0, I0, 0)
@@ -144,14 +141,15 @@ kfnll <-
     T <- length(z)
     stopifnot(T > 0)
     
-    logbeta <- ytilde_kk <- ytilde_k <- S <- array(NA_real_, dim = c(1, T))
+    logbeta <-
+      ytilde_kk <- ytilde_k <- S <- array(NA_real_, dim = c(1, T))
     
     K <- xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(4, T))
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(4, 4, T))
     
-    H <-matrix(c(0, 0, 0, rho1), ncol = 4)
-
+    H <- matrix(c(0, 0, 0, rho1), ncol = 4)
+    
     for (i in seq(1, T)) {
       if (i == 1) {
         xhat_init <- xhat0
@@ -161,13 +159,14 @@ kfnll <-
       } else {
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
-        logbeta[i] <- log(gamma) + a * (logbeta[i - 1] - log(gamma)) + bpars[i]
+        logbeta[i] <-
+          log(gamma) + a * (logbeta[i - 1] - log(gamma)) + bpars[i]
         time.steps <- c(times[i - 1], times[i])
       }
       R <- exp(logtau)
       
       xhat_init["C"] <- 0
-      PNinit[, 4] <- PNinit[4, ] <- 0
+      PNinit[, 4] <- PNinit[4,] <- 0
       
       XP <- iterate_f_and_P(
         xhat_init,
@@ -176,8 +175,7 @@ kfnll <-
         gamma = gamma,
         N = N,
         beta_t = exp(logbeta[i]),
-        time.steps = time.steps,
-        vif = vif
+        time.steps = time.steps
       )
       xhat_kkmo[, i] <- XP$xhat
       P_kkmo[, , i] <- XP$PN
@@ -186,7 +184,7 @@ kfnll <-
       K[, i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, i])
       ytilde_k[, i] <- z[i] - H %*% xhat_kkmo[, i, drop = FALSE]
       xhat_kk[, i] <-
-        xhat_kkmo[, i, drop = FALSE] + 
+        xhat_kkmo[, i, drop = FALSE] +
         K[, i, drop = FALSE] %*% ytilde_k[, i, drop = FALSE]
       xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
       P_kk[, , i] <-
@@ -202,18 +200,22 @@ kfnll <-
         sim_means <- sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
           logbeta_fet <- numeric(nrow(fets))
-          logbeta_fet[1] <- log(gamma) + a * (logbeta[T] - log(gamma)) +  rnorm(1, mean = 0, sd = betasd)
-          if (length(logbeta_fet) > 1){
-            for (jj in seq(2, length(logbeta_fet))){
-              logbeta_fet[jj] <- log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + rnorm(1, mean = 0, sd = betasd)
+          logbeta_fet[1] <-
+            log(gamma) + a * (logbeta[T] - log(gamma)) +  
+            rnorm(1, mean = 0, sd = betasd)
+          if (length(logbeta_fet) > 1) {
+            for (jj in seq(2, length(logbeta_fet))) {
+              logbeta_fet[jj] <-
+                log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + 
+                rnorm(1, mean = 0, sd = betasd)
             }
           }
-          #logbeta_fet[bpars_fet > bmax] <- bmax
           xhat_init <- xhat_kk[, T]
           PNinit <- P_kk[, , T]
-          if (fet_zero_cases == "daily" || fets$target_wday[1] == 1){
+          if (fet_zero_cases == "daily" ||
+              fets$target_wday[1] == 1) {
             xhat_init["C"] <- 0
-            PNinit[, 4] <- PNinit[4, ] <- 0
+            PNinit[, 4] <- PNinit[4,] <- 0
           }
           XP <- iterate_f_and_P(
             xhat_init,
@@ -222,17 +224,17 @@ kfnll <-
             gamma = gamma,
             N = N,
             beta_t = exp(logbeta_fet[1]),
-            time.steps = c(times[T], fets$target_end_times[1]),
-            vif = vif
+            time.steps = c(times[T], fets$target_end_times[1])
           )
           sim_means[1, j] <- H %*% XP$xhat
           sim_cov[1, j] <- H %*% XP$PN %*% t(H) + exp(logtau)
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
-            if (fet_zero_cases == "daily" || fets$target_wday[i + 1] == 1){
+            if (fet_zero_cases == "daily" ||
+                fets$target_wday[i + 1] == 1) {
               xhat_init["C"] <- 0
-              PNinit[, 4] <- PNinit[4, ] <- 0
+              PNinit[, 4] <- PNinit[4,] <- 0
             }
             XP <-
               iterate_f_and_P(
@@ -242,8 +244,8 @@ kfnll <-
                 gamma = gamma,
                 N = N,
                 beta_t = exp(logbeta_fet[i + 1]),
-                time.steps = c(fets$target_end_times[i], fets$target_end_times[i + 1]),
-                vif = vif
+                time.steps = c(fets$target_end_times[i], 
+                               fets$target_end_times[i + 1])
               )
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
@@ -261,7 +263,7 @@ kfnll <-
         P_kkmo = P_kkmo,
         P_kk = P_kk,
         ytilde_k = ytilde_k,
-        S = S, 
+        S = S,
         sim_means = sim_means,
         sim_cov = sim_cov,
         logbeta = logbeta
@@ -288,7 +290,10 @@ calc_kf_nll <- function(w, x, y, betasd, pm) {
   JuliaCall::julia_assign("z", map(y, list))
   JuliaCall::julia_assign("a", p$a)
   JuliaCall::julia_assign("betasd", betasd)
-  nll <- JuliaCall::julia_eval("InfectionKalman.obj(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)")
+  nll <- JuliaCall::julia_eval(paste0(
+    "InfectionKalman.obj",
+    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
+  ))
   nll
 }
 
@@ -305,7 +310,10 @@ calc_kf_grad <- function(w, x, y, betasd, pm) {
   JuliaCall::julia_assign("z", map(y, list))
   JuliaCall::julia_assign("a", p$a)
   JuliaCall::julia_assign("betasd", betasd)
-  g <- JuliaCall::julia_eval("InfectionKalman.grad(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)")
+  g <- JuliaCall::julia_eval(paste0(
+    "InfectionKalman.grad",
+    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
+  ))
   g
 }
 
@@ -322,7 +330,6 @@ kf_nll_details <- function(w, x, y, betasd, pm, fet) {
     z = y,
     t0 = p$t0,
     times = p$times,
-    vif = p$vif,
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases = "weekly",
@@ -333,13 +340,13 @@ kf_nll_details <- function(w, x, y, betasd, pm, fet) {
   nll
 }
 
-write_forecasts <- function(gpnet, fet, btsd = 0) {
-  nlam <- length(gpnet$lambda)
+write_forecasts <- function(fits, fet, betagrid) {
+  nlam <- length(betagrid)
   for (penind in 1:nlam) {
-    wfit <- c(rpath$a0[, penind], rpath$beta[, penind])
-    names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
+    wfit <- fits[[penind]]$par
     dets <-
-      kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet, btsd = btsd)
+      kf_nll_details(wfit, x, y, param_map, 
+                     betasd = betagrid[penind], fet = fet)
     inds <- which(fet$target_wday == 7)
     fcst <- create_forecast_df(
       means = dets$sim_means[inds, ],
@@ -349,7 +356,7 @@ write_forecasts <- function(gpnet, fet, btsd = 0) {
     
     stopifnot(setequal(fet$target_end_dates[inds], 
                        fcst$target_end_date %>% unique()))
-    lambda <- rpath$lambda[penind]
+    lambda <- 1 / betagrid[penind]
     fcst_path <-
       file.path(
         "forecasts",
@@ -385,7 +392,8 @@ case_data <- ltdat2 %>% ungroup() %>%
   select(target_end_date, time, wday, value) %>% 
   rename(reports = value)
 
-target_end_dates <- max(case_data$target_end_date) + lubridate::ddays(1) * seq(1, 28)
+target_end_dates <- max(case_data$target_end_date) + 
+  lubridate::ddays(1) * seq(1, 28)
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
 
@@ -420,7 +428,6 @@ wfixed <- c(
   rho1 = 0.4,
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
-  vif = 1,
   t0 = rev(case_data$time)[wsize + 1],
   a = 0.98,
   betasd = 1
@@ -428,12 +435,7 @@ wfixed <- c(
 
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
-  #is_spline_par <- grepl("^b[0-9]+$", names(w))
-  #tmp <- w[is_spline_par]
-  #bpars_diff <- tmp[order(as.integer(str_remove(names(tmp), "^b")))]
-  #stopifnot(length(bpars_diff) == nrow(x))
   ret$bpars <- w[seq(3, length(w))]
-  
   ret$logE0 <- w[1]
   ret$rho1 <- fixed["rho1"]
   ret$logtau <- w[2]
@@ -442,7 +444,6 @@ param_map <- function(x, w, fixed = wfixed){
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
   ret$t0 <- fixed["t0"]
-  ret$vif <- fixed["vif"]
   ret$a <- fixed["a"]
   ret
 }
@@ -451,63 +452,49 @@ wind <- tail(case_data, n = wsize)
 y <- wind$smooth
 x <- matrix(wind$time, ncol = 1)
 
-#calc_kf_nll(winit, x, y, param_map)
-pen_factor <- rep(1, length(winit))
-pen_factor[1:3] <- 0
-
-max_lambda <- 2.2
-log_dec <- 1.5
-len_lambda <- 1000
-lambda <-
-  10 ^ (seq(max_lambda, max_lambda - log_dec, length.out = len_lambda)) %>% 
-  round(2)
-
 tictoc::tic("optimization")
-rpath <-
-  get_gpnet(
+fits <- list()
+betagrid <- seq(0.001, 0.1, len = 10)
+fits[[1]] <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x,
+  betasd = betagrid[1],
+  y = y,
+  pm = param_map,
+  winit,
+  invisible = 1
+)
+for (i in seq(2, length(betagrid))) {
+  fits[[i]] <- lbfgs::lbfgs(
+    calc_kf_nll,
+    calc_kf_grad,
     x = x,
+    betasd = betagrid[i],
     y = y,
-    calc_convex_nll = calc_kf_nll,
-    calc_grad = calc_kf_grad,
-    param_map = param_map,
-    lambda = lambda,
-    penalty.factor = pen_factor,
-    thresh = 1e-4,
-    maxit = 1e3,
-    winit = winit,
-    make_log = TRUE
+    pm = param_map,
+    fits[[i - 1]]$par,
+    invisible = 1
   )
+}
 tictoc::toc()
 
 fet <- tibble(target_end_times, target_wday, target_end_dates)
-
-write_forecasts(rpath, fet, btsd = 0.)
+write_forecasts(fits, fet, betagrid)
 
 q("no")
 # View diagnostics
 
-penind <- 20
-wfit <- c(rpath$a0[,penind], rpath$beta[,penind])
-names(wfit)[4:length(wfit)] <- paste0("b", 2:wsize)
-
-
-fet <- tibble(target_end_times, target_wday, target_end_dates)
-
-
-dets <- kf_nll_details(wfit, x, y, param_map, rpath$lambda[penind], fet, btsd = 0.)
+fitind <- 1
+dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, 
+                       betasd = betagrid[fitind], fet)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
 
-par(mfrow = c(4, 1))
 tgrid <- tail(case_data$time, n = wsize)
-
-plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases", ylim = c(0, 1600))
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
 lines(tgrid, dets$xhat_kkmo["C",] * wfixed["rho1"])
-
-plot(tgrid, dets$S, log = "y", xlab = "Time", ylab = "Variance in smoother")
-plot(tgrid, dets$ytilde_k, xlab = "Time", ylab = "Residual in process 1-ahead prediction")
-plot(tgrid, dets$ytilde_k / sqrt(dets$S), xlab = "Time", ylab = "Standardized residual")
 
 inds <- which(fet$target_wday == 7)
 
@@ -515,56 +502,6 @@ fcst <- create_forecast_df(means = dets$sim_means[inds,],
                            vars = dets$sim_cov[inds,],
                            location = forecast_loc)
 
-fcst %>% ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + geom_line() + geom_point()
-
-fcst_path <- file.path("forecasts", paste0(forecast_date, "-", forecast_loc, "-CEID-InfectionKalman.csv"))
-if(!dir.exists("forecasts")) dir.create("forecasts")
-write_csv(x = fcst, path = fcst_path)
-
-## plot Rt and cases
-par(mfrow = c(2, 1))
-#plot(tgrid, tail(case_data$reports, n = wsize), xlab = "", ylab = "cases", type = 'h')
-plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "", ylab = " cases (7-day moving average)")
-bmat <- cbind(exp(rpath$a0[3,]), exp(rpath$a0[3,]) * t(apply(exp(rpath$beta), 2, cumprod)))
-matplot(tgrid, t(bmat) / gamma, type = 'l', ylab = expression(R[t]), xlab = "Year")
-
-fits <- list()
-library(lbfgs)
-
-
-betagrid <- seq(0.001, 0.1, len = 100)
-fits[[1]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[1], y = y, pm = param_map, winit)
-
-for(i in seq(2, length(betagrid))){
-  tictoc::tic()
-  fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[i], y = y, pm = param_map, 
-                     fits[[i - 1]]$par, invisible = 1)
-  tictoc::toc()
-}
-
-fitssamp <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = 1/lambda[945], y = y, pm = param_map, 
-                   fits[[945 - 1]]$par, invisible = 0)
-
-fitind <- 1
-dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, betasd = betagrid[fitind], fet)
-par(mfrow = c(1,1))
-qqnorm(dets$ytilde_k / sqrt(dets$S))
-abline(0, 1)
-
-tgrid <- tail(case_data$time, n = wsize)
-plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases", ylim = c(0, 1600))
-lines(tgrid, dets$xhat_kkmo["C",] * wfixed["rho1"])
-
-lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
-      fits[[i - 1]]$par, 
-      gtol = 1e-3,
-      linesearch_algorithm = "LBFGS_LINESEARCH_BACKTRACKING_WOLFE",
-      orthantwise_c = lambda[i], orthantwise_start = 3)
-
-
-
-o2 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, winit, orthantwise_c = 104, orthantwise_start = 3)
-o3 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, o2$par, orthantwise_c = 100.7, orthantwise_start = 3)
-o4 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, o2$par, orthantwise_c = lambda[15], orthantwise_start = 3)
-
-o5 <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, o2$par, orthantwise_c = lambda[16], orthantwise_start = 3)
+fcst %>% 
+  ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
+  geom_line() + geom_point()

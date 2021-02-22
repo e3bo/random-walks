@@ -90,14 +90,16 @@ stages:
     - covidhub-common.R
     - forecasts
     outs:
-    - lambda010.80-CEID-InfectionKalman
-    - lambda015.85-CEID-InfectionKalman
-    - lambda023.26-CEID-InfectionKalman
-    - lambda034.15-CEID-InfectionKalman
-    - lambda050.12-CEID-InfectionKalman
-    - lambda073.56-CEID-InfectionKalman
-    - lambda107.98-CEID-InfectionKalman
-    - lambda158.49-CEID-InfectionKalman
+    - lambda010.00-CEID-InfectionKalman
+    - lambda011.24-CEID-InfectionKalman
+    - lambda012.82-CEID-InfectionKalman
+    - lambda014.93-CEID-InfectionKalman
+    - lambda017.86-CEID-InfectionKalman
+    - lambda022.22-CEID-InfectionKalman
+    - lambda029.41-CEID-InfectionKalman
+    - lambda043.48-CEID-InfectionKalman
+    - lambda083.33-CEID-InfectionKalman
+    - lambda1000.00-CEID-InfectionKalman
   pull-archived-forecasts:
     cmd: ./pull-other-forecasts.R
     deps:
@@ -107,14 +109,16 @@ stages:
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
     deps:
-    - lambda010.80-CEID-InfectionKalman
-    - lambda015.85-CEID-InfectionKalman
-    - lambda023.26-CEID-InfectionKalman
-    - lambda034.15-CEID-InfectionKalman
-    - lambda050.12-CEID-InfectionKalman
-    - lambda073.56-CEID-InfectionKalman
-    - lambda107.98-CEID-InfectionKalman
-    - lambda158.49-CEID-InfectionKalman
+    - lambda010.00-CEID-InfectionKalman
+    - lambda011.24-CEID-InfectionKalman
+    - lambda012.82-CEID-InfectionKalman
+    - lambda014.93-CEID-InfectionKalman
+    - lambda017.86-CEID-InfectionKalman
+    - lambda022.22-CEID-InfectionKalman
+    - lambda029.41-CEID-InfectionKalman
+    - lambda043.48-CEID-InfectionKalman
+    - lambda083.33-CEID-InfectionKalman
+    - lambda1000.00-CEID-InfectionKalman
     - make-trajectory-plots.R
     - other-model-forecasts.rds
     outs:
@@ -127,14 +131,16 @@ stages:
     cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
     deps:
     - analyze-scores.R
-    - lambda010.80-CEID-InfectionKalman
-    - lambda015.85-CEID-InfectionKalman
-    - lambda023.26-CEID-InfectionKalman
-    - lambda034.15-CEID-InfectionKalman
-    - lambda050.12-CEID-InfectionKalman
-    - lambda073.56-CEID-InfectionKalman
-    - lambda107.98-CEID-InfectionKalman
-    - lambda158.49-CEID-InfectionKalman
+    - lambda010.00-CEID-InfectionKalman
+    - lambda011.24-CEID-InfectionKalman
+    - lambda012.82-CEID-InfectionKalman
+    - lambda014.93-CEID-InfectionKalman
+    - lambda017.86-CEID-InfectionKalman
+    - lambda022.22-CEID-InfectionKalman
+    - lambda029.41-CEID-InfectionKalman
+    - lambda043.48-CEID-InfectionKalman
+    - lambda083.33-CEID-InfectionKalman
+    - lambda1000.00-CEID-InfectionKalman
     - other-model-forecasts.rds
     outs:
     - analyze-scores.html
@@ -195,14 +201,16 @@ stages:
     - covidhub-common.R
     - hopkins/2020-10-12
     outs:
-    - forecasts/2020-10-12-fips36-lambda010.80-CEID-InfectionKalman.csv
-    - forecasts/2020-10-12-fips36-lambda015.85-CEID-InfectionKalman.csv
-    - forecasts/2020-10-12-fips36-lambda023.26-CEID-InfectionKalman.csv
-    - forecasts/2020-10-12-fips36-lambda034.15-CEID-InfectionKalman.csv
-    - forecasts/2020-10-12-fips36-lambda050.12-CEID-InfectionKalman.csv
-    - forecasts/2020-10-12-fips36-lambda073.56-CEID-InfectionKalman.csv
-    - forecasts/2020-10-12-fips36-lambda107.98-CEID-InfectionKalman.csv
-    - forecasts/2020-10-12-fips36-lambda158.49-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-10-12-fips36-lambda1000.00-CEID-InfectionKalman.csv
   forecast-2020-10-19-36:
     cmd: fdt=2020-10-19 loc=36 Rscript InfectionKalmanRegularization.R
     deps:
@@ -1088,3 +1096,26 @@ stages:
     - forecasts/2020-11-30-fips53-lambda073.56-CEID-InfectionKalman.csv
     - forecasts/2020-11-30-fips53-lambda107.98-CEID-InfectionKalman.csv
     - forecasts/2020-11-30-fips53-lambda158.49-CEID-InfectionKalman.csv
+  hopkins-2020-07-26:
+    cmd: fdt=2020-07-26 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-07-26
+  forecast-2020-07-26-36:
+    cmd: fdt=2020-07-26 loc=36 Rscript InfectionKalmanRegularization.R
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-07-26
+    outs:
+    - forecasts/2020-07-26-fips36-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips36-lambda1000.00-CEID-InfectionKalman.csv

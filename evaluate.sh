@@ -14,27 +14,31 @@ dvc run \
     -d covidhub-common.R \
     -d combine-location-forecasts.R \
     -n combine \
-    -o lambda010.80-CEID-InfectionKalman \
-    -o lambda015.85-CEID-InfectionKalman \
-    -o lambda023.26-CEID-InfectionKalman \
-    -o lambda034.15-CEID-InfectionKalman \
-    -o lambda050.12-CEID-InfectionKalman \
-    -o lambda073.56-CEID-InfectionKalman \
-    -o lambda107.98-CEID-InfectionKalman \
-    -o lambda158.49-CEID-InfectionKalman \
+    -o lambda1000.00-CEID-InfectionKalman \
+    -o lambda083.33-CEID-InfectionKalman \
+    -o lambda043.48-CEID-InfectionKalman \
+    -o lambda029.41-CEID-InfectionKalman \
+    -o lambda022.22-CEID-InfectionKalman \
+    -o lambda017.86-CEID-InfectionKalman \
+    -o lambda014.93-CEID-InfectionKalman \
+    -o lambda012.82-CEID-InfectionKalman \
+    -o lambda011.24-CEID-InfectionKalman \
+    -o lambda010.00-CEID-InfectionKalman \
     --force \
     ./combine-location-forecasts.R
     
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda010.80-CEID-InfectionKalman \
-    -d lambda015.85-CEID-InfectionKalman \
-    -d lambda023.26-CEID-InfectionKalman \
-    -d lambda034.15-CEID-InfectionKalman \
-    -d lambda050.12-CEID-InfectionKalman \
-    -d lambda073.56-CEID-InfectionKalman \
-    -d lambda107.98-CEID-InfectionKalman \
-    -d lambda158.49-CEID-InfectionKalman \
+    -d lambda1000.00-CEID-InfectionKalman \
+    -d lambda083.33-CEID-InfectionKalman \
+    -d lambda043.48-CEID-InfectionKalman \
+    -d lambda029.41-CEID-InfectionKalman \
+    -d lambda022.22-CEID-InfectionKalman \
+    -d lambda017.86-CEID-InfectionKalman \
+    -d lambda014.93-CEID-InfectionKalman \
+    -d lambda012.82-CEID-InfectionKalman \
+    -d lambda011.24-CEID-InfectionKalman \
+    -d lambda010.00-CEID-InfectionKalman \
     -d make-trajectory-plots.R \
     -o trajectories-all.png \
     -o trajectories-0.png \
@@ -47,14 +51,16 @@ dvc run \
     
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda010.80-CEID-InfectionKalman \
-    -d lambda015.85-CEID-InfectionKalman \
-    -d lambda023.26-CEID-InfectionKalman \
-    -d lambda034.15-CEID-InfectionKalman \
-    -d lambda050.12-CEID-InfectionKalman \
-    -d lambda073.56-CEID-InfectionKalman \
-    -d lambda107.98-CEID-InfectionKalman \
-    -d lambda158.49-CEID-InfectionKalman \
+    -d lambda1000.00-CEID-InfectionKalman \
+    -d lambda083.33-CEID-InfectionKalman \
+    -d lambda043.48-CEID-InfectionKalman \
+    -d lambda029.41-CEID-InfectionKalman \
+    -d lambda022.22-CEID-InfectionKalman \
+    -d lambda017.86-CEID-InfectionKalman \
+    -d lambda014.93-CEID-InfectionKalman \
+    -d lambda012.82-CEID-InfectionKalman \
+    -d lambda011.24-CEID-InfectionKalman \
+    -d lambda010.00-CEID-InfectionKalman \
     -d analyze-scores.R \
     -o figure \
     -o analyze-scores.md \
