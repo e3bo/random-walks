@@ -95,7 +95,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     
     stepdensity = Normal(0, betasd)
     rwlik = 0
-    for bval in bvec
+    for bval in bvec[2:end]
         rwlik += logpdf(stepdensity, bval)
     end
     

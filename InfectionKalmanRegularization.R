@@ -196,17 +196,16 @@ kfnll <-
     
     nll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) -
-      sum(dnorm(bpars, sd = betasd, log = TRUE))
+      sum(dnorm(bpars[-1], sd = betasd, log = TRUE))
     if (!just_nll) {
       if (!is.null(fets)) {
-        sim_means <-
-          sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
+        sim_means <- sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
           logbeta_fet <- numeric(nrow(fets))
-          logbeta_fet[1] <- log(gamma) + a * (logbeta[T] - log(gamma)) +  rnorm(1, betasd)
+          logbeta_fet[1] <- log(gamma) + a * (logbeta[T] - log(gamma)) +  rnorm(1, mean = 0, sd = betasd)
           if (length(logbeta_fet) > 1){
             for (jj in seq(2, length(logbeta_fet))){
-              logbeta_fet[jj] <- log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + rnorm(1, betasd)
+              logbeta_fet[jj] <- log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + rnorm(1, mean = 0, sd = betasd)
             }
           }
           #logbeta_fet[bpars_fet > bmax] <- bmax
@@ -533,7 +532,7 @@ fits <- list()
 library(lbfgs)
 
 
-betagrid <- seq(0.16, 1, len = 20)
+betagrid <- seq(0.001, 1, len = 20)
 
 fits[[1]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[1], y = y, pm = param_map, winit)
 fitlambda <- lambda
@@ -549,13 +548,15 @@ for(i in seq(2, length(betagrid))){
 fitssamp <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = 1/lambda[945], y = y, pm = param_map, 
                    fits[[945 - 1]]$par, invisible = 0)
 
-fitind <- 10
+fitind <- 1
 dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, betasd = betagrid[fitind], fet)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
 
-
+tgrid <- tail(case_data$time, n = wsize)
+plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases", ylim = c(0, 1600))
+lines(tgrid, dets$xhat_kkmo["C",] * wfixed["rho1"])
 
 lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
       fits[[i - 1]]$par, 
