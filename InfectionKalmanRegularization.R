@@ -532,16 +532,13 @@ fits <- list()
 library(lbfgs)
 
 
-betagrid <- seq(0.001, 1, len = 20)
-
+betagrid <- seq(0.001, 0.1, len = 100)
 fits[[1]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[1], y = y, pm = param_map, winit)
-fitlambda <- lambda
 
 for(i in seq(2, length(betagrid))){
   tictoc::tic()
-  fitlambda[i] <- lambda[i]
   fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[i], y = y, pm = param_map, 
-                     fits[[i - 1]]$par, invisible = 0)
+                     fits[[i - 1]]$par, invisible = 1)
   tictoc::toc()
 }
 

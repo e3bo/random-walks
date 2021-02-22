@@ -83,7 +83,15 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
                    0    0         γ     0]
         
         dp = jac * plast + plast * jac' + q * N
-        pkkmo[:,:,i] = plast + dp * dt
+        pnext = plast + dp * dt
+        for j in 1:dstate
+            if pnext[j, j] < 0
+                pnext[j, :] .= 0
+                pnext[:, j] .= 0
+            end
+        end
+        pkkmo[:,:,i] = pnext 
+        
         
         r[1,1] = τ
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
@@ -98,7 +106,6 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     for bval in bvec[2:end]
         rwlik += logpdf(stepdensity, bval)
     end
-    
     nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ Σ[1,1,:] + map(log, Σ[1,1,:])) + nobs * log(2 * pi)) - rwlik
     if just_nll
        return nll
