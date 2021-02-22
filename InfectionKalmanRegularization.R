@@ -129,12 +129,11 @@ kfnll <-
            Phat0 = diag(c(1, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases = "daily",
-           lambda,
            nsim,
            bmax = 3 * gamma,
            a = .98, 
            vif = 1,
-           btsd = 1,
+           betasd = 1,
            just_nll = TRUE) {
     
     E0 = exp(logE0)
@@ -196,7 +195,8 @@ kfnll <-
     }
     
     nll <-
-      0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) 
+      0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) -
+      sum(dnorm(bpars, sd = betasd, log = TRUE))
     if (!just_nll) {
       if (!is.null(fets)) {
         sim_means <-
@@ -276,7 +276,7 @@ moving_average <- function(x, n = 7) {
   stats::filter(x, rep(1 / n, n), sides = 1)
 }
 
-calc_kf_nll <- function(w, x, y, pm) {
+calc_kf_nll <- function(w, x, y, betasd, pm) {
   p <- pm(x, w)
   pvar <- c(p$logE0, p$logtau, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
@@ -288,11 +288,12 @@ calc_kf_nll <- function(w, x, y, pm) {
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", map(y, list))
   JuliaCall::julia_assign("a", p$a)
-  nll <- JuliaCall::julia_eval("InfectionKalman.obj(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a)")
+  JuliaCall::julia_assign("betasd", betasd)
+  nll <- JuliaCall::julia_eval("InfectionKalman.obj(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)")
   nll
 }
 
-calc_kf_grad <- function(w, x, y, pm) {
+calc_kf_grad <- function(w, x, y, betasd, pm) {
   p <- pm(x, w)
   pvar <- c(p$logE0, p$logtau, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
@@ -304,11 +305,12 @@ calc_kf_grad <- function(w, x, y, pm) {
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", map(y, list))
   JuliaCall::julia_assign("a", p$a)
-  g <- JuliaCall::julia_eval("InfectionKalman.grad(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a)")
+  JuliaCall::julia_assign("betasd", betasd)
+  g <- JuliaCall::julia_eval("InfectionKalman.grad(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)")
   g
 }
 
-kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
+kf_nll_details <- function(w, x, y, betasd, pm, fet) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
@@ -323,11 +325,10 @@ kf_nll_details <- function(w, x, y, pm, lambda, fet, btsd) {
     times = p$times,
     vif = p$vif,
     fet = fet,
-    lambda = lambda,
     just_nll = FALSE,
     fet_zero_cases = "weekly",
     nsim = 10,
-    btsd = btsd,
+    betasd = betasd,
     a = p$a
   )
   nll
@@ -422,7 +423,8 @@ wfixed <- c(
   eta = 365.25 / 4,
   vif = 1,
   t0 = rev(case_data$time)[wsize + 1],
-  a = 0.98
+  a = 0.98,
+  betasd = 1
 )
 
 param_map <- function(x, w, fixed = wfixed){
@@ -530,25 +532,28 @@ matplot(tgrid, t(bmat) / gamma, type = 'l', ylab = expression(R[t]), xlab = "Yea
 fits <- list()
 library(lbfgs)
 
-fits[[1]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, winit, orthantwise_c = lambda[1], orthantwise_start = 3)
+
+betagrid <- seq(0.16, 2, len = 20)
+
+fits[[1]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[1], y = y, pm = param_map, winit)
 fitlambda <- lambda
-for(i in seq(2, length(lambda))){
+
+for(i in seq(2, length(betagrid))){
   tictoc::tic()
   fitlambda[i] <- lambda[i]
-  fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
-                     fits[[i - 1]]$par, orthantwise_c = fitlambda[i], orthantwise_start = 3, invisible = 1)
-  while (!fits[[i]]$convergence %in% c(0, 2)) {
-    print(paste("failed to converge on ", fitlambda[i]))
-    fitlambda[i] <- (fitlambda[i - 1] - fitlambda[i]) / 2 + fitlambda[i - 1]
-    print(paste("trying", fitlambda[i]))
-    fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
-                       fits[[i - 1]]$par, orthantwise_c = fitlambda[i], orthantwise_start = 3, invisible = 1)
-  }
+  fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = betagrid[i], y = y, pm = param_map, 
+                     fits[[i - 1]]$par, invisible = 0)
   tictoc::toc()
 }
 
-fits[[i]] <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, y = y, pm = param_map, 
-                   fits[[i - 1]]$par, orthantwise_c = newlambda, orthantwise_start = 3, invisible = 0)
+fitssamp <- lbfgs(calc_kf_nll, calc_kf_grad, x = x, betasd = 1/lambda[945], y = y, pm = param_map, 
+                   fits[[945 - 1]]$par, invisible = 0)
+
+fitind <- 1
+dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, betasd = betagrid[4], fet)
+par(mfrow = c(1,1))
+qqnorm(dets$ytilde_k / sqrt(dets$S))
+abline(0, 1)
 
 
 
