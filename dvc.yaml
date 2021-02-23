@@ -147,9 +147,10 @@ stages:
     - analyze-scores.md
     - figure
     plots:
-    - wis-horizon-location-model.csv
+    - wis-horizon-location-model.csv:
+        template: relscore-horizon-location-model
     - wis-model-location.csv:
-        template: relscore-loctype-model
+        template: relscore-location-model
   hopkins-2020-09-07:
     cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
     deps:

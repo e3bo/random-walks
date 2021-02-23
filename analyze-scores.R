@@ -33,7 +33,10 @@ ws1 %>% ggplot(aes(x = target_end_date, y = meanscore, color = model)) +
   labs(x = "target date", y = "wis")
 
 ws2 <- ws %>% group_by(horizon, location, model) %>%
-  summarize(meanscore = mean(score_value), .groups = "drop")
+  summarize(meanscore = mean(score_value), .groups = "drop") %>%
+  group_by(location, horizon) %>% 
+  mutate(relscore = meanscore / meanscore[str_detect(model, "CEID-Walk")])
+
 ws2
 write_csv(ws2, "wis-horizon-location-model.csv")
 ws2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) + 

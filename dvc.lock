@@ -384,9 +384,9 @@ combine:
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
     size: 9912
   - path: forecasts
-    md5: 9732d7fc63de7915f3eceeb57ec150ac.dir
-    size: 2289060
-    nfiles: 1082
+    md5: afeb833751a7aeda01ee44bc9d39c533.dir
+    size: 1288724
+    nfiles: 610
   outs:
   - path: lambda010.00-CEID-InfectionKalman
     md5: 01c22f6c5fd29198fe47f9833f7a337d.dir
@@ -507,8 +507,8 @@ analyze-scores:
   cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
   deps:
   - path: analyze-scores.R
-    md5: 1f9d91022dda595d4945a8011fb7f0c9
-    size: 3146
+    md5: a3047b1bdf5b4f8e4425c7777bc8a988
+    size: 3261
   - path: lambda010.00-CEID-InfectionKalman
     md5: 01c22f6c5fd29198fe47f9833f7a337d.dir
     size: 126033
@@ -554,18 +554,18 @@ analyze-scores:
     size: 19473
   outs:
   - path: analyze-scores.html
-    md5: b3d082255b5b8118f1f81f6e1aa09a07
-    size: 298498
+    md5: 0db89af9fc0da2b953bda8265084f572
+    size: 298781
   - path: analyze-scores.md
-    md5: 1f2837c7bd171fe0002647691c9dd592
-    size: 7985
+    md5: 74cb2d19d8acf687c6ee175ab42febe8
+    size: 8246
   - path: figure
     md5: b9d482de73e708e88cab1ee9af6c1260.dir
     size: 207091
     nfiles: 6
   - path: wis-horizon-location-model.csv
-    md5: 192cce3bb128109388d63e56fa6d9a91
-    size: 7772
+    md5: 68015a0ef9f87d1ff8c5428fdaeb2f40
+    size: 10287
   - path: wis-model-location.csv
     md5: b489fc57cec2eac7bcb67fbaa11ec712
     size: 2518
