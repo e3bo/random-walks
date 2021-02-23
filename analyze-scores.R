@@ -35,6 +35,7 @@ ws1 %>% ggplot(aes(x = target_end_date, y = meanscore, color = model)) +
 ws2 <- ws %>% group_by(horizon, location, model) %>%
   summarize(meanscore = mean(score_value), .groups = "drop")
 ws2
+write_csv(ws2, "wis-horizon-location-model.csv")
 ws2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) + 
   geom_col(position = position_dodge()) + 
   facet_grid(location ~ ., scales = "free_y") + 
@@ -48,16 +49,21 @@ as2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) +
   facet_grid(location ~ ., scales = "free_y") + 
   labs(y = "MAE")
 
-
-
 ws3 <- ws %>% group_by(location, model) %>%
-  summarize(meanscore = mean(score_value), .groups = "drop")
+  summarize(meanscore = mean(score_value), .groups = "drop") %>%
+  group_by(location) %>% 
+  mutate(relscore = meanscore / meanscore[str_detect(model, "CEID-Walk")])
 ws3
-ws3 %>% ggplot(aes(x = location, y = meanscore, color = model)) + 
-  geom_point() + coord_flip() + labs(y = "WIS")
+write_csv(ws3, "wis-model-location.csv")
+
+ws3 %>% ggplot(aes(x = model, y = meanscore)) + 
+  geom_col(position = position_dodge()) + 
+  facet_grid(location ~ ., scales = "free_y") + labs(y = "WIS") + 
+  scale_x_discrete(guide = guide_axis(angle = 45))
 
 ws4 <- ws %>% group_by(model) %>% 
   summarize(meanscore = mean(score_value), .groups = "drop")
+
 ws4
 ws4 %>% ggplot(aes(x = model, y = meanscore)) + geom_col() + labs(y = "wis") +
   scale_x_discrete(guide = guide_axis(angle = 45))

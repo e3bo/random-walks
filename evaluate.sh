@@ -65,6 +65,10 @@ dvc run \
     -o figure \
     -o analyze-scores.md \
     -o analyze-scores.html \
+    --plots wis-model-location.csv \
+    --plots wis-horizon-location-model.csv \
     --force \
     -n analyze-scores \
     'Rscript -e "knitr::spin(\"analyze-scores.R\")"'
+    
+dvc plots modify wis-model-location.csv --template relscore-loctype-model
