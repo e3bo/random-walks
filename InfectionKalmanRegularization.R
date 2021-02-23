@@ -429,7 +429,7 @@ wfixed <- c(
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
   t0 = rev(case_data$time)[wsize + 1],
-  a = 0.98,
+  a = 0.95,
   betasd = 1
 )
 
