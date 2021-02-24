@@ -431,14 +431,14 @@ pvar_df <- tribble(
   "logE0", log(1e4), log(10), log(1e5),
   "logtau", log(tau_init), log(tau_init * 1e-8), log(tau_init * 10)
 ) %>% 
-  bind_rows(tibble(par = "b1",
-                   init = log(gamma), 
-                   lower = log(0.1 * gamma),
-                   upper = log(4 * gamma))) %>%
-  bind_rows(tibble(par = paste0("b", 1 + seq_len(wsize - 1)),
+  bind_rows(tibble(par = paste0("b", seq_len(wsize - 1)),
                    init = 0,
                    lower = -10,
-                   upper = 10))
+                   upper = 10)) %>%
+  bind_rows(tibble(par = paste0("b", wsize),
+                   init = log(gamma), 
+                   lower = log(0.1 * gamma),
+                   upper = log(4 * gamma)))
 
 winit <- pvar_df$init
 names(winit) <- pvar_df$par
