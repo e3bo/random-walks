@@ -70,7 +70,7 @@ create_forecast_df <- function(means,
   t2 <- t1 %>% filter(quantile == "0.5") %>%
     mutate(type = "point",
            quantile = NA_character_)
-  bind_rows(t1, t2) %>% select(forecast_date,
+  bind_rows(t1, t2) %>% dplyr::select(forecast_date,
                                target,
                                target_end_date,
                                location,
@@ -132,6 +132,7 @@ kfnll <-
            nsim,
            a = .98,
            betasd = 1,
+           params_Sigma = matrix(0, 2, 2),
            just_nll = TRUE) {
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
@@ -199,11 +200,15 @@ kfnll <-
       sum(dnorm(bpars[-T], sd = betasd, log = TRUE))
     if (!just_nll) {
       if (!is.null(fets)) {
+        params_mu <- c(logtau, bpars[T])
         sim_means <- sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
         for (j in seq_len(nsim)) {
           logbeta_fet <- numeric(nrow(fets))
+          params_samp <- MASS::mvrnorm(n = 1, mu = params_mu, Sigma = params_Sigma)
+          logtau_samp <- params_mu[1] # some estimates of variance are unrealistic
+          logbetaT_samp <- params_samp[2]
           logbeta_fet[1] <-
-            log(gamma) + a * (logbeta[T] - log(gamma)) +  
+            log(gamma) + a * (params_samp[2] - log(gamma)) +  
             rnorm(1, mean = 0, sd = betasd)
           if (length(logbeta_fet) > 1) {
             for (jj in seq(2, length(logbeta_fet))) {
@@ -251,7 +256,7 @@ kfnll <-
               )
             sim_means[i + 1, j] <- H %*% XP$xhat
             sim_cov[i + 1, j] <-
-              H %*% XP$PN %*% t(H) + exp(logtau)
+              H %*% XP$PN %*% t(H) + exp(logtau_samp)
           }
         }
       } else {
@@ -340,7 +345,7 @@ calc_kf_hess <- function(w, x, y, betasd, pm) {
   g
 }
 
-kf_nll_details <- function(w, x, y, betasd, pm, fet) {
+kf_nll_details <- function(w, x, y, betasd, pm, fet, params_Sigma) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
@@ -356,8 +361,9 @@ kf_nll_details <- function(w, x, y, betasd, pm, fet) {
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases = "weekly",
-    nsim = 10,
+    nsim = 400,
     betasd = betasd,
+    params_Sigma = params_Sigma,
     a = p$a
   )
   nll
@@ -367,9 +373,12 @@ write_forecasts <- function(fits, fet, betagrid) {
   nlam <- length(betagrid)
   for (penind in 1:nlam) {
     wfit <- fits[[penind]]$par
+    betasd <- betagrid[penind]
+    hess <- calc_kf_hess(wfit, x, y, betasd = betasd, param_map)
+    params_Sigma <- solve(hess)
     dets <-
       kf_nll_details(wfit, x, y, param_map, 
-                     betasd = betagrid[penind], fet = fet)
+                     betasd = betasd, fet = fet, params_Sigma = params_Sigma)
     inds <- which(fet$target_wday == 7)
     fcst <- create_forecast_df(
       means = dets$sim_means[inds, ],
