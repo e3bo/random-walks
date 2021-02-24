@@ -6,7 +6,7 @@ using ForwardDiff
 using LinearAlgebra
 using Optim
 
-export fit
+export hess
 export obj
 export grad
 
@@ -119,8 +119,9 @@ function grad(pvar, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::F
     g
 end
 
-function hess(par, z, w)
-    @time h = ForwardDiff.hessian(pvar -> obj(pvar, z, w), par)
+function hess(logE0::Float64, logtau::Float64, bpars, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1.)
+    pvar = [logE0 logtau bpars[1]]
+    h = ForwardDiff.hessian(par -> obj(vec([par bpars[2:end]']), z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd), pvar)
     h
 end
 

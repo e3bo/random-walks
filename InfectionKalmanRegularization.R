@@ -317,6 +317,27 @@ calc_kf_grad <- function(w, x, y, betasd, pm) {
   g
 }
 
+calc_kf_hess <- function(w, x, y, betasd, pm) {
+  p <- pm(x, w)
+  JuliaCall::julia_assign("logE0", p$logE0)
+  JuliaCall::julia_assign("logtau", p$logtau)
+  JuliaCall::julia_assign("bpars", p$bpars)
+  JuliaCall::julia_assign("η", p$eta)
+  JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("N", p$N)
+  JuliaCall::julia_assign("ρ", p$rho1)
+  JuliaCall::julia_assign("η", p$eta)
+  JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("z", map(y, list))
+  JuliaCall::julia_assign("a", p$a)
+  JuliaCall::julia_assign("betasd", betasd)
+  g <- JuliaCall::julia_eval(paste0(
+    "InfectionKalman.hess",
+    "(logE0, logtau, bpars, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
+  ))
+  g
+}
+
 kf_nll_details <- function(w, x, y, betasd, pm, fet) {
   p <- pm(x, w)
   nll <- kfnll(
