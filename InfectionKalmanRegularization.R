@@ -150,17 +150,19 @@ kfnll <-
     
     H <- matrix(c(0, 0, 0, rho1), ncol = 4)
     
+    logbeta[T] <- bpars[T]
+    for (i in seq(T - 1, 1)){
+      logbeta[i] <- (logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma)
+    }
+    
     for (i in seq(1, T)) {
       if (i == 1) {
         xhat_init <- xhat0
         PNinit <- Phat0
-        logbeta[i] <- bpars[i]
         time.steps <- c(t0, times[1])
       } else {
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
-        logbeta[i] <-
-          log(gamma) + a * (logbeta[i - 1] - log(gamma)) + bpars[i]
         time.steps <- c(times[i - 1], times[i])
       }
       R <- exp(logtau)
@@ -194,7 +196,7 @@ kfnll <-
     
     nll <-
       0.5 * sum(ytilde_k ^ 2 / S + log(S) + log(2 * pi)) -
-      sum(dnorm(bpars[-1], sd = betasd, log = TRUE))
+      sum(dnorm(bpars[-T], sd = betasd, log = TRUE))
     if (!just_nll) {
       if (!is.null(fets)) {
         sim_means <- sim_cov <- matrix(NA, nrow = (nrow(fets)), ncol = nsim)
