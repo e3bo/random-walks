@@ -29,8 +29,8 @@ jobs:
         run: |
           dvc pull --run-cache || true
           loc=$loc bash -x ./forecast.sh
-          #dvc push --run-cache
-          #git config --local user.email "actions@users.noreply.github.com"
-          #git config --local user.name "Automated Publisher"
-          #git add dvc.yaml dvc.lock metrics visuals
-          #git commit -m "Forecast pipeline additions" && git push
+          dvc push --run-cache
+          git config --local user.email "actions@users.noreply.github.com"
+          git config --local user.name "Automated Publisher"
+          git add dvc.yaml dvc.lock
+          git commit -m "Forecast pipeline additions" && git push
