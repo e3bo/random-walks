@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: [36, 53]
+        fips: [48, 53]
     steps:
       - uses: actions/checkout@v2
       - name: Echo inputs
@@ -32,5 +32,8 @@ jobs:
           dvc push --run-cache
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
+          tstamp=$(date +%F-%H%m)
+          branchname=${tstamp}-${loc}
+          git checkout -b $branchname
           git add dvc.yaml dvc.lock
-          git commit -m "Forecast pipeline additions" && git push
+          git commit -m "Forecast pipeline additions" && git push origin $branchname
