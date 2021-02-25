@@ -1,45 +1,31 @@
-name: add-forecast
+name: add-forecast-set
 on:
-  schedule:
-    - cron: '0 7 * * 1'
-jobs: 
+  push:
+    paths-ignore:
+      - '.dvc/**'
+      - dvc.lock
+      - 'metrics/**'
+      - README.md
+    branches:
+      - '*'
+      - '!master'
+defaults:
   run:
     runs-on: [ubuntu-latest]
-    container: docker://eamon/random-walks:2020-08-06
-    steps:
-      - uses: actions/checkout@v2
-      - name: pipeline-adder
-        env:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          dvc pull --run-cache || true
-          today=$(date +%F)
-          fdt=$today ./forecast.sh
-          ddt=$today ./score.sh
-          fdt=$today ddt=$today ./visualize-forecasts.sh
-          dvc push
-          
-          git config --local user.email "actions@users.noreply.github.com"
-          git config --local user.name "Automated Publisher"
-          git add dvc.yaml dvc.lock metrics visuals
-          if git commit -m "Weekly forecast, score, and plot pipeline additions" && git push;
-          then
-            echo "# Running times" > report.md
-            dvc metrics show >> report.md
-          
-            echo "# Plots" >> report.md
-            dvc plots show --show-vega metrics/${today}-score-by-loc-type.csv >vega.json
-            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-            dvc plots show --show-vega metrics/${today}-score-by-loc-type-targ-type.csv >vega.json
-            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-            dvc plots show --show-vega metrics/${today}-score-by-loc-type-targ-type-forecast-date.csv >vega.json
-            vl2png vega.json -s 1.5 | cml-publish --md >> report.md
-          
-          else
-            echo "No changes to outputs." > report.md
-          fi
-          cml-send-comment report.md
+    container: docker://eamon/random-walks:2021-02-22
+jobs:
+  backtest1:
+    name: Train and forecast set 1
+  strategy:
+  matrix:
+    fips: [36, 53]
+  steps:
+    - uses: actions/checkout@v2
+    - name: pipeline-adder
+      env:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        loc: ${{ strategy.fips }}
+      run: |
+          echo $loc
