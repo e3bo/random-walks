@@ -5,7 +5,7 @@ tictoc::tic()
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-JuliaCall::julia_setup("/opt/julia-1.5.3/bin/julia")
+JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
 JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
 
 ## main functions
