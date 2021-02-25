@@ -378,7 +378,7 @@ write_forecasts <- function(fits, fet, betagrid) {
     params_Sigma <- solve(hess)
     dets <-
       kf_nll_details(wfit, x, y, param_map, 
-                     betasd = betasd, fet = fet, params_Sigma = params_Sigma * 10)
+                     betasd = betasd, fet = fet, params_Sigma = params_Sigma)
     inds <- which(fet$target_wday == 7)
     fcst <- create_forecast_df(
       means = dets$sim_means[inds, ],

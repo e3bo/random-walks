@@ -3,7 +3,7 @@
 library(covidHubUtils)
 
 models <- c("COVIDhub-ensemble", "CEID-Walk")
-locs <- c("53", "36", "06")
+locs <- c("48", "53", "36", "06")
 
 fdts_mon <- seq.Date(as.Date("2020-07-20"), as.Date("2020-11-30"), by = "7 days")
 fdts_tue <- fdts_mon + 1
