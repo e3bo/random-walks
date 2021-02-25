@@ -25,4 +25,11 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           loc: ${{ matrix.fips }}
-        run: echo $loc && which dvc
+        run: |
+          dvc pull --run-cache || true
+          loc=$loc bash -x ./forecast.sh
+          dvc push --run-cache
+          git config --local user.email "actions@users.noreply.github.com"
+          git config --local user.name "Automated Publisher"
+          git add dvc.yaml dvc.lock metrics visuals
+          git commit -m "Forecast pipeline additions" && git push
