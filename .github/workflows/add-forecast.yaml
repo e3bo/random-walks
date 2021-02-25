@@ -9,10 +9,6 @@ on:
     branches:
       - '*'
       - '!master'
-defaults:
-  run:
-    runs-on: [ubuntu-latest]
-    container: docker://eamon/random-walks:2021-02-22
 jobs:
   backtest1:
     name: Train and forecast set 1
