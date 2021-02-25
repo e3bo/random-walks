@@ -17,6 +17,7 @@ jobs:
       matrix:
         fips: [36, 53]
     steps:
+      - uses: action/checkout@v2
       - name: Echo inputs
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
