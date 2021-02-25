@@ -16,10 +16,10 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: [48, 53]
+        fips: [06, 48, 53]
     steps:
       - uses: actions/checkout@v2
-      - name: Echo inputs
+      - name: Train and forecast for one location
         env:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -36,4 +36,16 @@ jobs:
           branchname=${tstamp}-${loc}
           git checkout -b $branchname
           git add dvc.yaml dvc.lock
-          git commit -m "Forecast pipeline additions" && git push origin $branchname || true
+          if git commit -m "Forecast pipeline additions" && git push origin $branchname;
+            echo "::set-output name=new-branch::$branchname"
+          else
+            echo "no new outputs"
+          fi
+  integration:
+    name: Integrate new outputs for each location
+    needs: backtest1
+    steps:
+      - uses: actions/checkout@v2
+        env:
+          branchnames: ${{ toJSON(needs.backtest1.outputs) }}
+    - run: echo $branchnames
