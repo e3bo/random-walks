@@ -48,4 +48,4 @@ jobs:
       - uses: actions/checkout@v2
         env:
           branchnames: ${{ toJSON(needs.backtest1.outputs) }}
-    - run: echo $branchnames
+        run: echo $branchnames
