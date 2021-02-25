@@ -7,7 +7,7 @@ on:
       - 'metrics/**'
       - README.md
     branches:
-      - '*'
+      - '!sir-kf'
       - '!master'
 jobs: 
   run:
