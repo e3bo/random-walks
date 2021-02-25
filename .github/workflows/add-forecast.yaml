@@ -12,6 +12,7 @@ on:
 jobs:
   backtest1:
     name: Train and forecast set 1
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         fips: [36, 53]
