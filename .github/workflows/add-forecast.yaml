@@ -36,4 +36,4 @@ jobs:
           branchname=${tstamp}-${loc}
           git checkout -b $branchname
           git add dvc.yaml dvc.lock
-          git commit -m "Forecast pipeline additions" && git push origin $branchname
+          git commit -m "Forecast pipeline additions" && git push origin $branchname || true
