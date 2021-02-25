@@ -1,10 +1,8 @@
 module InfectionKalman
 
-using DataFrames
 using Distributions
 using ForwardDiff
 using LinearAlgebra
-using Optim
 
 export hess
 export obj
@@ -126,26 +124,6 @@ function hess(logE0::Float64, logtau::Float64, bpars, z; γ::Float64 = 365.25 / 
     pvar = [logtau bpars[end]]
     h = ForwardDiff.hessian(par -> obj(vec([logE0 par[1] bpars[1:(end -1)]' par[2]]), z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd), pvar)
     h
-end
-
-function fit(cdata, pdata; detailed_results::Bool = false, hessian::Bool = false, time_limit = 600, show_trace::Bool = false, betasd::Float64 = 1., N::Float64 = 1e7, a::Float64 = 1.) 
-
-    wsize = size(pdata)[1] - 2
-    z = [[el] for el in cdata.smooth[end-wsize+1:end]]
-    w = [el for el in cdata.wday[end-wsize+1:end]]
-
-    res = optimize(pvar -> obj(pvar, z, w; betasd = betasd, N = N, a = a), pdata.lower, pdata.upper, pdata.init, Fminbox(LBFGS()), Optim.Options(show_trace = show_trace, time_limit = time_limit); autodiff = :forward)
-
-    if hessian 
-        h = hess(res.minimizer, z, w)
-        res = [res, h]
-    end
-    
-    if detailed_results
-        n, r, s, x, pk, pkk = obj(res.minimizer, z, w; just_nll = false)
-        res = [res, n, r, s, x, pk, pkk]
-    end
-    res
 end
 
 end

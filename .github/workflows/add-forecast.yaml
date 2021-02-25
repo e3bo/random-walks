@@ -27,10 +27,8 @@ jobs:
           loc: ${{ matrix.fips }}
           JULIA_DEPOT_PATH: /home/rstudio/.julia
         run: |
-          /opt/julia-1.5.3/bin/julia -v
-          julia -e "using DataFrames"
-          #dvc pull --run-cache || true
-          #loc=$loc bash -x ./forecast.sh
+          dvc pull --run-cache || true
+          loc=$loc bash -x ./forecast.sh
           #dvc push --run-cache
           #git config --local user.email "actions@users.noreply.github.com"
           #git config --local user.name "Automated Publisher"
