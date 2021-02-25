@@ -208,7 +208,7 @@ kfnll <-
           logtau_samp <- params_mu[1] # some estimates of variance are unrealistic
           logbetaT_samp <- params_samp[2]
           logbeta_fet[1] <-
-            log(gamma) + a * (params_samp[2] - log(gamma)) +  
+            log(gamma) + a * (logbetaT_samp - log(gamma)) +  
             rnorm(1, mean = 0, sd = betasd)
           if (length(logbeta_fet) > 1) {
             for (jj in seq(2, length(logbeta_fet))) {
@@ -361,7 +361,7 @@ kf_nll_details <- function(w, x, y, betasd, pm, fet, params_Sigma) {
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases = "weekly",
-    nsim = 400,
+    nsim = 20,
     betasd = betasd,
     params_Sigma = params_Sigma,
     a = p$a
@@ -378,7 +378,7 @@ write_forecasts <- function(fits, fet, betagrid) {
     params_Sigma <- solve(hess)
     dets <-
       kf_nll_details(wfit, x, y, param_map, 
-                     betasd = betasd, fet = fet, params_Sigma = params_Sigma)
+                     betasd = betasd, fet = fet, params_Sigma = params_Sigma * 10)
     inds <- which(fet$target_wday == 7)
     fcst <- create_forecast_df(
       means = dets$sim_means[inds, ],
