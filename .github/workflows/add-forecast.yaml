@@ -16,14 +16,14 @@ defaults:
 jobs:
   backtest1:
     name: Train and forecast set 1
-  strategy:
-    matrix:
-      fips: [36, 53]
-  steps:
-    env:
-      repo_token: ${{ secrets.GITHUB_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      loc: ${{ strategy.fips }}
-    run: |
-      echo $loc
+    strategy:
+      matrix:
+        fips: [36, 53]
+    steps:
+      env:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        loc: ${{ strategy.fips }}
+      run: |
+        echo $loc
