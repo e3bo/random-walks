@@ -52,16 +52,13 @@ jobs:
       - name: Merge changes
         run: |
           git fetch
-          git branch -a | grep -P "remotes/origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" > locrefs
+          git branch -a | grep -P "remotes/origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" |  tr '\n' ' '> tomerge
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-all-locations
           git checkout -b $branchname
-          for name in $(cat locrefs);
-          do
-            git merge --ff-only $name
-          done
-          git push origin $branchname;
-          for ref in $(cut locrefs -d'/' -f3);
-          do
-            git push origin --delete $ref
-          done
+          git merge --no-edit $tomerge
+          git config --local user.email "actions@users.noreply.github.com"
+          git config --local user.name "Automated Publisher"
+          git push origin $branchname
+          shortnames=$(echo $tomerge | sed "s/remotes\/origin\///g")
+          git push origin --delete $shortnames
