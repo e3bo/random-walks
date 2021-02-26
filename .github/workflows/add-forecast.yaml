@@ -37,6 +37,7 @@ jobs:
           git checkout -b $branchname
           git add dvc.yaml dvc.lock
           if git commit -m "Forecast pipeline additions" && git push origin $branchname;
+          then
             echo "::set-output name=new-branch::$branchname"
           else
             echo "no new outputs"
