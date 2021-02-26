@@ -12,7 +12,12 @@ dvc run \
     --force \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
 
+dirname=fips-${loc}
+mkdir -p $dirname
+cd $dirname
+
 dvc run \
+    -w .. \
     -d InfectionKalmanRegularization.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
