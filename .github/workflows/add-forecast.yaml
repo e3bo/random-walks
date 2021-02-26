@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: ["06", 48, 36, 53]
+        fips: ["06", 48, 36, 53, 12, 42, 17, 39, 13, 37, 26]
     steps:
       - uses: actions/checkout@v2
       - name: Train and forecast for one location
@@ -50,6 +50,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Merge changes
         run: |
+          git fetch
           git branch -a | grep -P "remotes/origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" > locrefs
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-all-locations
