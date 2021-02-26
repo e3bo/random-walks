@@ -46,6 +46,7 @@ jobs:
     needs: backtest1
     steps:
       - uses: actions/checkout@v2
+      - name: Merge changes
         env:
           branchnames: ${{ toJSON(needs.backtest1.outputs) }}
         run: echo $branchnames
