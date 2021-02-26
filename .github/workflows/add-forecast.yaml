@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: ["06", 48, 53]
+        fips: ["06", 48, 36, 53]
     steps:
       - uses: actions/checkout@v2
       - name: Train and forecast for one location
@@ -38,7 +38,7 @@ jobs:
           git add dvc.yaml dvc.lock
           if git commit -m "Forecast pipeline additions" && git push origin $branchname;
           then
-            echo "::set-output name=new-branch::$branchname"
+            echo "changes pushed to $branchname"
           else
             echo "no new outputs"
           fi
@@ -49,6 +49,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Merge changes
-        env:
-          branchnames: ${{ toJSON(needs.backtest1.outputs) }}
-        run: echo $branchnames
+        run: |
+        git branch -a | grep -P "remotes/origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" > locrefs
+        tstamp=$(date +%F-%H%m)
+        branchname=${tstamp}-all-locations
+        git checkout -b $branchname
+        for name in $(cat locrefs);
+        do
+           git merge --ff-only $name
+        done
+        git push origin $branchname;
+        for ref in $(cut locrefs -d'/' -f3);
+        do
+           git push origin --delete $ref
+        done
