@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: ["06", 36]
+        fips: ["06", 48]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-${loc}
           git checkout -b $branchname
-          git add dvc.yaml dvc.lock
+          git add */dvc.yaml */dvc.lock
           if git commit -m "Forecast pipeline additions" && git push origin $branchname;
           then
             echo "changes pushed to $branchname"
