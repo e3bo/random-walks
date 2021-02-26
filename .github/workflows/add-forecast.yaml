@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: [06, 48, 53]
+        fips: ["06", 48, 53]
     steps:
       - uses: actions/checkout@v2
       - name: Train and forecast for one location
