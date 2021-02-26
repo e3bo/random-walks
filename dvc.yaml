@@ -1616,3 +1616,20 @@ stages:
     - forecasts/2020-07-26-fips48-lambda043.48-CEID-InfectionKalman.csv
     - forecasts/2020-07-26-fips48-lambda083.33-CEID-InfectionKalman.csv
     - forecasts/2020-07-26-fips48-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2020-07-26-06:
+    cmd: fdt=2020-07-26 loc=06 Rscript InfectionKalmanRegularization.R
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-07-26
+    outs:
+    - forecasts/2020-07-26-fips06-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips06-lambda1000.00-CEID-InfectionKalman.csv
