@@ -32,6 +32,7 @@ jobs:
           #loc=$loc bash -x ./forecast.sh
           mkdir -p fips-${loc}
           touch fips-${loc}/dvc.yaml
+          touch fips-${loc}/dvc.lock
           dvc push --run-cache
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
