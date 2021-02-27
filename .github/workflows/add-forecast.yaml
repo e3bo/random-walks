@@ -31,7 +31,7 @@ jobs:
           dvc pull --run-cache || true
           #loc=$loc bash -x ./forecast.sh
           mkdir -p fips-${loc}
-          echo foo > fips-${loc}/dvc.yaml
+          touch > fips-${loc}/dvc.yaml
           touch fips-${loc}/dvc.lock
           dvc push --run-cache
           git config --local user.email "actions@users.noreply.github.com"
