@@ -59,9 +59,9 @@ jobs:
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-all-locations
           git checkout -b $branchname
-          git merge --no-edit $(cat tomerge)
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
+          git merge --no-edit $(cat tomerge)
           git push origin $branchname
           shortnames=$(cat tomerge | sed "s/origin\///g")
           git push origin --delete $shortnames
