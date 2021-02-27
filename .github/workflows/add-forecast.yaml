@@ -53,7 +53,7 @@ jobs:
         run: |
           git fetch
           git branch -a | grep -P "origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" |  tr '\n' ' '> tomerge
-          if [ -s tomerge ]; then
+          if ! [ -s tomerge ]; then
             echo "No changes to integrate."
             exit 0
           fi
