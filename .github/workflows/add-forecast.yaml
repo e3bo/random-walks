@@ -52,7 +52,7 @@ jobs:
       - name: Merge changes
         run: |
           git fetch
-          git branch -a | grep -P "remotes/origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" |  tr '\n' ' '> tomerge
+          git branch -a | grep -P "origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" |  tr '\n' ' '> tomerge
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-all-locations
           git checkout -b $branchname
@@ -60,5 +60,5 @@ jobs:
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
           git push origin $branchname
-          shortnames=$(echo $tomerge | sed "s/remotes\/origin\///g")
+          shortnames=$(echo $tomerge | sed "s/origin\///g")
           git push origin --delete $shortnames
