@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: [42, 37]
+        fips: [26, 34]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
