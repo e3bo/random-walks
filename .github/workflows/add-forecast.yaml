@@ -29,7 +29,9 @@ jobs:
           JULIA_DEPOT_PATH: /home/rstudio/.julia
         run: |
           dvc pull --run-cache || true
-          loc=$loc bash -x ./forecast.sh
+          #loc=$loc bash -x ./forecast.sh
+          mkdir -p fips-${loc}
+          touch fips-${loc}/dvc.yaml
           dvc push --run-cache
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
@@ -56,9 +58,9 @@ jobs:
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-all-locations
           git checkout -b $branchname
-          git merge --no-edit $tomerge
+          git merge --no-edit $(cat tomerge)
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
           git push origin $branchname
-          shortnames=$(echo $tomerge | sed "s/origin\///g")
+          shortnames=$(cat tomerge | sed "s/origin\///g")
           git push origin --delete $shortnames
