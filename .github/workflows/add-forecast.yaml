@@ -53,6 +53,10 @@ jobs:
         run: |
           git fetch
           git branch -a | grep -P "origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" |  tr '\n' ' '> tomerge
+          if [ -s tomerge ]; then
+            echo "No changes to integrate."
+            exit 0
+          fi
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-all-locations
           git checkout -b $branchname
@@ -60,5 +64,5 @@ jobs:
           git config --local user.name "Automated Publisher"
           git merge --no-edit $(cat tomerge)
           git push origin $branchname
-          #shortnames=$(cat tomerge | sed "s/origin\///g")
-          #git push origin --delete $shortnames
+          shortnames=$(cat tomerge | sed "s/remotes\/origin\///g")
+          git push origin --delete $shortnames
