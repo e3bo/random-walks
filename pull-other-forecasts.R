@@ -5,6 +5,7 @@ library(covidHubUtils)
 models <- c("COVIDhub-ensemble", "CEID-Walk")
 locs <-
   c(
+    "01",
     "04",
     "06",
     "08",
@@ -21,6 +22,7 @@ locs <-
     "36",
     "37",
     "42",
+    "45",
     "47",
     "48",
     "51",
