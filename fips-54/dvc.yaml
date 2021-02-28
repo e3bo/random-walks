@@ -1,0 +1,19 @@
+stages:
+  forecast-2020-07-26-54:
+    cmd: fdt=2020-07-26 loc=54 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-07-26
+    outs:
+    - forecasts/2020-07-26-fips54-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-07-26-fips54-lambda1000.00-CEID-InfectionKalman.csv
