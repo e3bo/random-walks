@@ -374,8 +374,9 @@ write_forecasts <- function(fits, fet, betagrid) {
   for (penind in 1:nlam) {
     wfit <- fits[[penind]]$par
     betasd <- betagrid[penind]
-    hess <- calc_kf_hess(wfit, x, y, betasd = betasd, param_map)
-    params_Sigma <- solve(hess)
+    #hess <- calc_kf_hess(wfit, x, y, betasd = betasd, param_map)
+    #params_Sigma <- solve(hess)
+    params_Sigma <- matrix(0, 2, 2)
     dets <-
       kf_nll_details(wfit, x, y, param_map, 
                      betasd = betasd, fet = fet, params_Sigma = params_Sigma)
