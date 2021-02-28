@@ -52,7 +52,11 @@ jobs:
     needs: backtest1
     steps:
       - uses: actions/checkout@v2
-      - name: Merge changes
+      - name: Merge changes and evaluate
+        env:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           git fetch
           git branch -a | grep -P "origin/202[1-9]-\d{2}-\d{2}-\d{4}-\d{2}" |  tr '\n' ' '> tomerge
