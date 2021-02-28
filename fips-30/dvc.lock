@@ -1,0 +1,44 @@
+forecast-2020-07-26-30:
+  cmd: fdt=2020-07-26 loc=30 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: 314bd489f890bbe7eb00864a8ffe1664
+    size: 15584
+  - path: covidhub-common.R
+    md5: 61115b4ee2b6253254dc75c5dc0fde3f
+    size: 9912
+  - path: hopkins/2020-07-26
+    md5: 10aa1c52c0425eb5e20f4d0b54b82363.dir
+    size: 4209293
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-07-26-fips30-lambda010.00-CEID-InfectionKalman.csv
+    md5: 0d207c2c78df4d62ac232ce13f1e5b5e
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda011.24-CEID-InfectionKalman.csv
+    md5: ed5c5296896da9969092400920c7c824
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda012.82-CEID-InfectionKalman.csv
+    md5: e7a93ed9be4c6731024a49992b5b43e3
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda014.93-CEID-InfectionKalman.csv
+    md5: f27a331c196b2a4c9e8cf6c43211ad34
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda017.86-CEID-InfectionKalman.csv
+    md5: 8d6267c95a68c92cb2bbe3edd8c2525b
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda022.22-CEID-InfectionKalman.csv
+    md5: 13b8487c79614a69080718d7fe606628
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda029.41-CEID-InfectionKalman.csv
+    md5: d14bdd2abac9d1169a143a112680cfb9
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda043.48-CEID-InfectionKalman.csv
+    md5: 7ce919adb8002dee645cea8bae56871d
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda083.33-CEID-InfectionKalman.csv
+    md5: 0e159246502557c4b6055948abab4fed
+    size: 2154
+  - path: forecasts/2020-07-26-fips30-lambda1000.00-CEID-InfectionKalman.csv
+    md5: d8476577625b8581c63307eb98d56c03
+    size: 2122
