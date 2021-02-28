@@ -16,7 +16,8 @@ jobs:
     container: docker://eamon/sir-kf:2021-02-22
     strategy:
       matrix:
-        fips: [26, 34]
+        fips: [04, 51]
+        fdt: 2020-07-26
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -26,10 +27,11 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           loc: ${{ matrix.fips }}
+          fdt: ${{ matrix.fdt }}
           JULIA_DEPOT_PATH: /home/rstudio/.julia
         run: |
-          dvc pull --run-cache || true
-          loc=$loc bash -x ./forecast.sh
+          dvc pull hopkins/$fdt || true
+          fdt=$fdt loc=$loc bash -x ./forecast.sh
           dvc push --run-cache
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
@@ -39,9 +41,9 @@ jobs:
           git add */dvc.yaml */dvc.lock
           if git commit -m "Forecast pipeline additions" && git push origin $branchname;
           then
-            echo "changes pushed to $branchname"
+            echo "Changes pushed to $branchname"
           else
-            echo "no new outputs"
+            echo "No new outputs"
           fi
   integration:
     name: Integrate new outputs for each location
