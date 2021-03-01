@@ -79,3 +79,13 @@ jobs:
           
           shortnames=$(cat tomerge | sed "s/remotes\/origin\///g")
           git push origin --delete $shortnames
+          
+          dvc plots show \
+            wis-horizon-location-model.csv --show-vega > vega.json
+          vl2png vega.json | cml-publish --md >> report.md
+          
+          dvc plots show \
+            wis-model-location.csv --show-vega > vega2.json
+          vl2png vega2.json | cml-publish --md >> report.md
+          
+          cml-send-comment report.md
