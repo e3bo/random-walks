@@ -17,7 +17,6 @@ jobs:
     strategy:
       matrix:
         fips: [41, 40, 72, "09", 49, 19, 32, "05", 28, 20, 35, 31, 54, 16, 15, 33, 23, 30, 44, 10, 46, 38, "02", 11, 50, 56, 66, 78, 60, 69]
-        fdt: [2020-07-26]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -27,11 +26,12 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           loc: ${{ matrix.fips }}
-          fdt: ${{ matrix.fdt }}
           JULIA_DEPOT_PATH: /home/rstudio/.julia
         run: |
-          dvc pull hopkins/$fdt || true
-          fdt=$fdt loc=$loc bash -x ./forecast.sh
+          for fdt in $(cat fdts); do
+            dvc pull hopkins/$fdt || true
+            fdt=$fdt loc=$loc bash -x ./forecast.sh
+          done
           dvc push --run-cache
           git config --local user.email "actions@users.noreply.github.com"
           git config --local user.name "Automated Publisher"
