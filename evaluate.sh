@@ -40,11 +40,11 @@ dvc run \
     -d lambda011.24-CEID-InfectionKalman \
     -d lambda010.00-CEID-InfectionKalman \
     -d make-trajectory-plots.R \
-    -o trajectories-all.png \
-    -o trajectories-0.png \
-    -o trajectories-1.png \
-    -o trajectories-2.png \
-    -o trajectories-3.png \
+    -o trajectories-all \
+    -o trajectories-0 \
+    -o trajectories-1 \
+    -o trajectories-2 \
+    -o trajectories-3 \
     --force \
     -n make-trajectory-plots \
     ./make-trajectory-plots.R

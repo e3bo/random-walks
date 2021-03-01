@@ -40,33 +40,32 @@ plotter <- function(dat) {
   p2
 }
 
-
-pall <- plotter(fdat2)
-
-
-lapply(1:20, )
-
-make_page_plot <- function(page) {
-  pall + ggforce::facet_wrap_paginate(location~model, nrow = 3, ncol = 12, 
+make_page_plot <- function(page, pobj) {
+  pobj + ggforce::facet_wrap_paginate(location~model, nrow = 3, ncol = 12, 
                                       page = page, scales = "free_y")
 }
 
-page_plots <- lapply(1:20, make_page_plot)
-
-save_page_plot <- function(pp, page_num){
+save_page_plot <- function(pp, page_num, dname){
   pstring <- sprintf("%02d", page_num)
-  fname <- paste0("trajectories-all-p", pstring, ".png")
+  fname <- paste0(dname, "/page", pstring, ".png")
   ggsave(fname, pp, height = 7.5, width = 24) 
 }
-mapply(save_page_plot, page_plots, seq_along(page_plots))
 
+save_multi_page_plot <- function(gg, dirname){
+ page_plots <- lapply(1:19, make_page_plot, pobj = gg)
+ if(!dir.exists(dirname)){
+   dir.create(dirname)
+ }
+ mapply(save_page_plot, page_plots, seq_along(page_plots), dname = dirname)
+}
 
+pall <- plotter(fdat2)
+save_multi_page_plot(pall, "trajectories-all")
 
 fdat3 <- fdat2 %>% mutate(ewk = lubridate::epiweek(forecast_date),
                           wkcyc = ewk %% 4)
-
 splt <- split(fdat3, fdat3$wkcyc)
 plots_staggered <- map(splt, plotter)
 
-pnames <- paste0("trajectories-", names(plots_staggered), ".png")
-map2(pnames, plots_staggered, ggsave, height = 18, width = 24)
+pnames <- paste0("trajectories-", names(plots_staggered))
+map2(plots_staggered, pnames, save_multi_page_plot)

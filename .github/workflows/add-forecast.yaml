@@ -13,7 +13,7 @@ jobs:
   backtest1:
     name: Train and forecast set 1
     runs-on: ubuntu-latest
-    container: docker://eamon/sir-kf:2021-02-22
+    container: docker://eamon/sir-kf:2021-03-01
     strategy:
       matrix:
         fips: [41, 40, 72, "09", 49, 19, 32, "05", 28, 20, 35, 31, 54, 16, 15, 33, 23, 30, 44, 10, 46, 38, "02", 11, 50, 56, 66, 78, 60, 69]
