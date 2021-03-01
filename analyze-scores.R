@@ -27,10 +27,11 @@ ws1 <-
   summarize(meanscore = mean(score_value), .groups = "drop")
 
 ws1
-ws1 %>% ggplot(aes(x = target_end_date, y = meanscore, color = model)) + 
-  geom_point() + facet_grid(location ~ horizon, scales = "free_y") + 
-  scale_x_date(guide = guide_axis(angle = 90)) + 
-  labs(x = "target date", y = "wis")
+#ws1 %>% ggplot(aes(x = target_end_date, y = meanscore, color = model)) + 
+#  geom_point() + facet_grid(location ~ horizon, scales = "free_y") + 
+#  scale_x_date(guide = guide_axis(angle = 90)) + 
+#  labs(x = "target date", y = "wis")
+
 
 ws2 <- ws %>% group_by(horizon, location, model) %>%
   summarize(meanscore = mean(score_value), .groups = "drop") %>%
@@ -39,18 +40,18 @@ ws2 <- ws %>% group_by(horizon, location, model) %>%
 
 ws2
 write_csv(ws2, "wis-horizon-location-model.csv")
-ws2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) + 
-  geom_col(position = position_dodge()) + 
-  facet_grid(location ~ ., scales = "free_y") + 
-  labs(y = "WIS")
+#ws2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) + 
+#  geom_col(position = position_dodge()) + 
+#  facet_grid(location ~ ., scales = "free_y") + 
+#  labs(y = "WIS")
 
 as2 <- as %>% group_by(horizon, location, model) %>%
   summarize(meanscore = mean(score_value), .groups = "drop")
 as2
-as2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) + 
-  geom_col(position = position_dodge()) + 
-  facet_grid(location ~ ., scales = "free_y") + 
-  labs(y = "MAE")
+#as2 %>% ggplot(aes(x = horizon, y = meanscore, fill = model)) + 
+#  geom_col(position = position_dodge()) + 
+#  facet_grid(location ~ ., scales = "free_y") + 
+#  labs(y = "MAE")
 
 ws3 <- ws %>% group_by(location, model) %>%
   summarize(meanscore = mean(score_value), .groups = "drop") %>%
@@ -59,10 +60,10 @@ ws3 <- ws %>% group_by(location, model) %>%
 ws3
 write_csv(ws3, "wis-model-location.csv")
 
-ws3 %>% ggplot(aes(x = model, y = meanscore)) + 
-  geom_col(position = position_dodge()) + 
-  facet_grid(location ~ ., scales = "free_y") + labs(y = "WIS") + 
-  scale_x_discrete(guide = guide_axis(angle = 45))
+#ws3 %>% ggplot(aes(x = model, y = meanscore)) + 
+#  geom_col(position = position_dodge()) + 
+#  facet_grid(location ~ ., scales = "free_y") + labs(y = "WIS") + 
+#  scale_x_discrete(guide = guide_axis(angle = 45))
 
 ws4 <- ws %>% group_by(model) %>% 
   summarize(meanscore = mean(score_value), .groups = "drop")
@@ -71,6 +72,7 @@ ws4
 ws4 %>% ggplot(aes(x = model, y = meanscore)) + geom_col() + labs(y = "wis") +
   scale_x_discrete(guide = guide_axis(angle = 45))
 
+q('no')
 ws$lambda <- ws$model %>%
   str_extract("lambda\\d{3}\\.\\d{2}") %>% str_remove("lambda") %>% as.numeric()
 
