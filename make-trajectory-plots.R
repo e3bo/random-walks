@@ -43,7 +43,24 @@ plotter <- function(dat) {
 
 pall <- plotter(fdat2)
 
-ggsave("trajectories-all.png", pall, height = 18, width = 24)
+
+lapply(1:20, )
+
+make_page_plot <- function(page) {
+  pall + ggforce::facet_wrap_paginate(location~model, nrow = 3, ncol = 12, 
+                                      page = page, scales = "free_y")
+}
+
+page_plots <- lapply(1:20, make_page_plot)
+
+save_page_plot <- function(pp, page_num){
+  pstring <- sprintf("%02d", page_num)
+  fname <- paste0("trajectories-all-p", pstring, ".png")
+  ggsave(fname, pp, height = 7.5, width = 24) 
+}
+mapply(save_page_plot, page_plots, seq_along(page_plots))
+
+
 
 fdat3 <- fdat2 %>% mutate(ewk = lubridate::epiweek(forecast_date),
                           wkcyc = ewk %% 4)
