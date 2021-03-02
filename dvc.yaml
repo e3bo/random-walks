@@ -122,11 +122,11 @@ stages:
     - make-trajectory-plots.R
     - other-model-forecasts.rds
     outs:
-    - trajectories-0.png
-    - trajectories-1.png
-    - trajectories-2.png
-    - trajectories-3.png
-    - trajectories-all.png
+    - trajectories-0
+    - trajectories-1
+    - trajectories-2
+    - trajectories-3
+    - trajectories-all
   analyze-scores:
     cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
     deps:
@@ -145,7 +145,6 @@ stages:
     outs:
     - analyze-scores.html
     - analyze-scores.md
-    - figure
     plots:
     - wis-horizon-location-model.csv:
         template: relscore-horizon-location-model

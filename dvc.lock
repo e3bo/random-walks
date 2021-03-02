@@ -384,49 +384,49 @@ combine:
     md5: 61115b4ee2b6253254dc75c5dc0fde3f
     size: 9912
   - path: forecasts
-    md5: 8831ec5260fad76684b2387638f861fa.dir
-    size: 2815316
-    nfiles: 1330
+    md5: a433111ff3b4568aefc18fdd46f528c9.dir
+    size: 14259112
+    nfiles: 6740
   outs:
   - path: lambda010.00-CEID-InfectionKalman
-    md5: 2e4c4faa792f41baf8b2f66f911c8bc3.dir
-    size: 273479
+    md5: 8467f60956658e995fe337356d28bea1.dir
+    size: 1377852
     nfiles: 21
   - path: lambda011.24-CEID-InfectionKalman
-    md5: 0fe9f072c8538b5491f537cce88b985d.dir
-    size: 273362
+    md5: 582b706c489d6d300d88578376751871.dir
+    size: 1377548
     nfiles: 21
   - path: lambda012.82-CEID-InfectionKalman
-    md5: ef75b4ae473590864491f2859f65b86a.dir
-    size: 273403
+    md5: a6aee164f53e0b36fab2a7925967cb44.dir
+    size: 1376996
     nfiles: 21
   - path: lambda014.93-CEID-InfectionKalman
-    md5: 29aa48c5e9695b156d5c8efbe31201c6.dir
-    size: 273385
+    md5: 385b33761b8c94c750079649935ec250.dir
+    size: 1376770
     nfiles: 21
   - path: lambda017.86-CEID-InfectionKalman
-    md5: c6ce1f799251f6fc1a2738b34c74bdf1.dir
-    size: 273340
+    md5: 9f4ad6731351ab1c894d0669fd0e6c45.dir
+    size: 1376430
     nfiles: 21
   - path: lambda022.22-CEID-InfectionKalman
-    md5: f9bd55219493f48142209c0c86228552.dir
-    size: 273271
+    md5: 7312e14f0f39e65d4a77e0e539cc27db.dir
+    size: 1375849
     nfiles: 21
   - path: lambda029.41-CEID-InfectionKalman
-    md5: b025060a2a570e48a35544556ebee68c.dir
-    size: 273229
+    md5: 97eeb757f24da463ce1858fe4e1731af.dir
+    size: 1375719
     nfiles: 21
   - path: lambda043.48-CEID-InfectionKalman
-    md5: 86d4023960269c88384138064b327caf.dir
-    size: 273247
+    md5: 056e7233a7fc51d6d9381a62beb6fa12.dir
+    size: 1375330
     nfiles: 21
   - path: lambda083.33-CEID-InfectionKalman
-    md5: 7bcd960e2b7cd3c3717fed5c64f9b8ac.dir
-    size: 273077
+    md5: ea5582d39f3c649a87bd4e0bd872fc6b.dir
+    size: 1374942
     nfiles: 21
   - path: lambda1000.00-CEID-InfectionKalman
-    md5: 09ae72910789684a5beb82c2ea5f62d8.dir
-    size: 273162
+    md5: a2718ba01e9b796186f01601f37ec8f7.dir
+    size: 1376511
     nfiles: 21
 pull-archived-forecasts:
   cmd: ./pull-other-forecasts.R
@@ -442,133 +442,134 @@ make-trajectory-plots:
   cmd: ./make-trajectory-plots.R
   deps:
   - path: lambda010.00-CEID-InfectionKalman
-    md5: 2e4c4faa792f41baf8b2f66f911c8bc3.dir
-    size: 273479
+    md5: 8467f60956658e995fe337356d28bea1.dir
+    size: 1377852
     nfiles: 21
   - path: lambda011.24-CEID-InfectionKalman
-    md5: 0fe9f072c8538b5491f537cce88b985d.dir
-    size: 273362
+    md5: 582b706c489d6d300d88578376751871.dir
+    size: 1377548
     nfiles: 21
   - path: lambda012.82-CEID-InfectionKalman
-    md5: ef75b4ae473590864491f2859f65b86a.dir
-    size: 273403
+    md5: a6aee164f53e0b36fab2a7925967cb44.dir
+    size: 1376996
     nfiles: 21
   - path: lambda014.93-CEID-InfectionKalman
-    md5: 29aa48c5e9695b156d5c8efbe31201c6.dir
-    size: 273385
+    md5: 385b33761b8c94c750079649935ec250.dir
+    size: 1376770
     nfiles: 21
   - path: lambda017.86-CEID-InfectionKalman
-    md5: c6ce1f799251f6fc1a2738b34c74bdf1.dir
-    size: 273340
+    md5: 9f4ad6731351ab1c894d0669fd0e6c45.dir
+    size: 1376430
     nfiles: 21
   - path: lambda022.22-CEID-InfectionKalman
-    md5: f9bd55219493f48142209c0c86228552.dir
-    size: 273271
+    md5: 7312e14f0f39e65d4a77e0e539cc27db.dir
+    size: 1375849
     nfiles: 21
   - path: lambda029.41-CEID-InfectionKalman
-    md5: b025060a2a570e48a35544556ebee68c.dir
-    size: 273229
+    md5: 97eeb757f24da463ce1858fe4e1731af.dir
+    size: 1375719
     nfiles: 21
   - path: lambda043.48-CEID-InfectionKalman
-    md5: 86d4023960269c88384138064b327caf.dir
-    size: 273247
+    md5: 056e7233a7fc51d6d9381a62beb6fa12.dir
+    size: 1375330
     nfiles: 21
   - path: lambda083.33-CEID-InfectionKalman
-    md5: 7bcd960e2b7cd3c3717fed5c64f9b8ac.dir
-    size: 273077
+    md5: ea5582d39f3c649a87bd4e0bd872fc6b.dir
+    size: 1374942
     nfiles: 21
   - path: lambda1000.00-CEID-InfectionKalman
-    md5: 09ae72910789684a5beb82c2ea5f62d8.dir
-    size: 273162
+    md5: a2718ba01e9b796186f01601f37ec8f7.dir
+    size: 1376511
     nfiles: 21
   - path: make-trajectory-plots.R
-    md5: c5fc7f7bf1ccc4d68ff784c368d56a9e
-    size: 1439
+    md5: cb25d82eca703a6cca39ebc8d3645d92
+    size: 2015
   - path: other-model-forecasts.rds
     md5: 86fa8f9751aa224d832733e3b54876c0
     size: 345326
   outs:
-  - path: trajectories-0.png
-    md5: 97bea84c17e3fbc6169ecc12df13c7c2
-    size: 1652939
-  - path: trajectories-1.png
-    md5: d294fc3b6d0b6804f26cd139f8862ae6
-    size: 1713497
-  - path: trajectories-2.png
-    md5: 5429b7bfd5a1275c8cf3d3cf962e1630
-    size: 1599411
-  - path: trajectories-3.png
-    md5: b25b7e11c5095c19b418b90fe3c63015
-    size: 1682453
-  - path: trajectories-all.png
-    md5: a75abb44015a6e8906b5304b88482c5d
-    size: 1738894
+  - path: trajectories-0
+    md5: c21e2af69115a57fe4df7e976bc20d9a.dir
+    size: 20612927
+    nfiles: 19
+  - path: trajectories-1
+    md5: 255a12c5972bef8321a27614b89ac0a3.dir
+    size: 20515405
+    nfiles: 19
+  - path: trajectories-2
+    md5: 7bc0bad23099e00f4cf6e6bee6fa0139.dir
+    size: 20110482
+    nfiles: 19
+  - path: trajectories-3
+    md5: ff3e3a288e51ebb403f3ad852feebeee.dir
+    size: 20782585
+    nfiles: 19
+  - path: trajectories-all
+    md5: 08f8ef8c428cb4b1e69a3d4b75b65cb7.dir
+    size: 23468290
+    nfiles: 19
 analyze-scores:
   cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
   deps:
   - path: analyze-scores.R
-    md5: a3047b1bdf5b4f8e4425c7777bc8a988
-    size: 3261
+    md5: 363dd335af60ffda72773c36c5072776
+    size: 1861
   - path: lambda010.00-CEID-InfectionKalman
-    md5: 2e4c4faa792f41baf8b2f66f911c8bc3.dir
-    size: 273479
+    md5: 8467f60956658e995fe337356d28bea1.dir
+    size: 1377852
     nfiles: 21
   - path: lambda011.24-CEID-InfectionKalman
-    md5: 0fe9f072c8538b5491f537cce88b985d.dir
-    size: 273362
+    md5: 582b706c489d6d300d88578376751871.dir
+    size: 1377548
     nfiles: 21
   - path: lambda012.82-CEID-InfectionKalman
-    md5: ef75b4ae473590864491f2859f65b86a.dir
-    size: 273403
+    md5: a6aee164f53e0b36fab2a7925967cb44.dir
+    size: 1376996
     nfiles: 21
   - path: lambda014.93-CEID-InfectionKalman
-    md5: 29aa48c5e9695b156d5c8efbe31201c6.dir
-    size: 273385
+    md5: 385b33761b8c94c750079649935ec250.dir
+    size: 1376770
     nfiles: 21
   - path: lambda017.86-CEID-InfectionKalman
-    md5: c6ce1f799251f6fc1a2738b34c74bdf1.dir
-    size: 273340
+    md5: 9f4ad6731351ab1c894d0669fd0e6c45.dir
+    size: 1376430
     nfiles: 21
   - path: lambda022.22-CEID-InfectionKalman
-    md5: f9bd55219493f48142209c0c86228552.dir
-    size: 273271
+    md5: 7312e14f0f39e65d4a77e0e539cc27db.dir
+    size: 1375849
     nfiles: 21
   - path: lambda029.41-CEID-InfectionKalman
-    md5: b025060a2a570e48a35544556ebee68c.dir
-    size: 273229
+    md5: 97eeb757f24da463ce1858fe4e1731af.dir
+    size: 1375719
     nfiles: 21
   - path: lambda043.48-CEID-InfectionKalman
-    md5: 86d4023960269c88384138064b327caf.dir
-    size: 273247
+    md5: 056e7233a7fc51d6d9381a62beb6fa12.dir
+    size: 1375330
     nfiles: 21
   - path: lambda083.33-CEID-InfectionKalman
-    md5: 7bcd960e2b7cd3c3717fed5c64f9b8ac.dir
-    size: 273077
+    md5: ea5582d39f3c649a87bd4e0bd872fc6b.dir
+    size: 1374942
     nfiles: 21
   - path: lambda1000.00-CEID-InfectionKalman
-    md5: 09ae72910789684a5beb82c2ea5f62d8.dir
-    size: 273162
+    md5: a2718ba01e9b796186f01601f37ec8f7.dir
+    size: 1376511
     nfiles: 21
   - path: other-model-forecasts.rds
     md5: 86fa8f9751aa224d832733e3b54876c0
     size: 345326
   outs:
   - path: analyze-scores.html
-    md5: 635ae46a5bb3525f614b29b0a3a85862
-    size: 453048
+    md5: f04e8fc03d61070d7abf4392c8f4d2d2
+    size: 30516
   - path: analyze-scores.md
-    md5: 544fff6c86afb3c4aed188cd0f2eaed5
-    size: 13423
-  - path: figure
-    md5: f87f3a4b32028feb228e3f46ae0e3e13.dir
-    size: 318880
-    nfiles: 6
+    md5: 2f0ea7902d899d095ec5b2f354067a52
+    size: 6492
   - path: wis-horizon-location-model.csv
-    md5: c232c2b3e56cc54745a56934d4059e41
-    size: 181589
+    md5: b03ac4507f96187a6e19b0ff285760cd
+    size: 181514
   - path: wis-model-location.csv
-    md5: 9a39b2dba39c1e7ea336dcc389af2174
-    size: 44071
+    md5: bf4513ed3c92824d8d5eed757e693fa8
+    size: 44177
 hopkins-2020-09-07:
   cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
   deps:

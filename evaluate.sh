@@ -62,7 +62,6 @@ dvc run \
     -d lambda011.24-CEID-InfectionKalman \
     -d lambda010.00-CEID-InfectionKalman \
     -d analyze-scores.R \
-    -o figure \
     -o analyze-scores.md \
     -o analyze-scores.html \
     --plots wis-model-location.csv \
