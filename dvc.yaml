@@ -146,11 +146,11 @@ stages:
     - analyze-scores.html
     - analyze-scores.md
     plots:
-    - wis-horizon-location-model.csv:
-        template: relscore-horizon-location-model
-    - wis-model-location.csv:
-        template: relscore-location-model
-    - wis-model.csv:
+    - horizon-location-model.csv:
+        template: horizon-location-model
+    - location-model.csv:
+        template: location-model
+    - model.csv:
         template: model
   hopkins-2020-09-07:
     cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
