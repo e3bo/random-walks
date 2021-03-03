@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-03-01
     strategy:
       matrix:
-        fips: ["01", "04", "06", "08", "12", "13", "17", "18", "21", "22", "24", "25", "26", "27", "29", "34", "36", "37", "39", "42", "45", "47", "48", "51", "53", "55"]
+        fips: ["06", "36", "48", "53"]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
