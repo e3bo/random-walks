@@ -18,9 +18,13 @@ truth_data <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
                          locations = unique(fdat2$location))
 
-scores <- score_forecasts(fdat2, truth_data, return_format = "long")
+locations_to_exclude <- c("78", "72", "69", "66", "60")
+
+scores <- score_forecasts(fdat2, truth_data, return_format = "long") %>%
+  filter(!location %in% locations_to_exclude)
 ws <- scores %>% filter(score_name == "wis")
 as <- scores %>% filter(score_name == "abs_error")
+
 
 ws1 <-
   ws %>% group_by(horizon, location, model, target_end_date) %>% 
@@ -49,9 +53,21 @@ ws3
 #ws3 %>% ggplot(aes(x = model, y = meanscore)) + 
 write_csv(ws3, "wis-model-location.csv")
 
-ws4 <- ws %>% group_by(model) %>% 
-  summarize(meanscore = mean(score_value), .groups = "drop")
+wscv <- ws3 %>%
+  filter(str_detect(model, "^lambda")) %>%
+  group_by(location) %>%
+  summarize(
+    cv_lambda = model[which.min(meanscore)],
+    model = "CEID-InfectionKalman",
+    meanscore = min(meanscore), .groups = "drop"
+  )
 
-ws4
+ws4 <- wscv %>% 
+  select(-cv_lambda) %>% 
+  bind_rows(ws3) %>%
+  group_by(model) %>% 
+  summarize(meanscore = mean(meanscore), .groups = "drop")
+write_csv(ws4, "wis-model.csv")
+
 ws4 %>% ggplot(aes(x = model, y = meanscore)) + geom_col() + labs(y = "wis") +
   scale_x_discrete(guide = guide_axis(angle = 45))

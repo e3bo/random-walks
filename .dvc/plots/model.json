@@ -1,0 +1,25 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+    "data": {
+        "values": "<DVC_METRIC_DATA>"
+    },
+    "title": "<DVC_METRIC_TITLE>",
+  "mark": {"type": "point"},
+  "encoding": {
+    "x": {
+	    "field": "model", 
+	    "type": "nominal", 
+	    "title": "model"
+    },
+    "y": {
+	    "field": "meanscore",
+            "type": "quantitative",
+            "title": "mean WIS"
+    },
+    "color": {
+	    "field": "rev", 
+	    "type": "nominal"
+    }
+  }
+}
+

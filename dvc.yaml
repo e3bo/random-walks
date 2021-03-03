@@ -150,6 +150,8 @@ stages:
         template: relscore-horizon-location-model
     - wis-model-location.csv:
         template: relscore-location-model
+    - wis-model.csv:
+        template: model
   hopkins-2020-09-07:
     cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
     deps:

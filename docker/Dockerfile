@@ -89,3 +89,13 @@ USER root
 WORKDIR ${RUNNER_PATH}
 RUN apt-get update && apt-get install --only-upgrade dvc
 RUN installGithub.r reichlab/zoltr epiforecasts/scoringutils reichlab/covidHubUtils
+
+# Install covidData
+RUN apt-get update && \
+apt-get install -y python3-pip && \
+pip3 install pandas && \
+pip3 install requests  && \
+install2.r --skipinstalled --error here
+RUN git clone https://github.com/reichlab/covidData.git && \
+cd covidData/code/data-processing && \
+make all

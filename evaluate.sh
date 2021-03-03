@@ -64,11 +64,14 @@ dvc run \
     -d analyze-scores.R \
     -o analyze-scores.md \
     -o analyze-scores.html \
+    --plots wis-model.csv \
     --plots wis-model-location.csv \
     --plots wis-horizon-location-model.csv \
     --force \
     -n analyze-scores \
     'Rscript -e "knitr::spin(\"analyze-scores.R\")"'
 
+
 dvc plots modify wis-horizon-location-model.csv --template relscore-horizon-location-model    
 dvc plots modify wis-model-location.csv --template relscore-location-model
+dvc plots modify wis-model.csv --template model
