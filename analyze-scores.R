@@ -20,54 +20,50 @@ truth_data <- load_truth(truth_source = "JHU",
 
 locations_to_exclude <- c("78", "72", "69", "66", "60")
 
-scores <- score_forecasts(fdat2, truth_data, return_format = "long") %>%
-  filter(!location %in% locations_to_exclude)
-ws <- scores %>% filter(score_name == "wis")
-as <- scores %>% filter(score_name == "abs_error")
+scores <- score_forecasts(fdat2, truth_data, return_format = "wide") %>%
+  filter(!location %in% locations_to_exclude) %>%
+  select(model, horizon, location, target_variable, target_end_date, 
+         coverage_50, coverage_95, abs_error, wis)
 
+s1 <-scores %>% group_by(horizon, location, model, target_end_date) %>% 
+  summarize(coverage_50 = mean(coverage_50), 
+            coverage_95 = mean(coverage_95),
+            abs_error = mean(abs_error),
+            wis = mean(wis),
+            .groups = "drop")
 
-ws1 <-
-  ws %>% group_by(horizon, location, model, target_end_date) %>% 
-  summarize(meanscore = mean(score_value), .groups = "drop")
+s2 <-scores %>% 
+  group_by(horizon, location, model) %>% 
+  summarize(coverage_50 = mean(coverage_50), 
+            coverage_95 = mean(coverage_95),
+            abs_error = mean(abs_error),
+            wis = mean(wis),
+            .groups = "drop_last") %>%
+  mutate(relative_wis = wis / wis[str_detect(model, "CEID-Walk")])
+write_csv(s2, "horizon-location-model.csv")
 
-ws1
+s3 <-scores %>% 
+  group_by(location, model) %>% 
+  summarize(coverage_50 = mean(coverage_50), 
+            coverage_95 = mean(coverage_95),
+            abs_error = mean(abs_error),
+            wis = mean(wis),
+            .groups = "drop_last") %>%
+  mutate(relative_wis = wis / wis[str_detect(model, "CEID-Walk")])
+write_csv(s3, "location-model.csv")
 
-ws2 <- ws %>% group_by(horizon, location, model) %>%
-  summarize(meanscore = mean(score_value), .groups = "drop") %>%
-  group_by(location, horizon) %>% 
-  mutate(relscore = meanscore / meanscore[str_detect(model, "CEID-Walk")])
-
-ws2
-write_csv(ws2, "wis-horizon-location-model.csv")
-
-as2 <- as %>% group_by(horizon, location, model) %>%
-  summarize(meanscore = mean(score_value), .groups = "drop")
-as2
-
-
-ws3 <- ws %>% group_by(location, model) %>%
-  summarize(meanscore = mean(score_value), .groups = "drop") %>%
-  group_by(location) %>% 
-  mutate(relscore = meanscore / meanscore[str_detect(model, "CEID-Walk")])
-ws3
-#ws3 %>% ggplot(aes(x = model, y = meanscore)) + 
-write_csv(ws3, "wis-model-location.csv")
-
-wscv <- ws3 %>%
+ascv <- s3 %>%
   filter(str_detect(model, "^lambda")) %>%
   group_by(location) %>%
-  summarize(
-    cv_lambda = model[which.min(meanscore)],
-    model = "CEID-InfectionKalman",
-    meanscore = min(meanscore), .groups = "drop"
-  )
+  filter(abs_error == min(abs_error)) %>%
+  mutate(model = "CV-CEID-InfectionKalman")
 
-ws4 <- wscv %>% 
-  select(-cv_lambda) %>% 
-  bind_rows(ws3) %>%
-  group_by(model) %>% 
-  summarize(meanscore = mean(meanscore), .groups = "drop")
-write_csv(ws4, "wis-model.csv")
+s4 <-
+  bind_rows(ascv, s3) %>% group_by(model) %>%
+  summarize(coverage_50 = mean(coverage_50), 
+            coverage_95 = mean(coverage_95),
+            abs_error = mean(abs_error),
+            wis = mean(wis),
+            .groups = "drop_last")  
 
-ws4 %>% ggplot(aes(x = model, y = meanscore)) + geom_col() + labs(y = "wis") +
-  scale_x_discrete(guide = guide_axis(angle = 45))
+write_csv(s4, "model.csv")
