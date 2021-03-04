@@ -13,10 +13,10 @@ jobs:
   backtest1:
     name: Train and forecast set 1
     runs-on: ubuntu-latest
-    container: docker://eamon/sir-kf:2021-03-01
+    container: docker://eamon/sir-kf:2021-03-03
     strategy:
       matrix:
-        fips: ["06", "36", "48", "53"]
+        fips: ["06"]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
