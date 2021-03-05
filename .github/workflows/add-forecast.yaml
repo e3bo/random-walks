@@ -16,7 +16,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-03-03
     strategy:
       matrix:
-        fips: ["06"]
+        fips: ["36"]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -48,7 +48,7 @@ jobs:
   integration:
     name: Integrate new outputs for each location
     runs-on: ubuntu-latest
-    container: docker://eamon/sir-kf:2021-02-22
+    container: docker://eamon/sir-kf:2021-03-03
     needs: backtest1
     steps:
       - uses: actions/checkout@v2

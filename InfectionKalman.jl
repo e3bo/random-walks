@@ -94,7 +94,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         pkkmo[:,:,i] = pnext 
         
         
-        r[1,1] = τ
+        r[1,1] = τ * max(1., z[i][1])
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
         ytkkmo[:,i] = z[i] - h * reshape(xkkmo[:,i], dstate, 1)

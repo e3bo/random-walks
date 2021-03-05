@@ -166,8 +166,7 @@ kfnll <-
         PNinit <- P_kk[, , i - 1]
         time.steps <- c(times[i - 1], times[i])
       }
-      R <- exp(logtau)
-      
+
       xhat_init["C"] <- 0
       PNinit[, 4] <- PNinit[4,] <- 0
       
@@ -180,9 +179,11 @@ kfnll <-
         beta_t = exp(logbeta[i]),
         time.steps = time.steps
       )
+
       xhat_kkmo[, i] <- XP$xhat
       P_kkmo[, , i] <- XP$PN
       
+      R <- exp(logtau) * max(z[i], 1)
       S[, i] <- H %*% P_kkmo[, , i] %*% t(H) + R
       K[, i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, i])
       ytilde_k[, i] <- z[i] - H %*% xhat_kkmo[, i, drop = FALSE]
@@ -518,9 +519,9 @@ write_forecasts(fits, fet, betagrid)
 q("no")
 # View diagnostics
 
-fitind <- 1
+fitind <- 3
 dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, 
-                       betasd = betagrid[fitind], fet)
+                       betasd = betagrid[fitind], fet, params_Sigma = matrix(0, 2, 2))
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)

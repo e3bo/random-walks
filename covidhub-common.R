@@ -92,7 +92,8 @@ process_hopkins <- function(path, weekly = TRUE){
   
   hpd_raw <-
     read_csv(path, col_types = col_types) %>%
-    pivot_longer(-c(Province_State, FIPS), names_to = "date_string", values_to = "day ahead cum") %>%
+    pivot_longer(-c(Province_State, FIPS), names_to = "date_string", 
+                 values_to = "day ahead cum") %>%
     mutate(target_end_date = lubridate::mdy(date_string)) %>%
     mutate(location = sprintf("%05d", FIPS)) %>%
     mutate(location = str_remove(location, "^000")) %>%
@@ -202,8 +203,10 @@ pull_data <- function(compid, dir){
     idt <- cdcfluview::ilinet(region = c("state"))
     stem <- "state-ILInet"
   } else if (compid == "national") {
-    idt_nat <- cdcfluview::ilinet(region = c("national")) %>% mutate(region = as.character(region))
-    idt_reg <- cdcfluview::ilinet(region = c("hhs")) %>% mutate(region = as.character(region))
+    idt_nat <- cdcfluview::ilinet(region = c("national")) %>% 
+      mutate(region = as.character(region))
+    idt_reg <- cdcfluview::ilinet(region = c("hhs")) %>% 
+      mutate(region = as.character(region))
     idt <- bind_rows(idt_nat, idt_reg)
     stem <- "national-regional-ILInet"
   } else if (compid == "hosp") {
