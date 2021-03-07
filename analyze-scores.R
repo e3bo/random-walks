@@ -13,8 +13,8 @@ load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }
 fdat1 <- map_dfr(dirnames, load_from_dir)
-fdst11 <- map_dfr(dirnames2, load_from_dir)
-fdat2 <- bind_rows(fdat0, fdat1, fdst11)
+fdat11 <- map_dfr(dirnames2, load_from_dir)
+fdat2 <- bind_rows(fdat0, fdat1, fdat11)
 
 truth_data <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
