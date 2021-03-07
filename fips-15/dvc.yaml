@@ -377,3 +377,165 @@ stages:
     - forecasts/2020-11-30-fips15-lambda043.48-CEID-InfectionKalman.csv
     - forecasts/2020-11-30-fips15-lambda083.33-CEID-InfectionKalman.csv
     - forecasts/2020-11-30-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2020-12-07-15:
+    cmd: fdt=2020-12-07 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-12-07
+    outs:
+    - forecasts/2020-12-07-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-12-07-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2020-12-14-15:
+    cmd: fdt=2020-12-14 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-12-14
+    outs:
+    - forecasts/2020-12-14-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-12-14-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2020-12-21-15:
+    cmd: fdt=2020-12-21 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-12-21
+    outs:
+    - forecasts/2020-12-21-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-12-21-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2020-12-28-15:
+    cmd: fdt=2020-12-28 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-12-28
+    outs:
+    - forecasts/2020-12-28-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2020-12-28-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2021-01-04-15:
+    cmd: fdt=2021-01-04 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2021-01-04
+    outs:
+    - forecasts/2021-01-04-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2021-01-04-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2021-01-11-15:
+    cmd: fdt=2021-01-11 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2021-01-11
+    outs:
+    - forecasts/2021-01-11-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2021-01-11-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2021-01-18-15:
+    cmd: fdt=2021-01-18 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2021-01-18
+    outs:
+    - forecasts/2021-01-18-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2021-01-18-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2021-01-25-15:
+    cmd: fdt=2021-01-25 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2021-01-25
+    outs:
+    - forecasts/2021-01-25-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2021-01-25-fips15-lambda1000.00-CEID-InfectionKalman.csv
+  forecast-2021-02-01-15:
+    cmd: fdt=2021-02-01 loc=15 Rscript InfectionKalmanRegularization.R
+    wdir: ..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2021-02-01
+    outs:
+    - forecasts/2021-02-01-fips15-lambda010.00-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda011.24-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda012.82-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda014.93-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda017.86-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda022.22-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda029.41-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda043.48-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda083.33-CEID-InfectionKalman.csv
+    - forecasts/2021-02-01-fips15-lambda1000.00-CEID-InfectionKalman.csv
