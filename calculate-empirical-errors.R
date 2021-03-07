@@ -4,13 +4,16 @@ library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
+regression_model_stop_time <- "2020-11-30"
+
 lambda <- 1 / seq(0.001, 0.1, length.out = 10)
 dirnames <- paste0("lambda", sprintf("%06.2f", lambda), "-CEID-InfectionKalman")
 
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }
-fdat1 <- map_dfr(dirnames, load_from_dir)
+fdat1 <- map_dfr(dirnames, load_from_dir) %>% 
+  filter(forecast_date <= regression_model_stop_time)
 
 truth_data <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
