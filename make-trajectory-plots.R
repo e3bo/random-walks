@@ -5,7 +5,7 @@ suppressPackageStartupMessages(library(tidyverse))
 
 fdat0 <- readRDS("other-model-forecasts.rds")
 lambda <- 1 / seq(0.001, 0.1, length.out = 10)
-dirnames <- paste0("lambda", sprintf("%06.2f", lambda), "-CEID-InfectionKalman")
+dirnames <- paste0("lambda", sprintf("%06.2f", lambda), "-CEID-InfectionKalmanEmp")
 
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
@@ -62,10 +62,10 @@ save_multi_page_plot <- function(gg, dirname){
 pall <- plotter(fdat2)
 save_multi_page_plot(pall, "trajectories-all")
 
-fdat3 <- fdat2 %>% mutate(ewk = lubridate::epiweek(forecast_date),
-                          wkcyc = ewk %% 4)
-splt <- split(fdat3, fdat3$wkcyc)
-plots_staggered <- map(splt, plotter)
+#fdat3 <- fdat2 %>% mutate(ewk = lubridate::epiweek(forecast_date),
+#                          wkcyc = ewk %% 4)
+#splt <- split(fdat3, fdat3$wkcyc)
+#plots_staggered <- map(splt, plotter)
 
-pnames <- paste0("trajectories-", names(plots_staggered))
-map2(plots_staggered, pnames, save_multi_page_plot)
+#pnames <- paste0("trajectories-", names(plots_staggered))
+#map2(plots_staggered, pnames, save_multi_page_plot)

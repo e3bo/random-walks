@@ -7,12 +7,14 @@ fdat0 <- readRDS("other-model-forecasts.rds")
 lambda <- 1 / seq(0.001, 0.1, length.out = 10)
 
 dirnames <- paste0("lambda", sprintf("%06.2f", lambda), "-CEID-InfectionKalman")
-
+dirnames2 <- paste0("lambda", sprintf("%06.2f", lambda), 
+                    "-CEID-InfectionKalmanEmp")
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }
 fdat1 <- map_dfr(dirnames, load_from_dir)
-fdat2 <- bind_rows(fdat0, fdat1)
+fdst11 <- map_dfr(dirnames2, load_from_dir)
+fdat2 <- bind_rows(fdat0, fdat1, fdst11)
 
 truth_data <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
@@ -53,10 +55,10 @@ s3 <-scores %>%
 write_csv(s3, "location-model.csv")
 
 ascv <- s3 %>%
-  filter(str_detect(model, "^lambda")) %>%
+  filter(str_detect(model, "^lambda.*Emp$")) %>%
   group_by(location) %>%
   filter(abs_error == min(abs_error)) %>%
-  mutate(model = "CV-CEID-InfectionKalman")
+  mutate(model = "CV-CEID-InfectionKalmanEmp")
 
 s4 <-
   bind_rows(ascv, s3) %>% group_by(model) %>%

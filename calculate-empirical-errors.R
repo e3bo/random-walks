@@ -54,7 +54,8 @@ update_pred_intervals <- function(mod_name, sd_model){
     fcst4 <- fcst3 %>% 
       mutate(value_new = ifelse(type == "quantile", 
                                 qnorm(p = quantile, mean = true_value, sd = sd),
-                                value)) %>%
+                                value),
+             value_new = ifelse(value_new < 0, 0, value_new)) %>%
       select(-value, -true_value, -sd) %>%
       rename(value=value_new)
     if (!dir.exists(new_mod_name))
