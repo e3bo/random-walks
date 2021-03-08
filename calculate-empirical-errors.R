@@ -35,10 +35,10 @@ resids <- dplyr::left_join(
   filter(!location %in% locations_to_exclude) %>%
   select(model, location, horizon, target_variable, target_end_date, true_value, 
          error) %>%
-  mutate(horizon = as.integer(horizon))
+  mutate(horizon = as.integer(horizon)) %>%
+  mutate(logtrue = log(true_value))
 
-m <- lm(log(error^2 + 1) ~ model + location + horizon + true_value, 
-        data = resids)
+m <- lm(log(error^2 + 1) ~ model + location + horizon + logtrue, data = resids)
 
 update_pred_intervals <- function(mod_name, sd_model){
   files <- dir(mod_name, full.names = TRUE)
@@ -49,7 +49,8 @@ update_pred_intervals <- function(mod_name, sd_model){
     fcst2 <- fcst %>% filter(type == "point") %>% 
       mutate(horizon = substring(target, 1, 1) %>% as.integer())
     pred <- fcst2 %>% select(location, value, horizon, target) %>% 
-      rename(true_value=value)
+      rename(true_value=value) %>%
+      mutate(logtrue = log(true_value))
     pred$model <- mod_name
     pred$sd <- sqrt(exp(predict(m, newdata = pred)))
     fcst3 <- left_join(fcst, select(pred, location, target, true_value, sd), 

@@ -63,7 +63,7 @@ locs <-
     "55"
   )
 
-fdts_mon <- seq.Date(as.Date("2020-07-20"), as.Date("2020-11-30"), by = "7 days")
+fdts_mon <- seq.Date(as.Date("2020-07-20"), as.Date("2021-02-01"), by = "7 days")
 fdts_tue <- fdts_mon + 1
 fdts_sun <- fdts_mon - 1
 
