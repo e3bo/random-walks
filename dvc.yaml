@@ -237,3 +237,21 @@ stages:
     - lambda043.48-CEID-InfectionKalmanEmp
     - lambda083.33-CEID-InfectionKalmanEmp
     - lambda1000.00-CEID-InfectionKalmanEmp
+  hopkins-2020-12-21:
+    cmd: fdt=2020-12-21 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-12-21
+  hopkins-2020-12-14:
+    cmd: fdt=2020-12-14 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-12-14
+  hopkins-2020-12-07:
+    cmd: fdt=2020-12-07 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-12-07

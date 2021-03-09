@@ -38,7 +38,7 @@ jobs:
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-${loc}
           git checkout -b $branchname
-          git add */dvc.yaml */dvc.lock
+          git add dvc.yaml dvc.lock */dvc.yaml */dvc.lock
           if git commit -m "Forecast pipeline additions" && git push origin $branchname;
           then
             echo "Changes pushed to $branchname"
