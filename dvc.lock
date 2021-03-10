@@ -496,8 +496,8 @@ analyze-scores:
   cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
   deps:
   - path: analyze-scores.R
-    md5: 4af717852d6b9fc6fac07fd435b8396b
-    size: 2521
+    md5: d61983f338b0dbd0de7f6c090a9ffce9
+    size: 3357
   - path: lambda010.00-CEID-InfectionKalman
     md5: 10823b37fcc4b1452ec0bfbf67270182.dir
     size: 3214586
@@ -583,20 +583,20 @@ analyze-scores:
     size: 523441
   outs:
   - path: analyze-scores.html
-    md5: 769cd3eb256f6a9ae6624c490e36c42c
-    size: 16418
+    md5: 6a73ed90388f03642488d2a53c2c0f9e
+    size: 17447
   - path: analyze-scores.md
-    md5: c8fc726e31660171b18d0eef3718afce
-    size: 2734
+    md5: f355dd532206f7c5cb0c4386d235f070
+    size: 3628
   - path: horizon-location-model.csv
-    md5: 4564f144bbd44c36b7672cd1b037f307
-    size: 534506
+    md5: cda16dd361f463a812380f4f07c53d57
+    size: 559988
   - path: location-model.csv
-    md5: 3765dac3207ec1ca99be2220b2aee52f
-    size: 134161
+    md5: dfcc6f4cb814d027a4f25fe40ed93ff9
+    size: 145144
   - path: model.csv
-    md5: bc8777aff1f5b788906737f0de8bca09
-    size: 2550
+    md5: 081b6d7f5f6124bfc6438c4cd9cc2ed2
+    size: 2536
 hopkins-2020-09-07:
   cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
   deps:

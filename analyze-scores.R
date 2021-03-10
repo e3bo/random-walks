@@ -14,9 +14,15 @@ load_from_dir <- function(dname){
 }
 fdat1 <- map_dfr(dirnames, load_from_dir)
 fdat11 <- map_dfr(dirnames2, load_from_dir)
+locations_to_exclude <- c("78", "72", "69", "66", "60")
 
 ## train_data will be used to select a lambda for each location
 train_data <- fdat11 %>% filter(forecast_date <= "2020-11-30")
+
+
+truth_data <- load_truth(truth_source = "JHU",
+                         target_variable = "inc case",
+                         locations = unique(train_data$location))
 
 train_scores <- score_forecasts(train_data, truth_data, return_format = "wide") %>%
   filter(!location %in% locations_to_exclude) %>%
@@ -45,13 +51,10 @@ cv_mod <- tscv %>% select(location, model) %>% left_join(val_data) %>%
 
 val_data <- bind_rows(val_data, cv_mod)
 
-truth_data <- load_truth(truth_source = "JHU",
-                         target_variable = "inc case",
-                         locations = unique(fdat2$location))
 
-locations_to_exclude <- c("78", "72", "69", "66", "60")
 
-scores <- score_forecasts(fdat2, truth_data, return_format = "wide") %>%
+
+scores <- score_forecasts(val_data, truth_data, return_format = "wide") %>%
   filter(!location %in% locations_to_exclude) %>%
   select(model, horizon, location, target_variable, target_end_date, 
          coverage_50, coverage_95, abs_error, wis)
@@ -84,7 +87,7 @@ s3 <-scores %>%
 write_csv(s3, "location-model.csv")
 
 s4 <-
-  bind_rows(ascv, s3) %>% group_by(model) %>%
+  scores %>% group_by(model) %>%
   summarize(coverage_50 = mean(coverage_50), 
             coverage_95 = mean(coverage_95),
             abs_error = mean(abs_error),
