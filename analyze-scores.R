@@ -14,7 +14,36 @@ load_from_dir <- function(dname){
 }
 fdat1 <- map_dfr(dirnames, load_from_dir)
 fdat11 <- map_dfr(dirnames2, load_from_dir)
-fdat2 <- bind_rows(fdat0, fdat1, fdat11)
+
+## train_data will be used to select a lambda for each location
+train_data <- fdat11 %>% filter(forecast_date <= "2020-11-30")
+
+train_scores <- score_forecasts(train_data, truth_data, return_format = "wide") %>%
+  filter(!location %in% locations_to_exclude) %>%
+  select(model, horizon, location, target_variable, target_end_date, 
+         coverage_50, coverage_95, abs_error, wis)
+
+tscv <-train_scores %>% 
+  group_by(location, model) %>% 
+  summarize(coverage_50 = mean(coverage_50), 
+            coverage_95 = mean(coverage_95),
+            abs_error = mean(abs_error),
+            wis = mean(wis),
+            .groups = "drop_last") %>%
+  group_by(location) %>%
+  filter(abs_error == min(abs_error))
+
+## val data will be used to evaluate the model with lambda selected from the
+## training data
+
+val_data <- 
+  fdat2 <- bind_rows(fdat0, fdat1, fdat11) %>%
+  filter(forecast_date > "2020-11-30")
+
+cv_mod <- tscv %>% select(location, model) %>% left_join(val_data) %>%
+  mutate(model = "CV-CEID-InfectionKalman")
+
+val_data <- bind_rows(val_data, cv_mod)
 
 truth_data <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
@@ -53,12 +82,6 @@ s3 <-scores %>%
             .groups = "drop_last") %>%
   mutate(relative_wis = wis / wis[str_detect(model, "CEID-Walk")])
 write_csv(s3, "location-model.csv")
-
-ascv <- s3 %>%
-  filter(str_detect(model, "^lambda.*Emp$")) %>%
-  group_by(location) %>%
-  filter(abs_error == min(abs_error)) %>%
-  mutate(model = "CV-CEID-InfectionKalmanEmp")
 
 s4 <-
   bind_rows(ascv, s3) %>% group_by(model) %>%
