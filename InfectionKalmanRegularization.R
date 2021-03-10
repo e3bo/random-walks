@@ -434,26 +434,6 @@ target_wday <- lubridate::wday(target_end_dates)
 case_data$smooth <- moving_average(case_data$reports)
 
 wsize <- 60
-gamma <- 365.25/9
-tau_init <- case_data$reports %>% tail(n = wsize) %>% var()
-
-pvar_df <- tribble(
-  ~par, ~init, ~lower, ~upper,
-  "logE0", log(1e4), log(10), log(1e5),
-  "logtau", log(tau_init), log(tau_init * 1e-8), log(tau_init * 10)
-) %>% 
-  bind_rows(tibble(par = paste0("b", seq_len(wsize - 1)),
-                   init = 0,
-                   lower = -10,
-                   upper = 10)) %>%
-  bind_rows(tibble(par = paste0("b", wsize),
-                   init = log(gamma), 
-                   lower = log(0.1 * gamma),
-                   upper = log(4 * gamma)))
-
-winit <- pvar_df$init
-names(winit) <- pvar_df$par
-
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
 
@@ -466,6 +446,21 @@ wfixed <- c(
   a = 0.95,
   betasd = 1
 )
+
+wind <- tail(case_data, n = wsize)
+y <- wind$smooth
+x <- matrix(wind$time, ncol = 1)
+
+
+
+
+gamma <- 365.25/9
+tau_init <- var(y)
+E0init <- (mean(y) / wfixed["rho1"]) * (365.25 / wfixed["eta"])
+
+binit <- c(rep(0, wsize - 1), log(gamma))
+names(binit) <- paste0("b", seq_len(wsize))
+winit <- c(logE0 = log(E0init), logtau=log(tau_init), binit)
 
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
@@ -481,10 +476,6 @@ param_map <- function(x, w, fixed = wfixed){
   ret$a <- fixed["a"]
   ret
 }
-
-wind <- tail(case_data, n = wsize)
-y <- wind$smooth
-x <- matrix(wind$time, ncol = 1)
 
 tictoc::tic("optimization")
 fits <- list()
@@ -519,7 +510,7 @@ write_forecasts(fits, fet, betagrid)
 q("no")
 # View diagnostics
 
-fitind <- 3
+fitind <- 1
 dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind], fet, params_Sigma = matrix(0, 2, 2))
 par(mfrow = c(1,1))
