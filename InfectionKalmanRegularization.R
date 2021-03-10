@@ -420,7 +420,7 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
           )
       fcst_path <- file.path(fcst_dir, fcst_name)
       if (!dir.exists(fcst_dir))
-        dir.create(fcst_dir)
+        dir.create(fcst_dir, recursive = TRUE)
       write_csv(x = fcst, path = fcst_path)
     }
   }
