@@ -15,7 +15,6 @@ par2name <- function(lambda, a){
 }
 covid_hub_forecaster_name <- outer(lambda, agrid, par2name)
 
-
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }

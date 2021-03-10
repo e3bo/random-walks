@@ -4,11 +4,17 @@ library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 
 fdat0 <- readRDS("other-model-forecasts.rds")
-lambda <- 1 / seq(0.001, 0.1, length.out = 10)
 
-dirnames <- paste0("lambda", sprintf("%06.2f", lambda), "-CEID-InfectionKalman")
-dirnames2 <- paste0("lambda", sprintf("%06.2f", lambda), 
-                    "-CEID-InfectionKalmanEmp")
+lambda <- 1 / seq(0.001, 0.1, length.out = 10)
+agrid <- c(0.94, 0.95)
+par2name <- function(lambda, a){
+  paste0("lambda", sprintf("%06.2f", lambda), 
+         "-a", sprintf("%02.2f", a),
+         "-CEID-InfectionKalman")
+}
+dirnames <- outer(lambda, agrid, par2name)
+dirnames2 <- paste0(dirnames, "Emp")
+
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }
@@ -51,9 +57,6 @@ cv_mod <- tscv %>% select(location, model) %>% left_join(val_data) %>%
   mutate(model = "CV-CEID-InfectionKalman")
 
 val_data <- bind_rows(val_data, cv_mod)
-
-
-
 
 scores <- score_forecasts(val_data, truth_data, return_format = "wide") %>%
   filter(!location %in% locations_to_exclude) %>%

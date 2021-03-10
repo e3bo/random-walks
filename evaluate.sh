@@ -83,30 +83,48 @@ dvc run \
     -n make-empirical-pi-forecasts \
     ./calculate-empirical-errors.R
 
-exit 0
-
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda1000.00-CEID-InfectionKalman \
-    -d lambda083.33-CEID-InfectionKalman \
-    -d lambda043.48-CEID-InfectionKalman \
-    -d lambda029.41-CEID-InfectionKalman \
-    -d lambda022.22-CEID-InfectionKalman \
-    -d lambda017.86-CEID-InfectionKalman \
-    -d lambda014.93-CEID-InfectionKalman \
-    -d lambda012.82-CEID-InfectionKalman \
-    -d lambda011.24-CEID-InfectionKalman \
-    -d lambda010.00-CEID-InfectionKalman \
-    -d lambda1000.00-CEID-InfectionKalmanEmp \
-    -d lambda083.33-CEID-InfectionKalmanEmp \
-    -d lambda043.48-CEID-InfectionKalmanEmp \
-    -d lambda029.41-CEID-InfectionKalmanEmp \
-    -d lambda022.22-CEID-InfectionKalmanEmp \
-    -d lambda017.86-CEID-InfectionKalmanEmp \
-    -d lambda014.93-CEID-InfectionKalmanEmp \
-    -d lambda012.82-CEID-InfectionKalmanEmp \
-    -d lambda011.24-CEID-InfectionKalmanEmp \
-    -d lambda010.00-CEID-InfectionKalmanEmp \
+    -d lambda1000.00-a0.94-CEID-InfectionKalman \
+    -d lambda083.33-a0.94-CEID-InfectionKalman \
+    -d lambda043.48-a0.94-CEID-InfectionKalman \
+    -d lambda029.41-a0.94-CEID-InfectionKalman \
+    -d lambda022.22-a0.94-CEID-InfectionKalman \
+    -d lambda017.86-a0.94-CEID-InfectionKalman \
+    -d lambda014.93-a0.94-CEID-InfectionKalman \
+    -d lambda012.82-a0.94-CEID-InfectionKalman \
+    -d lambda011.24-a0.94-CEID-InfectionKalman \
+    -d lambda010.00-a0.94-CEID-InfectionKalman \
+    -d lambda1000.00-a0.95-CEID-InfectionKalman \
+    -d lambda083.33-a0.95-CEID-InfectionKalman \
+    -d lambda043.48-a0.95-CEID-InfectionKalman \
+    -d lambda029.41-a0.95-CEID-InfectionKalman \
+    -d lambda022.22-a0.95-CEID-InfectionKalman \
+    -d lambda017.86-a0.95-CEID-InfectionKalman \
+    -d lambda014.93-a0.95-CEID-InfectionKalman \
+    -d lambda012.82-a0.95-CEID-InfectionKalman \
+    -d lambda011.24-a0.95-CEID-InfectionKalman \
+    -d lambda010.00-a0.95-CEID-InfectionKalman \
+    -d lambda1000.00-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda083.33-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda043.48-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda029.41-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda022.22-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda017.86-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda014.93-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda012.82-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda011.24-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda010.00-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda1000.00-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda083.33-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda043.48-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda029.41-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda022.22-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda017.86-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda014.93-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda012.82-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda011.24-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda010.00-a0.95-CEID-InfectionKalmanEmp \
     -d analyze-scores.R \
     -o analyze-scores.md \
     -o analyze-scores.html \
@@ -120,19 +138,29 @@ dvc run \
 dvc plots modify horizon-location-model.csv --template horizon-location-model    
 dvc plots modify location-model.csv --template location-model
 dvc plots modify model.csv --template model
-    
+exit 0
 dvc run \
     -d other-model-forecasts.rds \
-    -d lambda1000.00-CEID-InfectionKalmanEmp \
-    -d lambda083.33-CEID-InfectionKalmanEmp \
-    -d lambda043.48-CEID-InfectionKalmanEmp \
-    -d lambda029.41-CEID-InfectionKalmanEmp \
-    -d lambda022.22-CEID-InfectionKalmanEmp \
-    -d lambda017.86-CEID-InfectionKalmanEmp \
-    -d lambda014.93-CEID-InfectionKalmanEmp \
-    -d lambda012.82-CEID-InfectionKalmanEmp \
-    -d lambda011.24-CEID-InfectionKalmanEmp \
-    -d lambda010.00-CEID-InfectionKalmanEmp \
+    -d lambda1000.00-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda083.33-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda043.48-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda029.41-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda022.22-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda017.86-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda014.93-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda012.82-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda011.24-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda010.00-a0.94-CEID-InfectionKalmanEmp \
+    -d lambda1000.00-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda083.33-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda043.48-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda029.41-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda022.22-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda017.86-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda014.93-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda012.82-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda011.24-a0.95-CEID-InfectionKalmanEmp \
+    -d lambda010.00-a0.95-CEID-InfectionKalmanEmp \
     -d make-trajectory-plots.R \
     -o trajectories-all \
     --force \

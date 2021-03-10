@@ -137,26 +137,46 @@ stages:
     cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
     deps:
     - analyze-scores.R
-    - lambda010.00-CEID-InfectionKalman
-    - lambda010.00-CEID-InfectionKalmanEmp
-    - lambda011.24-CEID-InfectionKalman
-    - lambda011.24-CEID-InfectionKalmanEmp
-    - lambda012.82-CEID-InfectionKalman
-    - lambda012.82-CEID-InfectionKalmanEmp
-    - lambda014.93-CEID-InfectionKalman
-    - lambda014.93-CEID-InfectionKalmanEmp
-    - lambda017.86-CEID-InfectionKalman
-    - lambda017.86-CEID-InfectionKalmanEmp
-    - lambda022.22-CEID-InfectionKalman
-    - lambda022.22-CEID-InfectionKalmanEmp
-    - lambda029.41-CEID-InfectionKalman
-    - lambda029.41-CEID-InfectionKalmanEmp
-    - lambda043.48-CEID-InfectionKalman
-    - lambda043.48-CEID-InfectionKalmanEmp
-    - lambda083.33-CEID-InfectionKalman
-    - lambda083.33-CEID-InfectionKalmanEmp
-    - lambda1000.00-CEID-InfectionKalman
-    - lambda1000.00-CEID-InfectionKalmanEmp
+    - lambda010.00-a0.94-CEID-InfectionKalman
+    - lambda010.00-a0.94-CEID-InfectionKalmanEmp
+    - lambda010.00-a0.95-CEID-InfectionKalman
+    - lambda010.00-a0.95-CEID-InfectionKalmanEmp
+    - lambda011.24-a0.94-CEID-InfectionKalman
+    - lambda011.24-a0.94-CEID-InfectionKalmanEmp
+    - lambda011.24-a0.95-CEID-InfectionKalman
+    - lambda011.24-a0.95-CEID-InfectionKalmanEmp
+    - lambda012.82-a0.94-CEID-InfectionKalman
+    - lambda012.82-a0.94-CEID-InfectionKalmanEmp
+    - lambda012.82-a0.95-CEID-InfectionKalman
+    - lambda012.82-a0.95-CEID-InfectionKalmanEmp
+    - lambda014.93-a0.94-CEID-InfectionKalman
+    - lambda014.93-a0.94-CEID-InfectionKalmanEmp
+    - lambda014.93-a0.95-CEID-InfectionKalman
+    - lambda014.93-a0.95-CEID-InfectionKalmanEmp
+    - lambda017.86-a0.94-CEID-InfectionKalman
+    - lambda017.86-a0.94-CEID-InfectionKalmanEmp
+    - lambda017.86-a0.95-CEID-InfectionKalman
+    - lambda017.86-a0.95-CEID-InfectionKalmanEmp
+    - lambda022.22-a0.94-CEID-InfectionKalman
+    - lambda022.22-a0.94-CEID-InfectionKalmanEmp
+    - lambda022.22-a0.95-CEID-InfectionKalman
+    - lambda022.22-a0.95-CEID-InfectionKalmanEmp
+    - lambda029.41-a0.94-CEID-InfectionKalman
+    - lambda029.41-a0.94-CEID-InfectionKalmanEmp
+    - lambda029.41-a0.95-CEID-InfectionKalman
+    - lambda029.41-a0.95-CEID-InfectionKalmanEmp
+    - lambda043.48-a0.94-CEID-InfectionKalman
+    - lambda043.48-a0.94-CEID-InfectionKalmanEmp
+    - lambda043.48-a0.95-CEID-InfectionKalman
+    - lambda043.48-a0.95-CEID-InfectionKalmanEmp
+    - lambda083.33-a0.94-CEID-InfectionKalman
+    - lambda083.33-a0.94-CEID-InfectionKalmanEmp
+    - lambda083.33-a0.95-CEID-InfectionKalman
+    - lambda083.33-a0.95-CEID-InfectionKalmanEmp
+    - lambda1000.00-a0.94-CEID-InfectionKalman
+    - lambda1000.00-a0.94-CEID-InfectionKalmanEmp
+    - lambda1000.00-a0.95-CEID-InfectionKalman
+    - lambda1000.00-a0.95-CEID-InfectionKalmanEmp
     - other-model-forecasts.rds
     outs:
     - analyze-scores.html
