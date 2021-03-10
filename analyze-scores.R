@@ -24,7 +24,8 @@ truth_data <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
                          locations = unique(train_data$location))
 
-train_scores <- score_forecasts(train_data, truth_data, return_format = "wide") %>%
+train_scores <- 
+  score_forecasts(train_data, truth_data, return_format = "wide") %>%
   filter(!location %in% locations_to_exclude) %>%
   select(model, horizon, location, target_variable, target_end_date, 
          coverage_50, coverage_95, abs_error, wis)

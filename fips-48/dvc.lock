@@ -574,46 +574,20 @@ forecast-2020-10-12-48:
   cmd: fdt=2020-10-12 loc=48 Rscript InfectionKalmanRegularization.R
   deps:
   - path: InfectionKalmanRegularization.R
-    md5: e7c0f0f0f947fa8c7726f9cabd4286ab
-    size: 15622
+    md5: 5c055eaf75828a63cc454bdeaa72522d
+    size: 15851
   - path: covidhub-common.R
-    md5: 61115b4ee2b6253254dc75c5dc0fde3f
-    size: 9912
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
   - path: hopkins/2020-10-12
     md5: 7461af20726cac0df8ae8c4de261608c.dir
     size: 6162886
     nfiles: 8
   outs:
-  - path: forecasts/2020-10-12-fips48-lambda010.00-CEID-InfectionKalman.csv
-    md5: 6625595ad47c6a2f0a4efde92c825d91
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda011.24-CEID-InfectionKalman.csv
-    md5: c50a6bbd453f6aadbf4babbeab9c708a
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda012.82-CEID-InfectionKalman.csv
-    md5: ec4d3666d7e3feeb9b5a7b9f049a6514
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda014.93-CEID-InfectionKalman.csv
-    md5: 6254c36b4ccb1442eba506e789dd240d
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda017.86-CEID-InfectionKalman.csv
-    md5: c7183742b183e353380bfe50f8d06b43
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda022.22-CEID-InfectionKalman.csv
-    md5: cc3979546a61eeb14332fac8596c9223
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda029.41-CEID-InfectionKalman.csv
-    md5: 4e31842db2399b9040994e0e57df734c
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda043.48-CEID-InfectionKalman.csv
-    md5: 416a189002e6faeadbd617e5c421dd4b
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda083.33-CEID-InfectionKalman.csv
-    md5: cac4c9ec6abea751fcda3b4da90d3170
-    size: 2122
-  - path: forecasts/2020-10-12-fips48-lambda1000.00-CEID-InfectionKalman.csv
-    md5: 75e1114a3783ca0cd647dce9eb267097
-    size: 2122
+  - path: forecasts/2020-10-12-fips48
+    md5: d4c919f012da12fa122035f2e20ceb90.dir
+    size: 42440
+    nfiles: 20
 forecast-2020-10-19-48:
   cmd: fdt=2020-10-19 loc=48 Rscript InfectionKalmanRegularization.R
   deps:

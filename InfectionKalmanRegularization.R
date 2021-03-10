@@ -285,7 +285,7 @@ moving_average <- function(x, n = 7) {
   stats::filter(x, rep(1 / n, n), sides = 1)
 }
 
-calc_kf_nll <- function(w, x, y, betasd, pm) {
+calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
   pvar <- c(p$logE0, p$logtau, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
@@ -296,7 +296,7 @@ calc_kf_nll <- function(w, x, y, betasd, pm) {
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", map(y, list))
-  JuliaCall::julia_assign("a", p$a)
+  JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   nll <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.obj",
@@ -305,7 +305,7 @@ calc_kf_nll <- function(w, x, y, betasd, pm) {
   nll
 }
 
-calc_kf_grad <- function(w, x, y, betasd, pm) {
+calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
   pvar <- c(p$logE0, p$logtau, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
@@ -316,7 +316,7 @@ calc_kf_grad <- function(w, x, y, betasd, pm) {
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", map(y, list))
-  JuliaCall::julia_assign("a", p$a)
+  JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.grad",
@@ -325,7 +325,7 @@ calc_kf_grad <- function(w, x, y, betasd, pm) {
   g
 }
 
-calc_kf_hess <- function(w, x, y, betasd, pm) {
+calc_kf_hess <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
   JuliaCall::julia_assign("logE0", p$logE0)
   JuliaCall::julia_assign("logtau", p$logtau)
@@ -337,7 +337,7 @@ calc_kf_hess <- function(w, x, y, betasd, pm) {
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", map(y, list))
-  JuliaCall::julia_assign("a", p$a)
+  JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.hess",
@@ -346,7 +346,7 @@ calc_kf_hess <- function(w, x, y, betasd, pm) {
   g
 }
 
-kf_nll_details <- function(w, x, y, betasd, pm, fet, params_Sigma) {
+kf_nll_details <- function(w, x, y, betasd, a, pm, fet, params_Sigma) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
@@ -365,47 +365,64 @@ kf_nll_details <- function(w, x, y, betasd, pm, fet, params_Sigma) {
     nsim = 20,
     betasd = betasd,
     params_Sigma = params_Sigma,
-    a = p$a
+    a = a
   )
   nll
 }
 
-write_forecasts <- function(fits, fet, betagrid) {
-  nlam <- length(betagrid)
-  for (penind in 1:nlam) {
-    wfit <- fits[[penind]]$par
-    betasd <- betagrid[penind]
-    #hess <- calc_kf_hess(wfit, x, y, betasd = betasd, param_map)
-    #params_Sigma <- solve(hess)
-    params_Sigma <- matrix(0, 2, 2)
-    dets <-
-      kf_nll_details(wfit, x, y, param_map, 
-                     betasd = betasd, fet = fet, params_Sigma = params_Sigma)
-    inds <- which(fet$target_wday == 7)
-    fcst <- create_forecast_df(
-      means = dets$sim_means[inds, ],
-      vars = dets$sim_cov[inds, ],
-      location = forecast_loc
-    )
-    
-    stopifnot(setequal(fet$target_end_dates[inds], 
-                       fcst$target_end_date %>% unique()))
-    lambda <- 1 / betagrid[penind]
-    fcst_path <-
-      file.path(
-        "forecasts",
-        paste0(
-          forecast_date,
-          "-fips",
-          forecast_loc,
-          "-lambda",
-          sprintf("%06.2f", lambda),
-          "-CEID-InfectionKalman.csv"
+write_forecasts <- function(fits, fet, agrid, betagrid) {
+  n1 <- length(agrid)
+  n2 <- length(betagrid)
+  for (ind1 in 1:n1) {
+    for (ind2 in 1:n2) {
+      wfit <- fits[[ind1]][[ind2]]$par
+      a <- agrid[ind1]
+      betasd <- betagrid[ind2]
+      #hess <- calc_kf_hess(wfit, x, y, betasd = betasd, param_map)
+      #params_Sigma <- solve(hess)
+      params_Sigma <- matrix(0, 2, 2)
+      dets <-
+        kf_nll_details(
+          wfit,
+          x,
+          y,
+          param_map,
+          betasd = betasd,
+          a = a,
+          fet = fet,
+          params_Sigma = params_Sigma
         )
+      inds <- which(fet$target_wday == 7)
+      fcst <- create_forecast_df(
+        means = dets$sim_means[inds,],
+        vars = dets$sim_cov[inds,],
+        location = forecast_loc
       )
-    if (!dir.exists("forecasts"))
-      dir.create("forecasts")
-    write_csv(x = fcst, path = fcst_path)
+      
+      stopifnot(setequal(
+        fet$target_end_dates[inds],
+        fcst$target_end_date %>% unique()
+      ))
+      lambda <- 1 / betasd
+      fcst_dir <-
+        file.path(
+          "forecasts",
+          paste0(
+            forecast_date,
+            "-fips",
+            forecast_loc))
+      
+      fcst_name <- paste0("lambda",
+            sprintf("%06.2f", lambda),
+            "-a",
+            sprintf("%02.2f", a),
+            "-CEID-InfectionKalman.csv"
+          )
+      fcst_path <- file.path(fcst_dir, fcst_name)
+      if (!dir.exists(fcst_dir))
+        dir.create(fcst_dir)
+      write_csv(x = fcst, path = fcst_path)
+    }
   }
 }
 ## main script
@@ -442,17 +459,12 @@ wfixed <- c(
   rho1 = 0.4,
   gamma = 365.25 / 9, 
   eta = 365.25 / 4,
-  t0 = rev(case_data$time)[wsize + 1],
-  a = 0.95,
-  betasd = 1
+  t0 = rev(case_data$time)[wsize + 1]
 )
 
 wind <- tail(case_data, n = wsize)
 y <- wind$smooth
 x <- matrix(wind$time, ncol = 1)
-
-
-
 
 gamma <- 365.25/9
 tau_init <- var(y)
@@ -473,46 +485,56 @@ param_map <- function(x, w, fixed = wfixed){
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
   ret$t0 <- fixed["t0"]
-  ret$a <- fixed["a"]
   ret
 }
 
 tictoc::tic("optimization")
-fits <- list()
-betagrid <- seq(0.001, 0.1, len = 10)
-fits[[1]] <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x,
-  betasd = betagrid[1],
-  y = y,
-  pm = param_map,
-  winit,
-  invisible = 1
-)
-for (i in seq(2, length(betagrid))) {
-  fits[[i]] <- lbfgs::lbfgs(
+
+fit_over_betagrid <- function(a, betagrid) {
+  fits <- list()
+  fits[[1]] <- lbfgs::lbfgs(
     calc_kf_nll,
     calc_kf_grad,
     x = x,
-    betasd = betagrid[i],
+    betasd = betagrid[1],
+    a = a,
     y = y,
     pm = param_map,
-    fits[[i - 1]]$par,
+    winit,
     invisible = 1
   )
+  for (i in seq(2, length(betagrid))) {
+    fits[[i]] <- lbfgs::lbfgs(
+      calc_kf_nll,
+      calc_kf_grad,
+      x = x,
+      betasd = betagrid[i],
+      a = a,
+      y = y,
+      pm = param_map,
+      fits[[i - 1]]$par,
+      invisible = 1
+    )
+  }
+  return(fits)
 }
+
+betagrid <- seq(0.001, 0.1, len = 10)
+agrid <- c(0.94, 0.95)
+fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
 tictoc::toc()
 
 fet <- tibble(target_end_times, target_wday, target_end_dates)
-write_forecasts(fits, fet, betagrid)
+write_forecasts(fits, fet, agrid, betagrid)
 
 q("no")
 # View diagnostics
 
-fitind <- 1
-dets <- kf_nll_details(fits[[fitind]]$par, x = x, y = y, param_map, 
-                       betasd = betagrid[fitind], fet, params_Sigma = matrix(0, 2, 2))
+fitind1 <- 1
+fitind2 <- 1
+dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
+                       betasd = betagrid[fitind2], a = agrid[fitind1],
+                       fet, params_Sigma = matrix(0, 2, 2))
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k / sqrt(dets$S))
 abline(0, 1)
