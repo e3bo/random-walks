@@ -30,6 +30,7 @@ jobs:
         run: |
           for fdt in $(cat fdts); do
             dvc pull hopkins/$fdt || true
+            dvc pull forecasts/${fdt}-fips${loc} || true
             fdt=$fdt loc=$loc bash -x ./forecast.sh
           done
           dvc push --run-cache
