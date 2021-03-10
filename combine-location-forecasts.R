@@ -12,11 +12,17 @@ combine <- function(date, fnames, chubname){
 }
 
 lambda <- 1 / seq(0.001, 0.1, length.out = 10)
-covid_hub_forecaster_name <- paste0("lambda", sprintf("%06.2f", lambda), "-CEID-InfectionKalman")
+agrid <- c(0.94, 0.95)
+par2name <- function(lambda, a){
+  paste0("lambda", sprintf("%06.2f", lambda), 
+         "-a", sprintf("%02.2f", a),
+         "-CEID-InfectionKalman")
+}
+covid_hub_forecaster_name <- outer(lambda, agrid, par2name)
 
 agg_fcsts <- function(chname) {
-  pat <- sprintf("(20\\d{2}-\\d{2}-\\d{2})-fips\\d{2}-%s.csv", chname)
-  out <- dir("forecasts") %>% 
+  pat <- sprintf("(20\\d{2}-\\d{2}-\\d{2})-fips\\d{2}/%s.csv", chname)
+  out <- dir("forecasts", recursive = TRUE) %>% 
     str_subset(chname) %>% 
     stringr::str_match_all(pat)
     

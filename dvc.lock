@@ -378,56 +378,96 @@ combine:
   cmd: ./combine-location-forecasts.R
   deps:
   - path: combine-location-forecasts.R
-    md5: 541b48e42fb73ddd89234a2223e3083c
-    size: 945
+    md5: bfd8914f348f9665100a3bdfc5f94aed
+    size: 1102
   - path: covidhub-common.R
     md5: f20b6b459c901a0109be2e9b32b71b0d
     size: 9944
   - path: forecasts
-    md5: 8cf97510381453f78620706354d74723.dir
-    size: 33248816
-    nfiles: 15720
+    md5: fb5c90000c6b5a3828f4c705cda6a7c2.dir
+    size: 84240
+    nfiles: 40
   outs:
-  - path: lambda010.00-CEID-InfectionKalman
-    md5: 10823b37fcc4b1452ec0bfbf67270182.dir
-    size: 3214586
-    nfiles: 30
-  - path: lambda011.24-CEID-InfectionKalman
-    md5: 4aed399e28cd0d41a7cf2cf9e3106c54.dir
-    size: 3213913
-    nfiles: 30
-  - path: lambda012.82-CEID-InfectionKalman
-    md5: 7db3b84762c83144ef0cecb8458c0487.dir
-    size: 3213392
-    nfiles: 30
-  - path: lambda014.93-CEID-InfectionKalman
-    md5: 9a2e6ec553bda325788df440b52ed225.dir
-    size: 3212990
-    nfiles: 30
-  - path: lambda017.86-CEID-InfectionKalman
-    md5: f7503762676e75a243cf4af2be397cfd.dir
-    size: 3212346
-    nfiles: 30
-  - path: lambda022.22-CEID-InfectionKalman
-    md5: 2ac610fbb8379708e5a1faa7e8808df5.dir
-    size: 3211717
-    nfiles: 30
-  - path: lambda029.41-CEID-InfectionKalman
-    md5: f11cb0fdfb4b77c750a428593a89270b.dir
-    size: 3211400
-    nfiles: 30
-  - path: lambda043.48-CEID-InfectionKalman
-    md5: cafee145a0dac959dc40c6aa89dab1cd.dir
-    size: 3210719
-    nfiles: 30
-  - path: lambda083.33-CEID-InfectionKalman
-    md5: 898995fc051939629e24655a5bf04fee.dir
-    size: 3209511
-    nfiles: 30
-  - path: lambda1000.00-CEID-InfectionKalman
-    md5: 29be4b88586476b43a6f4948324d5c29.dir
-    size: 3210435
-    nfiles: 30
+  - path: lambda010.00-a0.94-CEID-InfectionKalman
+    md5: d3938199adc59e76544b1e2de3b29d8e.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda010.00-a0.95-CEID-InfectionKalman
+    md5: 66885be6feb435baeb094b485113f089.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda011.24-a0.94-CEID-InfectionKalman
+    md5: d808dc2d867b9a0f889555d6217e9004.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda011.24-a0.95-CEID-InfectionKalman
+    md5: 2dfaadfd9ac87ee38702df150364f5a4.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda012.82-a0.94-CEID-InfectionKalman
+    md5: fc601092c015e893173b4f4d03fb3752.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda012.82-a0.95-CEID-InfectionKalman
+    md5: b8266544a27045713cb74d0891550248.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda014.93-a0.94-CEID-InfectionKalman
+    md5: f78534ac5a7e667208cd7f4747a32604.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda014.93-a0.95-CEID-InfectionKalman
+    md5: 647c459b2cece972956356e5585f9828.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda017.86-a0.94-CEID-InfectionKalman
+    md5: d0d4cdc7eba00b12041e6f2245211f12.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda017.86-a0.95-CEID-InfectionKalman
+    md5: a773f8be36c701ceaeb148036d07b61c.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda022.22-a0.94-CEID-InfectionKalman
+    md5: 1a5acd9b634e652b1000bc429a489dc0.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda022.22-a0.95-CEID-InfectionKalman
+    md5: 5d4b9dabc5aa77da1f8c825a42b38ee1.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda029.41-a0.94-CEID-InfectionKalman
+    md5: 809f10e9af62978ea4d2a21823139ec8.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda029.41-a0.95-CEID-InfectionKalman
+    md5: 5ae03fdf4a5ad138ed08bba3507f7631.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda043.48-a0.94-CEID-InfectionKalman
+    md5: 121dc7f0b3e24789471a9d1b116d09a6.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda043.48-a0.95-CEID-InfectionKalman
+    md5: aea536f022c63d139a2f331fb155a2ee.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda083.33-a0.94-CEID-InfectionKalman
+    md5: 87e6c8ce8cc1345fee3defdfa484265e.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda083.33-a0.95-CEID-InfectionKalman
+    md5: 62de720654c2852c0917f1d438e25553.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda1000.00-a0.94-CEID-InfectionKalman
+    md5: 0509c98d04affc76a5bf741047b13ca2.dir
+    size: 4146
+    nfiles: 1
+  - path: lambda1000.00-a0.95-CEID-InfectionKalman
+    md5: b1e77ff6fac41f9a72581680c8cbb31c.dir
+    size: 4146
+    nfiles: 1
 pull-archived-forecasts:
   cmd: ./pull-other-forecasts.R
   deps:
