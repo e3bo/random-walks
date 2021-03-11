@@ -1,0 +1,522 @@
+forecast-2020-07-20-22:
+  cmd: fdt=2020-07-20 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-07-20
+    md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
+    size: 4049279
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-07-20-fips22
+    md5: 3680f185470243c393048156ee4f50cf.dir
+    size: 42344
+    nfiles: 20
+forecast-2020-07-27-22:
+  cmd: fdt=2020-07-27 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-07-27
+    md5: 13dc696d512db6d01cf50e17d5e8fbc0.dir
+    size: 4238629
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-07-27-fips22
+    md5: 3878a769a0dd863c2af9e88ca2fb44e8.dir
+    size: 42440
+    nfiles: 20
+forecast-2020-08-03-22:
+  cmd: fdt=2020-08-03 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-08-03
+    md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
+    size: 4404607
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-08-03-fips22
+    md5: 107830a7d8f2d7a86ea3eec4fc58571a.dir
+    size: 42440
+    nfiles: 20
+forecast-2020-08-10-22:
+  cmd: fdt=2020-08-10 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-08-10
+    md5: 13afccd4aa4b42b21d84325788c3a7f0.dir
+    size: 4577299
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-08-10-fips22
+    md5: 3b30e730e954d1a8d313fd3453ab6c53.dir
+    size: 42440
+    nfiles: 20
+forecast-2020-08-17-22:
+  cmd: fdt=2020-08-17 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-08-17
+    md5: dd6e23a30766101df60d6f41fd909679.dir
+    size: 4743866
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-08-17-fips22
+    md5: d19fc0d25498c5c724d33e0ef2b865e9.dir
+    size: 41928
+    nfiles: 20
+forecast-2020-08-24-22:
+  cmd: fdt=2020-08-24 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-08-24
+    md5: 25ca9b41da3e586516ce152aa29d3ef9.dir
+    size: 4920102
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-08-24-fips22
+    md5: fff259f2a6db20d5bf97ae34fc5852f3.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-08-31-22:
+  cmd: fdt=2020-08-31 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-08-31
+    md5: 537c308e7f44e42557dbab59b275bde4.dir
+    size: 5087140
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-08-31-fips22
+    md5: 31af6961fda71cf84665763399e9f034.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-09-07-22:
+  cmd: fdt=2020-09-07 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-09-07
+    md5: e39b3c0f55ea6382c06955cb15f12ac6.dir
+    size: 5267306
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-09-07-fips22
+    md5: 5cb391c041f1be4193265a55b94e256a.dir
+    size: 41832
+    nfiles: 20
+forecast-2020-09-14-22:
+  cmd: fdt=2020-09-14 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-09-14
+    md5: 7408a4d1d2c8fdb8a7b876ef78dff503.dir
+    size: 5448582
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-09-14-fips22
+    md5: a19674064f314273f96eb336ed3d9e4f.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-09-21-22:
+  cmd: fdt=2020-09-21 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-09-21
+    md5: 1ef819278a378fc1c7e45006fee9302e.dir
+    size: 5622795
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-09-21-fips22
+    md5: 20b90e2c4de9a1cd1a9efc024ae9b0f4.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-09-28-22:
+  cmd: fdt=2020-09-28 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-09-28
+    md5: 6aaa3222bc3aa2dc4b4795f5ac7c1639.dir
+    size: 5801081
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-09-28-fips22
+    md5: 583be2fcaf889061f787cba477fd5e18.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-10-05-22:
+  cmd: fdt=2020-10-05 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-10-05
+    md5: a004cb4fc6c590fa65cb16c73e990d27.dir
+    size: 5980964
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-10-05-fips22
+    md5: 00389bc6afe8fb7a28f524d8740265e1.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-10-12-22:
+  cmd: fdt=2020-10-12 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-10-12
+    md5: 7461af20726cac0df8ae8c4de261608c.dir
+    size: 6162886
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-10-12-fips22
+    md5: 5a3d10966c384a7d242f288a0aa6c4cb.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-10-19-22:
+  cmd: fdt=2020-10-19 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-10-19
+    md5: 33716b6b3d0db13adc926170d4fd7f8d.dir
+    size: 6347833
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-10-19-fips22
+    md5: d9cba05e5d4ad7f41bb69ccfb069a297.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-10-26-22:
+  cmd: fdt=2020-10-26 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-10-26
+    md5: 6cf94360504037df71b47f79f26bef0b.dir
+    size: 6532799
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-10-26-fips22
+    md5: 7efdd983e0a0f5124b3a809be9c6447f.dir
+    size: 41864
+    nfiles: 20
+forecast-2020-11-02-22:
+  cmd: fdt=2020-11-02 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-11-02
+    md5: a254b225c4f4c0d156daaea37551d597.dir
+    size: 6695942
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-11-02-fips22
+    md5: 243d73d971bfd0a8f0000422e7f9dcb6.dir
+    size: 41800
+    nfiles: 20
+forecast-2020-11-09-22:
+  cmd: fdt=2020-11-09 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-11-09
+    md5: 71419e2cf7b0649ca6325d7a518bfe7d.dir
+    size: 6889826
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-11-09-fips22
+    md5: 039c99470f7bcc6530ca92ada3f0ac24.dir
+    size: 41928
+    nfiles: 20
+forecast-2020-11-16-22:
+  cmd: fdt=2020-11-16 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-11-16
+    md5: 430a878537d60ab53d4c3a1a4d6cd23c.dir
+    size: 7073622
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-11-16-fips22
+    md5: 5c68909f5e6877b8b109c924c4d9921a.dir
+    size: 42216
+    nfiles: 20
+forecast-2020-11-23-22:
+  cmd: fdt=2020-11-23 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-11-23
+    md5: 8e28e8b35cf400b971d6153d7a5715ee.dir
+    size: 7266354
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-11-23-fips22
+    md5: 2eee1d38c0afc472a001b472f601be79.dir
+    size: 42312
+    nfiles: 20
+forecast-2020-11-30-22:
+  cmd: fdt=2020-11-30 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-11-30
+    md5: 553919c34613e7565024d3685dbc4a20.dir
+    size: 7464559
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-11-30-fips22
+    md5: f2e2fa32b472c610309c4c7969efc9f2.dir
+    size: 42312
+    nfiles: 20
+forecast-2020-12-07-22:
+  cmd: fdt=2020-12-07 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-12-07
+    md5: 5b5d307b68b393c0dc8be402225174eb.dir
+    size: 7661720
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-12-07-fips22
+    md5: aa172eb3e461469169783f527d2a7ccb.dir
+    size: 42440
+    nfiles: 20
+forecast-2020-12-14-22:
+  cmd: fdt=2020-12-14 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-12-14
+    md5: bbc8f5dd92136a70a7f9102d7694629d.dir
+    size: 7861195
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-12-14-fips22
+    md5: cd134a4b2dfcb3d52ca0f7efd3724b16.dir
+    size: 42440
+    nfiles: 20
+forecast-2020-12-21-22:
+  cmd: fdt=2020-12-21 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-12-21
+    md5: 12524dd8fbc2e6a6721278dfbdbf5474.dir
+    size: 8063262
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-12-21-fips22
+    md5: 22c322e8fd9c878582623a9f727501e6.dir
+    size: 42440
+    nfiles: 20
+forecast-2020-12-28-22:
+  cmd: fdt=2020-12-28 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-12-28
+    md5: 41293815be64e72a622d73dc5e7e41a5.dir
+    size: 8265932
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-12-28-fips22
+    md5: 0910bef622335e5a4c4894096bc18917.dir
+    size: 42440
+    nfiles: 20
+forecast-2021-01-04-22:
+  cmd: fdt=2021-01-04 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2021-01-04
+    md5: 50d6b954330a4125cccc93e6afaf8abf.dir
+    size: 8474141
+    nfiles: 8
+  outs:
+  - path: forecasts/2021-01-04-fips22
+    md5: 7c449dbb60be2268493d2cf939796a5c.dir
+    size: 42440
+    nfiles: 20
+forecast-2021-01-11-22:
+  cmd: fdt=2021-01-11 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2021-01-11
+    md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
+    size: 8678408
+    nfiles: 8
+  outs:
+  - path: forecasts/2021-01-11-fips22
+    md5: bf708276eac8604a4900c9f3063a71b7.dir
+    size: 42440
+    nfiles: 20
+forecast-2021-01-18-22:
+  cmd: fdt=2021-01-18 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2021-01-18
+    md5: 9b0db7fb22655f62fd124fc58a3d8e6f.dir
+    size: 8910503
+    nfiles: 8
+  outs:
+  - path: forecasts/2021-01-18-fips22
+    md5: ebb9a46cdd8f80734322776f23c97b85.dir
+    size: 42440
+    nfiles: 20
+forecast-2021-01-25-22:
+  cmd: fdt=2021-01-25 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2021-01-25
+    md5: c1a1887563595ac0c0dea6347ab8ff29.dir
+    size: 9130826
+    nfiles: 8
+  outs:
+  - path: forecasts/2021-01-25-fips22
+    md5: 98ce69f1b4eed934c40d07c768050e47.dir
+    size: 42440
+    nfiles: 20
+forecast-2021-02-01-22:
+  cmd: fdt=2021-02-01 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2021-02-01
+    md5: 8b07b96124b82ce52a7569cec6858440.dir
+    size: 9346644
+    nfiles: 8
+  outs:
+  - path: forecasts/2021-02-01-fips22
+    md5: 360eeb9f513e14b58a205dd8261b960c.dir
+    size: 42440
+    nfiles: 20
