@@ -116,23 +116,6 @@ stages:
     - pull-other-forecasts.R
     outs:
     - other-model-forecasts.rds
-  make-trajectory-plots:
-    cmd: ./make-trajectory-plots.R
-    deps:
-    - lambda010.00-CEID-InfectionKalmanEmp
-    - lambda011.24-CEID-InfectionKalmanEmp
-    - lambda012.82-CEID-InfectionKalmanEmp
-    - lambda014.93-CEID-InfectionKalmanEmp
-    - lambda017.86-CEID-InfectionKalmanEmp
-    - lambda022.22-CEID-InfectionKalmanEmp
-    - lambda029.41-CEID-InfectionKalmanEmp
-    - lambda043.48-CEID-InfectionKalmanEmp
-    - lambda083.33-CEID-InfectionKalmanEmp
-    - lambda1000.00-CEID-InfectionKalmanEmp
-    - make-trajectory-plots.R
-    - other-model-forecasts.rds
-    outs:
-    - trajectories-all
   analyze-scores:
     cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
     deps:
@@ -329,3 +312,31 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2021-02-01
+  make-trajectory-plots:
+    cmd: ./make-trajectory-plots.R
+    deps:
+    - hopkins/2021-02-01
+    - lambda010.00-a0.94-CEID-InfectionKalmanEmp
+    - lambda010.00-a0.95-CEID-InfectionKalmanEmp
+    - lambda011.24-a0.94-CEID-InfectionKalmanEmp
+    - lambda011.24-a0.95-CEID-InfectionKalmanEmp
+    - lambda012.82-a0.94-CEID-InfectionKalmanEmp
+    - lambda012.82-a0.95-CEID-InfectionKalmanEmp
+    - lambda014.93-a0.94-CEID-InfectionKalmanEmp
+    - lambda014.93-a0.95-CEID-InfectionKalmanEmp
+    - lambda017.86-a0.94-CEID-InfectionKalmanEmp
+    - lambda017.86-a0.95-CEID-InfectionKalmanEmp
+    - lambda022.22-a0.94-CEID-InfectionKalmanEmp
+    - lambda022.22-a0.95-CEID-InfectionKalmanEmp
+    - lambda029.41-a0.94-CEID-InfectionKalmanEmp
+    - lambda029.41-a0.95-CEID-InfectionKalmanEmp
+    - lambda043.48-a0.94-CEID-InfectionKalmanEmp
+    - lambda043.48-a0.95-CEID-InfectionKalmanEmp
+    - lambda083.33-a0.94-CEID-InfectionKalmanEmp
+    - lambda083.33-a0.95-CEID-InfectionKalmanEmp
+    - lambda1000.00-a0.94-CEID-InfectionKalmanEmp
+    - lambda1000.00-a0.95-CEID-InfectionKalmanEmp
+    - make-trajectory-plots.R
+    - other-model-forecasts.rds
+    outs:
+    - trajectories-all

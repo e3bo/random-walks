@@ -2,6 +2,8 @@
 
 set -e
 
+ddt="${ddt:-2021-02-01}"
+
 dvc run \
     -d pull-other-forecasts.R \
     -o other-model-forecasts.rds \
@@ -138,9 +140,10 @@ dvc run \
 dvc plots modify horizon-location-model.csv --template horizon-location-model    
 dvc plots modify location-model.csv --template location-model
 dvc plots modify model.csv --template model
-exit 0
+
 dvc run \
     -d other-model-forecasts.rds \
+    -d hopkins/$ddt \
     -d lambda1000.00-a0.94-CEID-InfectionKalmanEmp \
     -d lambda083.33-a0.94-CEID-InfectionKalmanEmp \
     -d lambda043.48-a0.94-CEID-InfectionKalmanEmp \

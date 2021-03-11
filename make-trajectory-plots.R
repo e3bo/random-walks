@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-library(covidHubUtils)
 source("covidhub-common.R")
+library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 
 lambda <- 1 / seq(0.001, 0.1, length.out = 10)
@@ -59,5 +59,8 @@ plots <- map(splt, plot_forecast_grid)
 plot_writer <- function(p, loc){
   plot_name <- paste0("trajectories-all/", loc, ".png")
   ggsave(plot_name, p, height = 7.5, width = 24)
+}
+if (!dir.exists("trajectories-all")){
+  dir.create("trajectories-all")
 }
 map2(plots, names(plots), plot_writer)
