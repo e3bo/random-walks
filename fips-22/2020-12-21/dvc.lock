@@ -1,0 +1,18 @@
+forecast-2020-12-21-22:
+  cmd: fdt=2020-12-21 loc=22 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-12-21
+    md5: 12524dd8fbc2e6a6721278dfbdbf5474.dir
+    size: 8063262
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-12-21-fips22
+    md5: 6b946f49f2a4dd586d5d3f87139180ca.dir
+    size: 42440
+    nfiles: 20
