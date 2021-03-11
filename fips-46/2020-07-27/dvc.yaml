@@ -1,0 +1,10 @@
+stages:
+  forecast-2020-07-27-46:
+    cmd: fdt=2020-07-27 loc=46 Rscript InfectionKalmanRegularization.R
+    wdir: ../..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-07-27
+    outs:
+    - forecasts/2020-07-27-fips46
