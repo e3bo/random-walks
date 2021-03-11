@@ -1,0 +1,18 @@
+forecast-2020-08-10-35:
+  cmd: fdt=2020-08-10 loc=35 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-08-10
+    md5: 13afccd4aa4b42b21d84325788c3a7f0.dir
+    size: 4577299
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-08-10-fips35
+    md5: daf088bc7127066d250707fe762618da.dir
+    size: 42696
+    nfiles: 20
