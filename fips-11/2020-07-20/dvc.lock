@@ -1,0 +1,18 @@
+forecast-2020-07-20-11:
+  cmd: fdt=2020-07-20 loc=11 Rscript InfectionKalmanRegularization.R
+  deps:
+  - path: InfectionKalmanRegularization.R
+    md5: f90b2c6631383d77ed0b978d3ebba3dc
+    size: 15869
+  - path: covidhub-common.R
+    md5: f20b6b459c901a0109be2e9b32b71b0d
+    size: 9944
+  - path: hopkins/2020-07-20
+    md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
+    size: 4049279
+    nfiles: 8
+  outs:
+  - path: forecasts/2020-07-20-fips11
+    md5: 227fc24968a7d3e8fd3a4b11a231cff5.dir
+    size: 42568
+    nfiles: 20
