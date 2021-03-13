@@ -19,7 +19,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     
     y0 = l0 * η / γ
     x0 = [N - l0 - y0; l0; y0; 0; 0]
-    p0 = [1 0 0 0 0; 0 1 0 0 0; 0 0 1 0 0; 0 0 0 0 0]
+    p0 = [1 0 0 0 0; 0 1 0 0 0; 0 0 1 0 0; 0 0 0 0 0; 0 0 0 0 0]
 
     #println(pvar)
     dstate = size(x0, 1)
@@ -35,6 +35,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     r[2,2] = τh
     
     zmiss = [ismissing(x) for x in z]
+    zz = Array{eltype(z)}(undef, dobs)
 
     # filter (assuming first observation at time 1)
     nobs = size(z, 1)
@@ -108,12 +109,16 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
         k[:,:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
-        for j in 1:dstate
-            k[:, zmiss[i,j] ,i] .= 0
+        for j in 1:dobs
+            if zmiss[i,j]
+                k[:, j ,i] .= 0
+                zz[j] = 0
+            else 
+                zz[j] = z[i,j]
+            end
         end
-        ytkkmo[:,i] = z[i,:] - h * reshape(xkkmo[:,i], dstate, 1)
-        sel = [!x for x in zmiss[i,:]]
-        xkk[:,i] = reshape(xkkmo[:,i], dstate, 1) + reshape(k[:,sel,i], dstate, sum(sel), 1) * ytkkmo[sel,i]
+        ytkkmo[:,i] = zz - h * reshape(xkkmo[:,i], dstate, 1)
+        xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
         pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * h) * pkkmo[:,:,i]
     end
     
@@ -124,11 +129,10 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     end
     kflik = 0
     for i in 1:nobs
-         sel = [!x for x in zmiss]
+         sel = [!x for x in zmiss[i,:]]
          kflik -= 0.5 * (ytkkmo[sel,i]' / Σ[sel, sel, i] * ytkkmo[sel,i] +  log(det(Σ[sel, sel, i]))  + dobs * log(2 * pi))
     end
     nll = -kflik - rwlik
-    
     
     if just_nll
        return nll
