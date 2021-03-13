@@ -23,32 +23,37 @@ create_forecast_df <- function(means,
     probs <- c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)
     maxn <- 8
     targ_string <- " wk ahead inc case"
-  } else{
-    stop("not implemented")
+    stride <- 7
+  } else if (target_type == "hospitalizations") {
     probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
-    if (target_type == "hosps") {
-      maxn <- 131
-    } else{
-      maxn <- 20
-    }
+    maxn <- 129
+    targ_string <- " day ahead inc hosp"
+    stride <- 1
+  } else {
+    stop("not implemented")
   }
   n <- nrow(means)
   stopifnot(nrow(vars) == n)
   stopifnot(n <= maxn)
-  wk_ahead <- seq_len(n)
-  targets <- paste0(wk_ahead, targ_string)
+  step_ahead <- seq_len(n)
+  targets <- paste0(step_ahead, targ_string)
   dte <- lubridate::ymd(fdt)
-  fdt_wd <- lubridate::wday(dte) # 1 = Sunday, 7 = Sat.
-  fdt_sun <- lubridate::ymd(dte) - (fdt_wd - 1)
-  take_back_step <- fdt_wd <= 2
-  if (take_back_step) {
-    week0_sun <- fdt_sun - 7
+  if (target_type %in% c("cases", "deaths")) {
+    fdt_wd <- lubridate::wday(dte) # 1 = Sunday, 7 = Sat.
+    fdt_sun <- lubridate::ymd(dte) - (fdt_wd - 1)
+    take_back_step <- fdt_wd <= 2
+    if (take_back_step) {
+      week0_sun <- fdt_sun - 7
+    } else {
+      week0_sun <- fdt_sun
+    }
+    time_zero <- week0_sun + 6
   } else {
-    week0_sun <- fdt_sun
+    time_zero <- dte
   }
-  t1 <- expand_grid(quantile = probs, h = wk_ahead) %>%
+  t1 <- expand_grid(quantile = probs, h = step_ahead) %>%
     mutate(target = paste0(h, targ_string),
-           target_end_date = week0_sun + 6 + h * 7) %>%
+           target_end_date = time_zero + h * stride) %>%
     add_column(
       location = as.character(location),
       forecast_date = fdt,
@@ -94,7 +99,8 @@ iterate_f_and_P <- function(xhat, PN, eta, gamma, chr, N, beta_t, time.steps){
     )
     
     f <-
-      c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N, chr * gamma * I / N)
+      c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N, 
+        chr * gamma * I / N)
     
     Q <- rbind(c(f[1] + f[2],       -f[2],                  0,     0,     0),
                c(      -f[2], f[2] + f[3],              -f[3],     0,     0),
@@ -204,7 +210,8 @@ kfnll <-
       S[, , i] <- H %*% P_kkmo[, , i] %*% t(H) + R
       K[, , i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, , i])
       K[, desel, i] <- 0
-      ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - H %*% xhat_kkmo[, i, drop = FALSE]
+      ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
+        H %*% xhat_kkmo[, i, drop = FALSE]
 
       xhat_kk[, i] <-
         xhat_kkmo[, i, drop = FALSE] +
@@ -213,13 +220,15 @@ kfnll <-
       xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
       P_kk[, , i] <-
         (diag(dstate) - K[, , i] %*% H) %*% P_kkmo[, , i]
-      ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - H %*% xhat_kk[, i, drop = FALSE]
+      ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
+        H %*% xhat_kk[, i, drop = FALSE]
     }
     
     nll <- 0
     for (i in seq(1, T)){
       sel <- !is_z_na[i, ]
-      nll <- nll + t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] + 
+      nll <- nll + 
+        t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] + 
         log(det(S[,,i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
     }
     nll <- 0.5 * nll - sum(dnorm(bpars[-T], sd = betasd, log = TRUE))
@@ -245,10 +254,10 @@ kfnll <-
           if (fet_zero_cases == "daily" ||
               fets$target_wday[1] == 1) {
             xhat_init["C"] <- 0
-            xhat_init["H"] <- 0
             PNinit[, 4] <- PNinit[4,] <- 0
-            PNinit[, 5] <- PNinit[5,] <- 0
           }
+          xhat_init["H"] <- 0
+          PNinit[, 5] <- PNinit[5,] <- 0
           XP <- iterate_f_and_P(
             xhat_init,
             PN = PNinit,
@@ -267,10 +276,10 @@ kfnll <-
             if (fet_zero_cases == "daily" ||
                 fets$target_wday[i + 1] == 1) {
               xhat_init["C"] <- 0
-              xhat_init["H"] <- 0
               PNinit[, 4] <- PNinit[4,] <- 0
-              PNinit[, 5] <- PNinit[5,] <- 0
             }
+            xhat_init["H"] <- 0
+            PNinit[, 5] <- PNinit[5,] <- 0
             XP <-
               iterate_f_and_P(
                 xhat_init,
@@ -574,7 +583,7 @@ agrid <- c(0.94, 0.95)
 fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
 tictoc::toc()
 
-target_end_dates <- max(wind$date) + lubridate::ddays(1) * seq(1, 28)
+target_end_dates <- max(wind$date) + lubridate::ddays(1) * seq(1, 29)
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
 
@@ -590,27 +599,43 @@ dets <- kf_nll_details(winit, x = x, y = y, param_map,
                        betasd = betagrid[fitind2], a = agrid[fitind1],
                        fet, params_Sigma = matrix(0, 2, 2))
 
-
-
 fitind1 <- 1
 fitind2 <- 1
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
                        fet, params_Sigma = matrix(0, 2, 2))
 par(mfrow = c(1,1))
-qqnorm(dets$ytilde_k / sqrt(dets$S))
+qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1,1,]))
+abline(0, 1)
+qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2,2,]))
 abline(0, 1)
 
-tgrid <- tail(case_data$time, n = wsize)
-plot(tgrid, tail(case_data$smooth, n = wsize), xlab = "Time", ylab = "Cases")
+tgrid <- tail(obs_data$time, n = wsize)
+plot(tgrid, tail(obs_data$cases, n = wsize), xlab = "Time", ylab = "Cases")
 lines(tgrid, dets$xhat_kkmo["C",] * wfixed["rho1"])
 
-inds <- which(fet$target_wday == 7)
+plot(tgrid, tail(obs_data$hospitalizations, n = wsize), xlab = "Time", 
+     ylab = "Hospitalizations")
+lines(tgrid, dets$xhat_kkmo["H",])
 
-fcst <- create_forecast_df(means = dets$sim_means[inds,],
-                           vars = dets$sim_cov[inds,],
-                           location = forecast_loc)
+case_inds <- which(fet$target_wday == 7)
 
-fcst %>% 
+case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
+                                vars = dets$sim_cov[1, 1, case_inds,],
+                                location = forecast_loc)
+
+case_fcst %>% 
+  ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
+  geom_line() + geom_point()
+
+hosp_inds <- fet$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
+stopifnot(sum(hosp_inds) == 28)
+
+hosp_fcst <- create_forecast_df(means = dets$sim_means[2, hosp_inds,],
+                                vars = dets$sim_cov[2, 2, hosp_inds,],
+                                target_type = "hospitalizations",
+                                location = forecast_loc)
+
+hosp_fcst %>% 
   ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
   geom_line() + geom_point()
