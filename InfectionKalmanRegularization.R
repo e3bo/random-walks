@@ -351,7 +351,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", map(y, list))
+  JuliaCall::julia_assign("z", data.matrix(y))
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(
@@ -441,7 +441,7 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
                                       location = forecast_loc)
       stopifnot(setequal(
         fet$target_end_dates[hosp_inds],
-        case_fcst$target_end_date %>% unique()
+        hosp_fcst$target_end_date %>% unique()
       ))
       fcst <- bind_rows(case_fcst, hosp_fcst)
 
@@ -607,7 +607,7 @@ nll <- calc_kf_nll(winit, x = x, y = y, param_map,
 
 
 fitind1 <- 1
-fitind2 <- 1
+fitind2 <- 8
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
                        fet)
