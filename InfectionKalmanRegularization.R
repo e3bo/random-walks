@@ -158,8 +158,8 @@ kfnll <-
     dstate <- length(xhat0)
     stopifnot(T > 0)
     
-    logbeta <-
-      ytilde_kk <- ytilde_k <- array(NA_real_, dim = c(dobs, T))
+    logbeta <- array(NA_real_, dim = c(T))
+    ytilde_kk <- ytilde_k <- array(NA_real_, dim = c(dobs, T))
     S <- array(NA_real_, dim = c(dobs, dobs, T))
     K <- array(NA_real_, dim = c(dstate, dobs, T))
     
@@ -323,7 +323,7 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$bpars)
+  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchr, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -331,7 +331,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", map(y, list))
+  JuliaCall::julia_assign("z", data.matrix(y))
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   nll <- JuliaCall::julia_eval(paste0(
@@ -343,7 +343,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
 
 calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logtau, p$bpars)
+  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchr, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -601,6 +601,10 @@ fitind2 <- 1
 dets <- kf_nll_details(winit, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
                        fet)
+
+nll <- calc_kf_nll(winit, x = x, y = y, param_map, 
+                       betasd = betagrid[fitind2], a = agrid[fitind1])
+
 
 fitind1 <- 1
 fitind2 <- 1

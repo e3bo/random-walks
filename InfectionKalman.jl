@@ -12,28 +12,36 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
 
     # prior for time 0
     l0 = exp(pvar[1])
-    τ = exp(pvar[2])
-    bvec = pvar[3:end]
+    τc = exp(pvar[2])
+    τh = exp(pvar[3])
+    chr = exp(pvar[4])
+    bvec = pvar[5:end]
     
     y0 = l0 * η / γ
-    x0 = [N - l0 - y0; l0; y0; 0]
-    p0 = [1 0 0 0; 0 1 0 0; 0 0 1 0; 0 0 0 0]
+    x0 = [N - l0 - y0; l0; y0; 0; 0]
+    p0 = [1 0 0 0 0; 0 1 0 0 0; 0 0 1 0 0; 0 0 0 0 0]
 
     #println(pvar)
     dstate = size(x0, 1)
 
     # observation matrix
-    h = [0 0 0 ρ]
+    h = [0 0 0 ρ 1; 0 0 0 0 1]
     
-    dobs = 1
+    dobs = size(z, 2)
     r = Matrix(undef, dobs, dobs)
+    r[1,1] = τc
+    r[1,2] = 0
+    r[2,1] = 0
+    r[2,2] = τh
+    
+    zmiss = [ismissing(x) for x in z]
 
     # filter (assuming first observation at time 1)
-    nobs = length(z)
+    nobs = size(z, 1)
 
     Σ = Array{eltype(bvec)}(undef, dobs, dobs, nobs)
     ytkkmo = Array{eltype(bvec)}(undef, dobs, nobs)
-    k = Array{eltype(bvec)}(undef, dstate, nobs)
+    k = Array{eltype(bvec)}(undef, dstate, dobs, nobs)
     xkk = Array{eltype(bvec)}(undef, dstate, nobs)
     xkkmo = Array{eltype(bvec)}(undef, dstate, nobs)
     pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
@@ -60,9 +68,12 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         l = xlast[2]
         y = xlast[3]
         xlast[4] = 0
+        xlast[5] = 0
         plast[4,:] .= 0
         plast[:,4] .= 0
-        vf = [-β*x*y/N - ι*x, β*x*y/N + ι*x - η*l, η*l - γ*y, γ*y]
+        plast[5,:] .= 0
+        plast[:,5] .= 0
+        vf = [-β*x*y/N - ι*x, β*x*y/N + ι*x - η*l, η*l - γ*y - chr*γ*y, γ*y, chr*γ*y]
         xnext = xlast + dt * vf
         for j in 1:dstate
             if xnext[j] < 0
@@ -71,17 +82,19 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         end
         xkkmo[:,i] = xnext
         
-        f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N]
+        f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N, chr*γ*y/N]
         
-        q = [  f[1]+f[2]     -f[2]            0      0
-                   -f[2] f[2]+f[3]        -f[3]      0
-                       0     -f[3]    f[3]+f[4]  -f[4]
-                       0         0        -f[4]   f[4]]
+        q = [  f[1]+f[2]     -f[2]               0      0        0
+                   -f[2] f[2]+f[3]           -f[3]      0        0
+                       0     -f[3]  f[3]+f[4]+f[5]  -f[4]    -f[5]
+                       0         0           -f[4]   f[4]        0
+                       0         0           -f[5]      0     f[5] ]
                        
-        jac= [-β*y/N    0    -β*x/N     0
-               β*y/N   -η     β*x/N     0
-                   0    η        -γ     0
-                   0    0         γ     0]
+        jac= [-β*y/N    0         -β*x/N     0     0
+               β*y/N   -η          β*x/N     0     0
+                   0    η   -γ*(1 + chr)     0     0
+                   0    0              γ     0     0
+                   0    0       chr *  γ     0     0]
         
         dp = jac * plast + plast * jac' + q * N
         pnext = plast + dp * dt
@@ -93,13 +106,15 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         end
         pkkmo[:,:,i] = pnext 
         
-        
-        r[1,1] = τ * max(1., z[i][1])
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
-        k[:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
-        ytkkmo[:,i] = z[i] - h * reshape(xkkmo[:,i], dstate, 1)
-        xkk[:,i] = reshape(xkkmo[:,i], dstate, 1) + reshape(k[:,i], dstate, 1) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,i], dstate, 1) * h) * pkkmo[:,:,i]
+        k[:,:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
+        for j in 1:dstate
+            k[:, zmiss[i,j] ,i] .= 0
+        end
+        ytkkmo[:,i] = z[i,:] - h * reshape(xkkmo[:,i], dstate, 1)
+        sel = [!x for x in zmiss[i,:]]
+        xkk[:,i] = reshape(xkkmo[:,i], dstate, 1) + reshape(k[:,sel,i], dstate, sum(sel), 1) * ytkkmo[sel,i]
+        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * h) * pkkmo[:,:,i]
     end
     
     stepdensity = Normal(0, betasd)
@@ -107,7 +122,14 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     for bval in bvec[1:(end-1)]
         rwlik += logpdf(stepdensity, bval)
     end
-    nll = 0.5 * (sum(ytkkmo[1,:] .^2 ./ Σ[1,1,:] + map(log, Σ[1,1,:])) + nobs * log(2 * pi)) - rwlik
+    kflik = 0
+    for i in 1:nobs
+         sel = [!x for x in zmiss]
+         kflik -= 0.5 * (ytkkmo[sel,i]' / Σ[sel, sel, i] * ytkkmo[sel,i] +  log(det(Σ[sel, sel, i]))  + dobs * log(2 * pi))
+    end
+    nll = -kflik - rwlik
+    
+    
     if just_nll
        return nll
     else
