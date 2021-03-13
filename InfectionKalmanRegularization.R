@@ -145,7 +145,6 @@ kfnll <-
            nsim,
            a = .98,
            betasd = 1,
-           params_Sigma = matrix(0, 2, 2),
            just_nll = TRUE) {
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
@@ -383,7 +382,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
   g
 }
 
-kf_nll_details <- function(w, x, y, betasd, a, pm, fet, params_Sigma) {
+kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
   p <- pm(x, w)
   nll <- kfnll(
     bpars = p$bpars,
@@ -403,7 +402,6 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet, params_Sigma) {
     fet_zero_cases = "weekly",
     nsim = 20,
     betasd = betasd,
-    params_Sigma = params_Sigma,
     a = a
   )
   nll
@@ -417,9 +415,6 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
       wfit <- fits[[ind1]][[ind2]]$par
       a <- agrid[ind1]
       betasd <- betagrid[ind2]
-      #hess <- calc_kf_hess(wfit, x, y, betasd = betasd, param_map)
-      #params_Sigma <- solve(hess)
-      params_Sigma <- matrix(0, 2, 2)
       dets <-
         kf_nll_details(
           wfit,
@@ -428,8 +423,7 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
           param_map,
           betasd = betasd,
           a = a,
-          fet = fet,
-          params_Sigma = params_Sigma
+          fet = fet
         )
       inds <- which(fet$target_wday == 7)
       fcst <- create_forecast_df(
@@ -597,13 +591,13 @@ fitind1 <- 1
 fitind2 <- 1
 dets <- kf_nll_details(winit, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
-                       fet, params_Sigma = matrix(0, 2, 2))
+                       fet)
 
 fitind1 <- 1
 fitind2 <- 1
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
-                       fet, params_Sigma = matrix(0, 2, 2))
+                       fet)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1,1,]))
 abline(0, 1)
