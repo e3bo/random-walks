@@ -425,17 +425,26 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
           a = a,
           fet = fet
         )
-      inds <- which(fet$target_wday == 7)
-      fcst <- create_forecast_df(
-        means = dets$sim_means[inds,],
-        vars = dets$sim_cov[inds,],
-        location = forecast_loc
-      )
-      
+      case_inds <- which(fet$target_wday == 7)
+      case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
+                                      vars = dets$sim_cov[1, 1, case_inds,],
+                                      location = forecast_loc)
       stopifnot(setequal(
-        fet$target_end_dates[inds],
-        fcst$target_end_date %>% unique()
+        fet$target_end_dates[case_inds],
+        case_fcst$target_end_date %>% unique()
       ))
+      hosp_inds <- fet$target_end_dates %in% 
+        (lubridate::ymd(forecast_date) + 1:28)
+      hosp_fcst <- create_forecast_df(means = dets$sim_means[2, hosp_inds,],
+                                      vars = dets$sim_cov[2, 2, hosp_inds,],
+                                      target_type = "hospitalizations",
+                                      location = forecast_loc)
+      stopifnot(setequal(
+        fet$target_end_dates[hosp_inds],
+        case_fcst$target_end_date %>% unique()
+      ))
+      fcst <- bind_rows(case_fcst, hosp_fcst)
+
       lambda <- 1 / betasd
       fcst_dir <-
         file.path(
