@@ -232,10 +232,11 @@ kfnll <-
 
     if (!just_nll) {
       if (!is.null(fets)) {
-        sim_means <-array(NA_real_, dim = c(dobs, nrow(fets), nsim))
-        sim_cov <- array(NA_real_, dim = c(dobs, dobs, nrow(fets), nsim))
+        nsimdays <- nrow(fets)
+        sim_means <- array(NA_real_, dim = c(dobs, nsimdays, nsim))
+        sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays, nsim))
         for (j in seq_len(nsim)) {
-          logbeta_fet <- numeric(nrow(fets))
+          logbeta_fet <- numeric(nsimdays)
           logbeta_fet[1] <-
             log(gamma) + a * (bpars[T] - log(gamma)) +  
             rnorm(1, mean = 0, sd = betasd)
@@ -588,7 +589,10 @@ agrid <- c(0.94, 0.95)
 fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
 tictoc::toc()
 
-target_end_dates <- max(wind$date) + lubridate::ddays(1) * seq(1, 29)
+ti <- max(wind$target_end_date) + lubridate::ddays(1)
+tf <- lubridate::ymd(forecast_date) + lubridate::ddays(28)
+target_end_dates <- seq(from = ti, to = tf, by = "day")
+
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
 
@@ -608,7 +612,7 @@ nll <- calc_kf_nll(winit, x = x, y = y, param_map,
                        betasd = betagrid[fitind2], a = agrid[fitind1])
 
 
-fitind1 <- 1
+fitind1 <- 2
 fitind2 <- 8
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
