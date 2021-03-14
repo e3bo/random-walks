@@ -12,6 +12,13 @@ dvc run \
     --force \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
 
+dvc run \
+    -d pull-healthdata-ts-from-date.R \
+    -o healthdata/$fdt/$loc \
+    -n healthdata-$fdt-$loc \
+    --force \
+    fdt=$fdt loc=$loc ./pull-healthdata-ts-from-date.R
+
 dirname=fips-${loc}/${fdt}
 mkdir -p $dirname
 cd $dirname

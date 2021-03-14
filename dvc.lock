@@ -882,3 +882,25 @@ hopkins-2020-08-17:
     md5: dd6e23a30766101df60d6f41fd909679.dir
     size: 4743866
     nfiles: 8
+healthdata-2020-10-12-36:
+  cmd: fdt=2020-10-12 loc=36 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: e08bccbda9f02d3c01a214d585b9321a
+    size: 757
+  outs:
+  - path: healthdata/2020-10-12/36
+    md5: e86ca54abd7a1f32e474061d2a30c7ef.dir
+    size: 0
+    nfiles: 1
+healthdata-2020-11-30-36:
+  cmd: fdt=2020-11-30 loc=36 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 4040e85d54a19e5927dd212956ecacf8
+    size: 977
+  outs:
+  - path: healthdata/2020-11-30/36
+    md5: d2ab428afc110efc2c295f99e4a291c4.dir
+    size: 77449
+    nfiles: 1
