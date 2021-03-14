@@ -495,12 +495,16 @@ most_recent_coverage <- tdat2 %>% arrange(date) %>%
   tail(n = 1)
 
 tdat3 <- tdat2 %>%
-  filter(previous_day_admission_adult_covid_confirmed > most_recent_coverage * cov_thresh) %>%
-  filter(previous_day_admission_adult_covid_confirmed < most_recent_coverage / cov_thresh) %>% 
-  mutate(hospitalizations = previous_day_admission_adult_covid_confirmed +
-           previous_day_admission_pediatric_covid_confirmed,
-         target_end_date = date - lubridate::ddays(1)) %>%
-  select(target_end_date, hospitalizations) 
+  filter(previous_day_admission_adult_covid_confirmed >
+           most_recent_coverage * cov_thresh) %>%
+  filter(previous_day_admission_adult_covid_confirmed <
+           most_recent_coverage / cov_thresh) %>%
+  mutate(
+    hospitalizations = previous_day_admission_adult_covid_confirmed +
+      previous_day_admission_pediatric_covid_confirmed,
+    target_end_date = date - lubridate::ddays(1)
+  ) %>%
+  select(target_end_date, hospitalizations)
 
 obs_data <- left_join(case_data, tdat3, by = "target_end_date")
 
