@@ -5,20 +5,6 @@ set -e
 fdt="${fdt:-2020-07-26}"
 loc="${loc:-36}"
 
-dvc run \
-    -d pull-hopkins-ts-from-date.R \
-    -o hopkins/$fdt \
-    -n hopkins-$fdt \
-    --force \
-    fdt=$fdt ./pull-hopkins-ts-from-date.R
-
-dvc run \
-    -d pull-healthdata-ts-from-date.R \
-    -o healthdata/$fdt/$loc \
-    -n healthdata-$fdt-$loc \
-    --force \
-    fdt=$fdt loc=$loc ./pull-healthdata-ts-from-date.R
-
 dirname=fips-${loc}/${fdt}
 mkdir -p $dirname
 cd $dirname
