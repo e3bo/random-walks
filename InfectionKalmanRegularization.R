@@ -3,7 +3,6 @@
 tictoc::tic()
 
 suppressPackageStartupMessages(library(tidyverse))
-library(covidData)
 source("covidhub-common.R")
 
 JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
@@ -84,7 +83,6 @@ create_forecast_df <- function(means,
                                quantile,
                                value)
 }
-
 
 iterate_f_and_P <- function(xhat, PN, eta, gamma, chr, N, beta_t, time.steps){
   P <- PN / N
@@ -472,34 +470,38 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
 forecast_date <- Sys.getenv("fdt", unset = "2020-11-16")
 forecast_loc <- Sys.getenv("loc", unset = "36")
 
-combined_data <- dplyr::bind_rows(
-  load_jhu_data(
-    issue_date = forecast_date,
-    spatial_resolution = c("state"),
-    temporal_resolution = "daily",
-    measure = "cases"
-  ) %>%
-    dplyr::mutate(measure = "cases"),
-  load_jhu_data(
-    issue_date = forecast_date,
-    spatial_resolution = c("state"),
-    temporal_resolution = "daily",
-    measure = "deaths"
-  ) %>%
-    dplyr::mutate(measure = "deaths"),
-  load_healthdata_data(
-    issue_date = forecast_date,
-    spatial_resolution = c("state"),
-    temporal_resolution = "daily",
-    measure = "hospitalizations"
-  ) %>%
-    dplyr::mutate(measure = "hospitalizations")
+hopdir <- file.path("hopkins", forecast_date)
+tdat <- load_hopkins(hopdir, weekly = FALSE)
+ltdat <- tdat %>% filter(location == forecast_loc) %>% 
+  filter(target_type == "day ahead inc case")
+ltdat2 <- ltdat %>% mutate(time = lubridate::decimal_date(target_end_date))
+case_data <- ltdat2 %>% ungroup() %>% 
+  mutate(wday = lubridate::wday(target_end_date)) %>%
+  select(target_end_date, time, wday, value) %>% 
+  rename(cases = value)
+
+healthd <- file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
+cov_thresh <- .5
+tdat2 <- read_csv(healthd,
+         col_types = cols_only(date = col_date("%Y%m%d"),
+         previous_day_admission_adult_covid_confirmed = col_integer(),
+         previous_day_admission_pediatric_covid_confirmed = col_integer(),
+         previous_day_admission_adult_covid_confirmed_coverage = col_integer())
 )
 
-obs_data <- combined_data %>% filter(location == forecast_loc) %>% 
-  select(date, inc, measure) %>% 
-  pivot_wider(id_cols = date, names_from = measure, values_from = inc) %>%
-  mutate(time = lubridate::decimal_date(date))
+most_recent_coverage <- tdat2 %>% arrange(date) %>%
+  pull(previous_day_admission_adult_covid_confirmed_coverage) %>%
+  tail(n = 1)
+
+tdat3 <- tdat2 %>%
+  filter(previous_day_admission_adult_covid_confirmed > most_recent_coverage * cov_thresh) %>%
+  filter(previous_day_admission_adult_covid_confirmed < most_recent_coverage / cov_thresh) %>% 
+  mutate(hospitalizations = previous_day_admission_adult_covid_confirmed +
+           previous_day_admission_pediatric_covid_confirmed,
+         target_end_date = date - lubridate::ddays(1)) %>%
+  select(target_end_date, hospitalizations) 
+
+obs_data <- left_join(case_data, tdat3, by = "target_end_date")
 
 wsize <- 60
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
