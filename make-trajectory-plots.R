@@ -32,6 +32,27 @@ tdat2 <- tdat %>% rename(true_value=value) %>%
   filter(target_type == "wk ahead inc case") %>% 
   select(location, target_end_date, true_value)
 
+
+healthdirs <- dir(file.path("healthdata", data_date), full.names = TRUE)
+names(healthdirs) <- basename(healthdirs)
+
+load_healthd <- function(dirpath){
+  path <- file.path(dirpath, "epidata.csv")
+  tdat <- read_csv(path,
+                  col_types = cols_only(date = col_date("%Y%m%d"),
+                                        previous_day_admission_adult_covid_confirmed = col_integer(),
+                                        previous_day_admission_pediatric_covid_confirmed = col_integer())) %>%
+    mutate(
+      hospitalizations = previous_day_admission_adult_covid_confirmed +
+        previous_day_admission_pediatric_covid_confirmed,
+      target_end_date = date - lubridate::ddays(1)
+    )
+  tdat %>% select(target_end_date, hospitalizations)
+}
+
+healthdata <- map(healthdirs, load_healthd) %>% bind_rows(.id = "loc")
+
+
 plot_forecast_grid <- function(locdata){
   locdata %>% left_join(tdat2, by = c("location", "target_end_date")) %>%
   filter(type == "point") %>%
