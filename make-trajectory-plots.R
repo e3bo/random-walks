@@ -9,7 +9,7 @@ agrid <- c(0.94, 0.95)
 par2name <- function(lambda, a){
   paste0("lambda", sprintf("%06.2f", lambda), 
          "-a", sprintf("%02.2f", a),
-         "-CEID-InfectionKalmanEmp")
+         "-CEID-InfectionKalman")
 }
 dirnames <- outer(lambda, agrid, par2name)
 
@@ -23,7 +23,8 @@ fdat2$lambda <- fdat2$model %>% str_extract("^lambda\\d+.\\d{2}-") %>%
 fdat2$a <- fdat2$model %>% str_extract("-a\\d{1}.\\d{2}-") %>% 
   str_remove("^-a") %>% str_remove("-$") %>% as.numeric()
 
-splt <- split(fdat2, fdat2$location)
+fdat3 <- fdat2 %>% filter(target_variable == "inc case")
+splt <- split(fdat3, fdat3$location)
 data_date <- Sys.getenv("ddt", unset = "2021-02-01")
 hopdir <- file.path("hopkins", data_date)
 tdat <- load_hopkins(hopdir, weekly = TRUE)
