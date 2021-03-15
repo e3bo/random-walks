@@ -165,7 +165,9 @@ stages:
     - analyze-scores.html
     - analyze-scores.md
     plots:
-    - horizon-location-model.csv:
+    - horizon-location-model-cases.csv:
+        template: horizon-location-model
+    - horizon-location-model-hosp.csv:
         template: horizon-location-model
     - location-model.csv:
         template: location-model
@@ -315,8 +317,8 @@ stages:
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
     deps:
-    - healthdata/
-    - hopkins/
+    - healthdata/2021-02-01
+    - hopkins/2021-02-01
     - lambda010.00-a0.94-CEID-InfectionKalman
     - lambda010.00-a0.95-CEID-InfectionKalman
     - lambda011.24-a0.94-CEID-InfectionKalman

@@ -6,6 +6,7 @@
     "title": "<DVC_METRIC_TITLE>",
   "mark": {"type": "point"},
   "encoding": {
+    "column": {"field": "target_variable"},
     "x": {
 	    "field": "model", 
 	    "type": "nominal", 
