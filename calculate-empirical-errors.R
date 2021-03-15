@@ -21,9 +21,15 @@ load_from_dir <- function(dname){
 fdat1 <- map_dfr(covid_hub_forecaster_name, load_from_dir) %>% 
   filter(forecast_date <= regression_model_stop_time)
 
-truth_data <- load_truth(truth_source = "JHU",
+truth_data1 <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
                          locations = unique(fdat1$location))
+
+truth_data2 <- load_truth(truth_source = "HealthData",
+                         target_variable = "inc hosp",
+                         locations = unique(fdat1$location))
+
+truth_data <- bind_rows(truth_data1, truth_data2)
 
 locations_to_exclude <- c("78", "72", "69", "66", "60")
 
@@ -44,7 +50,8 @@ resids <- dplyr::left_join(
   mutate(horizon = as.integer(horizon)) %>%
   mutate(logtrue = log(true_value))
 
-m <- lm(log(error^2 + 1) ~ model + location + horizon + logtrue, data = resids)
+m <- lm(log(error^2 + 1) ~ (model + location + horizon + logtrue) * target_variable, 
+              data = resids)
 
 update_pred_intervals <- function(mod_name, sd_model){
   files <- dir(mod_name, full.names = TRUE)
@@ -53,8 +60,9 @@ update_pred_intervals <- function(mod_name, sd_model){
     fcst <- read_forecast(file) %>%
       filter(!location %in% locations_to_exclude)
     fcst2 <- fcst %>% filter(type == "point") %>% 
-      mutate(horizon = substring(target, 1, 1) %>% as.integer())
-    pred <- fcst2 %>% select(location, value, horizon, target) %>% 
+      mutate(horizon = substring(target, 1, 1) %>% as.integer(),
+             target_variable = str_extract(target, "inc (case|hosp)"))
+    pred <- fcst2 %>% select(location, value, horizon, target, target_variable) %>% 
       rename(true_value=value) %>%
       mutate(logtrue = log(true_value))
     pred$model <- mod_name
