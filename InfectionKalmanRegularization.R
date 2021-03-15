@@ -530,7 +530,7 @@ tau_hosp_init <- var(y$hospitalizations, na.rm = TRUE)
 
 E0init <- (mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])
 chr_init <-
-  unname(coef(lm(hospitalizations ~ cases, data = wind))["cases"])
+  unname(coef(lm(hospitalizations ~ cases + 0, data = wind))["cases"])
 binit <- c(rep(0, wsize - 1), log(gamma))
 names(binit) <- paste0("b", seq_len(wsize))
 winit <- c(
