@@ -1265,3 +1265,9 @@ stages:
     - pull-healthdata-ts-from-date.R
     outs:
     - healthdata/2020-11-23/56
+  healthdata-2020-11-23-06:
+    cmd: fdt=2020-11-23 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-11-23/06

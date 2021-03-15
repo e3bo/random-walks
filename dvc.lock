@@ -2580,3 +2580,14 @@ healthdata-2020-11-23-56:
     md5: c46f9c49136eff69d291b697225d9753.dir
     size: 68177
     nfiles: 1
+healthdata-2020-11-23-06:
+  cmd: fdt=2020-11-23 loc=06 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 4040e85d54a19e5927dd212956ecacf8
+    size: 977
+  outs:
+  - path: healthdata/2020-11-23/06
+    md5: 56f0e134367f4a2869b84be643e221f0.dir
+    size: 80722
+    nfiles: 1
