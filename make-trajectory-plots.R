@@ -4,6 +4,7 @@ source("covidhub-common.R")
 library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 
+## load forecasts
 lambda <- 1 / seq(0.001, 0.1, length.out = 10)
 agrid <- c(0.94, 0.95)
 par2name <- function(lambda, a){
@@ -23,8 +24,14 @@ fdat2$lambda <- fdat2$model %>% str_extract("^lambda\\d+.\\d{2}-") %>%
 fdat2$a <- fdat2$model %>% str_extract("-a\\d{1}.\\d{2}-") %>% 
   str_remove("^-a") %>% str_remove("-$") %>% as.numeric()
 
+## split forecasts by location
 fdat3 <- fdat2 %>% filter(target_variable == "inc case")
-splt <- split(fdat3, fdat3$location)
+splt_cases <- split(fdat3, fdat3$location)
+
+fdat4 <- fdat2 %>% filter(target_variable == "inc hosp")
+splt_hosp <- split(fdat4, fdat4$location)
+
+## load JHU data
 data_date <- Sys.getenv("ddt", unset = "2021-02-01")
 hopdir <- file.path("hopkins", data_date)
 tdat <- load_hopkins(hopdir, weekly = TRUE)
@@ -32,16 +39,20 @@ tdat2 <- tdat %>% rename(true_value=value) %>%
   filter(target_type == "wk ahead inc case") %>% 
   select(location, target_end_date, true_value)
 
-
-healthdirs <- dir(file.path("healthdata", data_date), full.names = TRUE)
+## load hhs data
+healthdirs <-
+  dir(file.path("healthdata", data_date), full.names = TRUE)
 names(healthdirs) <- basename(healthdirs)
-
-load_healthd <- function(dirpath){
+load_healthd <- function(dirpath) {
   path <- file.path(dirpath, "epidata.csv")
-  tdat <- read_csv(path,
-                  col_types = cols_only(date = col_date("%Y%m%d"),
-                                        previous_day_admission_adult_covid_confirmed = col_integer(),
-                                        previous_day_admission_pediatric_covid_confirmed = col_integer())) %>%
+  tdat <- read_csv(
+    path,
+    col_types = cols_only(
+      date = col_date("%Y%m%d"),
+      previous_day_admission_adult_covid_confirmed = col_integer(),
+      previous_day_admission_pediatric_covid_confirmed = col_integer()
+    )
+  ) %>%
     mutate(
       hospitalizations = previous_day_admission_adult_covid_confirmed +
         previous_day_admission_pediatric_covid_confirmed,
@@ -49,12 +60,30 @@ load_healthd <- function(dirpath){
     )
   tdat %>% select(target_end_date, hospitalizations)
 }
+healthdata <-
+  map(healthdirs, load_healthd) %>% bind_rows(.id = "location") %>%
+  rename(true_value = hospitalizations)
 
-healthdata <- map(healthdirs, load_healthd) %>% bind_rows(.id = "loc")
-
-
-plot_forecast_grid <- function(locdata){
-  locdata %>% left_join(tdat2, by = c("location", "target_end_date")) %>%
+## make the plots
+plot_forecast_grid <- function(locdata, tv = "inc case"){
+  if (tv == "inc case"){
+    xname = "Year-Epiweek"
+    yname = "Incident cases"
+    db = "2 weeks"
+    labf <- function(x) {
+      wk <- strftime(x, format = "%U") %>% as.integer() + 1
+      yr <- strftime(x, format = "%y")
+      paste(yr, wk, sep = '-')
+    }
+    truth <- tdat2
+  } else {
+    xname <- "Date"
+    yname <- "Incident hospitalizations"
+    db <- "7 days"
+    labf <- waiver()
+    truth <- healthdata
+  }
+  locdata %>% left_join(truth, by = c("location", "target_end_date")) %>%
   filter(type == "point") %>%
   ggplot(aes(x = target_end_date, y = value, group = forecast_date)) + 
   geom_line() + 
@@ -63,26 +92,23 @@ plot_forecast_grid <- function(locdata){
   facet_grid(a~lambda) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   scale_x_date(
-    name = "Year-Epiweek",
-    date_breaks = "1 weeks",
-    labels = function(x) {
-      wk <- strftime(x, format = "%U") %>% as.integer() + 1
-      yr <- strftime(x, format = "%y")
-      paste(yr, wk, sep = '-')
-      }
-    ,
+    name = xname,
+    date_breaks = db,
+    labels = labf,
     expand = expansion()
   ) +
-  labs(y = "Incident cases")
+  labs(y = yname)
 }
 
-plots <- map(splt, plot_forecast_grid)
+plots_cases <- map(splt_cases, plot_forecast_grid)
+plots_hosp <- map(splt_hosp, plot_forecast_grid, tv = "inc hosp")
 
-plot_writer <- function(p, loc){
-  plot_name <- paste0("trajectories-all/", loc, ".png")
+plot_writer <- function(p, loc, pref){
+  plot_name <- paste0("trajectories-all/", pref, loc, ".png")
   ggsave(plot_name, p, height = 7.5, width = 24)
 }
 if (!dir.exists("trajectories-all")){
   dir.create("trajectories-all")
 }
-map2(plots, names(plots), plot_writer)
+map2(plots_cases, names(plots_cases), plot_writer, pref = "cases")
+map2(plots_hosp, names(plots_hosp), plot_writer, pref = "hosp")
