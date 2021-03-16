@@ -1,0 +1,10 @@
+stages:
+  forecast-2020-11-30-13:
+    cmd: fdt=2020-11-30 loc=13 Rscript InfectionKalmanRegularization.R
+    wdir: ../..
+    deps:
+    - InfectionKalmanRegularization.R
+    - covidhub-common.R
+    - hopkins/2020-11-30
+    outs:
+    - forecasts/2020-11-30-fips13
