@@ -2,8 +2,8 @@ forecast-2020-11-30-34:
   cmd: fdt=2020-11-30 loc=34 Rscript InfectionKalmanRegularization.R
   deps:
   - path: InfectionKalmanRegularization.R
-    md5: e63f49a45a90c3c6c172a09a3427cfff
-    size: 20023
+    md5: a2d93ddef0dbc9151c4d2e510f90a0e3
+    size: 20687
   - path: covidhub-common.R
     md5: f20b6b459c901a0109be2e9b32b71b0d
     size: 9944
@@ -13,6 +13,6 @@ forecast-2020-11-30-34:
     nfiles: 8
   outs:
   - path: forecasts/2020-11-30-fips34
-    md5: dad954c9092c58c1d6719c050adc9c69.dir
-    size: 933224
+    md5: 81ca9084bbb843dace92dc6b25178c24.dir
+    size: 937928
     nfiles: 20
