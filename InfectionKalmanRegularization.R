@@ -105,38 +105,46 @@ iterate_f_and_P <-
     dt <- diff(time.steps)
     vf <-  with(as.list(c(xhat, beta_t)), {
       F <- rbind(
-        c(-beta_t * I / N,    0,    -beta_t * S / N, 0, 0,        0,        0, 0),
-        c( beta_t * I / N, -eta,     beta_t * S / N, 0, 0,        0,        0, 0),
-        c(              0,  eta, -gamma * (1 + chp), 0, 0,        0,        0, 0),
-        c(              0,    0,              gamma, 0, 0,        0,        0, 0),
-        c(              0,    0,        chp * gamma, 0, 0,        0,        0, 0),
-        c(              0,    0,        chp * gamma, 0, 0, -gamma_h,        0, 0),
-        c(              0,    0,                  0, 0, 0,  gamma_h, -gamma_d, 0),
-        c(              0,    0,                  0, 0, 0,        0,  gamma_d, 0))
+        c(-beta_t * I / N,    0,    -beta_t * S / N, 0, 0,             0,        0, 0),
+        c( beta_t * I / N, -eta,     beta_t * S / N, 0, 0,             0,        0, 0),
+        c(              0,  eta,             -gamma, 0, 0,             0,        0, 0),
+        c(              0,    0,  (1 - chp) * gamma, 0, 0,             0,        0, 0),
+        c(              0,    0,        chp * gamma, 0, 0,             0,        0, 0),
+        c(              0,    0,        chp * gamma, 0, 0,      -gamma_h,        0, 0),
+        c(              0,    0,                  0, 0, 0, hfp * gamma_h, -gamma_d, 0),
+        c(              0,    0,                  0, 0, 0,             0,  gamma_d, 0))
       
       f <-
-        c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N,
-          chp * gamma * I / N, gamma_h * H / N, gamma_d * D / N)
+        c(
+          0,
+          beta_t * (S / N) * (I / N),
+          eta * E / N,
+          (1 - chp) * gamma * I / N,
+          chp * gamma * I / N,
+          (1 - hfp) * gamma_h * H / N,
+          hfp * gamma_h * H / N,
+          gamma_d * D / N
+        )
       
       Q <-
         rbind(
-          c(f[1] + f[2],       -f[2],                  0,     0,     0,        0,           0,    0),
-          c(      -f[2], f[2] + f[3],              -f[3],     0,     0,        0,           0,    0),
-          c(          0,       -f[3], f[3] + f[4] + f[5], -f[4], -f[5],    -f[5],           0,    0),
-          c(          0,           0,              -f[4],  f[4],     0,        0,           0,    0),
-          c(          0,           0,              -f[5],     0,  f[5],        0,           0,    0),
-          c(          0,           0,              -f[5],     0,     0,f[6]+f[5],       -f[6],    0),
-          c(          0,           0,                  0,     0,     0,    -f[6], f[6] + f[7],-f[7]),
-          c(          0,           0,                  0,     0,     0,        0,       -f[7], f[7])
+          c(f[1] + f[2],       -f[2],                  0,     0,     0,             0,           0,    0),
+          c(      -f[2], f[2] + f[3],              -f[3],     0,     0,             0,           0,    0),
+          c(          0,       -f[3], f[3] + f[4] + f[5], -f[4], -f[5],         -f[5],           0,    0),
+          c(          0,           0,              -f[4],  f[4],     0,             0,           0,    0),
+          c(          0,           0,              -f[5],     0,  f[5],             0,           0,    0),
+          c(          0,           0,              -f[5],     0,     0,f[7]+f[5]+f[6],       -f[7],    0),
+          c(          0,           0,                  0,     0,     0,         -f[7], f[8] + f[7], -f[8]),
+          c(          0,           0,                  0,     0,     0,             0,       -f[8],  f[8])
         )
       
-      dS <- (-beta_t * S * I / N)
-      dE <- (beta_t * S * I / N - eta * E)
-      dI <- (eta * E -  gamma * I - chp * gamma * I)
-      dC <- (gamma * I)
-      dHnew <- (gamma * chp * I)
+      dS <- -beta_t * S * I / N
+      dE <- beta_t * S * I / N - eta * E
+      dI <- eta * E -  gamma * I
+      dC <- gamma * (1 - chp) * I
+      dHnew <- gamma * chp * I
       dH <- gamma * chp * I - gamma_h * H
-      dD <- gamma_h * H - gamma_d * D
+      dD <- gamma_h * H * hfp - gamma_d * D
       dDrep <- gamma_d * D
       
       dP <-  F %*% P + P %*% t(F) + Q
@@ -621,10 +629,7 @@ tau_deaths_init <- var(y$deaths, na.rm = TRUE)
 E0init <- ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
 H0init <- (mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]) %>% unname()
 
-chp_init <- cor(wind$cases, 
-                wind$hospitalizations, 
-                use = "complete.obs", method = "kendal")
-
+chp_init <- sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases, na.rm = TRUE)
 hfp_init <- sum(y$deaths, na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE)
 
 binit <- c(rep(0, wsize - 1), log(wfixed["gamma"]))
@@ -747,10 +752,7 @@ plot(x[,1], y$deaths, xlab = "Time",
      ylab = "Deaths")
 lines(x[,1], dets$xhat_kkmo["Drep",])
 
-
-
 case_inds <- which(fet$target_wday == 7)
-
 case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
                                 vars = dets$sim_cov[1, 1, case_inds,],
                                 location = forecast_loc)

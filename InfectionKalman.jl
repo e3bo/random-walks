@@ -8,33 +8,34 @@ export hess
 export obj
 export grad
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true)
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 / 10,  γh::Float64 = 365.25 / 10 ,   dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true)
 
     # prior for time 0
     l0 = exp(pvar[1])
-    τc = exp(pvar[2])
-    τh = exp(pvar[3])
-    chr = exp(pvar[4])
-    bvec = pvar[5:end]
+    h0 = exp(pvar[2])
+    d0 = h0 * γh / γd
+    
+    τc = exp(pvar[3])
+    τh = exp(pvar[4])
+    τd = exp(pvar[5])
+    
+    chp = exp(pvar[6])
+    hfp = exp(par[7])
+    bvec = pvar[8 :end]
     
     y0 = l0 * η / γ
-    x0 = [N - l0 - y0; l0; y0; 0; 0]
-    p0 = [1 0 0 0 0; 0 1 0 0 0; 0 0 1 0 0; 0 0 0 0 0; 0 0 0 0 0]
-
-    #println(pvar)
+    
+    x0 = [N - l0 - y0 - h0 - d0; l0; y0; 0; 0; h0; d0; 0]
+    p0 = covert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
+    
     dstate = size(x0, 1)
 
     # observation matrix
-    h = [0 0 0 ρ 1; 0 0 0 0 1]
+    h = [0 0 0 ρ 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1]
     
     dobs = size(z, 2)
-    r = Matrix(undef, dobs, dobs)
-    r[1,1] = τc
-    r[1,2] = 0
-    r[2,1] = 0
-    r[2,2] = τh
+    r = Diagonal(τc, τh, τd) 
 
-    
     zmiss = [ismissing(x) for x in z]
     zz = Array{eltype(z)}(undef, dobs)
     maxzscore = 4
@@ -50,8 +51,6 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     logβ = Array{eltype(bvec)}(undef, nobs)
-    
-    C = Array{eltype(bvec)}(undef, dobs, dobs)
 
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
 
@@ -72,13 +71,29 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         x = xlast[1]
         l = xlast[2]
         y = xlast[3]
+        h = xlast[6]
+        d = xlast[7]
+        
         xlast[4] = 0
         xlast[5] = 0
+        xlast[8] = 0
         plast[4,:] .= 0
         plast[:,4] .= 0
         plast[5,:] .= 0
         plast[:,5] .= 0
-        vf = [-β*x*y/N - ι*x, β*x*y/N + ι*x - η*l, η*l - γ*y - chr*γ*y, γ*y, chr*γ*y]
+        plast[8,:] .= 0
+        plast[:,8] .= 0
+        
+        vf = [
+        -β*x*y/N - ι*x, 
+        β*x*y/N + ι*x - η*l, 
+        η*l - γ*y - chp*γ*y, 
+        γ*y, 
+        chp*γ*y,
+        chp*γ*y - γh*h,
+        γh*h - γd*d,
+        γd*d
+        ]
         xnext = xlast + dt * vf
         for j in 1:dstate
             if xnext[j] < 0
@@ -87,7 +102,8 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         end
         xkkmo[:,i] = xnext
         
-        f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N, chr*γ*y/N]
+        f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N, chp*γ*y/N,
+        ]
         
         q = [  f[1]+f[2]     -f[2]               0      0        0
                    -f[2] f[2]+f[3]           -f[3]      0        0
