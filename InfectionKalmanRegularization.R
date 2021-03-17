@@ -143,6 +143,7 @@ kfnll <-
            nsim,
            a = .98,
            betasd = 1,
+           maxzscore = 4,
            just_nll = TRUE) {
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
@@ -160,6 +161,7 @@ kfnll <-
     ytilde_kk <- ytilde_k <- array(NA_real_, dim = c(dobs, T))
     S <- array(NA_real_, dim = c(dobs, dobs, T))
     K <- array(NA_real_, dim = c(dstate, dobs, T))
+    rdiagadj <- array(NA_real_, dim = c(dobs, T))
     
     xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(dstate, T))
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
@@ -168,7 +170,6 @@ kfnll <-
     H <- rbind(c(0, 0, 0, rho1, 1), 
                c(0, 0, 0, 0, 1))
     R <- diag(exp(c(logtauc, logtauh)))
-    
     logbeta[T] <- bpars[T]
     for (i in seq(T - 1, 1)){
       logbeta[i] <- (logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma)
@@ -203,12 +204,30 @@ kfnll <-
       xhat_kkmo[, i] <- XP$xhat
       P_kkmo[, , i] <- XP$PN
       
-      desel <- is_z_na[i, ]
-      S[, , i] <- H %*% P_kkmo[, , i] %*% t(H) + R
-      K[, , i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, , i])
-      K[, desel, i] <- 0
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
-        H %*% xhat_kkmo[, i, drop = FALSE]
+        H %*% xhat_kkmo[, i, drop = FALSE]     
+      S[, , i] <- H %*% P_kkmo[, , i] %*% t(H) + R
+      
+      for (j in 1:dobs){
+        if (is.na(z[i,j])){
+          zscore <- 0
+          rdiagadj[j,i] <- 0
+        } else {
+          sd <- sqrt(S[j,j,i])
+          zscore <- ytilde_k[j,i] / sd 
+          if (abs(zscore) > maxzscore){
+            adjzscore <- maxzscore / (1 + abs(zscore) - maxzscore)
+            newsd <- abs(ytilde_k[j,i]) / adjzscore
+            rdiagadj[j,i] <- (newsd) ^ 2 - sd ^ 2
+          } else {
+            rdiagadj[j,i] <- 0
+          }
+        }
+        S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
+      }
+      K[, , i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, , i])
+      desel <- is_z_na[i, ]
+      K[, desel, i] <- 0
 
       xhat_kk[, i] <-
         xhat_kkmo[, i, drop = FALSE] +
@@ -309,7 +328,8 @@ kfnll <-
         S = S,
         sim_means = sim_means,
         sim_cov = sim_cov,
-        logbeta = logbeta
+        logbeta = logbeta,
+        rdiagadj = rdiagadj
       )
     } else {
       nll
@@ -566,6 +586,7 @@ fit_over_betagrid <- function(a, betagrid) {
     calc_kf_grad,
     x = x,
     betasd = betagrid[1],
+    epsilon = 1e-4,
     a = a,
     y = y,
     pm = param_map,
@@ -578,6 +599,7 @@ fit_over_betagrid <- function(a, betagrid) {
       calc_kf_grad,
       x = x,
       betasd = betagrid[i],
+      epsilon = 1e-4,
       a = a,
       y = y,
       pm = param_map,
@@ -616,8 +638,8 @@ nll <- calc_kf_nll(winit, x = x, y = y, param_map,
                        betasd = betagrid[fitind2], a = agrid[fitind1])
 
 
-fitind1 <- 2
-fitind2 <- 8
+fitind1 <- 1
+fitind2 <- 2
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
                        fet)
@@ -627,11 +649,12 @@ abline(0, 1)
 qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2,2,]))
 abline(0, 1)
 
+
 tgrid <- tail(obs_data$time, n = wsize)
-plot(tgrid, tail(obs_data$cases, n = wsize), xlab = "Time", ylab = "Cases")
+plot(tgrid, tail(obs_data$cases, n = wsize), xlab = "Time", ylab = "Cases", ylim = c(0, 6000))
 lines(tgrid, dets$xhat_kkmo["C",] * wfixed["rho1"])
 
-plot(tgrid, tail(obs_data$hospitalizations, n = wsize), xlab = "Time", 
+plot(tgrid, y[[2]], xlab = "Time", 
      ylab = "Hospitalizations")
 lines(tgrid, dets$xhat_kkmo["H",])
 

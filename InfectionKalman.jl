@@ -33,13 +33,15 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     r[1,2] = 0
     r[2,1] = 0
     r[2,2] = τh
+
     
     zmiss = [ismissing(x) for x in z]
     zz = Array{eltype(z)}(undef, dobs)
+    maxzscore = 4
 
     # filter (assuming first observation at time 1)
     nobs = size(z, 1)
-
+    rdiagadj = Array{eltype(bvec)}(undef, dobs, nobs)
     Σ = Array{eltype(bvec)}(undef, dobs, dobs, nobs)
     ytkkmo = Array{eltype(bvec)}(undef, dobs, nobs)
     k = Array{eltype(bvec)}(undef, dstate, dobs, nobs)
@@ -48,6 +50,8 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     logβ = Array{eltype(bvec)}(undef, nobs)
+    
+    C = Array{eltype(bvec)}(undef, dobs, dobs)
 
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
 
@@ -106,18 +110,39 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
             end
         end
         pkkmo[:,:,i] = pnext 
-        
         Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
-        k[:,:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
+
         for j in 1:dobs
             if zmiss[i,j]
-                k[:, j ,i] .= 0
                 zz[j] = 0
             else 
                 zz[j] = z[i,j]
             end
+        end       
+        ytkkmo[:,i] = zz - h * reshape(xkkmo[:,i], dstate, 1)       
+        for j in 1:dobs
+            if zmiss[i, j]
+                zscore = 0
+                rdiagadj[j,i] = 0
+            else
+                sd = sqrt(Σ[j,j,i])
+                zscore = ytkkmo[j,i] / sd 
+                if abs(zscore) > maxzscore
+                    adjzscore = maxzscore / (1 + abs(zscore) - maxzscore)
+                    newsd = abs(ytkkmo[j,i]) / adjzscore
+                    rdiagadj[j,i] = newsd ^ 2 - sd ^ 2
+                else 
+                    rdiagadj[j,i] = 0
+                end
+            end
+            Σ[j,j,i] += rdiagadj[j,i]
         end
-        ytkkmo[:,i] = zz - h * reshape(xkkmo[:,i], dstate, 1)
+        k[:,:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
+        for j in 1:dobs
+            if zmiss[i,j]
+                k[:, j ,i] .= 0
+            end
+        end
         xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
         pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * h) * pkkmo[:,:,i]
     end
@@ -137,7 +162,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     if just_nll
        return nll
     else
-       return nll, ytkkmo, Σ, xkkmo, pkkmo, pkk
+       return nll, ytkkmo, Σ, xkkmo, pkkmo, pkk, rdiagadj
     end
 end
 
