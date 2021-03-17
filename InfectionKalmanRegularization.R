@@ -84,60 +84,89 @@ create_forecast_df <- function(means,
                                value)
 }
 
-iterate_f_and_P <- function(xhat, PN, eta, gamma, chr, N, beta_t, time.steps){
-  P <- PN / N
-  dt <- diff(time.steps)
-  vf <-  with(as.list(c(xhat, beta_t)), {
-    F <- rbind(
-      c(-beta_t * I / N,    0,  -beta_t * S / N, 0, 0),
-      c( beta_t * I / N, -eta,   beta_t * S / N, 0, 0),
-      c(              0,  eta, -gamma*(1 + chr), 0, 0),
-      c(              0,    0,            gamma, 0, 0),
-      c(              0,    0,      chr * gamma, 0, 0)
-    )
-    
-    f <-
-      c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N, 
-        chr * gamma * I / N)
-    
-    Q <- rbind(c(f[1] + f[2],       -f[2],                  0,     0,     0),
-               c(      -f[2], f[2] + f[3],              -f[3],     0,     0),
-               c(          0,       -f[3], f[3] + f[4] + f[5], -f[4], -f[5]),
-               c(          0,           0,              -f[4],  f[4],     0),
-               c(          0,           0,              -f[5],     0,  f[5]))
-    
-    dS <- (-beta_t * S * I / N)
-    dE <- (beta_t * S * I / N - eta * E)
-    dI <- (eta * E -  gamma * I - chr * gamma * I)
-    dC <- (gamma * I)
-    dH <- chr * gamma * I
-    dP <-  F %*% P + P %*% t(F) + Q
-    
-    list(vf = c(dS, dE, dI, dC, dH),
-         dP = dP)
-  })
-  xhat_new <- xhat + vf$vf * dt
-  xhat_new[xhat_new < 0] <- 0
-  P_new <- P + vf$dP * dt
-  names(xhat_new) <- c("S", "E", "I", "C", "H")
-  PN_new <- P_new * N
-  list(xhat = xhat_new, PN = PN_new)
-}
+
+iterate_f_and_P <-
+  function(xhat,
+           PN,
+           eta,
+           gamma,
+           gamma_d,
+           gamma_h,
+           chp,
+           hfp,
+           N,
+           beta_t,
+           time.steps) {
+    P <- PN / N
+    dt <- diff(time.steps)
+    vf <-  with(as.list(c(xhat, beta_t)), {
+      F <- rbind(
+        c(-beta_t * I / N,    0,    -beta_t * S / N, 0, 0,        0,        0, 0),
+        c( beta_t * I / N, -eta,     beta_t * S / N, 0, 0,        0,        0, 0),
+        c(              0,  eta, -gamma * (1 + chp), 0, 0,        0,        0, 0),
+        c(              0,    0,              gamma, 0, 0,        0,        0, 0),
+        c(              0,    0,        chp * gamma, 0, 0,        0,        0, 0),
+        c(              0,    0,        chp * gamma, 0, 0, -gamma_h,        0, 0),
+        c(              0,    0,                  0, 0, 0,  gamma_h, -gamma_d, 0),
+        c(              0,    0,                  0, 0, 0,        0,  gamma_d, 0))
+      
+      f <-
+        c(0, beta_t * (S / N) * (I / N), eta * E / N, gamma * I / N,
+          chp * gamma * I / N, gamma_h * H / N, gamma_d * D / N)
+      
+      Q <-
+        rbind(
+          c(f[1] + f[2],       -f[2],                  0,     0,     0,        0,           0,    0),
+          c(      -f[2], f[2] + f[3],              -f[3],     0,     0,        0,           0,    0),
+          c(          0,       -f[3], f[3] + f[4] + f[5], -f[4], -f[5],    -f[5],           0,    0),
+          c(          0,           0,              -f[4],  f[4],     0,        0,           0,    0),
+          c(          0,           0,              -f[5],     0,  f[5],        0,           0,    0),
+          c(          0,           0,              -f[5],     0,     0,f[6]+f[5],       -f[6],    0),
+          c(          0,           0,                  0,     0,     0,    -f[6], f[6] + f[7],-f[7]),
+          c(          0,           0,                  0,     0,     0,        0,       -f[7], f[7])
+        )
+      
+      dS <- (-beta_t * S * I / N)
+      dE <- (beta_t * S * I / N - eta * E)
+      dI <- (eta * E -  gamma * I - chp * gamma * I)
+      dC <- (gamma * I)
+      dHnew <- (gamma * chp * I)
+      dH <- gamma * chp * I - gamma_h * H
+      dD <- gamma_h * H - gamma_d * D
+      dDrep <- gamma_d * D
+      
+      dP <-  F %*% P + P %*% t(F) + Q
+      
+      list(vf = c(dS, dE, dI, dC, dHnew, dH, dD, dDrep),
+           dP = dP)
+    })
+    xhat_new <- xhat + vf$vf * dt
+    xhat_new[xhat_new < 0] <- 0
+    P_new <- P + vf$dP * dt
+    names(xhat_new) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
+    PN_new <- P_new * N
+    list(xhat = xhat_new, PN = PN_new)
+  }
 
 kfnll <-
   function(bpars,
            logE0,
+           logH0,
            rho1,
            logtauc,
            logtauh,
-           logchr,
+           logtaud,
+           logchp,
+           loghfp,
            eta,
            gamma,
+           gamma_h,
+           gamma_d,
            N,
            z,
            t0,
            times,
-           Phat0 = diag(c(1, 1, 1, 0, 0)),
+           Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases = "daily",
            nsim,
@@ -147,8 +176,10 @@ kfnll <-
            just_nll = TRUE) {
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
-    xhat0 = c(N - E0 - I0, E0, I0, 0, 0)
-    names(xhat0) <- c("S", "E", "I", "C", "H")
+    H0 = exp(logH0)
+    D0 = H0 * gamma_h / gamma_d
+    xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
+    names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     
     z <- data.matrix(z)
     is_z_na <- is.na(z)
@@ -167,9 +198,10 @@ kfnll <-
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
     
-    H <- rbind(c(0, 0, 0, rho1, 1), 
-               c(0, 0, 0, 0, 1))
-    R <- diag(exp(c(logtauc, logtauh)))
+    H <- rbind(c(0, 0, 0, rho1, 1, 0, 0, 0), 
+               c(0, 0, 0,    0, 1, 0, 0, 0),
+               c(0, 0, 0,    0, 0, 0, 0, 1))
+    R <- diag(exp(c(logtauc, logtauh, logtaud)))
     logbeta[T] <- bpars[T]
     for (i in seq(T - 1, 1)){
       logbeta[i] <- (logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma)
@@ -188,15 +220,21 @@ kfnll <-
 
       xhat_init["C"] <- 0
       xhat_init["H"] <- 0
+      xhat_init["Drep"] <- 0
+      
       PNinit[, 4] <- PNinit[4,] <- 0
       PNinit[, 5] <- PNinit[5,] <- 0
+      PNinit[, 8] <- PNinit[8,] <- 0
 
       XP <- iterate_f_and_P(
         xhat_init,
         PN = PNinit,
         eta = eta,
         gamma = gamma,
-        chr = exp(logchr),
+        gamma_d = gamma_d,
+        gamma_h = gamma_h,
+        chp = exp(logchp),
+        hfp = exp(loghfp),
         N = N,
         beta_t = exp(logbeta[i]),
         time.steps = time.steps
@@ -280,7 +318,7 @@ kfnll <-
             PN = PNinit,
             eta = eta,
             gamma = gamma,
-            chr = exp(logchr),
+            chp = exp(logchp),
             N = N,
             beta_t = exp(logbeta_fet[1]),
             time.steps = c(times[T], fets$target_end_times[1])
@@ -303,7 +341,7 @@ kfnll <-
                 PN = PNinit,
                 eta = eta,
                 gamma = gamma,
-                chr = exp(logchr),
+                chp = exp(logchp),
                 N = N,
                 beta_t = exp(logbeta_fet[i + 1]),
                 time.steps = c(fets$target_end_times[i], 
@@ -342,7 +380,7 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchr, p$bpars)
+  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchp, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -362,7 +400,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
 
 calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchr, p$bpars)
+  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchp, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -409,7 +447,7 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     rho1 = p$rho1,
     logtauc = p$logtauc,
     logtauh = p$logtauh,
-    logchr = p$logchr,
+    logchp = p$logchp,
     eta = p$eta,
     gamma = p$gamma,
     N = p$N,
@@ -494,12 +532,14 @@ forecast_loc <- Sys.getenv("loc", unset = "36")
 hopdir <- file.path("hopkins", forecast_date)
 tdat <- load_hopkins(hopdir, weekly = FALSE)
 ltdat <- tdat %>% filter(location == forecast_loc) %>% 
-  filter(target_type == "day ahead inc case")
-ltdat2 <- ltdat %>% mutate(time = lubridate::decimal_date(target_end_date))
-case_data <- ltdat2 %>% ungroup() %>% 
+  filter(target_type == "day ahead inc case" | target_type == "day ahead inc death")
+ltdat2 <- ltdat %>% mutate(time = lubridate::decimal_date(target_end_date)) %>%
+  pivot_wider(names_from = target_type, values_from = value)
+
+jhu_data <- ltdat2 %>% ungroup() %>% 
   mutate(wday = lubridate::wday(target_end_date)) %>%
-  select(target_end_date, time, wday, value) %>% 
-  rename(cases = value)
+  rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
+  select(target_end_date, time, wday, cases, deaths)
 
 healthd <- file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
 cov_thresh <- .5
@@ -526,7 +566,7 @@ tdat3 <- tdat2 %>%
   ) %>%
   select(target_end_date, hospitalizations)
 
-obs_data <- left_join(case_data, tdat3, by = "target_end_date")
+obs_data <- left_join(jhu_data, tdat3, by = "target_end_date")
 
 wsize <- 60
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
@@ -535,43 +575,59 @@ N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>%
 wfixed <- c(
   N = N,
   rho1 = 0.4,
-  gamma = 365.25 / 9, 
+  gamma = 365.25 / 4,
+  gamma_h = 365.25 / 10,
+  gamma_d = 365.25 / 10,
   eta = 365.25 / 4,
   t0 = rev(obs_data$time)[wsize + 1]
 )
 
 wind <- tail(obs_data, n = wsize)
-y <- wind %>% select(cases, hospitalizations)
+y <- wind %>% select(cases, hospitalizations, deaths)
 x <- matrix(wind$time, ncol = 1)
 
-gamma <- 365.25/9
-tau_cases_init <- var(y$cases)
+tau_cases_init <- var(y$cases, na.rm = TRUE)
 tau_hosp_init <- var(y$hospitalizations, na.rm = TRUE)
+tau_deaths_init <- var(y$deaths, na.rm = TRUE)
 
 E0init <- (mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])
-chr_init <-
-  unname(coef(lm(hospitalizations ~ cases + 0, data = wind))["cases"])
-binit <- c(rep(0, wsize - 1), log(gamma))
+H0init <- mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]
+
+chp_init <- cor(wind$cases, 
+                wind$hospitalizations, 
+                use = "complete.obs", method = "kendal")
+
+hfp_init <- sum(y$deaths, na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE)
+
+binit <- c(rep(0, wsize - 1), log(wfixed["gamma"]))
 names(binit) <- paste0("b", seq_len(wsize))
 winit <- c(
   logE0 = log(E0init),
+  logH0 = log(H0init),
   logtauc = log(tau_cases_init),
   logtauh = log(tau_hosp_init),
-  logchr = log(chr_init),
+  logtaud = log(tau_deaths_init),
+  logchp = log(chp_init),
+  loghfp = log(hfp_init),
   binit
 )
 
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
-  ret$bpars <- w[seq(5, length(w))]
+  ret$bpars <- w[seq(8, length(w))]
   ret$logE0 <- w[1]
-  ret$rho1 <- fixed["rho1"]
-  ret$logtauc <- w[2]
-  ret$logtauh <- w[3]
-  ret$logchr <- w[4]
+  ret$logH0 <- w[2]
+  ret$logtauc <- w[3]
+  ret$logtauh <- w[4]
+  ret$logtaud <- w[5]
+  ret$logchp <- w[6]
+  ret$loghfp <- w[7]
   ret$times <- x[, 1]
+  ret$rho1 <- fixed["rho1"]
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
+  ret$gamma_h <- fixed["gamma_h"]
+  ret$gamma_d <- fixed["gamma_d"]
   ret$N <- fixed["N"]
   ret$t0 <- fixed["t0"]
   ret
