@@ -74,9 +74,9 @@ jobs:
           git config --local user.name "Automated Publisher"
           git merge --no-edit $(cat tomerge)
           
-          #dvc pull --run-cache || true
-          #bash -x evaluate.sh
-          #git commit -am "Update evaluations" || true
+          dvc pull --run-cache || true
+          bash -x evaluate.sh
+          git commit -am "Update evaluations" || true
           git commit -am "Integrate forecasts" || true
           git push origin $branchname
           dvc push --run-cache || true
