@@ -28,6 +28,11 @@ create_forecast_df <- function(means,
     maxn <- 129
     targ_string <- " day ahead inc hosp"
     stride <- 1
+  } else if (target_type == "inc deaths") {
+    probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+    maxn <- 8
+    targ_string <- " wk ahead inc death"
+    stride <- 7
   } else {
     stop("not implemented")
   }
@@ -37,7 +42,7 @@ create_forecast_df <- function(means,
   step_ahead <- seq_len(n)
   targets <- paste0(step_ahead, targ_string)
   dte <- lubridate::ymd(fdt)
-  if (target_type %in% c("cases", "deaths")) {
+  if (target_type %in% c("cases", "inc deaths")) {
     fdt_wd <- lubridate::wday(dte) # 1 = Sunday, 7 = Sat.
     fdt_sun <- lubridate::ymd(dte) - (fdt_wd - 1)
     take_back_step <- fdt_wd <= 2
@@ -83,7 +88,6 @@ create_forecast_df <- function(means,
                                quantile,
                                value)
 }
-
 
 iterate_f_and_P <-
   function(xhat,
@@ -219,7 +223,7 @@ kfnll <-
       }
 
       xhat_init["C"] <- 0
-      xhat_init["H"] <- 0
+      xhat_init["Hnew"] <- 0
       xhat_init["Drep"] <- 0
       
       PNinit[, 4] <- PNinit[4,] <- 0
@@ -311,14 +315,20 @@ kfnll <-
             xhat_init["C"] <- 0
             PNinit[, 4] <- PNinit[4,] <- 0
           }
-          xhat_init["H"] <- 0
+          xhat_init["Hnew"] <- 0
           PNinit[, 5] <- PNinit[5,] <- 0
+          xhat_init["Drep"] <- 0
+          PNinit[, 8] <- PNinit[8,] <- 0 
+          
           XP <- iterate_f_and_P(
             xhat_init,
             PN = PNinit,
             eta = eta,
             gamma = gamma,
+            gamma_d = gamma_d,
+            gamma_h = gamma_h,
             chp = exp(logchp),
+            hfp = exp(loghfp),
             N = N,
             beta_t = exp(logbeta_fet[1]),
             time.steps = c(times[T], fets$target_end_times[1])
@@ -333,15 +343,20 @@ kfnll <-
               xhat_init["C"] <- 0
               PNinit[, 4] <- PNinit[4,] <- 0
             }
-            xhat_init["H"] <- 0
+            xhat_init["Hnew"] <- 0
             PNinit[, 5] <- PNinit[5,] <- 0
+            xhat_init["Drep"] <- 0
+            PNinit[, 8] <- PNinit[8,] <- 0
             XP <-
               iterate_f_and_P(
                 xhat_init,
                 PN = PNinit,
                 eta = eta,
                 gamma = gamma,
+                gamma_d = gamma_d,
+                gamma_h = gamma_h,
                 chp = exp(logchp),
+                hfp = exp(loghfp),
                 N = N,
                 beta_t = exp(logbeta_fet[i + 1]),
                 time.steps = c(fets$target_end_times[i], 
@@ -380,7 +395,7 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchp, p$bpars)
+  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtauhd, p$logchp, p$loghfp, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -388,19 +403,21 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("γd", p$gamma_d)
+  JuliaCall::julia_assign("γh", p$gamma_h)
   JuliaCall::julia_assign("z", data.matrix(y))
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   nll <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.obj",
-    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
+    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, γd = γd, γh = γh, a = a, betasd = betasd)"
   ))
   nll
 }
 
 calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logtauc, p$logtauh, p$logchp, p$bpars)
+  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logchp, p$loghfp, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -408,12 +425,14 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
+  JuliaCall::julia_assign("γd", p$gamma_d)
+  JuliaCall::julia_assign("γh", p$gamma_h)
   JuliaCall::julia_assign("z", data.matrix(y))
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.grad",
-    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
+    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, γd = γd, γh = γh, a = a, betasd = betasd)"
   ))
   g
 }
@@ -429,7 +448,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", map(y, list))
+  JuliaCall::julia_assign("z", data.matrix(y))
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(
@@ -444,12 +463,17 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
   nll <- kfnll(
     bpars = p$bpars,
     logE0 = p$logE0,
+    logH0 = p$logH0,
     rho1 = p$rho1,
     logtauc = p$logtauc,
     logtauh = p$logtauh,
+    logtaud = p$logtaud,
     logchp = p$logchp,
+    loghfp = p$loghfp,
     eta = p$eta,
     gamma = p$gamma,
+    gamma_d = p$gamma_d,
+    gamma_h = p$gamma_h,
     N = p$N,
     z = y,
     t0 = p$t0,
@@ -500,6 +524,10 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
         fet$target_end_dates[hosp_inds],
         hosp_fcst$target_end_date %>% unique()
       ))
+      
+      death_inds <- case_inds
+      
+      
       fcst <- bind_rows(case_fcst, hosp_fcst)
 
       lambda <- 1 / betasd
@@ -590,8 +618,8 @@ tau_cases_init <- var(y$cases, na.rm = TRUE)
 tau_hosp_init <- var(y$hospitalizations, na.rm = TRUE)
 tau_deaths_init <- var(y$deaths, na.rm = TRUE)
 
-E0init <- (mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])
-H0init <- mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]
+E0init <- ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
+H0init <- (mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]) %>% unname()
 
 chp_init <- cor(wind$cases, 
                 wind$hospitalizations, 
@@ -704,15 +732,22 @@ qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1,1,]))
 abline(0, 1)
 qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2,2,]))
 abline(0, 1)
+qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3,3,]))
+abline(0,1 )
 
 
-tgrid <- tail(obs_data$time, n = wsize)
-plot(tgrid, tail(obs_data$cases, n = wsize), xlab = "Time", ylab = "Cases", ylim = c(0, 6000))
-lines(tgrid, dets$xhat_kkmo["C",] * wfixed["rho1"])
+plot(x[,1], y$cases, xlab = "Time", ylab = "Cases", ylim = c(0, 6000))
+lines(x[,1], dets$xhat_kkmo["C",] * wfixed["rho1"])
 
-plot(tgrid, y[[2]], xlab = "Time", 
+plot(x[,1], y$hospitalizations, xlab = "Time", 
      ylab = "Hospitalizations")
-lines(tgrid, dets$xhat_kkmo["H",])
+lines(x[,1], dets$xhat_kkmo["Hnew",])
+
+plot(x[,1], y$deaths, xlab = "Time", 
+     ylab = "Deaths")
+lines(x[,1], dets$xhat_kkmo["Drep",])
+
+
 
 case_inds <- which(fet$target_wday == 7)
 
@@ -733,5 +768,14 @@ hosp_fcst <- create_forecast_df(means = dets$sim_means[2, hosp_inds,],
                                 location = forecast_loc)
 
 hosp_fcst %>% 
+  ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
+  geom_line() + geom_point()
+
+death_fcst <- create_forecast_df(means = dets$sim_means[3, case_inds,],
+                                vars = dets$sim_cov[3, 3, case_inds,],
+                                target_type = "inc deaths",
+                                location = forecast_loc)
+
+death_fcst %>% 
   ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
   geom_line() + geom_point()
