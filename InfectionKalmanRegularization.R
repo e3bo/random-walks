@@ -703,7 +703,7 @@ fit_over_betagrid <- function(a, betagrid) {
   return(fits)
 }
 
-betagrid <- seq(0.001, 0.1, len = 2)
+betagrid <- seq(0.001, 0.1, len = 10)
 agrid <- c(0.94, 0.95)
 fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
 tictoc::toc()
