@@ -180,7 +180,7 @@ kfnll <-
            times,
            Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
-           fet_zero_cases = "daily",
+           fet_zero_cases_deaths = "daily",
            nsim,
            a = .98,
            betasd = 1,
@@ -318,15 +318,16 @@ kfnll <-
           }
           xhat_init <- xhat_kk[, T]
           PNinit <- P_kk[, , T]
-          if (fet_zero_cases == "daily" ||
+          if (fet_zero_cases_deaths == "daily" ||
               fets$target_wday[1] == 1) {
             xhat_init["C"] <- 0
             PNinit[, 4] <- PNinit[4,] <- 0
+            xhat_init["Drep"] <- 0
+            PNinit[, 8] <- PNinit[8,] <- 0 
           }
           xhat_init["Hnew"] <- 0
           PNinit[, 5] <- PNinit[5,] <- 0
-          xhat_init["Drep"] <- 0
-          PNinit[, 8] <- PNinit[8,] <- 0 
+
           
           XP <- iterate_f_and_P(
             xhat_init,
@@ -346,15 +347,16 @@ kfnll <-
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
-            if (fet_zero_cases == "daily" ||
+            if (fet_zero_cases_deaths == "daily" ||
                 fets$target_wday[i + 1] == 1) {
               xhat_init["C"] <- 0
               PNinit[, 4] <- PNinit[4,] <- 0
+              xhat_init["Drep"] <- 0
+              PNinit[, 8] <- PNinit[8,] <- 0
             }
             xhat_init["Hnew"] <- 0
             PNinit[, 5] <- PNinit[5,] <- 0
-            xhat_init["Drep"] <- 0
-            PNinit[, 8] <- PNinit[8,] <- 0
+
             XP <-
               iterate_f_and_P(
                 xhat_init,
@@ -488,7 +490,7 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     times = p$times,
     fet = fet,
     just_nll = FALSE,
-    fet_zero_cases = "weekly",
+    fet_zero_cases_deaths = "weekly",
     nsim = 20,
     betasd = betasd,
     a = a
@@ -701,7 +703,7 @@ fit_over_betagrid <- function(a, betagrid) {
   return(fits)
 }
 
-betagrid <- seq(0.001, 0.1, len = 10)
+betagrid <- seq(0.001, 0.1, len = 2)
 agrid <- c(0.94, 0.95)
 fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
 tictoc::toc()
@@ -744,15 +746,32 @@ abline(0,1 )
 
 
 plot(x[,1], y$cases, xlab = "Time", ylab = "Cases", ylim = c(0, 6000))
-lines(x[,1], dets$xhat_kkmo["C",] * wfixed["rho1"])
+pred_cases <- dets$xhat_kkmo["C",] * wfixed["rho1"] + dets$xhat_kkmo["Hnew",]
+se_cases <- sqrt(dets$S[1,1,])
+lines(x[,1], se_cases * 2 + pred_cases, col = "grey")
+lines(x[,1], pred_cases)
+lines(x[,1], -se_cases * 2 + pred_cases, col = "grey")
 
 plot(x[,1], y$hospitalizations, xlab = "Time", 
      ylab = "Hospitalizations")
-lines(x[,1], dets$xhat_kkmo["Hnew",])
+pred_hosps <- dets$xhat_kkmo["Hnew",]
+se_hosps <- sqrt(dets$S[2,2,])
+lines(x[,1], se_hosps * 2 + pred_hosps, col = "grey")
+lines(x[,1], pred_hosps)
+lines(x[,1], -se_hosps * 2 + pred_hosps, col = "grey")
 
 plot(x[,1], y$deaths, xlab = "Time", 
      ylab = "Deaths")
-lines(x[,1], dets$xhat_kkmo["Drep",])
+pred_deaths <- dets$xhat_kkmo["Drep",]
+se_deaths <- sqrt(dets$S[3,3,])
+lines(x[,1], se_deaths * 2 + pred_deaths, col = "grey")
+lines(x[,1], pred_deaths)
+lines(x[,1], -se_deaths * 2 + pred_deaths, col = "grey")
+
+
+
+
+
 
 case_inds <- which(fet$target_wday == 7)
 case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
