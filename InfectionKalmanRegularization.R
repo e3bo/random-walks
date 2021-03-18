@@ -184,8 +184,9 @@ kfnll <-
            nsim,
            a = .98,
            betasd = 1,
-           maxzscore = 4,
-           just_nll = TRUE) {
+           maxzscore = Inf,
+           just_nll = TRUE,
+           logmaxRt = 1.6) {
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
     H0 = exp(logH0)
@@ -216,7 +217,7 @@ kfnll <-
     R <- diag(exp(c(logtauc, logtauh, logtaud)))
     logbeta[T] <- bpars[T]
     for (i in seq(T - 1, 1)){
-      logbeta[i] <- (logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma)
+      logbeta[i] <- min((logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma), maxlogRt + log(gamma))
     }
 
     for (i in seq(1, T)) {
@@ -408,7 +409,6 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
-  JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("N", p$N)
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
@@ -608,7 +608,8 @@ tdat3 <- tdat2 %>%
 
 obs_data <- left_join(jhu_data, tdat3, by = "target_end_date")
 
-wsize <- 60
+wind <- obs_data %>% filter(target_end_date >= "2020-03-01")
+wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
 
@@ -684,7 +685,7 @@ fit_over_betagrid <- function(a, betagrid) {
     y = y,
     pm = param_map,
     winit,
-    invisible = 1
+    invisible = 0
   )
   for (i in seq(2, length(betagrid))) {
     fits[[i]] <- lbfgs::lbfgs(
@@ -705,6 +706,7 @@ fit_over_betagrid <- function(a, betagrid) {
 
 betagrid <- seq(0.001, 0.1, len = 10)
 agrid <- c(0.94, 0.95)
+
 fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
 tictoc::toc()
 

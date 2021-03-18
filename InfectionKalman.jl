@@ -8,7 +8,8 @@ export hess
 export obj
 export grad
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 / 10,  γh::Float64 = 365.25 / 10,   dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true)
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 / 10,  γh::Float64 = 365.25 / 10,   dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true,
+maxlogRt::Float64 = 1.6)
 
     # prior for time 0
     l0 = exp(pvar[1])
@@ -38,7 +39,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
 
     zmiss = [ismissing(x) for x in z]
     zz = Array{eltype(z)}(undef, dobs)
-    maxzscore = 4
+    maxzscore = Inf
 
     # filter (assuming first observation at time 1)
     nobs = size(z, 1)
@@ -56,7 +57,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
 
     logβ[nobs] = bvec[nobs]
     for i in (nobs - 1):-1:1
-        logβ[i] = (logβ[i + 1] - log(γ) - bvec[i]) / a + log(γ)
+        logβ[i] = min((logβ[i + 1] - log(γ) - bvec[i]) / a + log(γ), maxlogRt + log(γ))
     end
 
     for i in 1:nobs
