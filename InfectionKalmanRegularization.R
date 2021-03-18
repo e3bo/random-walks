@@ -685,7 +685,7 @@ fit_over_betagrid <- function(a, betagrid) {
     y = y,
     pm = param_map,
     winit,
-    invisible = 0
+    invisible = 1
   )
   for (i in seq(2, length(betagrid))) {
     fits[[i]] <- lbfgs::lbfgs(
@@ -724,7 +724,7 @@ q("no")
 # View diagnostics
 
 fitind1 <- 1
-fitind2 <- 1
+fitind2 <- 2
 dets <- kf_nll_details(winit, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
                        fet)
@@ -733,7 +733,7 @@ nll <- calc_kf_nll(winit, x = x, y = y, param_map,
                        betasd = betagrid[fitind2], a = agrid[fitind1])
 
 
-fitind1 <- 2
+fitind1 <- 1
 fitind2 <- 2
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
@@ -747,7 +747,7 @@ qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3,3,]))
 abline(0,1 )
 
 
-plot(x[,1], y$cases, xlab = "Time", ylab = "Cases", ylim = c(0, 6000))
+plot(x[,1], y$cases, xlab = "Time", ylab = "Cases")
 pred_cases <- dets$xhat_kkmo["C",] * wfixed["rho1"] + dets$xhat_kkmo["Hnew",]
 se_cases <- sqrt(dets$S[1,1,])
 lines(x[,1], se_cases * 2 + pred_cases, col = "grey")
