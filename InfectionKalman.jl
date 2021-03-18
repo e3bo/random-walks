@@ -8,7 +8,7 @@ export hess
 export obj
 export grad
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 / 10,  γh::Float64 = 365.25 / 10 ,   dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true)
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 / 10,  γh::Float64 = 365.25 / 10,   dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true)
 
     # prior for time 0
     l0 = exp(pvar[1])
@@ -20,21 +20,21 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
     τd = exp(pvar[5])
     
     chp = exp(pvar[6])
-    hfp = exp(par[7])
-    bvec = pvar[8 :end]
+    hfp = exp(pvar[7])
+    bvec = pvar[8:end]
     
     y0 = l0 * η / γ
     
     x0 = [N - l0 - y0 - h0 - d0; l0; y0; 0; 0; h0; d0; 0]
-    p0 = covert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
+    p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
     
     dstate = size(x0, 1)
 
     # observation matrix
-    h = [0 0 0 ρ 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1]
+    hmat = [0 0 0 ρ 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1]
     
     dobs = size(z, 2)
-    r = Diagonal(τc, τh, τd) 
+    r = Diagonal([τc, τh, τd]) 
 
     zmiss = [ismissing(x) for x in z]
     zz = Array{eltype(z)}(undef, dobs)
@@ -87,11 +87,11 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
         vf = [
         -β*x*y/N - ι*x, 
         β*x*y/N + ι*x - η*l, 
-        η*l - γ*y - chp*γ*y, 
-        γ*y, 
+        η*l - γ*y, 
+        (1 - chp) * γ*y, 
         chp*γ*y,
         chp*γ*y - γh*h,
-        γh*h - γd*d,
+        hfp*γh*h - γd*d,
         γd*d
         ]
         xnext = xlast + dt * vf
@@ -102,20 +102,33 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
         end
         xkkmo[:,i] = xnext
         
-        f = [0, β*x/N*y/N + ι*x/N, η*l/N, γ*y/N, chp*γ*y/N,
+        f = [0, 
+             β*x/N*y/N + ι*x/N, 
+             η*l/N, 
+             (1 - chp)*γ*y/N,
+             chp*γ*y/N,
+             (1 - hfp) * γh * h / N,
+             hfp * γh * h / N,
+             γd * d / N
         ]
         
-        q = [  f[1]+f[2]     -f[2]               0      0        0
-                   -f[2] f[2]+f[3]           -f[3]      0        0
-                       0     -f[3]  f[3]+f[4]+f[5]  -f[4]    -f[5]
-                       0         0           -f[4]   f[4]        0
-                       0         0           -f[5]      0     f[5] ]
+        q = [  f[1]+f[2]     -f[2]               0      0        0              0          0      0
+                   -f[2] f[2]+f[3]           -f[3]      0        0              0          0      0
+                       0     -f[3]  f[3]+f[4]+f[5]  -f[4]    -f[5]           -f[5]         0      0
+                       0         0           -f[4]   f[4]        0              0          0      0
+                       0         0           -f[5]      0     f[5]              0          0      0
+                       0         0           -f[5]      0        0  f[7]+f[5]+f[6]      -f[7]     0
+                       0         0              0       0        0           -f[7]  f[8]+f[7]  -f[8]
+                       0         0              0       0        0              0       -f[8]   f[8] ]
                        
-        jac= [-β*y/N    0         -β*x/N     0     0
-               β*y/N   -η          β*x/N     0     0
-                   0    η   -γ*(1 + chr)     0     0
-                   0    0              γ     0     0
-                   0    0       chr *  γ     0     0]
+        jac= [-β*y/N    0         -β*x/N     0     0       0    0 0
+               β*y/N   -η          β*x/N     0     0       0    0 0
+                   0    η             -γ     0     0       0    0 0
+                   0    0    (1 - chp)*γ     0     0       0    0 0
+                   0    0          chp*γ     0     0       0    0 0
+                   0    0          chp*γ     0     0     -γh    0 0  
+                   0    0              0     0     0  hfp*γh  -γd 0
+                   0    0              0     0     0       0   γd 0]
         
         dp = jac * plast + plast * jac' + q * N
         pnext = plast + dp * dt
@@ -126,7 +139,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
             end
         end
         pkkmo[:,:,i] = pnext 
-        Σ[:,:,i] = h * pkkmo[:,:,i] * h' + r
+        Σ[:,:,i] = hmat * pkkmo[:,:,i] * hmat' + r
 
         for j in 1:dobs
             if zmiss[i,j]
@@ -135,7 +148,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
                 zz[j] = z[i,j]
             end
         end       
-        ytkkmo[:,i] = zz - h * reshape(xkkmo[:,i], dstate, 1)       
+        ytkkmo[:,i] = zz - hmat * reshape(xkkmo[:,i], dstate, 1)
         for j in 1:dobs
             if zmiss[i, j]
                 zscore = 0
@@ -153,14 +166,14 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
             end
             Σ[j,j,i] += rdiagadj[j,i]
         end
-        k[:,:,i] = pkkmo[:,:,i] * h' / Σ[:,:,i]
+        k[:,:,i] = pkkmo[:,:,i] * hmat' / Σ[:,:,i]
         for j in 1:dobs
             if zmiss[i,j]
                 k[:, j ,i] .= 0
             end
         end
         xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * h) * pkkmo[:,:,i]
+        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat) * pkkmo[:,:,i]
     end
     
     stepdensity = Normal(0, betasd)
@@ -182,8 +195,8 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 /
     end
 end
 
-function grad(pvar, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1.)
-    g = ForwardDiff.gradient(par -> obj(par, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd), pvar)
+function grad(pvar, z; γ::Float64 = 365.25 / 9,  γd::Float64 = 365.25 / 10,  γh::Float64 = 365.25 / 10, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1.)
+    g = ForwardDiff.gradient(par -> obj(par, z; ρ = ρ, N = N, η = η, γ = γ,  γd = γd,  γh = γh, a = a, betasd = betasd), pvar)
     g
 end
 

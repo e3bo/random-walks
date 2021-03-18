@@ -403,7 +403,7 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtauhd, p$logchp, p$loghfp, p$bpars)
+  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -425,7 +425,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
 
 calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logchp, p$loghfp, p$bpars)
+  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -534,9 +534,11 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
       ))
       
       death_inds <- case_inds
-      
-      
-      fcst <- bind_rows(case_fcst, hosp_fcst)
+      death_fcst <- create_forecast_df(means = dets$sim_means[3, death_inds,],
+                                       vars = dets$sim_cov[3, 3, death_inds,],
+                                       target_type = "inc deaths",
+                                       location = forecast_loc)
+      fcst <- bind_rows(case_fcst, hosp_fcst, death_fcst)
 
       lambda <- 1 / betasd
       fcst_dir <-
@@ -675,7 +677,7 @@ fit_over_betagrid <- function(a, betagrid) {
     calc_kf_grad,
     x = x,
     betasd = betagrid[1],
-    epsilon = 1e-4,
+    epsilon = 1e-3,
     a = a,
     y = y,
     pm = param_map,
@@ -688,7 +690,7 @@ fit_over_betagrid <- function(a, betagrid) {
       calc_kf_grad,
       x = x,
       betasd = betagrid[i],
-      epsilon = 1e-4,
+      epsilon = 1e-3,
       a = a,
       y = y,
       pm = param_map,
@@ -727,7 +729,7 @@ nll <- calc_kf_nll(winit, x = x, y = y, param_map,
                        betasd = betagrid[fitind2], a = agrid[fitind1])
 
 
-fitind1 <- 1
+fitind1 <- 2
 fitind2 <- 2
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
