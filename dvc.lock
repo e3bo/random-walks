@@ -2,12 +2,12 @@ pull-archived-forecasts:
   cmd: ./pull-other-forecasts.R
   deps:
   - path: pull-other-forecasts.R
-    md5: 15e8c90f88012b187fea091e3e59e801
-    size: 1076
+    md5: 42dab43fb1273de4addcf79147a3e27d
+    size: 1219
   outs:
   - path: other-model-forecasts.rds
-    md5: e159a04141ff395935f4c53b186dfd4b
-    size: 523441
+    md5: 19b045ec9ea13bc485c37eac61292dc8
+    size: 2488296
 combine:
   cmd: ./combine-location-forecasts.R
   deps:

@@ -70,6 +70,8 @@ fdts_sun <- fdts_mon - 1
 fdat <- load_forecasts(models = models,
                        forecast_dates = c(fdts_sun, fdts_mon, fdts_tue),
                        locations = locs, 
-                       targets = paste(1:4, "wk ahead inc case"))
+                       targets = c(paste(1:4, "wk ahead inc case"),
+                                   paste(1:4, "wk ahead inc death"),
+                                   paste(1:28, "day ahead inc hosp"))) 
 
 saveRDS(fdat, file = "other-model-forecasts.rds")

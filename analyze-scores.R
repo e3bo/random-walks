@@ -33,7 +33,11 @@ truth_data2 <- load_truth(truth_source = "HealthData",
                           target_variable = "inc hosp",
                           locations = unique(fdat1$location))
 
-truth_data <- bind_rows(truth_data1, truth_data2)
+truth_data3 <- load_truth(truth_source = "JHU",
+                          target_variable = "inc death",
+                          locations = unique(train_data$location))
+
+truth_data <- bind_rows(truth_data1, truth_data2, truth_data3)
 
 train_scores <- 
   score_forecasts(train_data, truth_data, return_format = "wide") %>%
@@ -54,9 +58,8 @@ tscv <-train_scores %>%
 ## val data will be used to evaluate the model with lambda selected from the
 ## training data
 
-val_data <- 
-  fdat2 <- bind_rows(fdat0, fdat1, fdat11) %>%
-  filter(forecast_date > "2020-11-30")
+val_data <- bind_rows(fdat0, fdat1, fdat11) %>%
+  filter(forecast_date >= "2020-11-30")
 
 cv_mod <- tscv %>% select(location, model, target_variable) %>% 
   left_join(val_data, by = c("location", "model", "target_variable")) %>%
@@ -84,10 +87,14 @@ s2 <-scores %>%
             abs_error = mean(abs_error),
             wis = mean(wis),
             .groups = "drop_last")
+
 s2 %>% filter(target_variable == "inc case") %>% 
   write_csv("horizon-location-model-cases.csv")
 s2 %>% filter(target_variable == "inc hosp") %>% 
   write_csv("horizon-location-model-hosp.csv")
+s2 %>% filter(target_variable == "inc death") %>% 
+  write_csv("horizon-location-model-death.csv")
+
 
 s3 <-scores %>% 
   group_by(location, model, target_variable) %>% 
