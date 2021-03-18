@@ -165,14 +165,11 @@ stages:
     - analyze-scores.html
     - analyze-scores.md
     plots:
-    - horizon-location-model-cases.csv:
-        template: horizon-location-model
-    - horizon-location-model-hosp.csv:
-        template: horizon-location-model
-    - location-model.csv:
-        template: location-model
-    - model.csv:
-        template: model
+    - horizon-location-model-cases.csv
+    - horizon-location-model-death.csv
+    - horizon-location-model-hosp.csv
+    - location-model.csv
+    - model.csv
   hopkins-2020-09-07:
     cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
     deps:

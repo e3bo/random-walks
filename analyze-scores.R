@@ -95,7 +95,6 @@ s2 %>% filter(target_variable == "inc hosp") %>%
 s2 %>% filter(target_variable == "inc death") %>% 
   write_csv("horizon-location-model-death.csv")
 
-
 s3 <-scores %>% 
   group_by(location, model, target_variable) %>% 
   summarize(coverage_50 = mean(coverage_50), 
