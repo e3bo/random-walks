@@ -75,8 +75,8 @@ jobs:
           git merge --no-edit $(cat tomerge)
           
           dvc pull --run-cache || true
-          bash -x evaluate.sh
-          git commit -am "Update evaluations" || true
+          #bash -x evaluate.sh
+          #git commit -am "Update evaluations" || true
           git commit -am "Integrate forecasts" || true
           git push origin $branchname
           dvc push --run-cache || true
@@ -84,8 +84,8 @@ jobs:
           shortnames=$(cat tomerge | sed "s/remotes\/origin\///g")
           git push origin --delete $shortnames
 
-          dvc plots show \
-            location-model.csv --show-vega > vega2.json
-          vl2png vega2.json | cml-publish --md >> report.md
+          #dvc plots show \
+          #  location-model.csv --show-vega > vega2.json
+          #vl2png vega2.json | cml-publish --md >> report.md
           
-          cml-send-comment report.md
+          #cml-send-comment report.md
