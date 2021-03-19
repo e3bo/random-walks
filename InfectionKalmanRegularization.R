@@ -164,7 +164,6 @@ kfnll <-
   function(bpars,
            logE0,
            logH0,
-           rho1,
            logtauc,
            logtauh,
            logtaud,
@@ -185,7 +184,11 @@ kfnll <-
            betasd = 1,
            maxzscore = Inf,
            just_nll = TRUE,
-           logmaxRt = 1.6) {
+           logmaxRt = 1.6,
+           max_detect_par = 0.4,
+           log_detect_inc_rate = 1.1,
+           log_half_detect = 30,
+           base_detect_frac = 0.1) {
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
     H0 = exp(logH0)
@@ -194,6 +197,9 @@ kfnll <-
     xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     
+    detect_frac <- function(t){
+       1/(1+exp(max_detect_par)) * (t ^ exp(log_detect_inc_rate))  / ( (exp(log_half_detect) ^ exp(log_detect_inc_rate)) + (t ^ exp(log_detect_inc_rate))) + exp(base_detect_frac)
+    }
     z <- data.matrix(z)
     is_z_na <- is.na(z)
     T <- nrow(z)
@@ -211,9 +217,11 @@ kfnll <-
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
     
-    H <- rbind(c(0, 0, 0, rho1, 1, 0, 0, 0), 
-               c(0, 0, 0,    0, 1, 0, 0, 0),
-               c(0, 0, 0,    0, 0, 0, 0, 1))
+    H <- function(day){
+      rbind(c(0, 0, 0, detect_frac(day), 1, 0, 0, 0), 
+             c(0, 0, 0,    0, 1, 0, 0, 0),
+             c(0, 0, 0,    0, 0, 0, 0, 1))
+    }
     R <- diag(exp(c(logtauc, logtauh, logtaud)))
     logbeta[T] <- bpars[T]
     for (i in seq(T - 1, 1)){
@@ -256,8 +264,8 @@ kfnll <-
       P_kkmo[, , i] <- XP$PN
       
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
-        H %*% xhat_kkmo[, i, drop = FALSE]     
-      S[, , i] <- H %*% P_kkmo[, , i] %*% t(H) + R
+        H(i) %*% xhat_kkmo[, i, drop = FALSE]     
+      S[, , i] <- H(i) %*% P_kkmo[, , i] %*% t(H(i)) + R
       
       for (j in 1:dobs){
         if (is.na(z[i,j])){
@@ -276,7 +284,7 @@ kfnll <-
         }
         S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
       }
-      K[, , i] <- P_kkmo[, , i] %*% t(H) %*% solve(S[, , i])
+      K[, , i] <- P_kkmo[, , i] %*% t(H(i)) %*% solve(S[, , i])
       desel <- is_z_na[i, ]
       K[, desel, i] <- 0
 
@@ -286,9 +294,9 @@ kfnll <-
       
       xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
       P_kk[, , i] <-
-        (diag(dstate) - K[, , i] %*% H) %*% P_kkmo[, , i]
+        (diag(dstate) - K[, , i] %*% H(i)) %*% P_kkmo[, , i]
       ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
-        H %*% xhat_kk[, i, drop = FALSE]
+        H(i) %*% xhat_kk[, i, drop = FALSE]
     }
     
     nll <- 0
@@ -329,7 +337,6 @@ kfnll <-
           xhat_init["Hnew"] <- 0
           PNinit[, 5] <- PNinit[5,] <- 0
 
-          
           XP <- iterate_f_and_P(
             xhat_init,
             PN = PNinit,
@@ -343,8 +350,8 @@ kfnll <-
             beta_t = exp(logbeta_fet[1]),
             time.steps = c(times[T], fets$target_end_times[1])
           )
-          sim_means[, 1, j] <- H %*% XP$xhat
-          sim_cov[, , 1, j] <- H %*% XP$PN %*% t(H) + R
+          sim_means[, 1, j] <- H(T+1) %*% XP$xhat
+          sim_cov[, , 1, j] <- H(T+1) %*% XP$PN %*% t(H(T+1)) + R
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
@@ -373,9 +380,9 @@ kfnll <-
                 time.steps = c(fets$target_end_times[i], 
                                fets$target_end_times[i + 1])
               )
-            sim_means[, i + 1, j] <- H %*% XP$xhat
+            sim_means[, i + 1, j] <- H(T + i + 1) %*% XP$xhat
             sim_cov[, , i + 1, j] <-
-              H %*% XP$PN %*% t(H) + R
+              H(T + i + 1) %*% XP$PN %*% t(H(T + i + 1)) + R
           }
         }
       } else {
@@ -680,9 +687,8 @@ fit_over_betagrid <- function(a, betagrid) {
     y = y,
     pm = param_map,
     winit,
-    invisible = 0
+    invisible = 1
   )
-  return(fits)
   for (i in seq(2, length(betagrid))) {
     fits[[i]] <- lbfgs::lbfgs(
       calc_kf_nll,
@@ -694,7 +700,7 @@ fit_over_betagrid <- function(a, betagrid) {
       y = y,
       pm = param_map,
       fits[[i - 1]]$par,
-      invisible = 0
+      invisible = 1
     )
   }
   return(fits)
