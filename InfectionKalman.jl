@@ -8,8 +8,17 @@ export hess
 export obj
 export grad
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true,
-maxlogRt::Float64 = 1.6)
+function detect_frac(t; max_detect_par::Float64 = 0.4, detect_inc_rate::Float64 = 1.1, half_detect::Float64 = 30., base_detect_frac::Float64 = 0.1)
+    rho =  max_detect_par * (t ^ detect_inc_rate)  / ((half_detect ^ detect_inc_rate) + (t ^ detect_inc_rate)) + base_detect_frac
+    return rho
+end
+
+function hmat(t)
+    H =  [0 0 0 detect_frac(t) 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1] 
+    return H
+end
+
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6)
 
     γh = exp(pvar[8])
     γd = exp(pvar[8])
@@ -34,10 +43,6 @@ maxlogRt::Float64 = 1.6)
     p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
     
     dstate = size(x0, 1)
-
-    # observation matrix
-    hmat = [0 0 0 ρ 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1]
-    
     dobs = size(z, 2)
     r = Diagonal([τc, τh, τd]) 
 
@@ -47,7 +52,7 @@ maxlogRt::Float64 = 1.6)
 
     # filter (assuming first observation at time 1)
     nobs = size(z, 1)
-    rdiagadj = Array{eltype(bvec)}(undef, dobs, nobs)
+    rdiagadj = ones(eltype(bvec), dobs, nobs) # make non-zero to ensure Σ is not singular
     Σ = Array{eltype(bvec)}(undef, dobs, dobs, nobs)
     ytkkmo = Array{eltype(bvec)}(undef, dobs, nobs)
     k = Array{eltype(bvec)}(undef, dstate, dobs, nobs)
@@ -144,7 +149,7 @@ maxlogRt::Float64 = 1.6)
             end
         end
         pkkmo[:,:,i] = pnext 
-        Σ[:,:,i] = hmat * pkkmo[:,:,i] * hmat' + r
+        Σ[:,:,i] = hmat(i) * pkkmo[:,:,i] * hmat(i)' + r
 
         for j in 1:dobs
             if zmiss[i,j]
@@ -153,32 +158,32 @@ maxlogRt::Float64 = 1.6)
                 zz[j] = z[i,j]
             end
         end       
-        ytkkmo[:,i] = zz - hmat * reshape(xkkmo[:,i], dstate, 1)
+        ytkkmo[:,i] = zz - hmat(i) * reshape(xkkmo[:,i], dstate, 1)
         for j in 1:dobs
             if zmiss[i, j]
                 zscore = 0
-                rdiagadj[j,i] = 0
+                rdiagadj[j,i] += 0
             else
                 sd = sqrt(Σ[j,j,i])
                 zscore = ytkkmo[j,i] / sd 
                 if abs(zscore) > maxzscore
                     adjzscore = maxzscore / (1 + abs(zscore) - maxzscore)
                     newsd = abs(ytkkmo[j,i]) / adjzscore
-                    rdiagadj[j,i] = newsd ^ 2 - sd ^ 2
+                    rdiagadj[j,i] += newsd ^ 2 - sd ^ 2
                 else 
-                    rdiagadj[j,i] = 0
+                    rdiagadj[j,i] += 0
                 end
             end
             Σ[j,j,i] += rdiagadj[j,i]
         end
-        k[:,:,i] = pkkmo[:,:,i] * hmat' / Σ[:,:,i]
+        k[:,:,i] = pkkmo[:,:,i] * hmat(i)' / Σ[:,:,i]
         for j in 1:dobs
             if zmiss[i,j]
                 k[:, j ,i] .= 0
             end
         end
         xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat) * pkkmo[:,:,i]
+        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(i)) * pkkmo[:,:,i]
     end
     
     stepdensity = Normal(0, betasd)
@@ -200,8 +205,8 @@ maxlogRt::Float64 = 1.6)
     end
 end
 
-function grad(pvar, z; γ::Float64 = 365.25 / 9,  dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, ρ::Float64 = 0.4, a::Float64 = 1., betasd::Float64 = 1.)
-    g = ForwardDiff.gradient(par -> obj(par, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd), pvar)
+function grad(pvar, z; γ::Float64 = 365.25 / 9,  dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1.)
+    g = ForwardDiff.gradient(par -> obj(par, z; N = N, η = η, γ = γ, a = a, betasd = betasd), pvar)
     g
 end
 

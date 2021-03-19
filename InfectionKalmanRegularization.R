@@ -160,6 +160,14 @@ iterate_f_and_P <-
     list(xhat = xhat_new, PN = PN_new)
   }
 
+detect_frac <- function(t,
+                        max_detect_par = 0.4,
+                        detect_inc_rate = 1.1,
+                        half_detect = 30,
+                        base_detect_frac = 0.1) {
+  max_detect_par * (t ^ detect_inc_rate)  / ((half_detect ^ detect_inc_rate) + (t ^ detect_inc_rate)) + base_detect_frac
+}
+
 kfnll <-
   function(bpars,
            logE0,
@@ -184,11 +192,7 @@ kfnll <-
            betasd = 1,
            maxzscore = Inf,
            just_nll = TRUE,
-           logmaxRt = 1.6,
-           max_detect_par = 0.4,
-           log_detect_inc_rate = 1.1,
-           log_half_detect = 30,
-           base_detect_frac = 0.1) {
+           logmaxRt = 1.6) {
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
     H0 = exp(logH0)
@@ -197,9 +201,6 @@ kfnll <-
     xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     
-    detect_frac <- function(t){
-       1/(1+exp(max_detect_par)) * (t ^ exp(log_detect_inc_rate))  / ( (exp(log_half_detect) ^ exp(log_detect_inc_rate)) + (t ^ exp(log_detect_inc_rate))) + exp(base_detect_frac)
-    }
     z <- data.matrix(z)
     is_z_na <- is.na(z)
     T <- nrow(z)
@@ -211,7 +212,7 @@ kfnll <-
     ytilde_kk <- ytilde_k <- array(NA_real_, dim = c(dobs, T))
     S <- array(NA_real_, dim = c(dobs, dobs, T))
     K <- array(NA_real_, dim = c(dstate, dobs, T))
-    rdiagadj <- array(NA_real_, dim = c(dobs, T))
+    rdiagadj <- array(1, dim = c(dobs, T))
     
     xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(dstate, T))
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
@@ -270,16 +271,16 @@ kfnll <-
       for (j in 1:dobs){
         if (is.na(z[i,j])){
           zscore <- 0
-          rdiagadj[j,i] <- 0
+          rdiagadj[j,i] <- rdiagadj[j,i] + 0
         } else {
           sd <- sqrt(S[j,j,i])
           zscore <- ytilde_k[j,i] / sd 
           if (abs(zscore) > maxzscore){
             adjzscore <- maxzscore / (1 + abs(zscore) - maxzscore)
             newsd <- abs(ytilde_k[j,i]) / adjzscore
-            rdiagadj[j,i] <- (newsd) ^ 2 - sd ^ 2
+            rdiagadj[j,i] <- rdiagadj[j,i] + (newsd) ^ 2 - sd ^ 2
           } else {
-            rdiagadj[j,i] <- 0
+            rdiagadj[j,i] <- rdiagadj[j,i] + 0
           }
         }
         S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
@@ -417,7 +418,6 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("N", p$N)
-  JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", data.matrix(y))
@@ -425,7 +425,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("betasd", betasd)
   nll <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.obj",
-    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
+    "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd)"
   ))
   nll
 }
@@ -437,7 +437,6 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("N", p$N)
-  JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
   JuliaCall::julia_assign("z", data.matrix(y))
@@ -445,7 +444,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.grad",
-    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
+    "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd)"
   ))
   g
 }
@@ -477,7 +476,6 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     bpars = p$bpars,
     logE0 = p$logE0,
     logH0 = p$logH0,
-    rho1 = p$rho1,
     logtauc = p$logtauc,
     logtauh = p$logtauh,
     logtaud = p$logtaud,
@@ -665,7 +663,6 @@ param_map <- function(x, w, fixed = wfixed){
   ret$loghfp <- w[7]
   ret$loggammahd <- w[8]
   ret$times <- x[, 1]
-  ret$rho1 <- fixed["rho1"]
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
@@ -700,13 +697,13 @@ fit_over_betagrid <- function(a, betagrid) {
       y = y,
       pm = param_map,
       fits[[i - 1]]$par,
-      invisible = 1
+      invisible = 0
     )
   }
   return(fits)
 }
 
-betagrid <- seq(0.001, 0.1, len = 10)
+betagrid <- seq(0.001, 0.1, len = 2)
 agrid <- c(0.94, 0.95)
 
 fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
@@ -736,7 +733,7 @@ nll <- calc_kf_nll(winit, x = x, y = y, param_map,
 
 
 fitind1 <- 1
-fitind2 <- 2
+fitind2 <- 1
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
                        betasd = betagrid[fitind2], a = agrid[fitind1],
                        fet)
@@ -748,12 +745,14 @@ abline(0, 1)
 qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3,3,]))
 abline(0,1 )
 
-
+rho_t <- detect_frac(seq_len(nrow(y)))
 plot(x[,1], y$cases, xlab = "Time", ylab = "Cases")
-pred_cases <- dets$xhat_kkmo["C",] * wfixed["rho1"] + dets$xhat_kkmo["Hnew",]
+pred_cases <- dets$xhat_kkmo["C",] * rho_t + dets$xhat_kkmo["Hnew",]
+est_cases <- dets$xhat_kkmo["C",] + dets$xhat_kkmo["Hnew",]
 se_cases <- sqrt(dets$S[1,1,])
 lines(x[,1], se_cases * 2 + pred_cases, col = "grey")
 lines(x[,1], pred_cases)
+lines(x[,1], est_cases, lty = 2)
 lines(x[,1], -se_cases * 2 + pred_cases, col = "grey")
 
 plot(x[,1], y$hospitalizations, xlab = "Time", 
