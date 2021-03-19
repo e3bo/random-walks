@@ -170,10 +170,9 @@ kfnll <-
            logtaud,
            logchp,
            loghfp,
+           loggammahd, 
            eta,
            gamma,
-           gamma_h,
-           gamma_d,
            N,
            z,
            t0,
@@ -190,6 +189,7 @@ kfnll <-
     E0 = exp(logE0)
     I0 = E0 * eta / gamma
     H0 = exp(logH0)
+    gamma_d <- gamma_h <- exp(loggammahd)
     D0 = H0 * gamma_h / gamma_d
     xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
@@ -217,7 +217,7 @@ kfnll <-
     R <- diag(exp(c(logtauc, logtauh, logtaud)))
     logbeta[T] <- bpars[T]
     for (i in seq(T - 1, 1)){
-      logbeta[i] <- min((logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma), maxlogRt + log(gamma))
+      logbeta[i] <- min((logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma), logmaxRt + log(gamma))
     }
 
     for (i in seq(1, T)) {
@@ -406,28 +406,26 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$bpars)
+  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$loggammahd, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("N", p$N)
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("γd", p$gamma_d)
-  JuliaCall::julia_assign("γh", p$gamma_h)
   JuliaCall::julia_assign("z", data.matrix(y))
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   nll <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.obj",
-    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, γd = γd, γh = γh, a = a, betasd = betasd)"
+    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
   ))
   nll
 }
 
 calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$bpars)
+  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$loggammahd, p$bpars)
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
@@ -435,14 +433,12 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("ρ", p$rho1)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("γd", p$gamma_d)
-  JuliaCall::julia_assign("γh", p$gamma_h)
   JuliaCall::julia_assign("z", data.matrix(y))
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.grad",
-    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, γd = γd, γh = γh, a = a, betasd = betasd)"
+    "(pvar, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
   ))
   g
 }
@@ -480,10 +476,9 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     logtaud = p$logtaud,
     logchp = p$logchp,
     loghfp = p$loghfp,
+    loggammahd = p$loggammahd,
     eta = p$eta,
     gamma = p$gamma,
-    gamma_d = p$gamma_d,
-    gamma_h = p$gamma_h,
     N = p$N,
     z = y,
     t0 = p$t0,
@@ -608,7 +603,7 @@ tdat3 <- tdat2 %>%
 
 obs_data <- left_join(jhu_data, tdat3, by = "target_end_date")
 
-wind <- obs_data %>% filter(target_end_date >= "2020-03-01")
+wind <- obs_data %>% slice(which(obs_data$cases == 1):n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
@@ -647,12 +642,13 @@ winit <- c(
   logtaud = log(tau_deaths_init),
   logchp = log(chp_init),
   loghfp = log(hfp_init),
+  loggammahd = log(365.25 / 2),
   binit
 )
 
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
-  ret$bpars <- w[seq(8, length(w))]
+  ret$bpars <- w[seq(9, length(w))]
   ret$logE0 <- w[1]
   ret$logH0 <- w[2]
   ret$logtauc <- w[3]
@@ -660,12 +656,11 @@ param_map <- function(x, w, fixed = wfixed){
   ret$logtaud <- w[5]
   ret$logchp <- w[6]
   ret$loghfp <- w[7]
+  ret$loggammahd <- w[8]
   ret$times <- x[, 1]
   ret$rho1 <- fixed["rho1"]
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
-  ret$gamma_h <- fixed["gamma_h"]
-  ret$gamma_d <- fixed["gamma_d"]
   ret$N <- fixed["N"]
   ret$t0 <- fixed["t0"]
   ret
@@ -685,8 +680,9 @@ fit_over_betagrid <- function(a, betagrid) {
     y = y,
     pm = param_map,
     winit,
-    invisible = 1
+    invisible = 0
   )
+  return(fits)
   for (i in seq(2, length(betagrid))) {
     fits[[i]] <- lbfgs::lbfgs(
       calc_kf_nll,
@@ -698,7 +694,7 @@ fit_over_betagrid <- function(a, betagrid) {
       y = y,
       pm = param_map,
       fits[[i - 1]]$par,
-      invisible = 1
+      invisible = 0
     )
   }
   return(fits)
