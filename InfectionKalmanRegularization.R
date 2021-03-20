@@ -7,6 +7,7 @@ source("covidhub-common.R")
 
 JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
 JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
+JuliaCall::julia_eval("using DataFrames")
 
 ## main functions
 
@@ -414,15 +415,36 @@ moving_average <- function(x, n = 7) {
 
 calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$loggammahd, p$bpars)
+  if (ncol(y) == 3) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logH0,
+        p$logtauc,
+        p$logtauh,
+        p$logtaud,
+        p$logchp,
+        p$loghfp,
+        p$loggammahd,
+        p$bpars
+      )
+  } else if(ncol(y) == 1 && "cases" %in% names(y)) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logtauc,
+        p$bpars
+      )
+  }
   JuliaCall::julia_assign("pvar", pvar)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("N", p$N)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", data.matrix(y))
+  JuliaCall::julia_assign("z", y)
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
+  
   nll <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.obj",
     "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd)"
@@ -439,7 +461,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   JuliaCall::julia_assign("N", p$N)
   JuliaCall::julia_assign("η", p$eta)
   JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", data.matrix(y))
+  JuliaCall::julia_assign("z", y)
   JuliaCall::julia_assign("a", a)
   JuliaCall::julia_assign("betasd", betasd)
   g <- JuliaCall::julia_eval(paste0(

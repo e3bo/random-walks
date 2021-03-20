@@ -1,5 +1,6 @@
 module InfectionKalman
 
+using DataFrames
 using Distributions
 using ForwardDiff
 using LinearAlgebra
@@ -18,25 +19,37 @@ function hmat(t)
     return H
 end
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6)
+function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
 
-    γh = exp(pvar[8])
-    γd = exp(pvar[8])
+    if size(z, 2) == 3
+        γh = exp(pvar[8])
+        γd = exp(pvar[8])
     
-    # prior for time 0
-    l0 = exp(pvar[1])
-    h0 = exp(pvar[2])
+        l0 = exp(pvar[1])
+        h0 = exp(pvar[2])
+        d0 = h0 * γh / γd
+    
+        τc = exp(pvar[3])
+        τh = exp(pvar[4])
+        τd = exp(pvar[5])
+    
+        chp = exp(pvar[6])
+        hfp = exp(pvar[7])
+
+        bvec = pvar[9:end]
+    elseif size(z, 2) == 1 && "cases" in names(z)
+        l0 = exp(pvar[1])
+        τc = exp(pvar[2])
+        
+        z[!, "hospitalizations"] .= missing
+        z[!, "deaths"] .= missing
+    
+        bvec = pvar[3:end]
+    end
+    z = Matrix(select(z, :cases, :hospitalizations, :deaths)) # ensure assumed column order
+    
+    
     d0 = h0 * γh / γd
-    
-    τc = exp(pvar[3])
-    τh = exp(pvar[4])
-    τd = exp(pvar[5])
-    
-    chp = exp(pvar[6])
-    hfp = exp(pvar[7])
-
-    bvec = pvar[9:end]
-    
     y0 = l0 * η / γ
     
     x0 = [N - l0 - y0 - h0 - d0; l0; y0; 0; 0; h0; d0; 0]
