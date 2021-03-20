@@ -48,7 +48,6 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     end
     z = Matrix(select(z, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
-    
     d0 = h0 * γh / γd
     y0 = l0 * η / γ
     

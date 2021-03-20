@@ -202,7 +202,12 @@ kfnll <-
     xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     
-    z <- data.matrix(z)
+    if (ncol(z) == 1 && "cases" %in% names(z)){
+      z$hospitalizations <- NA
+      z$deaths <- NA
+    }
+    
+    z <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
     is_z_na <- is.na(z)
     T <- nrow(z)
     dobs <- ncol(z)
