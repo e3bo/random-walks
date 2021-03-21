@@ -72,14 +72,9 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     xkkmo = Array{eltype(bvec)}(undef, dstate, nobs)
     pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
-    logβ = Array{eltype(bvec)}(undef, nobs)
+    logβ = bvec
 
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
-
-    logβ[nobs] = bvec[nobs]
-    for i in (nobs - 1):-1:1
-        logβ[i] = min((logβ[i + 1] - log(γ) - bvec[i]) / a + log(γ), maxlogRt + log(γ))
-    end
 
     for i in 1:nobs
         if i == 1
@@ -116,6 +111,10 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         hfp*γh*h - γd*d,
         γd*d
         ]
+        if i == 1
+            println(logβ)
+            println(vf)
+        end
         xnext = xlast + dt * vf
         for j in 1:dstate
             if xnext[j] < 0
@@ -200,8 +199,9 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     
     stepdensity = Normal(0, betasd)
     rwlik = 0
-    for bval in bvec[1:(end-1)]
-        rwlik += logpdf(stepdensity, bval)
+    for i in 1:(nobs - 1)
+        step = (logβ[i + 1] - log(γ)) - a * (logβ[i] - log(γ))
+        rwlik += logpdf(stepdensity, step)
     end
     kflik = 0
     for i in 1:nobs

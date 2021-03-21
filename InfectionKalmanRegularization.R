@@ -170,7 +170,7 @@ detect_frac <- function(t,
 }
 
 kfnll <-
-  function(bpars,
+  function(logbeta,
            logE0,
            logH0,
            logtauc,
@@ -214,7 +214,6 @@ kfnll <-
     dstate <- length(xhat0)
     stopifnot(T > 0)
     
-    logbeta <- array(NA_real_, dim = c(T))
     ytilde_kk <- ytilde_k <- array(NA_real_, dim = c(dobs, T))
     S <- array(NA_real_, dim = c(dobs, dobs, T))
     K <- array(NA_real_, dim = c(dstate, dobs, T))
@@ -230,10 +229,7 @@ kfnll <-
              c(0, 0, 0,    0, 0, 0, 0, 1))
     }
     R <- diag(exp(c(logtauc, logtauh, logtaud)))
-    logbeta[T] <- bpars[T]
-    for (i in seq(T - 1, 1)){
-      logbeta[i] <- min((logbeta[i + 1] - log (gamma) - bpars[i]) / a + log(gamma), logmaxRt + log(gamma))
-    }
+    
 
     for (i in seq(1, T)) {
       if (i == 1) {
@@ -306,6 +302,12 @@ kfnll <-
         H(i) %*% xhat_kk[, i, drop = FALSE]
     }
     
+    rwlik <- 0
+    for (i in 1:(T - 1)){
+      step <- (logbeta[i + 1] - log(gamma)) - a * (logbeta[i] - log(gamma))
+      rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
+    }
+    
     nll <- 0
     for (i in seq(1, T)){
       sel <- !is_z_na[i, ]
@@ -313,7 +315,7 @@ kfnll <-
         t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] + 
         log(det(S[,,i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
     }
-    nll <- 0.5 * nll - sum(dnorm(bpars[-T], sd = betasd, log = TRUE))
+    nll <- 0.5 * nll - rwlik
 
     if (!just_nll) {
       if (!is.null(fets)) {
@@ -500,7 +502,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
 kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
   p <- pm(x, w)
   nll <- kfnll(
-    bpars = p$bpars,
+    logbeta = p$bpars,
     logE0 = p$logE0,
     logH0 = p$logH0,
     logtauc = p$logtauc,
@@ -664,7 +666,7 @@ H0init <- (mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]) 
 chp_init <- sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases, na.rm = TRUE)
 hfp_init <- sum(y$deaths, na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE)
 
-binit <- c(rep(0, wsize - 1), log(wfixed["gamma"]))
+binit <- unname(rep(log(wfixed["gamma"]), wsize))
 names(binit) <- paste0("b", seq_len(wsize))
 winit <- c(
   logE0 = log(E0init),
@@ -699,13 +701,13 @@ param_map <- function(x, w, fixed = wfixed){
 
 tictoc::tic("optimization")
 
-fit_over_betagrid <- function(a, betagrid) {
+fit_over_betagrid <- function(a, betasdgrid) {
   fits <- list()
   fits[[1]] <- lbfgs::lbfgs(
     calc_kf_nll,
     calc_kf_grad,
     x = x,
-    betasd = betagrid[1],
+    betasd = betasdgrid[1],
     epsilon = 1e-3,
     a = a,
     y = y,
@@ -718,7 +720,7 @@ fit_over_betagrid <- function(a, betagrid) {
       calc_kf_nll,
       calc_kf_grad,
       x = x,
-      betasd = betagrid[i],
+      betasd = betasdgrid[i],
       epsilon = 1e-3,
       a = a,
       y = y,
@@ -730,10 +732,10 @@ fit_over_betagrid <- function(a, betagrid) {
   return(fits)
 }
 
-betagrid <- seq(0.001, 0.1, len = 2)
+betasdgrid <- seq(0.001, 0.1, len = 2)
 agrid <- c(0.94, 0.95)
 
-fits <- map(agrid, fit_over_betagrid, betagrid = betagrid)
+fits <- map(agrid, fit_over_betagrid, betasdgrid = betasdgrid)
 tictoc::toc()
 
 ti <- max(wind$target_end_date) + lubridate::ddays(1)
