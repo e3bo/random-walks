@@ -441,6 +441,18 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$loggammahd,
         p$bpars
       )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    nll <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.obj",
+      "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+    ))
   } else if(ncol(y) == 1 && "cases" %in% names(y)) {
     pvar <-
       c(
@@ -448,20 +460,27 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$logtauc,
         p$bpars
       )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
+    JuliaCall::julia_assign("h0", exp(p$logH0))
+    JuliaCall::julia_assign("τh", exp(p$logtauh))
+    JuliaCall::julia_assign("τd", exp(p$logtaud))
+    JuliaCall::julia_assign("chp", exp(p$logchp))
+    JuliaCall::julia_assign("hfp", exp(p$loghfp))
+    nll <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.obj",
+      "(pvar, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τh, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+    ))
   }
-  JuliaCall::julia_assign("pvar", pvar)
-  JuliaCall::julia_assign("η", p$eta)
-  JuliaCall::julia_assign("N", p$N)
-  JuliaCall::julia_assign("η", p$eta)
-  JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", y)
-  JuliaCall::julia_assign("a", a)
-  JuliaCall::julia_assign("betasd", betasd)
-  
-  nll <- JuliaCall::julia_eval(paste0(
-    "InfectionKalman.obj",
-    "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = false)"
-  ))
+
   nll
 }
 
