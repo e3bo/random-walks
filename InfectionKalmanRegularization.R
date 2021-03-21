@@ -486,20 +486,58 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
 
 calc_kf_grad <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  pvar <- c(p$logE0, p$logH0, p$logtauc, p$logtauh, p$logtaud, p$logchp, p$loghfp, p$loggammahd, p$bpars)
-  JuliaCall::julia_assign("pvar", pvar)
-  JuliaCall::julia_assign("η", p$eta)
-  JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("N", p$N)
-  JuliaCall::julia_assign("η", p$eta)
-  JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", y)
-  JuliaCall::julia_assign("a", a)
-  JuliaCall::julia_assign("betasd", betasd)
-  g <- JuliaCall::julia_eval(paste0(
-    "InfectionKalman.grad",
-    "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd)"
-  ))
+  if (ncol(y) == 3) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logH0,
+        p$logtauc,
+        p$logtauh,
+        p$logtaud,
+        p$logchp,
+        p$loghfp,
+        p$loggammahd,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.grad",
+      "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+    ))
+  } else if(ncol(y) == 1 && "cases" %in% names(y)) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logtauc,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
+    JuliaCall::julia_assign("h0", exp(p$logH0))
+    JuliaCall::julia_assign("τh", exp(p$logtauh))
+    JuliaCall::julia_assign("τd", exp(p$logtaud))
+    JuliaCall::julia_assign("chp", exp(p$logchp))
+    JuliaCall::julia_assign("hfp", exp(p$loghfp))
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.grad",
+      "(pvar, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τh, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+    ))
+  }
   g
 }
 
@@ -735,7 +773,7 @@ fit_over_betagrid <- function(a, betasdgrid) {
     betasd = betasdgrid[1],
     epsilon = 1e-3,
     a = a,
-    y = y,
+    y = y[, "cases"],
     pm = param_map,
     winit,
     invisible = 1
@@ -748,7 +786,7 @@ fit_over_betagrid <- function(a, betasdgrid) {
       betasd = betasdgrid[i],
       epsilon = 1e-3,
       a = a,
-      y = y,
+      y = y[, "cases"],
       pm = param_map,
       fits[[i - 1]]$par,
       invisible = 0

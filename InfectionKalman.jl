@@ -21,6 +21,7 @@ end
 
 function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
 
+    zloc = deepcopy(z)
     if size(z, 2) == 3
         γh = exp(pvar[8])
         γd = exp(pvar[8])
@@ -41,12 +42,12 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         l0 = exp(pvar[1])
         τc = exp(pvar[2])
         
-        z[!, "hospitalizations"] .= missing
-        z[!, "deaths"] .= missing
+        zloc[!, "hospitalizations"] .= missing
+        zloc[!, "deaths"] .= missing
     
         bvec = pvar[3:end]
     end
-    z = Matrix(select(z, :cases, :hospitalizations, :deaths)) # ensure assumed column order
+    zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
     d0 = h0 * γh / γd
     y0 = l0 * η / γ
@@ -55,15 +56,15 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
     
     dstate = size(x0, 1)
-    dobs = size(z, 2)
+    dobs = size(zloc, 2)
     r = Diagonal([τc, τh, τd]) 
 
-    zmiss = [ismissing(x) for x in z]
-    zz = Array{eltype(z)}(undef, dobs)
+    zmiss = [ismissing(x) for x in zloc]
+    zz = Array{eltype(zloc)}(undef, dobs)
     maxzscore = Inf
 
     # filter (assuming first observation at time 1)
-    nobs = size(z, 1)
+    nobs = size(zloc, 1)
     rdiagadj = ones(eltype(bvec), dobs, nobs) # make non-zero to ensure Σ is not singular
     Σ = Array{eltype(bvec)}(undef, dobs, dobs, nobs)
     ytkkmo = Array{eltype(bvec)}(undef, dobs, nobs)
@@ -163,7 +164,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
             if zmiss[i,j]
                 zz[j] = 0
             else 
-                zz[j] = z[i,j]
+                zz[j] = zloc[i,j]
             end
         end       
         ytkkmo[:,i] = zz - hmat(i) * reshape(xkkmo[:,i], dstate, 1)
@@ -214,8 +215,8 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     end
 end
 
-function grad(pvar, z; γ::Float64 = 365.25 / 9,  dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1.)
-    g = ForwardDiff.gradient(par -> obj(par, z; N = N, η = η, γ = γ, a = a, betasd = betasd), pvar)
+function grad(pvar, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
+    g = ForwardDiff.gradient(par -> obj(par, z; N = N, η = η, γ = γ, a = a, betasd = betasd, dt = dt, ι = ι, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp), pvar)
     g
 end
 
