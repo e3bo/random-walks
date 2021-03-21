@@ -111,10 +111,6 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         hfp*γh*h - γd*d,
         γd*d
         ]
-        if i == 1
-            println(logβ)
-            println(vf)
-        end
         xnext = xlast + dt * vf
         for j in 1:dstate
             if xnext[j] < 0
@@ -132,7 +128,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
              hfp * γh * h / N,
              γd * d / N
         ]
-        
+
         q = [  f[1]+f[2]     -f[2]               0      0        0              0          0      0
                    -f[2] f[2]+f[3]           -f[3]      0        0              0          0      0
                        0     -f[3]  f[3]+f[4]+f[5]  -f[4]    -f[5]           -f[5]         0      0
@@ -150,6 +146,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
                    0    0          chp*γ     0     0     -γh    0 0  
                    0    0              0     0     0  hfp*γh  -γd 0
                    0    0              0     0     0       0   γd 0]
+                   
         
         dp = jac * plast + plast * jac' + q * N
         pnext = plast + dp * dt

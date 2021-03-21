@@ -126,7 +126,7 @@ iterate_f_and_P <-
           hfp * gamma_h * H / N,
           gamma_d * D / N
         )
-      
+
       Q <-
         rbind(
           c(f[1] + f[2],       -f[2],                  0,     0,     0,             0,           0,    0),
@@ -265,6 +265,12 @@ kfnll <-
       )
       xhat_kkmo[, i] <- XP$xhat
       P_kkmo[, , i] <- XP$PN
+      for (j in 1:dstate){
+        if (P_kkmo[j,j,i] < 0){
+          P_kkmo[j,,i] <- 0
+          P_kkmo[,j,i] <- 0
+        }
+      }
       
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
         H(i) %*% xhat_kkmo[, i, drop = FALSE]     
@@ -454,7 +460,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   
   nll <- JuliaCall::julia_eval(paste0(
     "InfectionKalman.obj",
-    "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd)"
+    "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = false)"
   ))
   nll
 }
