@@ -797,7 +797,7 @@ fit_over_betagrid <- function(a, betasdgrid) {
   return(fits)
 }
 
-betasdgrid <- seq(0.001, 0.1, len = 2)
+betasdgrid <- seq(0.001, 0.1, len = 10)
 agrid <- c(0.94, 0.95)
 
 fits <- map(agrid, fit_over_betagrid, betasdgrid = betasdgrid)
@@ -864,11 +864,6 @@ se_deaths <- sqrt(dets$S[3,3,])
 lines(x[,1], se_deaths * 2 + pred_deaths, col = "grey")
 lines(x[,1], pred_deaths)
 lines(x[,1], -se_deaths * 2 + pred_deaths, col = "grey")
-
-
-
-
-
 
 case_inds <- which(fet$target_wday == 7)
 case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
