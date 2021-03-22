@@ -331,7 +331,7 @@ kfnll <-
         for (j in seq_len(nsim)) {
           logbeta_fet <- numeric(nsimdays)
           logbeta_fet[1] <-
-            log(gamma) + a * (bpars[T] - log(gamma)) +  
+            log(gamma) + a * (logbeta[T] - log(gamma)) +  
             rnorm(1, mean = 0, sd = betasd)
           if (length(logbeta_fet) > 1) {
             for (jj in seq(2, length(logbeta_fet))) {
@@ -771,22 +771,24 @@ fit_over_betagrid <- function(a, betasdgrid) {
     calc_kf_grad,
     x = x,
     betasd = betasdgrid[1],
-    epsilon = 1e-3,
+    epsilon = 1e-1,
+    max_iterations = 1000,
     a = a,
-    y = y[, "cases"],
+    y = y[, ],
     pm = param_map,
     winit,
-    invisible = 1
+    invisible = 0
   )
-  for (i in seq(2, length(betagrid))) {
+  for (i in seq(2, length(betasdgrid))) {
     fits[[i]] <- lbfgs::lbfgs(
       calc_kf_nll,
       calc_kf_grad,
       x = x,
       betasd = betasdgrid[i],
-      epsilon = 1e-3,
+      epsilon = 1e-4,
+      max_iterations = 1000,
       a = a,
-      y = y[, "cases"],
+      y = y[, ],
       pm = param_map,
       fits[[i - 1]]$par,
       invisible = 0
