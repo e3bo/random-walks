@@ -1,5 +1,13 @@
 stages:
   forecast-2020-12-07-16:
+    cmd: fdt=2020-12-07 loc=16 Rscript write-formatted-forecast.R
+    wdir: ../..
+    deps:
+    - covidhub-common.R
+    - write-formatted-forecast.R
+    outs:
+    - forecasts/2020-12-07-fips16
+  fit-2020-12-07-16:
     cmd: fdt=2020-12-07 loc=16 Rscript InfectionKalmanRegularization.R
     wdir: ../..
     deps:
@@ -7,4 +15,4 @@ stages:
     - covidhub-common.R
     - hopkins/2020-12-07
     outs:
-    - forecasts/2020-12-07-fips16
+    - fits/2020-12-07-fips16

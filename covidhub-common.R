@@ -333,3 +333,22 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
     filter((nchar(location)) <= 2 | str_detect(target, "inc case$")) ## only case forecasts accepted for counties
 }
 
+
+param_map <- function(x, w, fixed = wfixed){
+  ret <- list()
+  ret$bpars <- w[seq(9, length(w))]
+  ret$logE0 <- w[1]
+  ret$logH0 <- w[2]
+  ret$logtauc <- w[3]
+  ret$logtauh <- w[4]
+  ret$logtaud <- w[5]
+  ret$logchp <- w[6]
+  ret$loghfp <- w[7]
+  ret$loggammahd <- w[8]
+  ret$times <- x[, 1]
+  ret$eta <- fixed["eta"]
+  ret$gamma <- fixed["gamma"]
+  ret$N <- fixed["N"]
+  ret$t0 <- fixed["t0"]
+  ret
+}
