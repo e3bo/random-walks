@@ -1,0 +1,535 @@
+#!/usr/bin/env R
+
+tictoc::tic()
+
+suppressPackageStartupMessages(library(tidyverse))
+source("covidhub-common.R")
+
+create_forecast_df <- function(means,
+                               vars,
+                               target_type = "cases",
+                               fdt = forecast_date,
+                               location) {
+  # takes in a vector of means and variance for the normal predicted
+  # distribution of the next n weeks, and outputs a representation of
+  # this forecast in the standard covidhub format
+  if (target_type == "cases") {
+    probs <- c(0.025, 0.100, 0.250, 0.500, 0.750, 0.900, 0.975)
+    maxn <- 8
+    targ_string <- " wk ahead inc case"
+    stride <- 7
+  } else if (target_type == "hospitalizations") {
+    probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+    maxn <- 129
+    targ_string <- " day ahead inc hosp"
+    stride <- 1
+  } else if (target_type == "inc deaths") {
+    probs <- c(0.01, 0.025, seq(0.05, 0.95, by = 0.05), 0.975, 0.99)
+    maxn <- 8
+    targ_string <- " wk ahead inc death"
+    stride <- 7
+  } else {
+    stop("not implemented")
+  }
+  n <- nrow(means)
+  stopifnot(nrow(vars) == n)
+  stopifnot(n <= maxn)
+  step_ahead <- seq_len(n)
+  targets <- paste0(step_ahead, targ_string)
+  dte <- lubridate::ymd(fdt)
+  if (target_type %in% c("cases", "inc deaths")) {
+    fdt_wd <- lubridate::wday(dte) # 1 = Sunday, 7 = Sat.
+    fdt_sun <- lubridate::ymd(dte) - (fdt_wd - 1)
+    take_back_step <- fdt_wd <= 2
+    if (take_back_step) {
+      week0_sun <- fdt_sun - 7
+    } else {
+      week0_sun <- fdt_sun
+    }
+    time_zero <- week0_sun + 6
+  } else {
+    time_zero <- dte
+  }
+  t1 <- expand_grid(quantile = probs, h = step_ahead) %>%
+    mutate(target = paste0(h, targ_string),
+           target_end_date = time_zero + h * stride) %>%
+    add_column(
+      location = as.character(location),
+      forecast_date = fdt,
+      type = "quantile"
+    ) %>%
+    mutate(q1 = map2_dbl(
+      quantile,
+      h,
+      ~ KScorrect::qmixnorm(
+        p = .x,
+        mean = means[.y,],
+        sd = sqrt(vars[.y,]),
+        pro = rep(1, ncol(means)),
+        expand = 0.0
+      )
+    ),
+    value = ifelse(q1 < 0, 0, q1)) %>%
+    mutate(value = format(value, digits = 4),
+           quantile = as.character(quantile))
+  t2 <- t1 %>% filter(quantile == "0.5") %>%
+    mutate(type = "point",
+           quantile = NA_character_)
+  bind_rows(t1, t2) %>% dplyr::select(forecast_date,
+                                      target,
+                                      target_end_date,
+                                      location,
+                                      type,
+                                      quantile,
+                                      value)
+}
+
+write_forecasts <- function(fits, fet, agrid, betagrid) {
+  n1 <- length(agrid)
+  n2 <- length(betagrid)
+  for (ind1 in 1:n1) {
+    for (ind2 in 1:n2) {
+      wfit <- fits[[ind1]][[ind2]]$par
+      a <- agrid[ind1]
+      betasd <- betagrid[ind2]
+      dets <-
+        kf_nll_details(
+          wfit,
+          x,
+          y,
+          param_map,
+          betasd = betasd,
+          a = a,
+          fet = fet
+        )
+      case_inds <- which(fet$target_wday == 7)
+      case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
+                                      vars = dets$sim_cov[1, 1, case_inds,],
+                                      location = forecast_loc)
+      stopifnot(setequal(
+        fet$target_end_dates[case_inds],
+        case_fcst$target_end_date %>% unique()
+      ))
+      hosp_inds <- fet$target_end_dates %in% 
+        (lubridate::ymd(forecast_date) + 1:28)
+      hosp_fcst <- create_forecast_df(means = dets$sim_means[2, hosp_inds,],
+                                      vars = dets$sim_cov[2, 2, hosp_inds,],
+                                      target_type = "hospitalizations",
+                                      location = forecast_loc)
+      stopifnot(setequal(
+        fet$target_end_dates[hosp_inds],
+        hosp_fcst$target_end_date %>% unique()
+      ))
+      
+      death_inds <- case_inds
+      death_fcst <- create_forecast_df(means = dets$sim_means[3, death_inds,],
+                                       vars = dets$sim_cov[3, 3, death_inds,],
+                                       target_type = "inc deaths",
+                                       location = forecast_loc)
+      fcst <- bind_rows(case_fcst, hosp_fcst, death_fcst)
+      
+      lambda <- 1 / betasd
+      fcst_dir <-
+        file.path(
+          "forecasts",
+          paste0(
+            forecast_date,
+            "-fips",
+            forecast_loc))
+      
+      fcst_name <- paste0("lambda",
+                          sprintf("%06.2f", lambda),
+                          "-a",
+                          sprintf("%02.2f", a),
+                          "-CEID-InfectionKalman.csv"
+      )
+      fcst_path <- file.path(fcst_dir, fcst_name)
+      if (!dir.exists(fcst_dir))
+        dir.create(fcst_dir, recursive = TRUE)
+      write_csv(x = fcst, path = fcst_path)
+    }
+  }
+}
+
+kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
+  p <- pm(x, w)
+  nll <- kfnll(
+    logbeta = p$bpars,
+    logE0 = p$logE0,
+    logH0 = p$logH0,
+    logtauc = p$logtauc,
+    logtauh = p$logtauh,
+    logtaud = p$logtaud,
+    logchp = p$logchp,
+    loghfp = p$loghfp,
+    loggammahd = p$loggammahd,
+    eta = p$eta,
+    gamma = p$gamma,
+    N = p$N,
+    z = y,
+    t0 = p$t0,
+    times = p$times,
+    fet = fet,
+    just_nll = FALSE,
+    fet_zero_cases_deaths = "weekly",
+    nsim = 20,
+    betasd = betasd,
+    a = a
+  )
+  nll
+}
+
+iterate_f_and_P <-
+  function(xhat,
+           PN,
+           eta,
+           gamma,
+           gamma_d,
+           gamma_h,
+           chp,
+           hfp,
+           N,
+           beta_t,
+           time.steps) {
+    P <- PN / N
+    dt <- diff(time.steps)
+    vf <-  with(as.list(c(xhat, beta_t)), {
+      F <- rbind(
+        c(-beta_t * I / N,    0,    -beta_t * S / N, 0, 0,             0,        0, 0),
+        c( beta_t * I / N, -eta,     beta_t * S / N, 0, 0,             0,        0, 0),
+        c(              0,  eta,             -gamma, 0, 0,             0,        0, 0),
+        c(              0,    0,  (1 - chp) * gamma, 0, 0,             0,        0, 0),
+        c(              0,    0,        chp * gamma, 0, 0,             0,        0, 0),
+        c(              0,    0,        chp * gamma, 0, 0,      -gamma_h,        0, 0),
+        c(              0,    0,                  0, 0, 0, hfp * gamma_h, -gamma_d, 0),
+        c(              0,    0,                  0, 0, 0,             0,  gamma_d, 0))
+      
+      f <-
+        c(
+          0,
+          beta_t * (S / N) * (I / N),
+          eta * E / N,
+          (1 - chp) * gamma * I / N,
+          chp * gamma * I / N,
+          (1 - hfp) * gamma_h * H / N,
+          hfp * gamma_h * H / N,
+          gamma_d * D / N
+        )
+      
+      Q <-
+        rbind(
+          c(f[1] + f[2],       -f[2],                  0,     0,     0,             0,           0,    0),
+          c(      -f[2], f[2] + f[3],              -f[3],     0,     0,             0,           0,    0),
+          c(          0,       -f[3], f[3] + f[4] + f[5], -f[4], -f[5],         -f[5],           0,    0),
+          c(          0,           0,              -f[4],  f[4],     0,             0,           0,    0),
+          c(          0,           0,              -f[5],     0,  f[5],             0,           0,    0),
+          c(          0,           0,              -f[5],     0,     0,f[7]+f[5]+f[6],       -f[7],    0),
+          c(          0,           0,                  0,     0,     0,         -f[7], f[8] + f[7], -f[8]),
+          c(          0,           0,                  0,     0,     0,             0,       -f[8],  f[8])
+        )
+      
+      dS <- -beta_t * S * I / N
+      dE <- beta_t * S * I / N - eta * E
+      dI <- eta * E -  gamma * I
+      dC <- gamma * (1 - chp) * I
+      dHnew <- gamma * chp * I
+      dH <- gamma * chp * I - gamma_h * H
+      dD <- gamma_h * H * hfp - gamma_d * D
+      dDrep <- gamma_d * D
+      
+      dP <-  F %*% P + P %*% t(F) + Q
+      
+      list(vf = c(dS, dE, dI, dC, dHnew, dH, dD, dDrep),
+           dP = dP)
+    })
+    xhat_new <- xhat + vf$vf * dt
+    xhat_new[xhat_new < 0] <- 0
+    P_new <- P + vf$dP * dt
+    names(xhat_new) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
+    PN_new <- P_new * N
+    list(xhat = xhat_new, PN = PN_new)
+  }
+
+detect_frac <- function(t,
+                        max_detect_par = 0.4,
+                        detect_inc_rate = 1.1,
+                        half_detect = 30,
+                        base_detect_frac = 0.1) {
+  max_detect_par * (t ^ detect_inc_rate)  / ((half_detect ^ detect_inc_rate) + (t ^ detect_inc_rate)) + base_detect_frac
+}
+
+kfnll <-
+  function(logbeta,
+           logE0,
+           logH0,
+           logtauc,
+           logtauh,
+           logtaud,
+           logchp,
+           loghfp,
+           loggammahd, 
+           eta,
+           gamma,
+           N,
+           z,
+           t0,
+           times,
+           Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
+           fets = NULL,
+           fet_zero_cases_deaths = "daily",
+           nsim,
+           a = .98,
+           betasd = 1,
+           maxzscore = Inf,
+           just_nll = TRUE,
+           logmaxRt = 1.6) {
+    E0 = exp(logE0)
+    I0 = E0 * eta / gamma
+    H0 = exp(logH0)
+    gamma_d <- gamma_h <- exp(loggammahd)
+    D0 = H0 * gamma_h / gamma_d
+    xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
+    names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
+    
+    if (ncol(z) == 1 && "cases" %in% names(z)){
+      z$hospitalizations <- NA
+      z$deaths <- NA
+    }
+    
+    z <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
+    is_z_na <- is.na(z)
+    T <- nrow(z)
+    dobs <- ncol(z)
+    dstate <- length(xhat0)
+    stopifnot(T > 0)
+    
+    ytilde_kk <- ytilde_k <- array(NA_real_, dim = c(dobs, T))
+    S <- array(NA_real_, dim = c(dobs, dobs, T))
+    K <- array(NA_real_, dim = c(dstate, dobs, T))
+    rdiagadj <- array(1, dim = c(dobs, T))
+    
+    xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(dstate, T))
+    rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
+    P_kk <- P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
+    
+    H <- function(day){
+      rbind(c(0, 0, 0, detect_frac(day), 1, 0, 0, 0), 
+            c(0, 0, 0,    0, 1, 0, 0, 0),
+            c(0, 0, 0,    0, 0, 0, 0, 1))
+    }
+    R <- diag(exp(c(logtauc, logtauh, logtaud)))
+    
+    
+    for (i in seq(1, T)) {
+      if (i == 1) {
+        xhat_init <- xhat0
+        PNinit <- Phat0
+        time.steps <- c(t0, times[1])
+      } else {
+        xhat_init <- xhat_kk[, i - 1]
+        PNinit <- P_kk[, , i - 1]
+        time.steps <- c(times[i - 1], times[i])
+      }
+      
+      xhat_init["C"] <- 0
+      xhat_init["Hnew"] <- 0
+      xhat_init["Drep"] <- 0
+      
+      PNinit[, 4] <- PNinit[4,] <- 0
+      PNinit[, 5] <- PNinit[5,] <- 0
+      PNinit[, 8] <- PNinit[8,] <- 0
+      
+      XP <- iterate_f_and_P(
+        xhat_init,
+        PN = PNinit,
+        eta = eta,
+        gamma = gamma,
+        gamma_d = gamma_d,
+        gamma_h = gamma_h,
+        chp = exp(logchp),
+        hfp = exp(loghfp),
+        N = N,
+        beta_t = exp(logbeta[i]),
+        time.steps = time.steps
+      )
+      xhat_kkmo[, i] <- XP$xhat
+      P_kkmo[, , i] <- XP$PN
+      for (j in 1:dstate){
+        if (P_kkmo[j,j,i] < 0){
+          P_kkmo[j,,i] <- 0
+          P_kkmo[,j,i] <- 0
+        }
+      }
+      
+      ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
+        H(i) %*% xhat_kkmo[, i, drop = FALSE]     
+      S[, , i] <- H(i) %*% P_kkmo[, , i] %*% t(H(i)) + R
+      
+      for (j in 1:dobs){
+        if (is.na(z[i,j])){
+          zscore <- 0
+          rdiagadj[j,i] <- rdiagadj[j,i] + 0
+        } else {
+          sd <- sqrt(S[j,j,i])
+          zscore <- ytilde_k[j,i] / sd 
+          if (abs(zscore) > maxzscore){
+            adjzscore <- maxzscore / (1 + abs(zscore) - maxzscore)
+            newsd <- abs(ytilde_k[j,i]) / adjzscore
+            rdiagadj[j,i] <- rdiagadj[j,i] + (newsd) ^ 2 - sd ^ 2
+          } else {
+            rdiagadj[j,i] <- rdiagadj[j,i] + 0
+          }
+        }
+        S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
+      }
+      K[, , i] <- P_kkmo[, , i] %*% t(H(i)) %*% solve(S[, , i])
+      desel <- is_z_na[i, ]
+      K[, desel, i] <- 0
+      
+      xhat_kk[, i] <-
+        xhat_kkmo[, i, drop = FALSE] +
+        K[, !desel, i] %*% ytilde_k[!desel, i, drop = FALSE]
+      
+      xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
+      P_kk[, , i] <-
+        (diag(dstate) - K[, , i] %*% H(i)) %*% P_kkmo[, , i]
+      ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
+        H(i) %*% xhat_kk[, i, drop = FALSE]
+    }
+    
+    rwlik <- 0
+    for (i in 1:(T - 1)){
+      step <- (logbeta[i + 1] - log(gamma)) - a * (logbeta[i] - log(gamma))
+      rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
+    }
+    
+    nll <- 0
+    for (i in seq(1, T)){
+      sel <- !is_z_na[i, ]
+      nll <- nll + 
+        t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] + 
+        log(det(S[,,i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
+    }
+    nll <- 0.5 * nll - rwlik
+    
+    if (!just_nll) {
+      if (!is.null(fets)) {
+        nsimdays <- nrow(fets)
+        sim_means <- array(NA_real_, dim = c(dobs, nsimdays, nsim))
+        sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays, nsim))
+        for (j in seq_len(nsim)) {
+          logbeta_fet <- numeric(nsimdays)
+          logbeta_fet[1] <-
+            log(gamma) + a * (logbeta[T] - log(gamma)) +  
+            rnorm(1, mean = 0, sd = betasd)
+          if (length(logbeta_fet) > 1) {
+            for (jj in seq(2, length(logbeta_fet))) {
+              logbeta_fet[jj] <-
+                log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + 
+                rnorm(1, mean = 0, sd = betasd)
+            }
+          }
+          xhat_init <- xhat_kk[, T]
+          PNinit <- P_kk[, , T]
+          if (fet_zero_cases_deaths == "daily" ||
+              fets$target_wday[1] == 1) {
+            xhat_init["C"] <- 0
+            PNinit[, 4] <- PNinit[4,] <- 0
+            xhat_init["Drep"] <- 0
+            PNinit[, 8] <- PNinit[8,] <- 0 
+          }
+          xhat_init["Hnew"] <- 0
+          PNinit[, 5] <- PNinit[5,] <- 0
+          
+          XP <- iterate_f_and_P(
+            xhat_init,
+            PN = PNinit,
+            eta = eta,
+            gamma = gamma,
+            gamma_d = gamma_d,
+            gamma_h = gamma_h,
+            chp = exp(logchp),
+            hfp = exp(loghfp),
+            N = N,
+            beta_t = exp(logbeta_fet[1]),
+            time.steps = c(times[T], fets$target_end_times[1])
+          )
+          sim_means[, 1, j] <- H(T+1) %*% XP$xhat
+          sim_cov[, , 1, j] <- H(T+1) %*% XP$PN %*% t(H(T+1)) + R
+          for (i in seq_along(fets$target_end_times[-1])) {
+            xhat_init <- XP$xhat
+            PNinit <- XP$PN
+            if (fet_zero_cases_deaths == "daily" ||
+                fets$target_wday[i + 1] == 1) {
+              xhat_init["C"] <- 0
+              PNinit[, 4] <- PNinit[4,] <- 0
+              xhat_init["Drep"] <- 0
+              PNinit[, 8] <- PNinit[8,] <- 0
+            }
+            xhat_init["Hnew"] <- 0
+            PNinit[, 5] <- PNinit[5,] <- 0
+            
+            XP <-
+              iterate_f_and_P(
+                xhat_init,
+                PN = PNinit,
+                eta = eta,
+                gamma = gamma,
+                gamma_d = gamma_d,
+                gamma_h = gamma_h,
+                chp = exp(logchp),
+                hfp = exp(loghfp),
+                N = N,
+                beta_t = exp(logbeta_fet[i + 1]),
+                time.steps = c(fets$target_end_times[i], 
+                               fets$target_end_times[i + 1])
+              )
+            sim_means[, i + 1, j] <- H(T + i + 1) %*% XP$xhat
+            sim_cov[, , i + 1, j] <-
+              H(T + i + 1) %*% XP$PN %*% t(H(T + i + 1)) + R
+          }
+        }
+      } else {
+        sim_means <- sim_cov <- NULL
+      }
+      
+      list(
+        nll = nll,
+        xhat_kkmo = xhat_kkmo,
+        xhat_kk = xhat_kk,
+        P_kkmo = P_kkmo,
+        P_kk = P_kk,
+        ytilde_k = ytilde_k,
+        S = S,
+        sim_means = sim_means,
+        sim_cov = sim_cov,
+        logbeta = logbeta,
+        rdiagadj = rdiagadj
+      )
+    } else {
+      nll
+    }
+  }
+
+
+forecast_date <- Sys.getenv("fdt", unset = "2020-11-16")
+forecast_loc <- Sys.getenv("loc", unset = "36")
+
+fit_dir <-
+  file.path(
+    "fits",
+    paste0(
+      forecast_date,
+      "-fips",
+      forecast_loc))
+
+x <- readRDS(file.path(fit_dir, "x.rds"))
+y <- readRDS(file.path(fit_dir, "y.rds"))
+wfixed <- readRDS(file.path(fit_dir, "wfixed.rds"))
+fits <- readRDS(file.path(fit_dir, "fits.rds"))
+fet <- readRDS(file.path(fit_dir, "fet.rds"))
+agrid <- readRDS(file.path(fit_dir, "agrid.rds"))
+betasdgrid <- readRDS(file.path(fit_dir, "betasdgrid.rds"))
+
+
+write_forecasts(fits, fet, agrid, betasdgrid)
