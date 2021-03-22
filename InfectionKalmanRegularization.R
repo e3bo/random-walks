@@ -811,7 +811,7 @@ target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
 
 fet <- tibble(target_end_times, target_wday, target_end_dates)
-write_forecasts(fits, fet, agrid, betagrid)
+write_forecasts(fits, fet, agrid, betasdgrid)
 
 q("no")
 # View diagnostics
@@ -829,7 +829,7 @@ nll <- calc_kf_nll(winit, x = x, y = y, param_map,
 fitind1 <- 1
 fitind2 <- 1
 dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
-                       betasd = betagrid[fitind2], a = agrid[fitind1],
+                       betasd = betasdgrid[fitind2], a = agrid[fitind1],
                        fet)
 par(mfrow = c(1,1))
 qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1,1,]))

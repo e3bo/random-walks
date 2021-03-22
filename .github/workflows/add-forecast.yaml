@@ -17,7 +17,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-03-13
     strategy:
       matrix:
-        fips: ["36", "48"]
+        fips: ["36", "48", "06"]
         fdts: ["2020-12-07"]
       fail-fast: false
     steps:
