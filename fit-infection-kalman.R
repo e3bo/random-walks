@@ -190,9 +190,25 @@ tdat3 <- tdat2 %>%
   ) %>%
   select(target_end_date, hospitalizations)
 
+if(FALSE){
+vacc_ts <- read_csv("vaccine_data_us_timeline.csv") %>%
+  filter(FIPS == forecast_loc) %>%
+  select(Date, Doses_admin) %>%
+  rename(target_end_date=Date, doses = Doses_admin)
+
+obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>% 
+  left_join(vacc_ts, by = "target_end_date")
+
+
+
+}
+
 obs_data <- left_join(jhu_data, tdat3, by = "target_end_date")
 
-wind <- obs_data %>% slice(match(1, obs_data$cases):n())
+
+
+
+wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
