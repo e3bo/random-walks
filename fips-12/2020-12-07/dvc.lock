@@ -1,18 +1,38 @@
 forecast-2020-12-07-12:
-  cmd: fdt=2020-12-07 loc=12 Rscript InfectionKalmanRegularization.R
+  cmd: fdt=2020-12-07 loc=12 Rscript write-formatted-forecast.R
   deps:
-  - path: InfectionKalmanRegularization.R
-    md5: f90b2c6631383d77ed0b978d3ebba3dc
-    size: 15869
   - path: covidhub-common.R
-    md5: f20b6b459c901a0109be2e9b32b71b0d
-    size: 9944
+    md5: d1f53bbe17d2d1081e275885727ee3ad
+    size: 10346
+  - path: fits/2020-12-07-fips12/fit.RData
+    md5: 36fde0383bf1967fd1c437508dbc5051
+    size: 44830
+  - path: write-formatted-forecast.R
+    md5: 6eff37a8d20f566571ec53cf50b52121
+    size: 20429
+  outs:
+  - path: forecasts/2020-12-07-fips12
+    md5: dbc14a8f567c38fa4377f3eb50fdb1cf.dir
+    size: 1091144
+    nfiles: 20
+  - path: plots/2020-12-07-fips12
+    md5: b39895bdb4f30eb13dda5b71437e1d55.dir
+    size: 23983704
+    nfiles: 100
+fit-2020-12-07-12:
+  cmd: fdt=2020-12-07 loc=12 Rscript fit-infection-kalman.R
+  deps:
+  - path: covidhub-common.R
+    md5: d1f53bbe17d2d1081e275885727ee3ad
+    size: 10346
+  - path: fit-infection-kalman.R
+    md5: f471724e4e9f3dd0caf81c062883f524
+    size: 9142
   - path: hopkins/2020-12-07
     md5: 5b5d307b68b393c0dc8be402225174eb.dir
     size: 7661720
     nfiles: 8
   outs:
-  - path: forecasts/2020-12-07-fips12
-    md5: 8bc5dce40fef26e2663222560e89275e.dir
-    size: 42728
-    nfiles: 20
+  - path: fits/2020-12-07-fips12/fit.RData
+    md5: 36fde0383bf1967fd1c437508dbc5051
+    size: 44830
