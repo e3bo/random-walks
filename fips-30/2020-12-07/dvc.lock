@@ -12,12 +12,12 @@ forecast-2020-12-07-30:
     size: 20429
   outs:
   - path: forecasts/2020-12-07-fips30
-    md5: d9bae09d5185d9e2519ca4e61390d9aa.dir
-    size: 1096072
+    md5: a5d6b878d1036a5125f62727537a30ae.dir
+    size: 1098088
     nfiles: 20
   - path: plots/2020-12-07-fips30
-    md5: 500a6b76107f8ec6ffd35fc3e9bb8003.dir
-    size: 25855924
+    md5: d263ad7c50e37580cba9c2a0bb46266c.dir
+    size: 25656735
     nfiles: 100
 fit-2020-12-07-30:
   cmd: fdt=2020-12-07 loc=30 Rscript fit-infection-kalman.R
@@ -26,8 +26,8 @@ fit-2020-12-07-30:
     md5: d1f53bbe17d2d1081e275885727ee3ad
     size: 10346
   - path: fit-infection-kalman.R
-    md5: f471724e4e9f3dd0caf81c062883f524
-    size: 9142
+    md5: 2ee1780b5824d4c3febe16e8f9fd0640
+    size: 9455
   - path: hopkins/2020-12-07
     md5: 5b5d307b68b393c0dc8be402225174eb.dir
     size: 7661720
