@@ -2,8 +2,8 @@
 
 set -e
 
-fdt="${fdt:-2020-07-26}"
-loc="${loc:-36}"
+fdt="${fdt:-2020-12-07}"
+loc="${loc:-06}"
 
 dirname=fips-${loc}/${fdt}
 mkdir -p $dirname
@@ -14,7 +14,7 @@ dvc run \
     -d fit-infection-kalman.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
-    -o fits/${fdt}-fips${loc} \
+    -o fits/${fdt}-fips${loc}/fit.RData \
     --force \
     -n fit-$fdt-$loc \
     fdt=$fdt loc=$loc Rscript fit-infection-kalman.R
@@ -23,7 +23,9 @@ dvc run \
     -w ../.. \
     -d write-formatted-forecast.R \
     -d covidhub-common.R \
+    -d fits/${fdt}-fips${loc}/fit.RData \
     -o forecasts/${fdt}-fips${loc} \
+    -o plots/${fdt}-fips${loc} \
     --force \
     -n forecast-$fdt-$loc \
     fdt=$fdt loc=$loc Rscript write-formatted-forecast.R

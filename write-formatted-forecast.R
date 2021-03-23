@@ -102,6 +102,7 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
           a = a,
           fet = fet
         )
+      make_fit_plots(dets, x = x, a = a, betasd = betasd)
       case_inds <- which(fet$target_wday == 7)
       case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
                                       vars = dets$sim_cov[1, 1, case_inds,],
@@ -511,8 +512,141 @@ kfnll <-
     }
   }
 
+make_fit_plots <- function(dets, x, a, betasd) {
+  
+  plot_dir <-
+    file.path(
+      "plots",
+      paste0(
+        forecast_date,
+        "-fips",
+        forecast_loc),
+      paste0(
+        "lambda",
+        sprintf("%06.2f", 1 / betasd),
+        "-a",
+        sprintf("%02.2f", a)))
+  
+  if (!dir.exists(plot_dir))
+    dir.create(plot_dir, recursive = TRUE)
+  
+  plot_path1 <- file.path(plot_dir, "qqplots.png")
+  
+  png(
+    plot_path1,
+    width = 7.5,
+    height = 10,
+    units = "in",
+    res = 90
+  )
+  
+  par(mfrow = c(3, 1))
+  qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
+  abline(0, 1)
+  qqnorm(dets$ytilde_k[2, ] / sqrt(dets$S[2, 2, ]), sub = "Hospitalizations")
+  abline(0, 1)
+  qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
+  abline(0, 1)
+  dev.off()
+  
+  plot_path2 <- file.path(plot_dir, "fitted-time-series.png")
+  png(
+    plot_path2,
+    width = 7.5,
+    height = 10,
+    units = "in",
+    res = 90
+  )
+  par(mfrow = c(3, 1))
+  
+  
+  rho_t <- detect_frac(seq_len(nrow(y)))
+  plot(x[, 1], y$cases, xlab = "Time", ylab = "Cases")
+  pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
+  est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
+  se_cases <- sqrt(dets$S[1, 1, ])
+  lines(x[, 1], se_cases * 2 + pred_cases, col = "grey")
+  lines(x[, 1], pred_cases)
+  lines(x[, 1], est_cases, lty = 2)
+  lines(x[, 1],-se_cases * 2 + pred_cases, col = "grey")
+  
+  plot(x[, 1], y$hospitalizations, xlab = "Time",
+       ylab = "Hospitalizations")
+  pred_hosps <- dets$xhat_kkmo["Hnew", ]
+  se_hosps <- sqrt(dets$S[2, 2, ])
+  lines(x[, 1], se_hosps * 2 + pred_hosps, col = "grey")
+  lines(x[, 1], pred_hosps)
+  lines(x[, 1],-se_hosps * 2 + pred_hosps, col = "grey")
+  
+  plot(x[, 1], y$deaths, xlab = "Time",
+       ylab = "Deaths")
+  pred_deaths <- dets$xhat_kkmo["Drep", ]
+  se_deaths <- sqrt(dets$S[3, 3, ])
+  lines(x[, 1], se_deaths * 2 + pred_deaths, col = "grey")
+  lines(x[, 1], pred_deaths)
+  lines(x[, 1],-se_deaths * 2 + pred_deaths, col = "grey")
+  dev.off()
+  
+  plot_path3 <- file.path(plot_dir, "case-forecasts.png")
+  case_inds <- which(fet$target_wday == 7)
+  case_fcst <-
+    create_forecast_df(
+      means = dets$sim_means[1, case_inds, ],
+      vars = dets$sim_cov[1, 1, case_inds, ],
+      location = forecast_loc
+    )
+  p3 <- case_fcst %>%
+    ggplot(aes(
+      x = target_end_date,
+      y = as.numeric(value),
+      color = quantile
+    )) +
+    geom_line() + geom_point() + labs(y = "Weekly cases")
+  ggsave(plot_path3, p3)
+  
+  plot_path4 <- file.path(plot_dir, "hosp-forecasts.png")
+  hosp_inds <-
+    fet$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
+  stopifnot(sum(hosp_inds) == 28)
+  
+  hosp_fcst <-
+    create_forecast_df(
+      means = dets$sim_means[2, hosp_inds, ],
+      vars = dets$sim_cov[2, 2, hosp_inds, ],
+      target_type = "hospitalizations",
+      location = forecast_loc
+    )
+  
+  p4 <- hosp_fcst %>%
+    ggplot(aes(
+      x = target_end_date,
+      y = as.numeric(value),
+      color = quantile
+    )) +
+    geom_line() + geom_point() + labs(y = "Daily hospital admissions")
+  ggsave(plot_path4, p4)
+  
+  plot_path5 <- file.path(plot_dir, "death-forecasts.png")
+  death_fcst <-
+    create_forecast_df(
+      means = dets$sim_means[3, case_inds, ],
+      vars = dets$sim_cov[3, 3, case_inds, ],
+      target_type = "inc deaths",
+      location = forecast_loc
+    )
+  
+  p5 <- death_fcst %>%
+    ggplot(aes(
+      x = target_end_date,
+      y = as.numeric(value),
+      color = quantile
+    )) +
+    geom_line() + geom_point() + labs(y = "Weekly deaths")
+  
+  ggsave(filename = plot_path5, plot = p5)
+}
 
-forecast_date <- Sys.getenv("fdt", unset = "2020-11-16")
+forecast_date <- Sys.getenv("fdt", unset = "2020-12-07")
 forecast_loc <- Sys.getenv("loc", unset = "36")
 
 fit_dir <-
@@ -523,13 +657,5 @@ fit_dir <-
       "-fips",
       forecast_loc))
 
-x <- readRDS(file.path(fit_dir, "x.rds"))
-y <- readRDS(file.path(fit_dir, "y.rds"))
-wfixed <- readRDS(file.path(fit_dir, "wfixed.rds"))
-fits <- readRDS(file.path(fit_dir, "fits.rds"))
-fet <- readRDS(file.path(fit_dir, "fet.rds"))
-agrid <- readRDS(file.path(fit_dir, "agrid.rds"))
-betasdgrid <- readRDS(file.path(fit_dir, "betasdgrid.rds"))
-
-
+load(file.path(fit_dir, "fit.RData"))
 write_forecasts(fits, fet, agrid, betasdgrid)

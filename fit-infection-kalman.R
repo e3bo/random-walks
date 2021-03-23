@@ -150,7 +150,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
 
 ## main script
 
-forecast_date <- Sys.getenv("fdt", unset = "2020-11-16")
+forecast_date <- Sys.getenv("fdt", unset = "2020-12-07")
 forecast_loc <- Sys.getenv("loc", unset = "36")
 
 hopdir <- file.path("hopkins", forecast_date)
@@ -214,8 +214,11 @@ tau_cases_init <- var(y$cases, na.rm = TRUE)
 tau_hosp_init <- var(y$hospitalizations, na.rm = TRUE)
 tau_deaths_init <- var(y$deaths, na.rm = TRUE)
 
-E0init <- ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
-H0init <- (mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]) %>% unname()
+E0init <-
+  ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
+H0init <-
+  (mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]) %>% 
+  unname()
 
 chp_init <- sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases, na.rm = TRUE)
 hfp_init <- sum(y$deaths, na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE)
@@ -244,7 +247,7 @@ fit_over_betagrid <- function(a, betasdgrid) {
     x = x,
     betasd = betasdgrid[1],
     epsilon = 1e-1,
-    max_iterations = 1000,
+    max_iterations = 2,
     a = a,
     y = y[, ],
     pm = param_map,
@@ -258,7 +261,7 @@ fit_over_betagrid <- function(a, betasdgrid) {
       x = x,
       betasd = betasdgrid[i],
       epsilon = 1e-4,
-      max_iterations = 1000,
+      max_iterations = 2,
       a = a,
       y = y[, ],
       pm = param_map,
@@ -295,95 +298,5 @@ fit_dir <-
 if (!dir.exists(fit_dir))
   dir.create(fit_dir, recursive = TRUE)
 
-saveRDS(x, file.path(fit_dir, "x.rds"))
-saveRDS(y, file.path(fit_dir, "y.rds"))
-saveRDS(wfixed, file.path(fit_dir, "wfixed.rds"))
-saveRDS(fits, file.path(fit_dir, "fits.rds"))
-saveRDS(fet, file.path(fit_dir, "fet.rds"))
-saveRDS(agrid, file.path(fit_dir, "agrid.rds"))
-saveRDS(betasdgrid, file.path(fit_dir, "betasdgrid.rds"))
-
-q("no")
-# Diagnostics, requires variables in above script and functions in write-formatted-forecasts.R
-fits <- readRDS(file.path(fit_dir, "fits.rds"))
-fet <- readRDS(file.path(fit_dir, "fet.rds"))
-agrid <- readRDS(file.path(fit_dir, "agrid.rds"))
-betasdgrid <- readRDS(file.path(fit_dir, "betasdgrid.rds"))
-
-fitind1 <- 1
-fitind2 <- 2
-dets <- kf_nll_details(winit, x = x, y = y, param_map, 
-                       betasd = betagrid[fitind2], a = agrid[fitind1],
-                       fet)
-
-nll <- calc_kf_nll(winit, x = x, y = y, param_map, 
-                       betasd = betagrid[fitind2], a = agrid[fitind1])
-
-fitind1 <- 1
-fitind2 <- 1
-dets <- kf_nll_details(fits[[fitind1]][[fitind2]]$par, x = x, y = y, param_map, 
-                       betasd = betasdgrid[fitind2], a = agrid[fitind1],
-                       fet)
-par(mfrow = c(1,1))
-qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1,1,]))
-abline(0, 1)
-qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2,2,]))
-abline(0, 1)
-qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3,3,]))
-abline(0,1 )
-
-rho_t <- detect_frac(seq_len(nrow(y)))
-plot(x[,1], y$cases, xlab = "Time", ylab = "Cases")
-pred_cases <- dets$xhat_kkmo["C",] * rho_t + dets$xhat_kkmo["Hnew",]
-est_cases <- dets$xhat_kkmo["C",] + dets$xhat_kkmo["Hnew",]
-se_cases <- sqrt(dets$S[1,1,])
-lines(x[,1], se_cases * 2 + pred_cases, col = "grey")
-lines(x[,1], pred_cases)
-lines(x[,1], est_cases, lty = 2)
-lines(x[,1], -se_cases * 2 + pred_cases, col = "grey")
-
-plot(x[,1], y$hospitalizations, xlab = "Time", 
-     ylab = "Hospitalizations")
-pred_hosps <- dets$xhat_kkmo["Hnew",]
-se_hosps <- sqrt(dets$S[2,2,])
-lines(x[,1], se_hosps * 2 + pred_hosps, col = "grey")
-lines(x[,1], pred_hosps)
-lines(x[,1], -se_hosps * 2 + pred_hosps, col = "grey")
-
-plot(x[,1], y$deaths, xlab = "Time", 
-     ylab = "Deaths")
-pred_deaths <- dets$xhat_kkmo["Drep",]
-se_deaths <- sqrt(dets$S[3,3,])
-lines(x[,1], se_deaths * 2 + pred_deaths, col = "grey")
-lines(x[,1], pred_deaths)
-lines(x[,1], -se_deaths * 2 + pred_deaths, col = "grey")
-
-case_inds <- which(fet$target_wday == 7)
-case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
-                                vars = dets$sim_cov[1, 1, case_inds,],
-                                location = forecast_loc)
-
-case_fcst %>% 
-  ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
-  geom_line() + geom_point()
-
-hosp_inds <- fet$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
-stopifnot(sum(hosp_inds) == 28)
-
-hosp_fcst <- create_forecast_df(means = dets$sim_means[2, hosp_inds,],
-                                vars = dets$sim_cov[2, 2, hosp_inds,],
-                                target_type = "hospitalizations",
-                                location = forecast_loc)
-
-hosp_fcst %>% 
-  ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
-  geom_line() + geom_point()
-
-death_fcst <- create_forecast_df(means = dets$sim_means[3, case_inds,],
-                                vars = dets$sim_cov[3, 3, case_inds,],
-                                target_type = "inc deaths",
-                                location = forecast_loc)
-
-death_fcst %>% 
-  ggplot(aes(x = target_end_date, y = as.numeric(value), color = quantile)) + 
-  geom_line() + geom_point()
+the_file <- file.path(fit_dir, "fit.RData")
+save(x, y, wfixed, fits, fet, agrid, betasdgrid, file = the_file)

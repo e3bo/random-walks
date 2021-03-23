@@ -17,7 +17,7 @@ jobs:
     container: docker://eamon/sir-kf:2021-03-13
     strategy:
       matrix:
-        fips: ["16", "02", "04", "06", "36", "48"]
+        fips: ["16", "02"]
         fdts: ["2020-12-07"]
       fail-fast: false
     steps:
@@ -41,7 +41,7 @@ jobs:
           tstamp=$(date +%F-%H%m)
           branchname=${tstamp}-fips${loc}-fdt${fdt}
           git checkout -b $branchname
-          git add fips-${loc}/${fdt}/dvc.* fits/.gitignore
+          git add fips-${loc}/${fdt}/dvc.*
           if git commit -m "Forecast pipeline additions" && git push origin $branchname;
           then
             echo "Changes pushed to $branchname"
