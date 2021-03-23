@@ -12,12 +12,12 @@ forecast-2020-12-07-16:
     size: 20429
   outs:
   - path: forecasts/2020-12-07-fips16
-    md5: 5e527146e52c1d9b6ae3bef3770e27a3.dir
-    size: 1092264
+    md5: 00a2e519931df56116d50ba7211250c4.dir
+    size: 1093672
     nfiles: 20
   - path: plots/2020-12-07-fips16
-    md5: ad0aacd13696d23005760527f633348d.dir
-    size: 25068346
+    md5: 5daeb30b2b3c393b7189983d0ccbb376.dir
+    size: 23932175
     nfiles: 100
 fit-2020-12-07-16:
   cmd: fdt=2020-12-07 loc=16 Rscript fit-infection-kalman.R
