@@ -5,19 +5,19 @@ forecast-2020-12-07-01:
     md5: d1f53bbe17d2d1081e275885727ee3ad
     size: 10346
   - path: fits/2020-12-07-fips01/fit.RData
-    md5: fbacb1b4398fbf59ca7a7b40ef4570c4
-    size: 43435
+    md5: 95b96c7290013ac2663a70025ca7be19
+    size: 43404
   - path: write-formatted-forecast.R
     md5: 6eff37a8d20f566571ec53cf50b52121
     size: 20429
   outs:
   - path: forecasts/2020-12-07-fips01
-    md5: 052bec61fd34035cfcfb981d266ff6da.dir
-    size: 1079688
+    md5: 6f8a9387c4a84b5874bf8f00a7abc28e.dir
+    size: 1076808
     nfiles: 20
   - path: plots/2020-12-07-fips01
-    md5: eeb0b97aa56f4fcd2e955a686766671c.dir
-    size: 24859967
+    md5: 310eaf7023b03423b6255153328ea831.dir
+    size: 24840195
     nfiles: 100
 fit-2020-12-07-01:
   cmd: fdt=2020-12-07 loc=01 Rscript fit-infection-kalman.R
@@ -26,13 +26,13 @@ fit-2020-12-07-01:
     md5: d1f53bbe17d2d1081e275885727ee3ad
     size: 10346
   - path: fit-infection-kalman.R
-    md5: 2ee1780b5824d4c3febe16e8f9fd0640
-    size: 9455
+    md5: 78fedd369905d1ae5da39e6f08a8522c
+    size: 9486
   - path: hopkins/2020-12-07
     md5: 5b5d307b68b393c0dc8be402225174eb.dir
     size: 7661720
     nfiles: 8
   outs:
   - path: fits/2020-12-07-fips01/fit.RData
-    md5: fbacb1b4398fbf59ca7a7b40ef4570c4
-    size: 43435
+    md5: 95b96c7290013ac2663a70025ca7be19
+    size: 43404
