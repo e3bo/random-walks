@@ -1876,3 +1876,363 @@ stages:
     - pull-healthdata-ts-from-date.R
     outs:
     - healthdata/2020-12-07/56
+  hopkins-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-22
+  healthdata-2021-03-22-36:
+    cmd: fdt=2021-03-22 loc=36 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-22/36
+  hopkins-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-15
+  healthdata-2021-03-15-36:
+    cmd: fdt=2021-03-15 loc=36 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-15/36
+  hopkins-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-08
+  healthdata-2021-03-08-36:
+    cmd: fdt=2021-03-08 loc=36 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-08/36
+  hopkins-2021-03-01:
+    cmd: fdt=2021-03-01 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-01
+  healthdata-2021-03-01-36:
+    cmd: fdt=2021-03-01 loc=36 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-01/36
+  hopkins-2021-03-20:
+    cmd: fdt=2021-03-20 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-20
+  healthdata-2021-03-20-36:
+    cmd: fdt=2021-03-20 loc=36 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/36
+  healthdata-2021-03-20-01:
+    cmd: fdt=2021-03-20 loc=01 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/01
+  healthdata-2021-03-20-02:
+    cmd: fdt=2021-03-20 loc=02 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/02
+  healthdata-2021-03-20-04:
+    cmd: fdt=2021-03-20 loc=04 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/04
+  healthdata-2021-03-20-05:
+    cmd: fdt=2021-03-20 loc=05 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/05
+  healthdata-2021-03-20-06:
+    cmd: fdt=2021-03-20 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/06
+  healthdata-2021-03-20-08:
+    cmd: fdt=2021-03-20 loc=08 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/08
+  healthdata-2021-03-20-09:
+    cmd: fdt=2021-03-20 loc=09 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/09
+  healthdata-2021-03-20-10:
+    cmd: fdt=2021-03-20 loc=10 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/10
+  healthdata-2021-03-20-11:
+    cmd: fdt=2021-03-20 loc=11 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/11
+  healthdata-2021-03-20-12:
+    cmd: fdt=2021-03-20 loc=12 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/12
+  healthdata-2021-03-20-13:
+    cmd: fdt=2021-03-20 loc=13 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/13
+  healthdata-2021-03-20-15:
+    cmd: fdt=2021-03-20 loc=15 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/15
+  healthdata-2021-03-20-16:
+    cmd: fdt=2021-03-20 loc=16 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/16
+  healthdata-2021-03-20-17:
+    cmd: fdt=2021-03-20 loc=17 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/17
+  healthdata-2021-03-20-18:
+    cmd: fdt=2021-03-20 loc=18 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/18
+  healthdata-2021-03-20-19:
+    cmd: fdt=2021-03-20 loc=19 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/19
+  healthdata-2021-03-20-20:
+    cmd: fdt=2021-03-20 loc=20 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/20
+  healthdata-2021-03-20-21:
+    cmd: fdt=2021-03-20 loc=21 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/21
+  healthdata-2021-03-20-22:
+    cmd: fdt=2021-03-20 loc=22 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/22
+  healthdata-2021-03-20-23:
+    cmd: fdt=2021-03-20 loc=23 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/23
+  healthdata-2021-03-20-24:
+    cmd: fdt=2021-03-20 loc=24 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/24
+  healthdata-2021-03-20-25:
+    cmd: fdt=2021-03-20 loc=25 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/25
+  healthdata-2021-03-20-26:
+    cmd: fdt=2021-03-20 loc=26 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/26
+  healthdata-2021-03-20-27:
+    cmd: fdt=2021-03-20 loc=27 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/27
+  healthdata-2021-03-20-28:
+    cmd: fdt=2021-03-20 loc=28 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/28
+  healthdata-2021-03-20-29:
+    cmd: fdt=2021-03-20 loc=29 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/29
+  healthdata-2021-03-20-30:
+    cmd: fdt=2021-03-20 loc=30 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/30
+  healthdata-2021-03-20-31:
+    cmd: fdt=2021-03-20 loc=31 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/31
+  healthdata-2021-03-20-32:
+    cmd: fdt=2021-03-20 loc=32 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/32
+  healthdata-2021-03-20-33:
+    cmd: fdt=2021-03-20 loc=33 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/33
+  healthdata-2021-03-20-34:
+    cmd: fdt=2021-03-20 loc=34 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/34
+  healthdata-2021-03-20-35:
+    cmd: fdt=2021-03-20 loc=35 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/35
+  healthdata-2021-03-20-37:
+    cmd: fdt=2021-03-20 loc=37 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/37
+  healthdata-2021-03-20-38:
+    cmd: fdt=2021-03-20 loc=38 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/38
+  healthdata-2021-03-20-39:
+    cmd: fdt=2021-03-20 loc=39 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/39
+  healthdata-2021-03-20-40:
+    cmd: fdt=2021-03-20 loc=40 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/40
+  healthdata-2021-03-20-41:
+    cmd: fdt=2021-03-20 loc=41 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/41
+  healthdata-2021-03-20-42:
+    cmd: fdt=2021-03-20 loc=42 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/42
+  healthdata-2021-03-20-44:
+    cmd: fdt=2021-03-20 loc=44 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/44
+  healthdata-2021-03-20-45:
+    cmd: fdt=2021-03-20 loc=45 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/45
+  healthdata-2021-03-20-46:
+    cmd: fdt=2021-03-20 loc=46 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/46
+  healthdata-2021-03-20-47:
+    cmd: fdt=2021-03-20 loc=47 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/47
+  healthdata-2021-03-20-48:
+    cmd: fdt=2021-03-20 loc=48 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/48
+  healthdata-2021-03-20-49:
+    cmd: fdt=2021-03-20 loc=49 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/49
+  healthdata-2021-03-20-50:
+    cmd: fdt=2021-03-20 loc=50 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/50
+  healthdata-2021-03-20-51:
+    cmd: fdt=2021-03-20 loc=51 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/51
+  healthdata-2021-03-20-53:
+    cmd: fdt=2021-03-20 loc=53 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/53
+  healthdata-2021-03-20-54:
+    cmd: fdt=2021-03-20 loc=54 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/54
+  healthdata-2021-03-20-55:
+    cmd: fdt=2021-03-20 loc=55 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/55
+  healthdata-2021-03-20-56:
+    cmd: fdt=2021-03-20 loc=56 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-20/56
