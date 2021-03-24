@@ -120,7 +120,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("hfp", exp(p$loghfp))
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τh, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
     ))
   }
   g
@@ -205,9 +205,6 @@ obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>%
 
 obs_data <- left_join(jhu_data, tdat3, by = "target_end_date")
 
-
-
-
 wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
@@ -226,18 +223,18 @@ wfixed <- c(
 y <- wind %>% select(cases, hospitalizations, deaths)
 x <- matrix(wind$time, ncol = 1)
 
-tau_cases_init <- var(y$cases, na.rm = TRUE)
-tau_hosp_init <- var(y$hospitalizations, na.rm = TRUE)
-tau_deaths_init <- var(y$deaths, na.rm = TRUE)
+tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
+tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
+tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
 
 E0init <-
   ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
-H0init <-
-  (mean(y$hospitalizations, na.rm = TRUE) * 365.25 / wfixed["gamma_h"]) %>% 
-  unname()
 
-chp_init <- sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases, na.rm = TRUE)
-hfp_init <- sum(y$deaths, na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE)
+hosp_obs <- !is.na(y$hospitalizations)
+chp_init <- sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases[hosp_obs], na.rm = TRUE)
+hfp_init <- max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE), 0.01)
+
+H0init <- hfp_init / mean(y$deaths)
 
 binit <- unname(rep(log(wfixed["gamma"]), wsize))
 names(binit) <- paste0("b", seq_len(wsize))
