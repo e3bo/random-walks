@@ -179,9 +179,9 @@ most_recent_coverage <- tdat2 %>% arrange(date) %>%
   tail(n = 1)
 
 tdat3 <- tdat2 %>%
-  filter(previous_day_admission_adult_covid_confirmed >
+  filter(previous_day_admission_adult_covid_confirmed_coverage >
            most_recent_coverage * cov_thresh) %>%
-  filter(previous_day_admission_adult_covid_confirmed <
+  filter(previous_day_admission_adult_covid_confirmed_coverage <
            most_recent_coverage / cov_thresh) %>%
   mutate(
     hospitalizations = previous_day_admission_adult_covid_confirmed +
