@@ -24,6 +24,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$logchp,
         p$loghfp,
         p$loggammahd,
+        p$logdoseeffect,
         p$bpars
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -31,18 +32,20 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("N", p$N)
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("cov", x)
     JuliaCall::julia_assign("z", y)
     JuliaCall::julia_assign("a", a)
     JuliaCall::julia_assign("betasd", betasd)
     nll <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.obj",
-      "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
     ))
   } else if(ncol(y) == 1 && "cases" %in% names(y)) {
     pvar <-
       c(
         p$logE0,
         p$logtauc,
+        p$logdoseeffect,
         p$bpars
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -51,6 +54,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("γ", p$gamma)
     JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
     JuliaCall::julia_assign("a", a)
     JuliaCall::julia_assign("betasd", betasd)
     JuliaCall::julia_assign("γd", exp(p$loggammahd))
@@ -62,7 +66,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("hfp", exp(p$loghfp))
     nll <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.obj",
-      "(pvar, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τh, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τh, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
     ))
   }
 
@@ -82,6 +86,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$logchp,
         p$loghfp,
         p$loggammahd,
+        p$logdoseeffect,
         p$bpars
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -90,17 +95,19 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("γ", p$gamma)
     JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
     JuliaCall::julia_assign("a", a)
     JuliaCall::julia_assign("betasd", betasd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
     ))
   } else if(ncol(y) == 1 && "cases" %in% names(y)) {
     pvar <-
       c(
         p$logE0,
         p$logtauc,
+        p$logdoseeffect,
         p$bpars
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -109,6 +116,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("γ", p$gamma)
     JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
     JuliaCall::julia_assign("a", a)
     JuliaCall::julia_assign("betasd", betasd)
     JuliaCall::julia_assign("γd", exp(p$loggammahd))
@@ -120,7 +128,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("hfp", exp(p$loghfp))
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
     ))
   }
   g
@@ -150,7 +158,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
 
 ## main script
 
-forecast_date <- Sys.getenv("fdt", unset = "2020-12-07")
+forecast_date <- Sys.getenv("fdt", unset = "2021-03-20")
 forecast_loc <- Sys.getenv("loc", unset = "36")
 
 hopdir <- file.path("hopkins", forecast_date)
@@ -190,20 +198,20 @@ tdat3 <- tdat2 %>%
   ) %>%
   select(target_end_date, hospitalizations)
 
-if(FALSE){
 vacc_ts <- read_csv("vaccine_data_us_timeline.csv") %>%
-  filter(FIPS == forecast_loc) %>%
+  filter(FIPS == forecast_loc & Vaccine_Type == "All") %>%
   select(Date, Doses_admin) %>%
   rename(target_end_date=Date, doses = Doses_admin)
 
-obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>% 
-  left_join(vacc_ts, by = "target_end_date")
-
-
-
+i <- 1 #replace leading NAs with 0
+while(is.na(vacc_ts$doses[i])){
+  vacc_ts$doses[i] <- 0
+  i <- i + 1
 }
 
-obs_data <- left_join(jhu_data, tdat3, by = "target_end_date")
+obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>% 
+  left_join(vacc_ts, by = "target_end_date")
+obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <- 0
 
 wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 wsize <- nrow(wind)
@@ -221,7 +229,7 @@ wfixed <- c(
 )
 
 y <- wind %>% select(cases, hospitalizations, deaths)
-x <- matrix(wind$time, ncol = 1)
+x <- wind %>% select(time, doses)
 
 tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
 tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
@@ -235,6 +243,7 @@ chp_init <- sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases[hosp_obs], na.rm
 hfp_init <- max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE), 0.01)
 
 H0init <- hfp_init / mean(y$deaths)
+logdoseeffect_init = log(log(wfixed["N"]) - log(wfixed["N"] - 1)) # first dose reduces susceptibility by 1/N
 
 binit <- unname(rep(log(wfixed["gamma"]), wsize))
 names(binit) <- paste0("b", seq_len(wsize))
@@ -247,6 +256,7 @@ winit <- c(
   logchp = log(chp_init),
   loghfp = log(hfp_init),
   loggammahd = log(365.25 / 2),
+  logdoseeffect = logdoseeffect_init,
   binit
 )
 

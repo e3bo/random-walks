@@ -19,12 +19,11 @@ function hmat(t)
     return H
 end
 
-function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
+function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
 
     zloc = deepcopy(z)
     if size(z, 2) == 3
-        γh = exp(pvar[8])
-        γd = exp(pvar[8])
+
     
         l0 = exp(pvar[1])
         h0 = exp(pvar[2])
@@ -36,16 +35,22 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     
         chp = exp(pvar[6])
         hfp = exp(pvar[7])
+        
+        γh = exp(pvar[8])
+        γd = exp(pvar[8])
+        
+        doseeffect = exp(pvar[9])
 
-        bvec = pvar[9:end]
+        bvec = pvar[10:end]
     elseif size(z, 2) == 1 && "cases" in names(z)
         l0 = exp(pvar[1])
         τc = exp(pvar[2])
+        doseeffect = exp(pvar[3])
         
         zloc[!, "hospitalizations"] .= missing
         zloc[!, "deaths"] .= missing
     
-        bvec = pvar[3:end]
+        bvec = pvar[4:end]
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
@@ -86,6 +91,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
             plast = pkk[:,:,i-1]
         end
         β = exp(logβ[i])
+        u = exp(-cov.doses[i] * doseeffect)
         x = xlast[1]
         l = xlast[2]
         y = xlast[3]
@@ -103,8 +109,8 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         plast[:,8] .= 0
         
         vf = [
-        -β*x*y/N - ι*x, 
-        β*x*y/N + ι*x - η*l, 
+        -β*x*u*y/N - ι*x, 
+        β*x*u*y/N + ι*x - η*l, 
         η*l - γ*y, 
         (1 - chp) * γ*y, 
         chp*γ*y,
@@ -121,7 +127,7 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
         xkkmo[:,i] = xnext
         
         f = [0, 
-             β*x/N*y/N + ι*x/N, 
+             β*u*x/N*y/N + ι*x/N, 
              η*l/N, 
              (1 - chp)*γ*y/N,
              chp*γ*y/N,
@@ -139,8 +145,8 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
                        0         0              0       0        0           -f[7]  f[8]+f[7]  -f[8]
                        0         0              0       0        0              0       -f[8]   f[8] ]
                        
-        jac= [-β*y/N    0         -β*x/N     0     0       0    0 0
-               β*y/N   -η          β*x/N     0     0       0    0 0
+        jac= [-β*u*y/N    0         -β*u*x/N     0     0       0    0 0
+               β*u*y/N   -η          β*u*x/N     0     0       0    0 0
                    0    η             -γ     0     0       0    0 0
                    0    0    (1 - chp)*γ     0     0       0    0 0
                    0    0          chp*γ     0     0       0    0 0
@@ -215,8 +221,8 @@ function obj(pvar::Vector, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224
     end
 end
 
-function grad(pvar, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
-    g = ForwardDiff.gradient(par -> obj(par, z; N = N, η = η, γ = γ, a = a, betasd = betasd, dt = dt, ι = ι, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp), pvar)
+function grad(pvar, x, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
+    g = ForwardDiff.gradient(par -> obj(par, x, z; N = N, η = η, γ = γ, a = a, betasd = betasd, dt = dt, ι = ι, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp), pvar)
     g
 end
 

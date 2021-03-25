@@ -336,7 +336,6 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
 
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
-  ret$bpars <- w[seq(9, length(w))]
   ret$logE0 <- w[1]
   ret$logH0 <- w[2]
   ret$logtauc <- w[3]
@@ -345,7 +344,10 @@ param_map <- function(x, w, fixed = wfixed){
   ret$logchp <- w[6]
   ret$loghfp <- w[7]
   ret$loggammahd <- w[8]
+  ret$logdoseeffect <- w[9]
+  ret$bpars <- w[seq(10, length(w))]
   ret$times <- x[, 1]
+  ret$doses <- x[, 2]
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
