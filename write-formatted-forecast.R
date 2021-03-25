@@ -84,7 +84,7 @@ create_forecast_df <- function(means,
                                       value)
 }
 
-write_forecasts <- function(fits, fet, agrid, betagrid) {
+write_forecasts <- function(fits, fet, agrid, betagrid, fdt = forecast_date) {
   n1 <- length(agrid)
   n2 <- length(betagrid)
   for (ind1 in 1:n1) {
@@ -104,6 +104,9 @@ write_forecasts <- function(fits, fet, agrid, betagrid) {
         )
       make_fit_plots(dets, x = x, a = a, betasd = betasd)
       case_inds <- which(fet$target_wday == 7)
+      if (lubridate::wday(fdt) > 2){
+        case_inds <- case_inds[-1] # drop first epiweek, which has been observed too much to be forecasted
+      }
       case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
                                       vars = dets$sim_cov[1, 1, case_inds,],
                                       location = forecast_loc)
