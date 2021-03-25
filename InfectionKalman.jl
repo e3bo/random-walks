@@ -118,6 +118,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         hfp*γh*h - γd*d,
         γd*d
         ]
+
         xnext = xlast + dt * vf
         for j in 1:dstate
             if xnext[j] < 0

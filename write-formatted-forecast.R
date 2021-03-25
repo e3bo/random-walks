@@ -196,9 +196,8 @@ iterate_f_and_P <-
            hfp,
            N,
            beta_t,
-           time.steps) {
+           dt = 0.00273224) {
     P <- PN / N
-    dt <- diff(time.steps)
     vf <-  with(as.list(c(xhat, beta_t)), {
       F <- rbind(
         c(-beta_t * I / N,    0,    -beta_t * S / N, 0, 0,             0,        0, 0),
@@ -253,7 +252,7 @@ iterate_f_and_P <-
     P_new <- P + vf$dP * dt
     names(xhat_new) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     PN_new <- P_new * N
-    list(xhat = xhat_new, PN = PN_new)
+    list(xhat = xhat_new, PN = PN_new, vf = vf$vf)
   }
 
 detect_frac <- function(t,
@@ -334,11 +333,9 @@ kfnll <-
       if (i == 1) {
         xhat_init <- xhat0
         PNinit <- Phat0
-        time.steps <- c(t0, times[1])
       } else {
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
-        time.steps <- c(times[i - 1], times[i])
       }
       
       xhat_init["C"] <- 0
@@ -349,6 +346,7 @@ kfnll <-
       PNinit[, 5] <- PNinit[5,] <- 0
       PNinit[, 8] <- PNinit[8,] <- 0
       
+      #if(i == 360) browser()
       XP <- iterate_f_and_P(
         xhat_init,
         PN = PNinit,
@@ -360,10 +358,10 @@ kfnll <-
         hfp = exp(loghfp),
         N = N,
         beta_t = exp(logbeta[i]) * exp(-doseeffect * doses[i]),
-        time.steps = time.steps
       )
       xhat_kkmo[, i] <- XP$xhat
       P_kkmo[, , i] <- XP$PN
+
       for (j in 1:dstate){
         if (P_kkmo[j,j,i] < 0){
           P_kkmo[j,,i] <- 0

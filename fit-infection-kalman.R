@@ -214,6 +214,8 @@ obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>%
 obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <- 0
 
 wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
+#wind <- obs_data %>% slice(match(1, obs_data$cases > 0):347)
+#wind <- obs_data %>% slice(100:200)
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
@@ -225,7 +227,7 @@ wfixed <- c(
   gamma_h = 365.25 / 10,
   gamma_d = 365.25 / 10,
   eta = 365.25 / 4,
-  t0 = rev(obs_data$time)[wsize + 1]
+  t0 = min(wind$time) - 0.00273224
 )
 
 y <- wind %>% select(cases, hospitalizations, deaths)
