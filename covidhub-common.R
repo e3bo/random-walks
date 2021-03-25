@@ -346,8 +346,8 @@ param_map <- function(x, w, fixed = wfixed){
   ret$loggammahd <- w[8]
   ret$logdoseeffect <- w[9]
   ret$bpars <- w[seq(10, length(w))]
-  ret$times <- x[, 1]
-  ret$doses <- x[, 2]
+  ret$times <- x$time
+  ret$doses <- x$doses
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]

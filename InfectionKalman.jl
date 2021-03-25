@@ -90,8 +90,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = exp(logβ[i])
-        u = exp(-cov.doses[i] * doseeffect)
+        doseeffect = 0
+        β = exp(logβ[i]) * exp(-cov.doses[i]*doseeffect)
         x = xlast[1]
         l = xlast[2]
         y = xlast[3]
@@ -109,8 +109,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         plast[:,8] .= 0
         
         vf = [
-        -β*x*u*y/N - ι*x, 
-        β*x*u*y/N + ι*x - η*l, 
+        -β*x*y/N - ι*x, 
+        β*x*y/N + ι*x - η*l, 
         η*l - γ*y, 
         (1 - chp) * γ*y, 
         chp*γ*y,
@@ -127,7 +127,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         xkkmo[:,i] = xnext
         
         f = [0, 
-             β*u*x/N*y/N + ι*x/N, 
+             β*x/N*y/N + ι*x/N, 
              η*l/N, 
              (1 - chp)*γ*y/N,
              chp*γ*y/N,
@@ -145,8 +145,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
                        0         0              0       0        0           -f[7]  f[8]+f[7]  -f[8]
                        0         0              0       0        0              0       -f[8]   f[8] ]
                        
-        jac= [-β*u*y/N    0         -β*u*x/N     0     0       0    0 0
-               β*u*y/N   -η          β*u*x/N     0     0       0    0 0
+        jac= [-β*y/N    0         -β*x/N     0     0       0    0 0
+               β*y/N   -η          β*x/N     0     0       0    0 0
                    0    η             -γ     0     0       0    0 0
                    0    0    (1 - chp)*γ     0     0       0    0 0
                    0    0          chp*γ     0     0       0    0 0

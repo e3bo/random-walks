@@ -167,12 +167,14 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     logchp = p$logchp,
     loghfp = p$loghfp,
     loggammahd = p$loggammahd,
+    logdoseeffect = p$logdoseeffect,
     eta = p$eta,
     gamma = p$gamma,
     N = p$N,
     z = y,
     t0 = p$t0,
     times = p$times,
+    doses = p$doses,
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases_deaths = "weekly",
@@ -271,13 +273,15 @@ kfnll <-
            logtaud,
            logchp,
            loghfp,
-           loggammahd, 
+           loggammahd,
+           logdoseeffect,
            eta,
            gamma,
            N,
            z,
            t0,
            times,
+           doses,
            Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases_deaths = "daily",
@@ -294,6 +298,8 @@ kfnll <-
     D0 = H0 * gamma_h / gamma_d
     xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
+    doseeffect <- exp(logdoseeffect)
+    doseeffect <- 0
     
     if (ncol(z) == 1 && "cases" %in% names(z)){
       z$hospitalizations <- NA
@@ -353,7 +359,7 @@ kfnll <-
         chp = exp(logchp),
         hfp = exp(loghfp),
         N = N,
-        beta_t = exp(logbeta[i]),
+        beta_t = exp(logbeta[i]) * exp(-doseeffect * doses[i]),
         time.steps = time.steps
       )
       xhat_kkmo[, i] <- XP$xhat
@@ -455,7 +461,7 @@ kfnll <-
             chp = exp(logchp),
             hfp = exp(loghfp),
             N = N,
-            beta_t = exp(logbeta_fet[1]),
+            beta_t = exp(logbeta_fet[1]) * exp(-doseeffect * doses[T]),
             time.steps = c(times[T], fets$target_end_times[1])
           )
           sim_means[, 1, j] <- H(T+1) %*% XP$xhat
@@ -484,7 +490,7 @@ kfnll <-
                 chp = exp(logchp),
                 hfp = exp(loghfp),
                 N = N,
-                beta_t = exp(logbeta_fet[i + 1]),
+                beta_t = exp(logbeta_fet[i + 1]) * exp(-doseeffect * doses[T]),
                 time.steps = c(fets$target_end_times[i], 
                                fets$target_end_times[i + 1])
               )
