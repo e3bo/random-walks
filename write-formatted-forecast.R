@@ -670,7 +670,7 @@ make_fit_plots <- function(dets, x, a, betasd) {
     mutate(Estimate = factor(
       name,
       levels = c("vacc_reduction", "Rt"),
-      labels = c("Reduction from vaccine", "Value")
+      labels = c("Reduction in reproduction number due to vaccination", "Value")
     ))
   
   p6 <- ggplot(df, aes(x = time, y = value, fill = Estimate)) +
