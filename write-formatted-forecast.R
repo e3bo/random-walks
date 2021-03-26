@@ -678,7 +678,7 @@ make_fit_plots <- function(dets, x, a, betasd) {
     labs(x = "Time", y = expression(paste("Instantaneous reproduction number, ", R[t]))) +
     theme_light() +
     theme(legend.position = "top")
-  ggsave(filename = plot_path5, plot = p6)
+  ggsave(filename = plot_path6, plot = p6)
 }
 
 forecast_date <- Sys.getenv("fdt", unset = "2021-03-20")

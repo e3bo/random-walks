@@ -198,7 +198,12 @@ tdat3 <- tdat2 %>%
   ) %>%
   select(target_end_date, hospitalizations)
 
-vacc_ts <- read_csv("vaccine_data_us_timeline.csv") %>%
+vacc_ts <- read_csv("vaccine_data_us_timeline.csv",
+                    col_types = cols_only(FIPS = col_double(),
+                                          Vaccine_Type = col_character(),
+                                          Doses_admin = col_double(),
+                                          Date = col_date())) %>%
+  mutate(FIPS = sprintf("%02d", FIPS)) %>%
   filter(FIPS == forecast_loc & Vaccine_Type == "All") %>%
   select(Date, Doses_admin) %>%
   rename(target_end_date=Date, doses = Doses_admin)
