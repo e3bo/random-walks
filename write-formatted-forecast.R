@@ -298,8 +298,7 @@ kfnll <-
     xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     doseeffect <- exp(logdoseeffect)
-    doseeffect <- 0
-    
+
     if (ncol(z) == 1 && "cases" %in% names(z)){
       z$hospitalizations <- NA
       z$deaths <- NA
@@ -459,8 +458,7 @@ kfnll <-
             chp = exp(logchp),
             hfp = exp(loghfp),
             N = N,
-            beta_t = exp(logbeta_fet[1]) * exp(-doseeffect * doses[T]),
-            time.steps = c(times[T], fets$target_end_times[1])
+            beta_t = exp(logbeta_fet[1]) * exp(-doseeffect * doses[T])
           )
           sim_means[, 1, j] <- H(T+1) %*% XP$xhat
           sim_cov[, , 1, j] <- H(T+1) %*% XP$PN %*% t(H(T+1)) + R
@@ -488,9 +486,7 @@ kfnll <-
                 chp = exp(logchp),
                 hfp = exp(loghfp),
                 N = N,
-                beta_t = exp(logbeta_fet[i + 1]) * exp(-doseeffect * doses[T]),
-                time.steps = c(fets$target_end_times[i], 
-                               fets$target_end_times[i + 1])
+                beta_t = exp(logbeta_fet[i + 1]) * exp(-doseeffect * doses[T])
               )
             sim_means[, i + 1, j] <- H(T + i + 1) %*% XP$xhat
             sim_cov[, , i + 1, j] <-
@@ -512,6 +508,8 @@ kfnll <-
         sim_means = sim_means,
         sim_cov = sim_cov,
         logbeta = logbeta,
+        doseeffect = doseeffect,
+        gamma = gamma,
         rdiagadj = rdiagadj
       )
     } else {
@@ -568,30 +566,30 @@ make_fit_plots <- function(dets, x, a, betasd) {
   
   
   rho_t <- detect_frac(seq_len(nrow(y)))
-  plot(x[, 1], y$cases, xlab = "Time", ylab = "Cases")
+  plot(x$time, y$cases, xlab = "Time", ylab = "Cases")
   pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
   est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
   se_cases <- sqrt(dets$S[1, 1, ])
-  lines(x[, 1], se_cases * 2 + pred_cases, col = "grey")
-  lines(x[, 1], pred_cases)
-  lines(x[, 1], est_cases, lty = 2)
-  lines(x[, 1],-se_cases * 2 + pred_cases, col = "grey")
+  lines(x$time, se_cases * 2 + pred_cases, col = "grey")
+  lines(x$time, pred_cases)
+  lines(x$time, est_cases, lty = 2)
+  lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
   
-  plot(x[, 1], y$hospitalizations, xlab = "Time",
+  plot(x$time, y$hospitalizations, xlab = "Time",
        ylab = "Hospitalizations")
   pred_hosps <- dets$xhat_kkmo["Hnew", ]
   se_hosps <- sqrt(dets$S[2, 2, ])
-  lines(x[, 1], se_hosps * 2 + pred_hosps, col = "grey")
-  lines(x[, 1], pred_hosps)
-  lines(x[, 1],-se_hosps * 2 + pred_hosps, col = "grey")
+  lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
+  lines(x$time, pred_hosps)
+  lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
   
-  plot(x[, 1], y$deaths, xlab = "Time",
+  plot(x$time, y$deaths, xlab = "Time",
        ylab = "Deaths")
   pred_deaths <- dets$xhat_kkmo["Drep", ]
   se_deaths <- sqrt(dets$S[3, 3, ])
-  lines(x[, 1], se_deaths * 2 + pred_deaths, col = "grey")
-  lines(x[, 1], pred_deaths)
-  lines(x[, 1],-se_deaths * 2 + pred_deaths, col = "grey")
+  lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
+  lines(x$time, pred_deaths)
+  lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
   dev.off()
   
   plot_path3 <- file.path(plot_dir, "case-forecasts.png")
@@ -651,9 +649,39 @@ make_fit_plots <- function(dets, x, a, betasd) {
     geom_line() + geom_point() + labs(y = "Weekly deaths")
   
   ggsave(filename = plot_path5, plot = p5)
+
+  plot_path6 <- file.path(plot_dir, "Rt-time-series.png")
+  
+  df <- tibble(
+    time = x$time,
+    beta_t = exp(dets$logbeta),
+    doses = x$doses,
+    gamma = dets$gamma,
+    de = dets$doseeffect
+  ) %>%
+    mutate(
+      Rtnovacc = beta_t / gamma,
+      u = exp(-doses * de),
+      Rt = beta_t * u / gamma,
+      vacc_reduction = Rtnovacc - Rt
+    ) %>%
+    select(time, vacc_reduction, Rt) %>%
+    pivot_longer(-time) %>%
+    mutate(Estimate = factor(
+      name,
+      levels = c("vacc_reduction", "Rt"),
+      labels = c("Reduction from vaccine", "Value")
+    ))
+  
+  p6 <- ggplot(df, aes(x = time, y = value, fill = Estimate)) +
+    geom_area() +
+    labs(x = "Time", y = expression(paste("Instantaneous reproduction number, ", R[t]))) +
+    theme_light() +
+    theme(legend.position = "top")
+  ggsave(filename = plot_path5, plot = p6)
 }
 
-forecast_date <- Sys.getenv("fdt", unset = "2020-12-07")
+forecast_date <- Sys.getenv("fdt", unset = "2021-03-20")
 forecast_loc <- Sys.getenv("loc", unset = "36")
 
 fit_dir <-

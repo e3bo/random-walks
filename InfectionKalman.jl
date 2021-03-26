@@ -90,7 +90,6 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        doseeffect = 0
         β = exp(logβ[i]) * exp(-cov.doses[i]*doseeffect)
         x = xlast[1]
         l = xlast[2]
