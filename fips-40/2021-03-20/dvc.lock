@@ -2,37 +2,37 @@ fit-2021-03-20-40:
   cmd: fdt=2021-03-20 loc=40 Rscript fit-infection-kalman.R
   deps:
   - path: covidhub-common.R
-    md5: d1f53bbe17d2d1081e275885727ee3ad
-    size: 10346
+    md5: 04d21acd456a175c3042f7d5a68b4c2a
+    size: 10399
   - path: fit-infection-kalman.R
-    md5: abb755968b7936ed479f0ac854412008
-    size: 9665
+    md5: 1727b17056dc641b7847302e351044a5
+    size: 10517
   - path: hopkins/2021-03-20
     md5: 7a5650e737646c7b862f64bfa9e45662.dir
     size: 10804753
     nfiles: 8
   outs:
   - path: fits/2021-03-20-fips40/fit.RData
-    md5: fc4e4e2d36f3514a98b50368725caa74
-    size: 59601
+    md5: c9af92ebc0c3b52b756a48a445aa4215
+    size: 60117
 forecast-2021-03-20-40:
   cmd: fdt=2021-03-20 loc=40 Rscript write-formatted-forecast.R
   deps:
   - path: covidhub-common.R
-    md5: d1f53bbe17d2d1081e275885727ee3ad
-    size: 10346
+    md5: 04d21acd456a175c3042f7d5a68b4c2a
+    size: 10399
   - path: fits/2021-03-20-fips40/fit.RData
-    md5: fc4e4e2d36f3514a98b50368725caa74
-    size: 59601
+    md5: c9af92ebc0c3b52b756a48a445aa4215
+    size: 60117
   - path: write-formatted-forecast.R
-    md5: 931652980bf5c161df13aeb46e546081
-    size: 20602
+    md5: fbf8b0fefa75dd2fca0a58ccda858ff2
+    size: 21474
   outs:
   - path: forecasts/2021-03-20-fips40
-    md5: dedc8a0f6b9d64d02753850db8af6aa3.dir
-    size: 1103048
+    md5: 859857adcd8b6de08e27ee1acf3801b4.dir
+    size: 1103112
     nfiles: 20
   - path: plots/2021-03-20-fips40
-    md5: b79ab9eb0c714e0f048b56bd030b06ad.dir
-    size: 25062249
-    nfiles: 100
+    md5: 8fcff728d1cb0ec00d2fb6be487a9798.dir
+    size: 22347213
+    nfiles: 120
