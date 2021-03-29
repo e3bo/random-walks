@@ -203,7 +203,7 @@ vacc_path <- file.path("hopkins-vaccine",
                        "vaccine_data_us_timeline.csv")
 if (file.exists(vacc_path)) {
   vacc_ts <- read_csv(
-    "vaccine_data_us_timeline.csv",
+    vacc_path,
     col_types = cols_only(
       FIPS = col_double(),
       Vaccine_Type = col_character(),
