@@ -1,0 +1,46 @@
+fit-2021-03-29-56:
+  cmd: fdt=2021-03-29 loc=56 Rscript fit-infection-kalman.R
+  deps:
+  - path: covidhub-common.R
+    md5: 04d21acd456a175c3042f7d5a68b4c2a
+    size: 10399
+  - path: fit-infection-kalman.R
+    md5: 4bf32d0f77c0af2d2c4c049c3cf83be8
+    size: 10693
+  - path: healthdata/2021-03-29/56
+    md5: 1328eeb724d10c39c5d9f1bb5fc3d571.dir
+    size: 100634
+    nfiles: 1
+  - path: hopkins-vaccine/2021-03-29
+    md5: 0d0e971d6873949b6a4dbbfc431b5328.dir
+    size: 1892034
+    nfiles: 1
+  - path: hopkins/2021-03-29
+    md5: 108e400c368365126ba4e8f9f256f30e.dir
+    size: 12647684
+    nfiles: 8
+  outs:
+  - path: fits/2021-03-29-fips56/fit.RData
+    md5: ec4c2d099824134237033cdfec44fee0
+    size: 60338
+forecast-2021-03-29-56:
+  cmd: fdt=2021-03-29 loc=56 Rscript write-formatted-forecast.R
+  deps:
+  - path: covidhub-common.R
+    md5: 04d21acd456a175c3042f7d5a68b4c2a
+    size: 10399
+  - path: fits/2021-03-29-fips56/fit.RData
+    md5: ec4c2d099824134237033cdfec44fee0
+    size: 60338
+  - path: write-formatted-forecast.R
+    md5: fbf8b0fefa75dd2fca0a58ccda858ff2
+    size: 21474
+  outs:
+  - path: forecasts/2021-03-29-fips56
+    md5: 68806708489cf27efc01969489feb4f7.dir
+    size: 1101064
+    nfiles: 20
+  - path: plots/2021-03-29-fips56
+    md5: d1b3f6e2953d7834a8cf9d6d3f7d74db.dir
+    size: 14037683
+    nfiles: 120
