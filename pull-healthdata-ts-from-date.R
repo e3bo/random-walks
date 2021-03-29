@@ -20,7 +20,11 @@ while (issue_date > "2020-11-02"){ # release date on healthdata.gov is 2020-11-0
     issue_date <- issue_date - lubridate::ddays(1)
   } else {
     out <- req$epidata
-    break
+    if (nrow(out) == 1) { ## daily issue, keep looking for issue with all dates
+      issue_date <- issue_date - lubridate::ddays(1)
+    } else{
+      break
+    }
   }
 }
 

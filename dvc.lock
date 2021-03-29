@@ -376,4017 +376,587 @@ analyze-scores:
     size: 7904952
     nfiles: 11
   - path: lambda029.41-a0.94-CEID-InfectionKalmanEmp
-    md5: 2620c0f30d96c79aa8c739eee20479bd.dir
-    size: 9203800
-    nfiles: 11
-  - path: lambda029.41-a0.95-CEID-InfectionKalman
-    md5: 9f2f20d09bdcd518495511db0f6396cd.dir
-    size: 7903613
-    nfiles: 11
-  - path: lambda029.41-a0.95-CEID-InfectionKalmanEmp
-    md5: 64ca17a80ab68c3d4c6049893be13e91.dir
-    size: 9202759
-    nfiles: 11
-  - path: lambda043.48-a0.94-CEID-InfectionKalman
-    md5: 3aed53ab17f4353196c6776fc7b1f311.dir
-    size: 7906418
-    nfiles: 11
-  - path: lambda043.48-a0.94-CEID-InfectionKalmanEmp
-    md5: 6bdd42cf65e36929117dd3a26d9081e0.dir
-    size: 9203965
-    nfiles: 11
-  - path: lambda043.48-a0.95-CEID-InfectionKalman
-    md5: dc1a155116315e475d0808b1c3eb49d7.dir
-    size: 7901917
-    nfiles: 11
-  - path: lambda043.48-a0.95-CEID-InfectionKalmanEmp
-    md5: abf317beaecc1838f0bd6680169a84eb.dir
-    size: 9202804
-    nfiles: 11
-  - path: lambda083.33-a0.94-CEID-InfectionKalman
-    md5: 2d5e1258486b78f80b7fa4a90f722464.dir
-    size: 7908062
-    nfiles: 11
-  - path: lambda083.33-a0.94-CEID-InfectionKalmanEmp
-    md5: e838fc577dcb9212437407483b4d079e.dir
-    size: 9199566
-    nfiles: 11
-  - path: lambda083.33-a0.95-CEID-InfectionKalman
-    md5: 71d946f2421790854d5862f387618aa2.dir
-    size: 7907616
-    nfiles: 11
-  - path: lambda083.33-a0.95-CEID-InfectionKalmanEmp
-    md5: e5757cb8d6047366d8fa360af66f3257.dir
-    size: 9200760
-    nfiles: 11
-  - path: lambda1000.00-a0.94-CEID-InfectionKalman
-    md5: ab54e1fabae61e0011dd6c0db831e358.dir
-    size: 7927472
-    nfiles: 11
-  - path: lambda1000.00-a0.94-CEID-InfectionKalmanEmp
-    md5: 13b278e1133438b1ec2232b00ab90869.dir
-    size: 9187710
-    nfiles: 11
-  - path: lambda1000.00-a0.95-CEID-InfectionKalman
-    md5: 58b0f29d55746cbef05d29ab2b418324.dir
-    size: 7911321
-    nfiles: 11
-  - path: lambda1000.00-a0.95-CEID-InfectionKalmanEmp
-    md5: 5f63935e434b3499159dfcd87149da19.dir
-    size: 9188840
-    nfiles: 11
-  - path: other-model-forecasts.rds
-    md5: 19b045ec9ea13bc485c37eac61292dc8
-    size: 2488296
-  outs:
-  - path: analyze-scores.html
-    md5: 8311696685b025c8b1cdab542bf95488
-    size: 18753
-  - path: analyze-scores.md
-    md5: 322c2f2c83cbf47e003c52d9b2965646
-    size: 4767
-  - path: horizon-location-model-cases.csv
-    md5: 0f79a5433b7e0df4aee573b317214185
-    size: 753018
-  - path: horizon-location-model-death.csv
-    md5: 6e80a49e3e0810fd68e19b179909aa1c
-    size: 728546
-  - path: horizon-location-model-hosp.csv
-    md5: 4da0e2b57c34abac2bd498ef406fef92
-    size: 5312127
-  - path: location-model.csv
-    md5: 5a7d0ce3d755fab4f806e2b5f98b3ad9
-    size: 618678
-  - path: model.csv
-    md5: 67303f788e0f9e2b0a725b03f4a24c90
-    size: 14581
-make-trajectory-plots:
-  cmd: ./make-trajectory-plots.R
-  deps:
-  - path: healthdata/2021-02-01
-    md5: 7b171c5486c16ae3c3fb36ae6fc6a490.dir
-    size: 4830610
-    nfiles: 52
-  - path: hopkins/2021-02-01
-    md5: 8b07b96124b82ce52a7569cec6858440.dir
-    size: 9346644
-    nfiles: 8
-  - path: lambda010.00-a0.94-CEID-InfectionKalman
-    md5: 6a02fc4aa54114e2711894c5e7dc4d5d.dir
-    size: 7611807
-    nfiles: 11
-  - path: lambda010.00-a0.95-CEID-InfectionKalman
-    md5: 7f5a4229d623b946e17fc96d581f2cdd.dir
-    size: 7607343
-    nfiles: 11
-  - path: lambda011.24-a0.94-CEID-InfectionKalman
-    md5: 1e2b6a6aff6c72d307dd3379b372fc9e.dir
-    size: 7607063
-    nfiles: 11
-  - path: lambda011.24-a0.95-CEID-InfectionKalman
-    md5: 2da91e6df67c69e62074050a4df97042.dir
-    size: 7604635
-    nfiles: 11
-  - path: lambda012.82-a0.94-CEID-InfectionKalman
-    md5: 3111bdcfbe2931a630f57df96cbc6b5a.dir
-    size: 7605916
-    nfiles: 11
-  - path: lambda012.82-a0.95-CEID-InfectionKalman
-    md5: 022c9e7ca1225ff8270a0b906af08860.dir
-    size: 7600532
-    nfiles: 11
-  - path: lambda014.93-a0.94-CEID-InfectionKalman
-    md5: ba9df658f3f6bba7a3f8a8d1c6498082.dir
-    size: 7603784
-    nfiles: 11
-  - path: lambda014.93-a0.95-CEID-InfectionKalman
-    md5: 01ae0e01c8be280c7ddf8450640e093d.dir
-    size: 7595859
-    nfiles: 11
-  - path: lambda017.86-a0.94-CEID-InfectionKalman
-    md5: 35d0fc4d2aaaec6a24e144603eacbd44.dir
-    size: 7601212
-    nfiles: 11
-  - path: lambda017.86-a0.95-CEID-InfectionKalman
-    md5: 1b343d09bff7b2c8656af922b4e3d35d.dir
-    size: 7592064
-    nfiles: 11
-  - path: lambda022.22-a0.94-CEID-InfectionKalman
-    md5: 3f214c6fd75133c4522e8b905568c9f2.dir
-    size: 7597762
-    nfiles: 11
-  - path: lambda022.22-a0.95-CEID-InfectionKalman
-    md5: 1b5f59d60589269b0b2b74a884ffdaa2.dir
-    size: 7590595
-    nfiles: 11
-  - path: lambda029.41-a0.94-CEID-InfectionKalman
-    md5: a54e5cd830459d7a945d7efb2d40def4.dir
-    size: 7595730
-    nfiles: 11
-  - path: lambda029.41-a0.95-CEID-InfectionKalman
-    md5: 5e5bb106090a90e782cbc77574abd959.dir
-    size: 7589042
-    nfiles: 11
-  - path: lambda043.48-a0.94-CEID-InfectionKalman
-    md5: 68791e494e55fea23fbaa52414eb2b2e.dir
-    size: 7594818
-    nfiles: 11
-  - path: lambda043.48-a0.95-CEID-InfectionKalman
-    md5: e966fdf055a1f3fac63ac4ef7c0323c0.dir
-    size: 7589845
-    nfiles: 11
-  - path: lambda083.33-a0.94-CEID-InfectionKalman
-    md5: 71e6afa8d5e33ac67888de986ac2f545.dir
-    size: 7597660
-    nfiles: 11
-  - path: lambda083.33-a0.95-CEID-InfectionKalman
-    md5: 637aeab5310de63e9cd9d4f6aa2f534f.dir
-    size: 7592817
-    nfiles: 11
-  - path: lambda1000.00-a0.94-CEID-InfectionKalman
-    md5: b30f2e758379ed92cbacbba5e8199e1d.dir
-    size: 7617941
-    nfiles: 11
-  - path: lambda1000.00-a0.95-CEID-InfectionKalman
-    md5: 3484013ff35cf47f14f54efff0d314c5.dir
-    size: 7600363
-    nfiles: 11
-  - path: make-trajectory-plots.R
-    md5: 9b513e55481bc4c1073846d3b763fdf0
-    size: 3639
-  - path: other-model-forecasts.rds
-    md5: e159a04141ff395935f4c53b186dfd4b
-    size: 523441
-  outs:
-  - path: trajectories-all
-    md5: f1f55e699f03726d3e9cad68bf2328a9.dir
-    size: 98271771
-    nfiles: 100
-hopkins-2020-12-14:
-  cmd: fdt=2020-12-14 ./pull-hopkins-ts-from-date.R
+    md5:
+hopkins-2021-03-29:
+  cmd: fdt=2021-03-29 ./pull-hopkins-ts-from-date.R
   deps:
   - path: pull-hopkins-ts-from-date.R
     md5: d350b3ca9b344dea811f07232d0ec8d8
     size: 803
   outs:
-  - path: hopkins/2020-12-14
-    md5: bbc8f5dd92136a70a7f9102d7694629d.dir
-    size: 7861195
+  - path: hopkins/2021-03-29
+    md5: 108e400c368365126ba4e8f9f256f30e.dir
+    size: 12647684
     nfiles: 8
-hopkins-2020-09-07:
-  cmd: fdt=2020-09-07 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-09-07
-    md5: e39b3c0f55ea6382c06955cb15f12ac6.dir
-    size: 5267306
-    nfiles: 8
-hopkins-2021-01-11:
-  cmd: fdt=2021-01-11 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-01-11
-    md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
-    size: 8678408
-    nfiles: 8
-hopkins-2020-11-16:
-  cmd: fdt=2020-11-16 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-11-16
-    md5: 430a878537d60ab53d4c3a1a4d6cd23c.dir
-    size: 7073622
-    nfiles: 8
-hopkins-2020-09-21:
-  cmd: fdt=2020-09-21 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-09-21
-    md5: 1ef819278a378fc1c7e45006fee9302e.dir
-    size: 5622795
-    nfiles: 8
-hopkins-2020-12-21:
-  cmd: fdt=2020-12-21 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-12-21
-    md5: 12524dd8fbc2e6a6721278dfbdbf5474.dir
-    size: 8063262
-    nfiles: 8
-hopkins-2020-12-07:
-  cmd: fdt=2020-12-07 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-12-07
-    md5: 5b5d307b68b393c0dc8be402225174eb.dir
-    size: 7661720
-    nfiles: 8
-hopkins-2021-01-18:
-  cmd: fdt=2021-01-18 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-01-18
-    md5: 9b0db7fb22655f62fd124fc58a3d8e6f.dir
-    size: 8910503
-    nfiles: 8
-hopkins-2020-08-24:
-  cmd: fdt=2020-08-24 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-08-24
-    md5: 25ca9b41da3e586516ce152aa29d3ef9.dir
-    size: 4920102
-    nfiles: 8
-hopkins-2020-07-20:
-  cmd: fdt=2020-07-20 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-07-20
-    md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
-    size: 4049279
-    nfiles: 8
-hopkins-2020-09-14:
-  cmd: fdt=2020-09-14 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-09-14
-    md5: 7408a4d1d2c8fdb8a7b876ef78dff503.dir
-    size: 5448582
-    nfiles: 8
-hopkins-2020-07-27:
-  cmd: fdt=2020-07-27 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-07-27
-    md5: 13dc696d512db6d01cf50e17d5e8fbc0.dir
-    size: 4238629
-    nfiles: 8
-hopkins-2020-08-10:
-  cmd: fdt=2020-08-10 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-08-10
-    md5: 13afccd4aa4b42b21d84325788c3a7f0.dir
-    size: 4577299
-    nfiles: 8
-hopkins-2020-08-03:
-  cmd: fdt=2020-08-03 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-08-03
-    md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
-    size: 4404607
-    nfiles: 8
-hopkins-2020-10-19:
-  cmd: fdt=2020-10-19 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-10-19
-    md5: 33716b6b3d0db13adc926170d4fd7f8d.dir
-    size: 6347833
-    nfiles: 8
-hopkins-2021-01-04:
-  cmd: fdt=2021-01-04 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-01-04
-    md5: 50d6b954330a4125cccc93e6afaf8abf.dir
-    size: 8474141
-    nfiles: 8
-hopkins-2020-08-31:
-  cmd: fdt=2020-08-31 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-08-31
-    md5: 537c308e7f44e42557dbab59b275bde4.dir
-    size: 5087140
-    nfiles: 8
-hopkins-2020-12-28:
-  cmd: fdt=2020-12-28 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-12-28
-    md5: 41293815be64e72a622d73dc5e7e41a5.dir
-    size: 8265932
-    nfiles: 8
-hopkins-2021-02-01:
-  cmd: fdt=2021-02-01 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-02-01
-    md5: 8b07b96124b82ce52a7569cec6858440.dir
-    size: 9346644
-    nfiles: 8
-hopkins-2020-10-12:
-  cmd: fdt=2020-10-12 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-10-12
-    md5: 7461af20726cac0df8ae8c4de261608c.dir
-    size: 6162886
-    nfiles: 8
-hopkins-2020-11-09:
-  cmd: fdt=2020-11-09 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-11-09
-    md5: 71419e2cf7b0649ca6325d7a518bfe7d.dir
-    size: 6889826
-    nfiles: 8
-hopkins-2020-10-05:
-  cmd: fdt=2020-10-05 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-10-05
-    md5: a004cb4fc6c590fa65cb16c73e990d27.dir
-    size: 5980964
-    nfiles: 8
-hopkins-2020-11-23:
-  cmd: fdt=2020-11-23 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-11-23
-    md5: 8e28e8b35cf400b971d6153d7a5715ee.dir
-    size: 7266354
-    nfiles: 8
-hopkins-2020-11-02:
-  cmd: fdt=2020-11-02 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-11-02
-    md5: a254b225c4f4c0d156daaea37551d597.dir
-    size: 6695942
-    nfiles: 8
-hopkins-2021-01-25:
-  cmd: fdt=2021-01-25 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-01-25
-    md5: c1a1887563595ac0c0dea6347ab8ff29.dir
-    size: 9130826
-    nfiles: 8
-hopkins-2020-10-26:
-  cmd: fdt=2020-10-26 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-10-26
-    md5: 6cf94360504037df71b47f79f26bef0b.dir
-    size: 6532799
-    nfiles: 8
-hopkins-2020-07-26:
-  cmd: fdt=2020-07-26 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-07-26
-    md5: 10aa1c52c0425eb5e20f4d0b54b82363.dir
-    size: 4209293
-    nfiles: 8
-hopkins-2020-11-30:
-  cmd: fdt=2020-11-30 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-11-30
-    md5: 553919c34613e7565024d3685dbc4a20.dir
-    size: 7464559
-    nfiles: 8
-hopkins-2020-09-28:
-  cmd: fdt=2020-09-28 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-09-28
-    md5: 6aaa3222bc3aa2dc4b4795f5ac7c1639.dir
-    size: 5801081
-    nfiles: 8
-hopkins-2020-08-17:
-  cmd: fdt=2020-08-17 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2020-08-17
-    md5: dd6e23a30766101df60d6f41fd909679.dir
-    size: 4743866
-    nfiles: 8
-healthdata-2020-10-12-36:
-  cmd: fdt=2020-10-12 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: e08bccbda9f02d3c01a214d585b9321a
-    size: 757
-  outs:
-  - path: healthdata/2020-10-12/36
-    md5: e86ca54abd7a1f32e474061d2a30c7ef.dir
-    size: 0
-    nfiles: 1
-healthdata-2020-11-30-36:
-  cmd: fdt=2020-11-30 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/36
-    md5: d2ab428afc110efc2c295f99e4a291c4.dir
-    size: 77449
-    nfiles: 1
-healthdata-2020-11-16-36:
-  cmd: fdt=2020-11-16 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/36
-    md5: 4f334142951083e2f3abe0dbcfe1a044.dir
-    size: 72823
-    nfiles: 1
-healthdata-2020-11-16-01:
-  cmd: fdt=2020-11-16 loc=01 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/01
-    md5: 35eaeec18b2c8ceb4d48ec94fd2682eb.dir
-    size: 84834
-    nfiles: 1
-healthdata-2020-11-16-02:
-  cmd: fdt=2020-11-16 loc=02 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/02
-    md5: 5ae1160619575a39f64708b64ffd07be.dir
-    size: 61689
-    nfiles: 1
-healthdata-2020-11-16-04:
-  cmd: fdt=2020-11-16 loc=04 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/04
-    md5: e8ea8e7afc442cec014afada73a9636a.dir
-    size: 70994
-    nfiles: 1
-healthdata-2020-11-16-05:
-  cmd: fdt=2020-11-16 loc=05 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/05
-    md5: 2728599fa2fdd533abf5fa7ba954256e.dir
-    size: 69892
-    nfiles: 1
-healthdata-2020-11-16-06:
-  cmd: fdt=2020-11-16 loc=06 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/06
-    md5: b94f7b9c6a4e67457b48aeea603d019d.dir
-    size: 78375
-    nfiles: 1
-healthdata-2020-11-16-08:
-  cmd: fdt=2020-11-16 loc=08 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/08
-    md5: 58ab2fc7f4876c1edf4d909fa82ece2b.dir
-    size: 67424
-    nfiles: 1
-healthdata-2020-11-16-09:
-  cmd: fdt=2020-11-16 loc=09 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/09
-    md5: 78c3c1ee90f9282fc7cf484e1c049be0.dir
-    size: 66299
-    nfiles: 1
-healthdata-2020-11-16-10:
-  cmd: fdt=2020-11-16 loc=10 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/10
-    md5: 021ad46ff1740295d4e76ea5441d0039.dir
-    size: 61281
-    nfiles: 1
-healthdata-2020-11-16-11:
-  cmd: fdt=2020-11-16 loc=11 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/11
-    md5: f9058853605bf3651f4ba7b5ee01e0df.dir
-    size: 63053
-    nfiles: 1
-healthdata-2020-11-16-12:
-  cmd: fdt=2020-11-16 loc=12 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/12
-    md5: 917cfc11cf8a2d028a629436a80fd6d5.dir
-    size: 74724
-    nfiles: 1
-healthdata-2020-11-16-13:
-  cmd: fdt=2020-11-16 loc=13 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/13
-    md5: e91db2495fd6e90a4c3b7f71f3c0ab26.dir
-    size: 75737
-    nfiles: 1
-healthdata-2020-11-16-15:
-  cmd: fdt=2020-11-16 loc=15 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/15
-    md5: f85c29fb2e260467c759c910b4455c13.dir
-    size: 77411
-    nfiles: 1
-healthdata-2020-11-16-16:
-  cmd: fdt=2020-11-16 loc=16 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/16
-    md5: 10d7ce14a3d4e8aee86dce56ca18bfcd.dir
-    size: 66078
-    nfiles: 1
-healthdata-2020-11-16-17:
-  cmd: fdt=2020-11-16 loc=17 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/17
-    md5: d4752d9263a5b2844e1040069f901134.dir
-    size: 77875
-    nfiles: 1
-healthdata-2020-11-16-18:
-  cmd: fdt=2020-11-16 loc=18 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/18
-    md5: 41ccef811bfdfb87d6c983f02a4dd717.dir
-    size: 85467
-    nfiles: 1
-healthdata-2020-11-16-19:
-  cmd: fdt=2020-11-16 loc=19 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/19
-    md5: 0434d1ea8fd0eb6a4b751832d56892ee.dir
-    size: 71644
-    nfiles: 1
-healthdata-2020-11-16-20:
-  cmd: fdt=2020-11-16 loc=20 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/20
-    md5: c6826b2ff16d91bec73d4d1a9502e581.dir
-    size: 77004
-    nfiles: 1
-healthdata-2020-11-16-21:
-  cmd: fdt=2020-11-16 loc=21 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/21
-    md5: 1b339edb8baa31075c01e42c75ac0532.dir
-    size: 73733
-    nfiles: 1
-healthdata-2020-11-16-22:
-  cmd: fdt=2020-11-16 loc=22 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/22
-    md5: c3bafeb3f7545de31b3d33cafa469153.dir
-    size: 75017
-    nfiles: 1
-healthdata-2020-11-16-23:
-  cmd: fdt=2020-11-16 loc=23 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/23
-    md5: bd5b3738642cad27e71ef00b6a229fed.dir
-    size: 67880
-    nfiles: 1
-healthdata-2020-11-16-24:
-  cmd: fdt=2020-11-16 loc=24 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/24
-    md5: e04b6f98c91c83cf233c32b6b3cdca85.dir
-    size: 69913
-    nfiles: 1
-healthdata-2020-11-16-25:
-  cmd: fdt=2020-11-16 loc=25 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/25
-    md5: 8dd458b0a6b4f9205e6c99a61bf44453.dir
-    size: 66970
-    nfiles: 1
-healthdata-2020-11-16-26:
-  cmd: fdt=2020-11-16 loc=26 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/26
-    md5: 2e4f4ffa2b6fc4c09def5ebb7990a6e8.dir
-    size: 74866
-    nfiles: 1
-healthdata-2020-11-16-27:
-  cmd: fdt=2020-11-16 loc=27 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/27
-    md5: 8ab6283e396e2f6309b50980c7684c1b.dir
-    size: 83464
-    nfiles: 1
-healthdata-2020-11-16-28:
-  cmd: fdt=2020-11-16 loc=28 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/28
-    md5: a8490776f3c496d1059de020ef426214.dir
-    size: 71676
-    nfiles: 1
-healthdata-2020-11-16-29:
-  cmd: fdt=2020-11-16 loc=29 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/29
-    md5: c400aa086df8733b646a011cb8c6ed1f.dir
-    size: 76381
-    nfiles: 1
-healthdata-2020-11-16-30:
-  cmd: fdt=2020-11-16 loc=30 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/30
-    md5: 9b1952f10f6c33f0a6f709dc5cfeacf2.dir
-    size: 79193
-    nfiles: 1
-healthdata-2020-11-16-31:
-  cmd: fdt=2020-11-16 loc=31 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/31
-    md5: ae13b5daa2ffeb49098da02ae5192d67.dir
-    size: 68423
-    nfiles: 1
-healthdata-2020-11-16-32:
-  cmd: fdt=2020-11-16 loc=32 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/32
-    md5: 1eb1739514b76dc68a35de9e1367333f.dir
-    size: 76582
-    nfiles: 1
-healthdata-2020-11-16-33:
-  cmd: fdt=2020-11-16 loc=33 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/33
-    md5: 1a54eb1244944fe54f9432eaf52cf0f0.dir
-    size: 62747
-    nfiles: 1
-healthdata-2020-11-16-34:
-  cmd: fdt=2020-11-16 loc=34 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/34
-    md5: 7def0359fb2259c3ba0b39593fc057e8.dir
-    size: 70386
-    nfiles: 1
-healthdata-2020-11-16-35:
-  cmd: fdt=2020-11-16 loc=35 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/35
-    md5: 2f71e91f9f90ef4ef987708c030b581e.dir
-    size: 66139
-    nfiles: 1
-healthdata-2020-11-16-37:
-  cmd: fdt=2020-11-16 loc=37 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/37
-    md5: a641540795229ba60d570cc3a9b0f410.dir
-    size: 86370
-    nfiles: 1
-healthdata-2020-11-16-38:
-  cmd: fdt=2020-11-16 loc=38 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/38
-    md5: a3dd4fdde0503fbecb0d73662f3e747f.dir
-    size: 66325
-    nfiles: 1
-healthdata-2020-11-16-39:
-  cmd: fdt=2020-11-16 loc=39 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/39
-    md5: 946f62b104194cb09fc07d131e6b3146.dir
-    size: 75903
-    nfiles: 1
-healthdata-2020-11-16-40:
-  cmd: fdt=2020-11-16 loc=40 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/40
-    md5: 1cc63b03d3eaf060a1d53a3b4ea42f76.dir
-    size: 73290
-    nfiles: 1
-healthdata-2020-11-16-41:
-  cmd: fdt=2020-11-16 loc=41 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/41
-    md5: db15e26a08398d94b5a3db568faa61b1.dir
-    size: 70500
-    nfiles: 1
-healthdata-2020-11-16-42:
-  cmd: fdt=2020-11-16 loc=42 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/42
-    md5: 6deaad9a9838eb3d1adec943415ff0fb.dir
-    size: 75359
-    nfiles: 1
-healthdata-2020-11-16-44:
-  cmd: fdt=2020-11-16 loc=44 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/44
-    md5: d196de987bee7b0f5330800e20bbe6d5.dir
-    size: 67132
-    nfiles: 1
-healthdata-2020-11-16-45:
-  cmd: fdt=2020-11-16 loc=45 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/45
-    md5: e8cae9308454ed12e5b5ca1d8c727dd6.dir
-    size: 69902
-    nfiles: 1
-healthdata-2020-11-16-46:
-  cmd: fdt=2020-11-16 loc=46 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/46
-    md5: 569b524b94a8916febda475e50a7165b.dir
-    size: 62366
-    nfiles: 1
-healthdata-2020-11-16-47:
-  cmd: fdt=2020-11-16 loc=47 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/47
-    md5: e8d6e9608ae7e166de8f9c3f540215ee.dir
-    size: 72723
-    nfiles: 1
-healthdata-2020-11-16-48:
-  cmd: fdt=2020-11-16 loc=48 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/48
-    md5: 2a34c3c34ba4da9a8a89155633d3901b.dir
-    size: 89010
-    nfiles: 1
-healthdata-2020-11-16-49:
-  cmd: fdt=2020-11-16 loc=49 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/49
-    md5: d69f9cb1fe9f05f989dfb52cb520479a.dir
-    size: 65027
-    nfiles: 1
-healthdata-2020-11-16-50:
-  cmd: fdt=2020-11-16 loc=50 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/50
-    md5: a5c493b75e454c6bca1c8421ea7db673.dir
-    size: 60586
-    nfiles: 1
-healthdata-2020-11-16-51:
-  cmd: fdt=2020-11-16 loc=51 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/51
-    md5: f02066e24cfb5753a0e99659bef47da4.dir
-    size: 71387
-    nfiles: 1
-healthdata-2020-11-16-53:
-  cmd: fdt=2020-11-16 loc=53 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/53
-    md5: fb45308943666012eee29c6254d56a95.dir
-    size: 71298
-    nfiles: 1
-healthdata-2020-11-16-54:
-  cmd: fdt=2020-11-16 loc=54 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/54
-    md5: 9f338165c91589fd7504872fe34b7e18.dir
-    size: 70372
-    nfiles: 1
-healthdata-2020-11-16-55:
-  cmd: fdt=2020-11-16 loc=55 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/55
-    md5: 92e8cc1a4e09ff5f111e05d0558c95fd.dir
-    size: 74133
-    nfiles: 1
-healthdata-2020-11-16-56:
-  cmd: fdt=2020-11-16 loc=56 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-16/56
-    md5: cb11c8c5727cb29b6f55443e216e79ba.dir
-    size: 66239
-    nfiles: 1
-healthdata-2021-02-01-01:
-  cmd: fdt=2021-02-01 loc=01 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/01
-    md5: 25075fb4760f53e3acee608b40a10f76.dir
-    size: 108847
-    nfiles: 1
-healthdata-2021-02-01-02:
-  cmd: fdt=2021-02-01 loc=02 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/02
-    md5: 01262a80582819c9c99ee1adc87113f0.dir
-    size: 81110
-    nfiles: 1
-healthdata-2021-02-01-04:
-  cmd: fdt=2021-02-01 loc=04 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/04
-    md5: 9c64ad87c7ef37b5d79844b2b9559b33.dir
-    size: 95293
-    nfiles: 1
-healthdata-2021-02-01-05:
-  cmd: fdt=2021-02-01 loc=05 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/05
-    md5: f77b2ddadaa61ca1114912674f1da8f4.dir
-    size: 92928
-    nfiles: 1
-healthdata-2021-02-01-06:
-  cmd: fdt=2021-02-01 loc=06 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/06
-    md5: f6575c293f7977059804a969bf6a8820.dir
-    size: 104605
-    nfiles: 1
-healthdata-2021-02-01-08:
-  cmd: fdt=2021-02-01 loc=08 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/08
-    md5: e8305843baff5cbe49bb7f27f1247eaf.dir
-    size: 90588
-    nfiles: 1
-healthdata-2021-02-01-09:
-  cmd: fdt=2021-02-01 loc=09 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/09
-    md5: c0596b47683d19323214c408431fab4c.dir
-    size: 87675
-    nfiles: 1
-healthdata-2021-02-01-10:
-  cmd: fdt=2021-02-01 loc=10 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/10
-    md5: 6dc4a88f6ef85395768f87ccf3ecaced.dir
-    size: 81107
-    nfiles: 1
-healthdata-2021-02-01-11:
-  cmd: fdt=2021-02-01 loc=11 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/11
-    md5: 1076d523b38008d3f286006e7ae72bc1.dir
-    size: 83589
-    nfiles: 1
-healthdata-2021-02-01-12:
-  cmd: fdt=2021-02-01 loc=12 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/12
-    md5: 41e52836dd99824255ce35a464a531e6.dir
-    size: 100093
-    nfiles: 1
-healthdata-2021-02-01-13:
-  cmd: fdt=2021-02-01 loc=13 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/13
-    md5: cd428395a364bbb9d176700153e399fc.dir
-    size: 100874
-    nfiles: 1
-healthdata-2021-02-01-15:
-  cmd: fdt=2021-02-01 loc=15 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/15
-    md5: 9b0fd7b2b60b28c7648b61b4c8974d45.dir
-    size: 97315
-    nfiles: 1
-healthdata-2021-02-01-16:
-  cmd: fdt=2021-02-01 loc=16 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/16
-    md5: 561cc4978a7a8b83c8a59284c4755923.dir
-    size: 86417
-    nfiles: 1
-healthdata-2021-02-01-17:
-  cmd: fdt=2021-02-01 loc=17 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/17
-    md5: a0d0b39ad8027e21500f359ce8a48e67.dir
-    size: 103086
-    nfiles: 1
-healthdata-2021-02-01-18:
-  cmd: fdt=2021-02-01 loc=18 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/18
-    md5: df19aaf8ca6ce9c07db7182288224d37.dir
-    size: 109860
-    nfiles: 1
-healthdata-2021-02-01-19:
-  cmd: fdt=2021-02-01 loc=19 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/19
-    md5: 21d0d25d6a5619b1f27c59388ae9cd82.dir
-    size: 94550
-    nfiles: 1
-healthdata-2021-02-01-20:
-  cmd: fdt=2021-02-01 loc=20 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/20
-    md5: bcbd142f3e8e2059e2d2cb452de35b4a.dir
-    size: 100328
-    nfiles: 1
-healthdata-2021-02-01-21:
-  cmd: fdt=2021-02-01 loc=21 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/21
-    md5: 29588496ae808d15f7989147ee0d27d8.dir
-    size: 97708
-    nfiles: 1
-healthdata-2021-02-01-22:
-  cmd: fdt=2021-02-01 loc=22 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/22
-    md5: e7a227cc5f049e95accf993f84e63c06.dir
-    size: 98937
-    nfiles: 1
-healthdata-2021-02-01-23:
-  cmd: fdt=2021-02-01 loc=23 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/23
-    md5: afecde3de186ee72e958d8639d3e9464.dir
-    size: 88152
-    nfiles: 1
-healthdata-2021-02-01-24:
-  cmd: fdt=2021-02-01 loc=24 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/24
-    md5: 10268fb51d30f8dde886852cde77794f.dir
-    size: 91692
-    nfiles: 1
-healthdata-2021-02-01-25:
-  cmd: fdt=2021-02-01 loc=25 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/25
-    md5: ae949e47c399612a87771d0a15b52f21.dir
-    size: 90419
-    nfiles: 1
-healthdata-2021-02-01-26:
-  cmd: fdt=2021-02-01 loc=26 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/26
-    md5: 8904d4b6442197ff90d33f66c363ed9b.dir
-    size: 99486
-    nfiles: 1
-healthdata-2021-02-01-27:
-  cmd: fdt=2021-02-01 loc=27 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/27
-    md5: 650e2ad8c659c44d3e5e5e5c3051503e.dir
-    size: 106812
-    nfiles: 1
-healthdata-2021-02-01-28:
-  cmd: fdt=2021-02-01 loc=28 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/28
-    md5: 1dec289739699dfb7d62c4ac76b7409b.dir
-    size: 94429
-    nfiles: 1
-healthdata-2021-02-01-29:
-  cmd: fdt=2021-02-01 loc=29 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/29
-    md5: a23f35fd46ad55196bb5f57f18297e20.dir
-    size: 101063
-    nfiles: 1
-healthdata-2021-02-01-30:
-  cmd: fdt=2021-02-01 loc=30 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/30
-    md5: d80527e352e436372485aaeeb127b22a.dir
-    size: 99456
-    nfiles: 1
-healthdata-2021-02-01-31:
-  cmd: fdt=2021-02-01 loc=31 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/31
-    md5: 3c6cd7eb703aa32e240ea78d8cc61165.dir
-    size: 90781
-    nfiles: 1
-healthdata-2021-02-01-32:
-  cmd: fdt=2021-02-01 loc=32 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/32
-    md5: 67ca20b5558984fde1a5b669aa8d3f61.dir
-    size: 99048
-    nfiles: 1
-healthdata-2021-02-01-33:
-  cmd: fdt=2021-02-01 loc=33 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/33
-    md5: 9edb3c415d156f6fa48fc7436144f9c6.dir
-    size: 83211
-    nfiles: 1
-healthdata-2021-02-01-34:
-  cmd: fdt=2021-02-01 loc=34 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/34
-    md5: a2a1545fa79c4fa24aab481cf1c2da3f.dir
-    size: 92871
-    nfiles: 1
-healthdata-2021-02-01-35:
-  cmd: fdt=2021-02-01 loc=35 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/35
-    md5: 7c1b8d02d9d74394f4b95ea9a117541d.dir
-    size: 87120
-    nfiles: 1
-healthdata-2021-02-01-36:
-  cmd: fdt=2021-02-01 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/36
-    md5: 51e73d470d105a1828c06785fc2be408.dir
-    size: 98048
-    nfiles: 1
-healthdata-2021-02-01-37:
-  cmd: fdt=2021-02-01 loc=37 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/37
-    md5: e81c5a9df50bcef687b3ce16c0be1a30.dir
-    size: 110566
-    nfiles: 1
-healthdata-2021-02-01-38:
-  cmd: fdt=2021-02-01 loc=38 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/38
-    md5: 39aee56789b6e37c10c87e3f3c65743e.dir
-    size: 87865
-    nfiles: 1
-healthdata-2021-02-01-39:
-  cmd: fdt=2021-02-01 loc=39 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/39
-    md5: 7ef60f46249c396b775aef6677fc25db.dir
-    size: 101048
-    nfiles: 1
-healthdata-2021-02-01-40:
-  cmd: fdt=2021-02-01 loc=40 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/40
-    md5: e30e76facef04b5e1e55453ad23caa3c.dir
-    size: 97601
-    nfiles: 1
-healthdata-2021-02-01-41:
-  cmd: fdt=2021-02-01 loc=41 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/41
-    md5: 0c96d6f07ed5f1b2e30d4eb673179b7e.dir
-    size: 91324
-    nfiles: 1
-healthdata-2021-02-01-42:
-  cmd: fdt=2021-02-01 loc=42 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/42
-    md5: d1ff038d2125e3303fdb9df68011cf2c.dir
-    size: 100581
-    nfiles: 1
-healthdata-2021-02-01-44:
-  cmd: fdt=2021-02-01 loc=44 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/44
-    md5: 2a12f0aa3915562577b59a38ea42c0bb.dir
-    size: 85446
-    nfiles: 1
-healthdata-2021-02-01-45:
-  cmd: fdt=2021-02-01 loc=45 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/45
-    md5: 4e3f26490a27906b88116ff6a8f28cc0.dir
-    size: 91971
-    nfiles: 1
-healthdata-2021-02-01-46:
-  cmd: fdt=2021-02-01 loc=46 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/46
-    md5: 5bc467fed6b18f9dd2a45514b2dba51a.dir
-    size: 83280
-    nfiles: 1
-healthdata-2021-02-01-47:
-  cmd: fdt=2021-02-01 loc=47 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/47
-    md5: 2ee531b4ebc75649d20aee5737ea39c1.dir
-    size: 97650
-    nfiles: 1
-healthdata-2021-02-01-48:
-  cmd: fdt=2021-02-01 loc=48 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/48
-    md5: 7cc5dbe365882b976981227725103e06.dir
-    size: 115001
-    nfiles: 1
-healthdata-2021-02-01-49:
-  cmd: fdt=2021-02-01 loc=49 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/49
-    md5: be1254723f7d44e6762c2c3a761902af.dir
-    size: 85601
-    nfiles: 1
-healthdata-2021-02-01-50:
-  cmd: fdt=2021-02-01 loc=50 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/50
-    md5: 35b72cf35ab501878791c0bc6685af31.dir
-    size: 79869
-    nfiles: 1
-healthdata-2021-02-01-51:
-  cmd: fdt=2021-02-01 loc=51 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/51
-    md5: a50d37e605416e73093ff8ec93a4afbc.dir
-    size: 95284
-    nfiles: 1
-healthdata-2021-02-01-53:
-  cmd: fdt=2021-02-01 loc=53 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/53
-    md5: 853513178154c6e15071762a902efa26.dir
-    size: 94603
-    nfiles: 1
-healthdata-2021-02-01-54:
-  cmd: fdt=2021-02-01 loc=54 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/54
-    md5: 29f89c7547634b12c7a874f324c79d22.dir
-    size: 91128
-    nfiles: 1
-healthdata-2021-02-01-55:
-  cmd: fdt=2021-02-01 loc=55 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/55
-    md5: 0c75cf30d00ad3d60afb66f9cd91d48d.dir
-    size: 98101
-    nfiles: 1
-healthdata-2021-02-01-56:
-  cmd: fdt=2021-02-01 loc=56 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-02-01/56
-    md5: 47aab38b7836bdd11705e243275d14ab.dir
-    size: 85989
-    nfiles: 1
-healthdata-2020-11-23-01:
-  cmd: fdt=2020-11-23 loc=01 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/01
-    md5: acfc9249ad43b987cb4aa59e0349fddc.dir
-    size: 87114
-    nfiles: 1
-healthdata-2020-11-23-02:
-  cmd: fdt=2020-11-23 loc=02 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/02
-    md5: 818929ffad43938a7d0728848654fa31.dir
-    size: 63611
-    nfiles: 1
-healthdata-2020-11-23-04:
-  cmd: fdt=2020-11-23 loc=04 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/04
-    md5: b09737168cb1b2a0b52fd8c9be21eff9.dir
-    size: 73246
-    nfiles: 1
-healthdata-2020-11-23-05:
-  cmd: fdt=2020-11-23 loc=05 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/05
-    md5: d8e7a2ab0bf873554628944fbdfed4f2.dir
-    size: 72047
-    nfiles: 1
-healthdata-2020-11-23-08:
-  cmd: fdt=2020-11-23 loc=08 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/08
-    md5: 8294c6e9216594750cad841f8e12bbf5.dir
-    size: 69642
-    nfiles: 1
-healthdata-2020-11-23-09:
-  cmd: fdt=2020-11-23 loc=09 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/09
-    md5: b7365d4d5656a759411e5d1132128a4f.dir
-    size: 68335
-    nfiles: 1
-healthdata-2020-11-23-10:
-  cmd: fdt=2020-11-23 loc=10 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/10
-    md5: 34225209c9830aad7ad51a23e501c772.dir
-    size: 63253
-    nfiles: 1
-healthdata-2020-11-23-11:
-  cmd: fdt=2020-11-23 loc=11 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/11
-    md5: 87a7bbb8d9d33579bb16fa05ee081931.dir
-    size: 65027
-    nfiles: 1
-healthdata-2020-11-23-12:
-  cmd: fdt=2020-11-23 loc=12 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/12
-    md5: 019fb39d2f91380603d1e8de35d033bd.dir
-    size: 77024
-    nfiles: 1
-healthdata-2020-11-23-13:
-  cmd: fdt=2020-11-23 loc=13 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/13
-    md5: d1c0cd1044da77c3e654c3d175426324.dir
-    size: 78018
-    nfiles: 1
-healthdata-2020-11-23-15:
-  cmd: fdt=2020-11-23 loc=15 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/15
-    md5: 3ea87d44b4c4ffafa46472cc419a9204.dir
-    size: 79365
-    nfiles: 1
-healthdata-2020-11-23-16:
-  cmd: fdt=2020-11-23 loc=16 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/16
-    md5: 6a8c45160e1abf206d95f29c6aa446a8.dir
-    size: 68032
-    nfiles: 1
-healthdata-2020-11-23-17:
-  cmd: fdt=2020-11-23 loc=17 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/17
-    md5: d7e9926bd91db8c4cf05b0dcd6009b28.dir
-    size: 80186
-    nfiles: 1
-healthdata-2020-11-23-18:
-  cmd: fdt=2020-11-23 loc=18 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/18
-    md5: b3b18c6e478e714cdfe641bb926b69e3.dir
-    size: 87749
-    nfiles: 1
-healthdata-2020-11-23-19:
-  cmd: fdt=2020-11-23 loc=19 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/19
-    md5: 54f7cbf2c47447d4b4a962cfdea0d485.dir
-    size: 73835
-    nfiles: 1
-healthdata-2020-11-23-20:
-  cmd: fdt=2020-11-23 loc=20 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/20
-    md5: dedb55442a9ea10c11fcbfb23ab494be.dir
-    size: 79203
-    nfiles: 1
-healthdata-2020-11-23-21:
-  cmd: fdt=2020-11-23 loc=21 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/21
-    md5: 8295cbf3412bbc87bd8e6df57c246da9.dir
-    size: 76010
-    nfiles: 1
-healthdata-2020-11-23-22:
-  cmd: fdt=2020-11-23 loc=22 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/22
-    md5: a308059f93cd1d7ac5275b65bd417844.dir
-    size: 75895
-    nfiles: 1
-healthdata-2020-11-23-23:
-  cmd: fdt=2020-11-23 loc=23 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/23
-    md5: 97730c287ba1ed6d192663468e4858fb.dir
-    size: 69848
-    nfiles: 1
-healthdata-2020-11-23-24:
-  cmd: fdt=2020-11-23 loc=24 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/24
-    md5: 81b6a566dc474f74f249f7b598ddf22a.dir
-    size: 72043
-    nfiles: 1
-healthdata-2020-11-23-25:
-  cmd: fdt=2020-11-23 loc=25 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/25
-    md5: 5207a3bc87486fc4e15842d8e0e5949e.dir
-    size: 69178
-    nfiles: 1
-healthdata-2020-11-23-26:
-  cmd: fdt=2020-11-23 loc=26 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/26
-    md5: 6b83cb0d9d057f5f89f432cf9fd1e8e5.dir
-    size: 77158
-    nfiles: 1
-healthdata-2020-11-23-27:
-  cmd: fdt=2020-11-23 loc=27 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/27
-    md5: e3a19fab8a2050cb4c7a9a0811947f09.dir
-    size: 85713
-    nfiles: 1
-healthdata-2020-11-23-28:
-  cmd: fdt=2020-11-23 loc=28 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/28
-    md5: de00b09646fff5f3eec6836ceb30a6e0.dir
-    size: 73811
-    nfiles: 1
-healthdata-2020-11-23-29:
-  cmd: fdt=2020-11-23 loc=29 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/29
-    md5: 7cdb61c139fb694c6752394530fd90d6.dir
-    size: 78689
-    nfiles: 1
-healthdata-2020-11-23-30:
-  cmd: fdt=2020-11-23 loc=30 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/30
-    md5: d6bee31c5c03639d2344e663ab781251.dir
-    size: 81169
-    nfiles: 1
-healthdata-2020-11-23-31:
-  cmd: fdt=2020-11-23 loc=31 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/31
-    md5: 58e3b810709c50dc2a162de49c8c8616.dir
-    size: 70450
-    nfiles: 1
-healthdata-2020-11-23-32:
-  cmd: fdt=2020-11-23 loc=32 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/32
-    md5: d70b7d0892ac3400e7e310b72a1d369c.dir
-    size: 78628
-    nfiles: 1
-healthdata-2020-11-23-33:
-  cmd: fdt=2020-11-23 loc=33 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/33
-    md5: 0926921826a3099ea77fa077a98a2bb3.dir
-    size: 64720
-    nfiles: 1
-healthdata-2020-11-23-34:
-  cmd: fdt=2020-11-23 loc=34 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/34
-    md5: 4a190b1a09bb88177e18025735fa3061.dir
-    size: 72532
-    nfiles: 1
-healthdata-2020-11-23-35:
-  cmd: fdt=2020-11-23 loc=35 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/35
-    md5: f09988bdf2876d568fc50f911bf02113.dir
-    size: 68138
-    nfiles: 1
-healthdata-2020-11-23-36:
-  cmd: fdt=2020-11-23 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/36
-    md5: b2319d765f7fe05303bbb4c8714b8794.dir
-    size: 75130
-    nfiles: 1
-healthdata-2020-11-23-37:
-  cmd: fdt=2020-11-23 loc=37 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/37
-    md5: 54d86f3fa5fefdbb754b89ebf34b1405.dir
-    size: 88663
-    nfiles: 1
-healthdata-2020-11-23-38:
-  cmd: fdt=2020-11-23 loc=38 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/38
-    md5: 84470e9801f163c47c467051091c6949.dir
-    size: 68263
-    nfiles: 1
-healthdata-2020-11-23-39:
-  cmd: fdt=2020-11-23 loc=39 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/39
-    md5: bf9b867e92fcf73780a2af061dd8dc8b.dir
-    size: 78173
-    nfiles: 1
-healthdata-2020-11-23-40:
-  cmd: fdt=2020-11-23 loc=40 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/40
-    md5: 7ccae7611b0d48e8f9ba87839f98cb39.dir
-    size: 75537
-    nfiles: 1
-healthdata-2020-11-23-41:
-  cmd: fdt=2020-11-23 loc=41 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/41
-    md5: 5ae0960bddddac3b38fe10c272aa384e.dir
-    size: 72510
-    nfiles: 1
-healthdata-2020-11-23-42:
-  cmd: fdt=2020-11-23 loc=42 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/42
-    md5: 989a668ef03a32da6d3a23ae025f69d7.dir
-    size: 77643
-    nfiles: 1
-healthdata-2020-11-23-44:
-  cmd: fdt=2020-11-23 loc=44 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/44
-    md5: 19bc627b40390c4dc097739bad6892c6.dir
-    size: 69102
-    nfiles: 1
-healthdata-2020-11-23-45:
-  cmd: fdt=2020-11-23 loc=45 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/45
-    md5: 1b0f08a9df02cc0e71d45b8fd1c3d0eb.dir
-    size: 71965
-    nfiles: 1
-healthdata-2020-11-23-46:
-  cmd: fdt=2020-11-23 loc=46 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/46
-    md5: f99970c6694cde89e0fa6855765113db.dir
-    size: 64342
-    nfiles: 1
-healthdata-2020-11-23-47:
-  cmd: fdt=2020-11-23 loc=47 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/47
-    md5: 6574a14ffe8936796f977f2b0b2d2cf2.dir
-    size: 74975
-    nfiles: 1
-healthdata-2020-11-23-48:
-  cmd: fdt=2020-11-23 loc=48 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/48
-    md5: 7634d9a29ed35fdb28bf2b72083e0a3d.dir
-    size: 91335
-    nfiles: 1
-healthdata-2020-11-23-49:
-  cmd: fdt=2020-11-23 loc=49 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/49
-    md5: 1d4baaf0753da878c1cf7829a2ad2ef7.dir
-    size: 67035
-    nfiles: 1
-healthdata-2020-11-23-50:
-  cmd: fdt=2020-11-23 loc=50 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/50
-    md5: 49f7e7f44e2cf519580f86514010ae74.dir
-    size: 62417
-    nfiles: 1
-healthdata-2020-11-23-51:
-  cmd: fdt=2020-11-23 loc=51 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/51
-    md5: 39be1a6f35a534810743b8f729528697.dir
-    size: 73639
-    nfiles: 1
-healthdata-2020-11-23-53:
-  cmd: fdt=2020-11-23 loc=53 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/53
-    md5: f78ea92a62dff4ef37f273dd5bed0e26.dir
-    size: 73457
-    nfiles: 1
-healthdata-2020-11-23-54:
-  cmd: fdt=2020-11-23 loc=54 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/54
-    md5: b432faeedde94266eff4297d52332020.dir
-    size: 72369
-    nfiles: 1
-healthdata-2020-11-23-55:
-  cmd: fdt=2020-11-23 loc=55 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/55
-    md5: 3e9407856999db90bb8176503317c51d.dir
-    size: 76394
-    nfiles: 1
-healthdata-2020-11-23-56:
-  cmd: fdt=2020-11-23 loc=56 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/56
-    md5: c46f9c49136eff69d291b697225d9753.dir
-    size: 68177
-    nfiles: 1
-healthdata-2020-11-23-06:
-  cmd: fdt=2020-11-23 loc=06 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-23/06
-    md5: 56f0e134367f4a2869b84be643e221f0.dir
-    size: 80722
-    nfiles: 1
-healthdata-2020-11-30-01:
-  cmd: fdt=2020-11-30 loc=01 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/01
-    md5: 20b9d5d3a7cf6e3d4eb203ad9a0d35fc.dir
-    size: 89390
-    nfiles: 1
-healthdata-2020-11-30-02:
-  cmd: fdt=2020-11-30 loc=02 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/02
-    md5: 534b6f281316a0cfb8827fed0ba4d961.dir
-    size: 65575
-    nfiles: 1
-healthdata-2020-11-30-04:
-  cmd: fdt=2020-11-30 loc=04 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/04
-    md5: e08193f7c5440090ff1095ad8e47f775.dir
-    size: 75385
-    nfiles: 1
-healthdata-2020-11-30-05:
-  cmd: fdt=2020-11-30 loc=05 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/05
-    md5: 4c0d3e9a2f806e4c1c8bf46e3e66abc7.dir
-    size: 74137
-    nfiles: 1
-healthdata-2020-11-30-06:
-  cmd: fdt=2020-11-30 loc=06 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/06
-    md5: 5398240fd0fcabef208f448c8f7c96af.dir
-    size: 82854
-    nfiles: 1
-healthdata-2020-11-30-08:
-  cmd: fdt=2020-11-30 loc=08 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/08
-    md5: f84fae475aef5655244b7a8b70f4f56a.dir
-    size: 71839
-    nfiles: 1
-healthdata-2020-11-30-09:
-  cmd: fdt=2020-11-30 loc=09 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/09
-    md5: f0fd9ea136492ea4d876f2f1451ffe43.dir
-    size: 70313
-    nfiles: 1
-healthdata-2020-11-30-10:
-  cmd: fdt=2020-11-30 loc=10 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/10
-    md5: 9f00990e4ab5be89c31878cac71680c5.dir
-    size: 64975
-    nfiles: 1
-healthdata-2020-11-30-11:
-  cmd: fdt=2020-11-30 loc=11 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/11
-    md5: a23a22f4bacc17a9e70c9aaaf94ad2a0.dir
-    size: 66922
-    nfiles: 1
-healthdata-2020-11-30-12:
-  cmd: fdt=2020-11-30 loc=12 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/12
-    md5: 2abb1b643cb5c733c1b2c816f80cac17.dir
-    size: 79330
-    nfiles: 1
-healthdata-2020-11-30-13:
-  cmd: fdt=2020-11-30 loc=13 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/13
-    md5: 12d0104d2749bf081668ae0433e7e0f8.dir
-    size: 80305
-    nfiles: 1
-healthdata-2020-11-30-15:
-  cmd: fdt=2020-11-30 loc=15 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/15
-    md5: dbc68a89c69fb03d4c22e6897820497d.dir
-    size: 81301
-    nfiles: 1
-healthdata-2020-11-30-16:
-  cmd: fdt=2020-11-30 loc=16 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/16
-    md5: a18ca066bbc9c699379b7e454ff76e5c.dir
-    size: 69983
-    nfiles: 1
-healthdata-2020-11-30-17:
-  cmd: fdt=2020-11-30 loc=17 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/17
-    md5: 2460773c10226a8ae225f7cfcf19eb97.dir
-    size: 82474
-    nfiles: 1
-healthdata-2020-11-30-18:
-  cmd: fdt=2020-11-30 loc=18 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/18
-    md5: 6e4919c568d8b69c9d61d1d3ce3c1566.dir
-    size: 90037
-    nfiles: 1
-healthdata-2020-11-30-19:
-  cmd: fdt=2020-11-30 loc=19 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/19
-    md5: a2e259be3563de6033936eb2a8fe9d09.dir
-    size: 76026
-    nfiles: 1
-healthdata-2020-11-30-20:
-  cmd: fdt=2020-11-30 loc=20 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/20
-    md5: 8b63fc65e22b4c6033cbc4b778f13d67.dir
-    size: 81382
-    nfiles: 1
-healthdata-2020-11-30-21:
-  cmd: fdt=2020-11-30 loc=21 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/21
-    md5: ed8fd7885365e5deaac1156a2930806b.dir
-    size: 78270
-    nfiles: 1
-healthdata-2020-11-30-22:
-  cmd: fdt=2020-11-30 loc=22 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/22
-    md5: f771d82484ca9f24eecb501ef84a4d37.dir
-    size: 78138
-    nfiles: 1
-healthdata-2020-11-30-23:
-  cmd: fdt=2020-11-30 loc=23 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/23
-    md5: 6eaaac76ee23c04ef85ad144687a7c62.dir
-    size: 71789
-    nfiles: 1
-healthdata-2020-11-30-24:
-  cmd: fdt=2020-11-30 loc=24 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/24
-    md5: 2a15cd370f86b73aef7f1dc6e005244d.dir
-    size: 74158
-    nfiles: 1
-healthdata-2020-11-30-25:
-  cmd: fdt=2020-11-30 loc=25 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/25
-    md5: edde87d0ca8cebe40852c2b419ab9079.dir
-    size: 71408
-    nfiles: 1
-healthdata-2020-11-30-26:
-  cmd: fdt=2020-11-30 loc=26 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/26
-    md5: b2ad7ea3c0b03cc36029392c5c18316f.dir
-    size: 79448
-    nfiles: 1
-healthdata-2020-11-30-27:
-  cmd: fdt=2020-11-30 loc=27 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/27
-    md5: 80de88830bfab6e45ace448be0ffb836.dir
-    size: 87948
-    nfiles: 1
-healthdata-2020-11-30-28:
-  cmd: fdt=2020-11-30 loc=28 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/28
-    md5: 1d3240aa45ea56f5b1b666ad45816603.dir
-    size: 75968
-    nfiles: 1
-healthdata-2020-11-30-29:
-  cmd: fdt=2020-11-30 loc=29 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/29
-    md5: 9271d96251ee58ad598d4626bfc52e89.dir
-    size: 80980
-    nfiles: 1
-healthdata-2020-11-30-30:
-  cmd: fdt=2020-11-30 loc=30 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/30
-    md5: 38951e51f784728078ff351cf8b9f6ae.dir
-    size: 83134
-    nfiles: 1
-healthdata-2020-11-30-31:
-  cmd: fdt=2020-11-30 loc=31 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/31
-    md5: 56c6985dd9d1867cff1c0bae9193ce27.dir
-    size: 72470
-    nfiles: 1
-healthdata-2020-11-30-32:
-  cmd: fdt=2020-11-30 loc=32 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/32
-    md5: 0592688472ed1d1d71de9b8a16e7d8d8.dir
-    size: 80679
-    nfiles: 1
-healthdata-2020-11-30-33:
-  cmd: fdt=2020-11-30 loc=33 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/33
-    md5: c93a9ce49572fa51531a9f87ef760183.dir
-    size: 66709
-    nfiles: 1
-healthdata-2020-11-30-34:
-  cmd: fdt=2020-11-30 loc=34 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/34
-    md5: 79ab435af6758ba66bfaf1a9caf9d7e6.dir
-    size: 74669
-    nfiles: 1
-healthdata-2020-11-30-35:
-  cmd: fdt=2020-11-30 loc=35 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/35
-    md5: dbb98f748ddae301c778fa773968e86f.dir
-    size: 70141
-    nfiles: 1
-healthdata-2020-11-30-37:
-  cmd: fdt=2020-11-30 loc=37 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/37
-    md5: d491f033c5f91a22714453c49ad29e9b.dir
-    size: 90962
-    nfiles: 1
-healthdata-2020-11-30-38:
-  cmd: fdt=2020-11-30 loc=38 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/38
-    md5: e2f423dd48f50885c6a6b93e8457e2cf.dir
-    size: 71164
-    nfiles: 1
-healthdata-2020-11-30-39:
-  cmd: fdt=2020-11-30 loc=39 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/39
-    md5: 6e2d38308c5e70de89ad90c83c9dd381.dir
-    size: 80497
-    nfiles: 1
-healthdata-2020-11-30-40:
-  cmd: fdt=2020-11-30 loc=40 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/40
-    md5: 07e6b1f1969fc2418581fe90738ed2c4.dir
-    size: 77782
-    nfiles: 1
-healthdata-2020-11-30-41:
-  cmd: fdt=2020-11-30 loc=41 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/41
-    md5: f4be8990a0e975c5b60a1101a7c14c73.dir
-    size: 74515
-    nfiles: 1
-healthdata-2020-11-30-42:
-  cmd: fdt=2020-11-30 loc=42 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/42
-    md5: 581c239c0f912ebe49999672a845c329.dir
-    size: 79967
-    nfiles: 1
-healthdata-2020-11-30-44:
-  cmd: fdt=2020-11-30 loc=44 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/44
-    md5: 4d7c1ab403f5f77b0e0cd4c2e5ac0952.dir
-    size: 71056
-    nfiles: 1
-healthdata-2020-11-30-45:
-  cmd: fdt=2020-11-30 loc=45 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/45
-    md5: 9aec654e5287f91b5d3b06b800fbcca1.dir
-    size: 74003
-    nfiles: 1
-healthdata-2020-11-30-46:
-  cmd: fdt=2020-11-30 loc=46 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/46
-    md5: b0e9c334690a736403e7fce573adf03b.dir
-    size: 66333
-    nfiles: 1
-healthdata-2020-11-30-47:
-  cmd: fdt=2020-11-30 loc=47 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/47
-    md5: 117f00a84f5de555af583b2b93d8b56d.dir
-    size: 77266
-    nfiles: 1
-healthdata-2020-11-30-48:
-  cmd: fdt=2020-11-30 loc=48 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/48
-    md5: 3a755254881e2b790c5185ee54acf227.dir
-    size: 93683
-    nfiles: 1
-healthdata-2020-11-30-49:
-  cmd: fdt=2020-11-30 loc=49 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/49
-    md5: 82f554fd9e65296de93052e455e3c89e.dir
-    size: 69037
-    nfiles: 1
-healthdata-2020-11-30-50:
-  cmd: fdt=2020-11-30 loc=50 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/50
-    md5: 22dcbb98adbdcaea1e718a1c0109eb3d.dir
-    size: 64298
-    nfiles: 1
-healthdata-2020-11-30-51:
-  cmd: fdt=2020-11-30 loc=51 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/51
-    md5: 5823e5908c71fd56a0cf8949dcbf5cb8.dir
-    size: 75892
-    nfiles: 1
-healthdata-2020-11-30-53:
-  cmd: fdt=2020-11-30 loc=53 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/53
-    md5: 073bc3121520880143e702fac33ac62d.dir
-    size: 75626
-    nfiles: 1
-healthdata-2020-11-30-54:
-  cmd: fdt=2020-11-30 loc=54 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/54
-    md5: f4cf8444a29bda81517e82fa0a0c060b.dir
-    size: 74366
-    nfiles: 1
-healthdata-2020-11-30-55:
-  cmd: fdt=2020-11-30 loc=55 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/55
-    md5: 6216cd5a37f52dde91098155899b5b4a.dir
-    size: 78652
-    nfiles: 1
-healthdata-2020-11-30-56:
-  cmd: fdt=2020-11-30 loc=56 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-11-30/56
-    md5: 2084e20b74cbfe3a80355061bdd49040.dir
-    size: 70050
-    nfiles: 1
-healthdata-2020-12-07-01:
-  cmd: fdt=2020-12-07 loc=01 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/01
-    md5: c2767710f7b057a09f7cfa363394d300.dir
-    size: 91666
-    nfiles: 1
-healthdata-2020-12-07-02:
-  cmd: fdt=2020-12-07 loc=02 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/02
-    md5: ae42adacc386d61ef6df3f7289230979.dir
-    size: 67428
-    nfiles: 1
-healthdata-2020-12-07-04:
-  cmd: fdt=2020-12-07 loc=04 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/04
-    md5: 68f855dc1240ff6a5abd62181b7b57be.dir
-    size: 77760
-    nfiles: 1
-healthdata-2020-12-07-05:
-  cmd: fdt=2020-12-07 loc=05 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/05
-    md5: cb9e8fd2be442ed99921dd4ca21a2afa.dir
-    size: 76381
-    nfiles: 1
-healthdata-2020-12-07-06:
-  cmd: fdt=2020-12-07 loc=06 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/06
-    md5: ca64a1a0927608634b393a765ca6670d.dir
-    size: 85386
-    nfiles: 1
-healthdata-2020-12-07-08:
-  cmd: fdt=2020-12-07 loc=08 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/08
-    md5: e0f05a06203ee1014b171609804076de.dir
-    size: 74080
-    nfiles: 1
-healthdata-2020-12-07-09:
-  cmd: fdt=2020-12-07 loc=09 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/09
-    md5: e6ff980b0b6ce5343a53259e6053119b.dir
-    size: 72471
-    nfiles: 1
-healthdata-2020-12-07-10:
-  cmd: fdt=2020-12-07 loc=10 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/10
-    md5: fde33dae329bcd07fb67b63f9c6c1392.dir
-    size: 67207
-    nfiles: 1
-healthdata-2020-12-07-11:
-  cmd: fdt=2020-12-07 loc=11 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/11
-    md5: ef2eda8d2cdcb48e3e6b997c18dbc8b0.dir
-    size: 69022
-    nfiles: 1
-healthdata-2020-12-07-12:
-  cmd: fdt=2020-12-07 loc=12 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/12
-    md5: c4f44fec9c9bc011fbc33c872a57182a.dir
-    size: 81627
-    nfiles: 1
-healthdata-2020-12-07-13:
-  cmd: fdt=2020-12-07 loc=13 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/13
-    md5: 6f72c545ec77c25dd6cb227c5c61da11.dir
-    size: 82606
-    nfiles: 1
-healthdata-2020-12-07-15:
-  cmd: fdt=2020-12-07 loc=15 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/15
-    md5: 56b3d525d54c261963008327980e8ab9.dir
-    size: 83253
-    nfiles: 1
-healthdata-2020-12-07-16:
-  cmd: fdt=2020-12-07 loc=16 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/16
-    md5: 53e64384ccf13daea9ac3996c0d7486b.dir
-    size: 71967
-    nfiles: 1
-healthdata-2020-12-07-17:
-  cmd: fdt=2020-12-07 loc=17 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/17
-    md5: e5f8a36a4c66bfe14dbdce6c956695e5.dir
-    size: 84799
-    nfiles: 1
-healthdata-2020-12-07-18:
-  cmd: fdt=2020-12-07 loc=18 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/18
-    md5: 0184b9a6100379ac1bb4a8f4a19daca9.dir
-    size: 92321
-    nfiles: 1
-healthdata-2020-12-07-19:
-  cmd: fdt=2020-12-07 loc=19 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/19
-    md5: b928a1fb97379c31b6f3f70df2a0f5b0.dir
-    size: 78199
-    nfiles: 1
-healthdata-2020-12-07-20:
-  cmd: fdt=2020-12-07 loc=20 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/20
-    md5: 717a0017ef39786633d3c458b8dce5c8.dir
-    size: 83572
-    nfiles: 1
-healthdata-2020-12-07-21:
-  cmd: fdt=2020-12-07 loc=21 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/21
-    md5: 8e40e1392528e843cc2b4acb05da1178.dir
-    size: 80534
-    nfiles: 1
-healthdata-2020-12-07-22:
-  cmd: fdt=2020-12-07 loc=22 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/22
-    md5: 6d8313fa3b9b1afb8e7d9fc41368f8e7.dir
-    size: 80396
-    nfiles: 1
-healthdata-2020-12-07-23:
-  cmd: fdt=2020-12-07 loc=23 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/23
-    md5: 0c06a1bc6ef677a7f774d713d6fd9469.dir
-    size: 73791
-    nfiles: 1
-healthdata-2020-12-07-24:
-  cmd: fdt=2020-12-07 loc=24 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/24
-    md5: 1f100e98e3912cf3f936b201a956dc4a.dir
-    size: 76273
-    nfiles: 1
-healthdata-2020-12-07-25:
-  cmd: fdt=2020-12-07 loc=25 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/25
-    md5: 0ee172191efae47996b16fb1fa85a7a4.dir
-    size: 73637
-    nfiles: 1
-healthdata-2020-12-07-26:
-  cmd: fdt=2020-12-07 loc=26 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/26
-    md5: d5a9a67127f8ebc4ff764205798f10db.dir
-    size: 81729
-    nfiles: 1
-healthdata-2020-12-07-27:
-  cmd: fdt=2020-12-07 loc=27 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/27
-    md5: 33975fe44cae472bb1928c8f625c8f02.dir
-    size: 90171
-    nfiles: 1
-healthdata-2020-12-07-28:
-  cmd: fdt=2020-12-07 loc=28 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/28
-    md5: ae759b7cd57b34be751d47fb9d44e58d.dir
-    size: 78136
-    nfiles: 1
-healthdata-2020-12-07-29:
-  cmd: fdt=2020-12-07 loc=29 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/29
-    md5: a0a317ba405860652f0f444bec089a2f.dir
-    size: 83252
-    nfiles: 1
-healthdata-2020-12-07-30:
-  cmd: fdt=2020-12-07 loc=30 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/30
-    md5: 04107f8d10b1d0a069203d2500aa44e8.dir
-    size: 85073
-    nfiles: 1
-healthdata-2020-12-07-31:
-  cmd: fdt=2020-12-07 loc=31 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/31
-    md5: b2190023982f93991efe1ae8cacd3afd.dir
-    size: 74582
-    nfiles: 1
-healthdata-2020-12-07-32:
-  cmd: fdt=2020-12-07 loc=32 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/32
-    md5: eb642513f5d331bdc3906bf387856224.dir
-    size: 82731
-    nfiles: 1
-healthdata-2020-12-07-33:
-  cmd: fdt=2020-12-07 loc=33 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/33
-    md5: c87916bf45fc467cda631bd251ffc176.dir
-    size: 68693
-    nfiles: 1
-healthdata-2020-12-07-34:
-  cmd: fdt=2020-12-07 loc=34 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/34
-    md5: dce31947e173755383609a4e27465caf.dir
-    size: 76812
-    nfiles: 1
-healthdata-2020-12-07-35:
-  cmd: fdt=2020-12-07 loc=35 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/35
-    md5: 6ef29f85d0e447b2e50fdc23b10b5c7f.dir
-    size: 72093
-    nfiles: 1
-healthdata-2020-12-07-36:
-  cmd: fdt=2020-12-07 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/36
-    md5: f73e8335dd81d2af334ed42baa72dd50.dir
-    size: 79745
-    nfiles: 1
-healthdata-2020-12-07-37:
-  cmd: fdt=2020-12-07 loc=37 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/37
-    md5: 1d3b78a47aa59a802faf33752c8d515e.dir
-    size: 93249
-    nfiles: 1
-healthdata-2020-12-07-38:
-  cmd: fdt=2020-12-07 loc=38 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/38
-    md5: 6c4d1ec71407aba9fdde8319c3212959.dir
-    size: 73147
-    nfiles: 1
-healthdata-2020-12-07-39:
-  cmd: fdt=2020-12-07 loc=39 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/39
-    md5: 9c631e5f032d84b1f274009981338a4f.dir
-    size: 82825
-    nfiles: 1
-healthdata-2020-12-07-40:
-  cmd: fdt=2020-12-07 loc=40 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/40
-    md5: 4ce162535ab0180111d14a98b83e2c7a.dir
-    size: 80042
-    nfiles: 1
-healthdata-2020-12-07-41:
-  cmd: fdt=2020-12-07 loc=41 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/41
-    md5: 7b0cf8f9ac0c3d44c592a06b60a60d7b.dir
-    size: 76518
-    nfiles: 1
-healthdata-2020-12-07-42:
-  cmd: fdt=2020-12-07 loc=42 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/42
-    md5: 62d8d622316993e0b5a471e872e4cde3.dir
-    size: 82295
-    nfiles: 1
-healthdata-2020-12-07-44:
-  cmd: fdt=2020-12-07 loc=44 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/44
-    md5: cdcf748a8e3abb796515126c0fb4dcb4.dir
-    size: 73006
-    nfiles: 1
-healthdata-2020-12-07-45:
-  cmd: fdt=2020-12-07 loc=45 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/45
-    md5: b156f6d5484de905c66262fa21a90f36.dir
-    size: 76081
-    nfiles: 1
-healthdata-2020-12-07-46:
-  cmd: fdt=2020-12-07 loc=46 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/46
-    md5: f1589186ccd1b52bdafbfeaf7c3773d9.dir
-    size: 68298
-    nfiles: 1
-healthdata-2020-12-07-47:
-  cmd: fdt=2020-12-07 loc=47 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/47
-    md5: 31ad5cd380ea73225d42d07dccc58ca0.dir
-    size: 79562
-    nfiles: 1
-healthdata-2020-12-07-48:
-  cmd: fdt=2020-12-07 loc=48 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/48
-    md5: 4edc77746fcaa600fdd739d15ebaef5d.dir
-    size: 96025
-    nfiles: 1
-healthdata-2020-12-07-49:
-  cmd: fdt=2020-12-07 loc=49 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/49
-    md5: 2c92162836fddb2b2af8cfa2eab67749.dir
-    size: 71031
-    nfiles: 1
-healthdata-2020-12-07-50:
-  cmd: fdt=2020-12-07 loc=50 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/50
-    md5: 03048396e60ee414ca5ca3056a04bade.dir
-    size: 66190
-    nfiles: 1
-healthdata-2020-12-07-51:
-  cmd: fdt=2020-12-07 loc=51 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/51
-    md5: 44dc15ef9a29c2501566090f55a2ee9f.dir
-    size: 78147
-    nfiles: 1
-healthdata-2020-12-07-53:
-  cmd: fdt=2020-12-07 loc=53 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/53
-    md5: e0b70c5a0893f3aa19df1dd30e2ce644.dir
-    size: 77858
-    nfiles: 1
-healthdata-2020-12-07-54:
-  cmd: fdt=2020-12-07 loc=54 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/54
-    md5: 3f3f467a60749f7c0599fd5a93a3af09.dir
-    size: 76358
-    nfiles: 1
-healthdata-2020-12-07-55:
-  cmd: fdt=2020-12-07 loc=55 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/55
-    md5: 5dd4d2f20558ec73c287fa1162631b10.dir
-    size: 80901
-    nfiles: 1
-healthdata-2020-12-07-56:
-  cmd: fdt=2020-12-07 loc=56 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2020-12-07/56
-    md5: df105f5dc1f3d8ad6f7eed849dbd47bf.dir
-    size: 71936
-    nfiles: 1
-hopkins-2021-03-22:
-  cmd: fdt=2021-03-22 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-03-22
-    md5: 89b4e22ae3fddb846cc6dc1da44883d3.dir
-    size: 10868951
-    nfiles: 8
-healthdata-2021-03-22-36:
-  cmd: fdt=2021-03-22 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-22/36
-    md5: b18e10fc38f39facefbe6c7c07507d6c.dir
-    size: 2785
-    nfiles: 1
-hopkins-2021-03-15:
-  cmd: fdt=2021-03-15 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-03-15
-    md5: 281fdf9ecf693de50b5fab3cf39a3425.dir
-    size: 10652189
-    nfiles: 8
-healthdata-2021-03-15-36:
-  cmd: fdt=2021-03-15 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-15/36
-    md5: 403bd3eb94816094e9464fc9fdef80f4.dir
-    size: 2783
-    nfiles: 1
-hopkins-2021-03-08:
-  cmd: fdt=2021-03-08 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-03-08
-    md5: 99e7a89abcf79fbd3c62eb65a1d533de.dir
-    size: 10436566
-    nfiles: 8
-healthdata-2021-03-08-36:
-  cmd: fdt=2021-03-08 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-08/36
-    md5: 7d586bf3e014beb1da9512c88b7b0899.dir
-    size: 2782
-    nfiles: 1
-hopkins-2021-03-01:
-  cmd: fdt=2021-03-01 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-03-01
-    md5: b667c26091b1d8a3437a33df7a91272f.dir
-    size: 10198102
-    nfiles: 8
-healthdata-2021-03-01-36:
-  cmd: fdt=2021-03-01 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-01/36
-    md5: 5e94d51a98341a082b615281bf5a0402.dir
-    size: 2787
-    nfiles: 1
-hopkins-2021-03-20:
-  cmd: fdt=2021-03-20 ./pull-hopkins-ts-from-date.R
-  deps:
-  - path: pull-hopkins-ts-from-date.R
-    md5: d350b3ca9b344dea811f07232d0ec8d8
-    size: 803
-  outs:
-  - path: hopkins/2021-03-20
-    md5: 7a5650e737646c7b862f64bfa9e45662.dir
-    size: 10804753
-    nfiles: 8
-healthdata-2021-03-20-36:
-  cmd: fdt=2021-03-20 loc=36 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/36
-    md5: 1e9f9811c8a06f5e0c619c61229fa4d6.dir
-    size: 113949
-    nfiles: 1
-healthdata-2021-03-20-01:
-  cmd: fdt=2021-03-20 loc=01 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/01
-    md5: 599b1545456714578e223115899b2b29.dir
-    size: 124306
-    nfiles: 1
-healthdata-2021-03-20-02:
-  cmd: fdt=2021-03-20 loc=02 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/02
-    md5: 7e0ad00393379b3d4f7e60e2e214197a.dir
-    size: 93704
-    nfiles: 1
-healthdata-2021-03-20-04:
-  cmd: fdt=2021-03-20 loc=04 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/04
-    md5: 0a5ab6ca95061525fbb626a03e0e613b.dir
-    size: 110784
-    nfiles: 1
-healthdata-2021-03-20-05:
-  cmd: fdt=2021-03-20 loc=05 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/05
-    md5: ab3c1e9a07c9a6645618240624152e1f.dir
-    size: 107501
-    nfiles: 1
-healthdata-2021-03-20-06:
-  cmd: fdt=2021-03-20 loc=06 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/06
-    md5: 098a767e766230ded7639a0ed1ec4388.dir
-    size: 120779
-    nfiles: 1
-healthdata-2021-03-20-08:
-  cmd: fdt=2021-03-20 loc=08 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/08
-    md5: 42c3526dc3f3958ce4c704fe2a9af1c8.dir
-    size: 105502
-    nfiles: 1
-healthdata-2021-03-20-09:
-  cmd: fdt=2021-03-20 loc=09 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/09
-    md5: 5fcd50d8eee0470c5e370e59b8eaf2ba.dir
-    size: 101376
-    nfiles: 1
-healthdata-2021-03-20-10:
-  cmd: fdt=2021-03-20 loc=10 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/10
-    md5: eec7b0f42c9e8acf69943883bdec1191.dir
-    size: 94202
-    nfiles: 1
-healthdata-2021-03-20-11:
-  cmd: fdt=2021-03-20 loc=11 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/11
-    md5: 8dbba0f0adbdb61fbb2a72940a1da666.dir
-    size: 97048
-    nfiles: 1
-healthdata-2021-03-20-12:
-  cmd: fdt=2021-03-20 loc=12 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/12
-    md5: 1d5df93778313c8a0c4331bbb07ef1b2.dir
-    size: 116040
-    nfiles: 1
-healthdata-2021-03-20-13:
-  cmd: fdt=2021-03-20 loc=13 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/13
-    md5: 215f1580228ff3e7962acda714c46dad.dir
-    size: 116702
-    nfiles: 1
-healthdata-2021-03-20-15:
-  cmd: fdt=2021-03-20 loc=15 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/15
-    md5: 88db90c06dc0b21426bcd48e01e1c8eb.dir
-    size: 110404
-    nfiles: 1
-healthdata-2021-03-20-16:
-  cmd: fdt=2021-03-20 loc=16 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/16
-    md5: 45bc0866d8bf1123f2b8baa02108b247.dir
-    size: 99755
-    nfiles: 1
-healthdata-2021-03-20-17:
-  cmd: fdt=2021-03-20 loc=17 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/17
-    md5: a2d830a6690b86d5e032ffbd6b5b4c90.dir
-    size: 118973
-    nfiles: 1
-healthdata-2021-03-20-18:
-  cmd: fdt=2021-03-20 loc=18 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/18
-    md5: 3d1534380eb00e9254a56afd05f9716d.dir
-    size: 125357
-    nfiles: 1
-healthdata-2021-03-20-19:
-  cmd: fdt=2021-03-20 loc=19 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/19
-    md5: e01d41e99965b7d16900a5ca1f319877.dir
-    size: 109063
-    nfiles: 1
-healthdata-2021-03-20-20:
-  cmd: fdt=2021-03-20 loc=20 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/20
-    md5: 7c44abbe93f84e6470fb9497cc9d3ce3.dir
-    size: 114976
-    nfiles: 1
-healthdata-2021-03-20-21:
-  cmd: fdt=2021-03-20 loc=21 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/21
-    md5: 6c93a091a6c46f200817358411e160d2.dir
-    size: 112921
-    nfiles: 1
-healthdata-2021-03-20-22:
-  cmd: fdt=2021-03-20 loc=22 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/22
-    md5: 903a0112a2d89bf979bc0d3fae6c893f.dir
-    size: 114212
-    nfiles: 1
-healthdata-2021-03-20-23:
-  cmd: fdt=2021-03-20 loc=23 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/23
-    md5: e021f11130fef840f599a6f65e290d3f.dir
-    size: 101413
-    nfiles: 1
-healthdata-2021-03-20-24:
-  cmd: fdt=2021-03-20 loc=24 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/24
-    md5: 1e827ebe0c336a32862e01692f994cf0.dir
-    size: 105930
-    nfiles: 1
-healthdata-2021-03-20-25:
-  cmd: fdt=2021-03-20 loc=25 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/25
-    md5: 8d98af03a2e443e6f3550bd0a968bfce.dir
-    size: 105517
-    nfiles: 1
-healthdata-2021-03-20-26:
-  cmd: fdt=2021-03-20 loc=26 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/26
-    md5: 629c22e697ca2c56c5642c79bce180c8.dir
-    size: 114948
-    nfiles: 1
-healthdata-2021-03-20-27:
-  cmd: fdt=2021-03-20 loc=27 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/27
-    md5: aafeb9293502019f145afb839dbde364.dir
-    size: 121622
-    nfiles: 1
-healthdata-2021-03-20-28:
-  cmd: fdt=2021-03-20 loc=28 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/28
-    md5: e4eb152b1c0089bc70942d9fe66420de.dir
-    size: 108915
-    nfiles: 1
-healthdata-2021-03-20-29:
-  cmd: fdt=2021-03-20 loc=29 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/29
-    md5: cc5368cbb202486708b522f26c5103ee.dir
-    size: 116688
-    nfiles: 1
-healthdata-2021-03-20-30:
-  cmd: fdt=2021-03-20 loc=30 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/30
-    md5: bf3c597eab5cc73408142b4c03957c35.dir
-    size: 112623
-    nfiles: 1
-healthdata-2021-03-20-31:
-  cmd: fdt=2021-03-20 loc=31 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/31
-    md5: 2f500f2b9ff3419dc741ab03df2655dc.dir
-    size: 105266
-    nfiles: 1
-healthdata-2021-03-20-32:
-  cmd: fdt=2021-03-20 loc=32 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/32
-    md5: e77d01933ee439550f273a75c3412af7.dir
-    size: 112602
-    nfiles: 1
-healthdata-2021-03-20-33:
-  cmd: fdt=2021-03-20 loc=33 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/33
-    md5: de3e909d99d3fe692bfe332d80b24a3e.dir
-    size: 96452
-    nfiles: 1
-healthdata-2021-03-20-34:
-  cmd: fdt=2021-03-20 loc=34 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/34
-    md5: e938896517ef73aba5e6da16cc99d070.dir
-    size: 107402
-    nfiles: 1
-healthdata-2021-03-20-35:
-  cmd: fdt=2021-03-20 loc=35 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/35
-    md5: f1f0b1d09ab7c84a866fd881e6fc4163.dir
-    size: 100602
-    nfiles: 1
-healthdata-2021-03-20-37:
-  cmd: fdt=2021-03-20 loc=37 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/37
-    md5: 3a6edc55a86ee86ae10c2e3d9c86b2de.dir
-    size: 126212
-    nfiles: 1
-healthdata-2021-03-20-38:
-  cmd: fdt=2021-03-20 loc=38 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/38
-    md5: 667053af93a4dd68f953b959db005db5.dir
-    size: 101123
-    nfiles: 1
-healthdata-2021-03-20-39:
-  cmd: fdt=2021-03-20 loc=39 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/39
-    md5: 31740dac213a1efe42988b7dec8718d5.dir
-    size: 116959
-    nfiles: 1
-healthdata-2021-03-20-40:
-  cmd: fdt=2021-03-20 loc=40 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/40
-    md5: 4359b0b10a958fe7250bdf178e356499.dir
-    size: 112770
-    nfiles: 1
-healthdata-2021-03-20-41:
-  cmd: fdt=2021-03-20 loc=41 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/41
-    md5: 4259b550239a26b8450105c8d294e204.dir
-    size: 104860
-    nfiles: 1
-healthdata-2021-03-20-42:
-  cmd: fdt=2021-03-20 loc=42 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/42
-    md5: 4abe24bea167bbab62ca3fc4f73d8f41.dir
-    size: 116392
-    nfiles: 1
-healthdata-2021-03-20-44:
-  cmd: fdt=2021-03-20 loc=44 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/44
-    md5: a09690cdadad640c354817af04825d10.dir
-    size: 98696
-    nfiles: 1
-healthdata-2021-03-20-45:
-  cmd: fdt=2021-03-20 loc=45 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/45
-    md5: d2114bc0ba097a6783d5ae5a3106e2f5.dir
-    size: 106052
-    nfiles: 1
-healthdata-2021-03-20-46:
-  cmd: fdt=2021-03-20 loc=46 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/46
-    md5: 6a46503052a37eb7014e4f49d79a649a.dir
-    size: 96549
-    nfiles: 1
-healthdata-2021-03-20-47:
-  cmd: fdt=2021-03-20 loc=47 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/47
-    md5: d6383bbaef44f8794d8f5a87e0680fdc.dir
-    size: 113231
-    nfiles: 1
-healthdata-2021-03-20-48:
-  cmd: fdt=2021-03-20 loc=48 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/48
-    md5: df9f00e4b501140706f442c1567393e4.dir
-    size: 131203
-    nfiles: 1
-healthdata-2021-03-20-49:
-  cmd: fdt=2021-03-20 loc=49 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/49
-    md5: b84d91ccea03d589d2b5d308da6d06fe.dir
-    size: 98913
-    nfiles: 1
-healthdata-2021-03-20-50:
-  cmd: fdt=2021-03-20 loc=50 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/50
-    md5: dcfa5bc52ed0ec6aab76dff7d875d382.dir
-    size: 92599
-    nfiles: 1
-healthdata-2021-03-20-51:
-  cmd: fdt=2021-03-20 loc=51 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/51
-    md5: 827d765a3a354d8bca09f915ba6d7f77.dir
-    size: 110585
-    nfiles: 1
-healthdata-2021-03-20-53:
-  cmd: fdt=2021-03-20 loc=53 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/53
-    md5: 7ee758d0e02de675428823df7e9711b1.dir
-    size: 109313
-    nfiles: 1
-healthdata-2021-03-20-54:
-  cmd: fdt=2021-03-20 loc=54 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/54
-    md5: a15085672c156e9ea9ae9fd9536f84b9.dir
-    size: 104572
-    nfiles: 1
-healthdata-2021-03-20-55:
-  cmd: fdt=2021-03-20 loc=55 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/55
-    md5: 2eaa710a1bdd2fa411ed463d5c701d4f.dir
-    size: 113240
-    nfiles: 1
-healthdata-2021-03-20-56:
-  cmd: fdt=2021-03-20 loc=56 ./pull-healthdata-ts-from-date.R
-  deps:
-  - path: pull-healthdata-ts-from-date.R
-    md5: 4040e85d54a19e5927dd212956ecacf8
-    size: 977
-  outs:
-  - path: healthdata/2021-03-20/56
-    md5: 35232afda769b8a0501691bf56ae557a.dir
-    size: 98788
-    nfiles: 1
-hopkins-vaccine-2021-03-20:
-  cmd: fdt=2021-03-20 ./pull-hopkins-vaccine-ts-from-date.R
+hopkins-vaccine-2021-03-29:
+  cmd: fdt=2021-03-29 ./pull-hopkins-vaccine-ts-from-date.R
   deps:
   - path: pull-hopkins-vaccine-ts-from-date.R
     md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
     size: 1067
   outs:
-  - path: hopkins-vaccine/2021-03-20
-    md5: fd81fc488cec8490dfc6055b58cb2201.dir
-    size: 1623780
+  - path: hopkins-vaccine/2021-03-29
+    md5: 0d0e971d6873949b6a4dbbfc431b5328.dir
+    size: 1892034
     nfiles: 1
-hopkins-vaccine-2020-11-30:
-  cmd: fdt=2020-11-30 ./pull-hopkins-vaccine-ts-from-date.R
+healthdata-2021-03-29-01:
+  cmd: fdt=2021-03-29 loc=01 ./pull-healthdata-ts-from-date.R
   deps:
-  - path: pull-hopkins-vaccine-ts-from-date.R
-    md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
-    size: 1067
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
   outs:
-  - path: hopkins-vaccine/2020-11-30
-    md5: d751713988987e9331980363e24189ce.dir
-    size: 0
-    nfiles: 0
+  - path: healthdata/2021-03-29/01
+    md5: 67ce1c330cd972e343109f23dab12112.dir
+    size: 126547
+    nfiles: 1
+healthdata-2021-03-29-02:
+  cmd: fdt=2021-03-29 loc=02 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/02
+    md5: 69953e06c4f0bad2a35a56e79b8c5850.dir
+    size: 95530
+    nfiles: 1
+healthdata-2021-03-29-04:
+  cmd: fdt=2021-03-29 loc=04 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/04
+    md5: 4ef3607a3689c65efce360fbda022665.dir
+    size: 112986
+    nfiles: 1
+healthdata-2021-03-29-05:
+  cmd: fdt=2021-03-29 loc=05 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/05
+    md5: 05d26a98148450a9e6026919870e0b28.dir
+    size: 109581
+    nfiles: 1
+healthdata-2021-03-29-06:
+  cmd: fdt=2021-03-29 loc=06 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/06
+    md5: 294e387e1aef16637ad7eb10008b5962.dir
+    size: 123095
+    nfiles: 1
+healthdata-2021-03-29-08:
+  cmd: fdt=2021-03-29 loc=08 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/08
+    md5: cf404eb61222e95b96bc718c60b627c3.dir
+    size: 107617
+    nfiles: 1
+healthdata-2021-03-29-09:
+  cmd: fdt=2021-03-29 loc=09 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/09
+    md5: 5380040d151539db6dd0db3181470b80.dir
+    size: 103377
+    nfiles: 1
+healthdata-2021-03-29-10:
+  cmd: fdt=2021-03-29 loc=10 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/10
+    md5: e6d65ec3f5ce7ea3abbb017b79e3894b.dir
+    size: 96130
+    nfiles: 1
+healthdata-2021-03-29-11:
+  cmd: fdt=2021-03-29 loc=11 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/11
+    md5: 6d0a0936f34aa37e86d690fd6fb49829.dir
+    size: 99017
+    nfiles: 1
+healthdata-2021-03-29-12:
+  cmd: fdt=2021-03-29 loc=12 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/12
+    md5: 466e14d98505e6ae34a8e7ca8a7f40da.dir
+    size: 118348
+    nfiles: 1
+healthdata-2021-03-29-13:
+  cmd: fdt=2021-03-29 loc=13 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/13
+    md5: a85c32c3915718672b2f3b840701dc0b.dir
+    size: 119015
+    nfiles: 1
+healthdata-2021-03-29-15:
+  cmd: fdt=2021-03-29 loc=15 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/15
+    md5: aa85ea53d48b484f634aeab9b992e6b4.dir
+    size: 112202
+    nfiles: 1
+healthdata-2021-03-29-16:
+  cmd: fdt=2021-03-29 loc=16 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/16
+    md5: a72b7ecdcb18da31ce1620dd2260ac6c.dir
+    size: 101660
+    nfiles: 1
+healthdata-2021-03-29-17:
+  cmd: fdt=2021-03-29 loc=17 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/17
+    md5: 1c37977efc3055fcdbda18448dba8c89.dir
+    size: 121287
+    nfiles: 1
+healthdata-2021-03-29-18:
+  cmd: fdt=2021-03-29 loc=18 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/18
+    md5: c1c520f412eb9cc0204080700fbeb09d.dir
+    size: 127596
+    nfiles: 1
+healthdata-2021-03-29-19:
+  cmd: fdt=2021-03-29 loc=19 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/19
+    md5: 899a8fc135c38a7f9a0b69104825145d.dir
+    size: 111184
+    nfiles: 1
+healthdata-2021-03-29-20:
+  cmd: fdt=2021-03-29 loc=20 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/20
+    md5: 50ed1b157bce3d342849fcef02ea0f27.dir
+    size: 117090
+    nfiles: 1
+healthdata-2021-03-29-21:
+  cmd: fdt=2021-03-29 loc=21 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/21
+    md5: 51013a1713e798fd7df9806bb43f5b8d.dir
+    size: 115090
+    nfiles: 1
+healthdata-2021-03-29-22:
+  cmd: fdt=2021-03-29 loc=22 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/22
+    md5: 7f513119b19cfff0dd681105e0fe857f.dir
+    size: 116416
+    nfiles: 1
+healthdata-2021-03-29-23:
+  cmd: fdt=2021-03-29 loc=23 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/23
+    md5: a2cd53a66587eff02ee12d6d03c2c9fd.dir
+    size: 103278
+    nfiles: 1
+healthdata-2021-03-29-24:
+  cmd: fdt=2021-03-29 loc=24 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/24
+    md5: 5157c0b04f9b40e5c9c5d74097425750.dir
+    size: 108008
+    nfiles: 1
+healthdata-2021-03-29-25:
+  cmd: fdt=2021-03-29 loc=25 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/25
+    md5: 2f9d9d4e827ac8c09ebfd24897fa6ecf.dir
+    size: 107667
+    nfiles: 1
+healthdata-2021-03-29-26:
+  cmd: fdt=2021-03-29 loc=26 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/26
+    md5: cbd08181179d1e2ed3e9ef786140668a.dir
+    size: 117221
+    nfiles: 1
+healthdata-2021-03-29-27:
+  cmd: fdt=2021-03-29 loc=27 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/27
+    md5: 46a635eb8c2d185aa6eb705a025e31e7.dir
+    size: 123764
+    nfiles: 1
+healthdata-2021-03-29-28:
+  cmd: fdt=2021-03-29 loc=28 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/28
+    md5: c3da3a6936e58462c21c2e3279c77b65.dir
+    size: 110993
+    nfiles: 1
+healthdata-2021-03-29-29:
+  cmd: fdt=2021-03-29 loc=29 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/29
+    md5: 86bd218e6d44cd5bef44c8f422377c09.dir
+    size: 118938
+    nfiles: 1
+healthdata-2021-03-29-30:
+  cmd: fdt=2021-03-29 loc=30 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/30
+    md5: 454d39d1e74b23608fe14ee79d0ac663.dir
+    size: 114483
+    nfiles: 1
+healthdata-2021-03-29-31:
+  cmd: fdt=2021-03-29 loc=31 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/31
+    md5: 73d0a859260dacaa6fce3ea227e35137.dir
+    size: 107367
+    nfiles: 1
+healthdata-2021-03-29-32:
+  cmd: fdt=2021-03-29 loc=32 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/32
+    md5: a197f8ea305a742803f14907cca3c2e0.dir
+    size: 114572
+    nfiles: 1
+healthdata-2021-03-29-33:
+  cmd: fdt=2021-03-29 loc=33 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/33
+    md5: 2506aac658fdcd48ed3afbe24cde0400.dir
+    size: 98350
+    nfiles: 1
+healthdata-2021-03-29-34:
+  cmd: fdt=2021-03-29 loc=34 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/34
+    md5: 7b71e8d00c522c901939039806ff633e.dir
+    size: 109522
+    nfiles: 1
+healthdata-2021-03-29-35:
+  cmd: fdt=2021-03-29 loc=35 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/35
+    md5: d413c48c63f407720be5cce957580c20.dir
+    size: 102584
+    nfiles: 1
+healthdata-2021-03-29-36:
+  cmd: fdt=2021-03-29 loc=36 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/36
+    md5: d7e7ac87bf7adaafe9878eaf72d74f03.dir
+    size: 116268
+    nfiles: 1
+healthdata-2021-03-29-37:
+  cmd: fdt=2021-03-29 loc=37 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/37
+    md5: 5a6752fde8418e4739b9cd1402a31318.dir
+    size: 128462
+    nfiles: 1
+healthdata-2021-03-29-38:
+  cmd: fdt=2021-03-29 loc=38 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/38
+    md5: 5b61f8a11e11a303c88510f4631e2d6f.dir
+    size: 103024
+    nfiles: 1
+healthdata-2021-03-29-39:
+  cmd: fdt=2021-03-29 loc=39 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/39
+    md5: e1fdd8b867bd55333dea0807db7f3b5f.dir
+    size: 119258
+    nfiles: 1
+healthdata-2021-03-29-40:
+  cmd: fdt=2021-03-29 loc=40 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/40
+    md5: 797c1299fefebcde3629823a9b8cac83.dir
+    size: 114974
+    nfiles: 1
+healthdata-2021-03-29-41:
+  cmd: fdt=2021-03-29 loc=41 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/41
+    md5: bf720b66ba78d0c9cb7e2e5cd52718ea.dir
+    size: 106815
+    nfiles: 1
+healthdata-2021-03-29-42:
+  cmd: fdt=2021-03-29 loc=42 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/42
+    md5: b18d06793d7d1ff35d5d4fd72de979ae.dir
+    size: 118686
+    nfiles: 1
+healthdata-2021-03-29-44:
+  cmd: fdt=2021-03-29 loc=44 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/44
+    md5: d205df7afc580ead13fbaba50162950b.dir
+    size: 100604
+    nfiles: 1
+healthdata-2021-03-29-45:
+  cmd: fdt=2021-03-29 loc=45 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/45
+    md5: c1254417368da6b835cddaaffaab6412.dir
+    size: 108091
+    nfiles: 1
+healthdata-2021-03-29-46:
+  cmd: fdt=2021-03-29 loc=46 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/46
+    md5: bf4fb96290fe77aa3c89a14cd2549831.dir
+    size: 98454
+    nfiles: 1
+healthdata-2021-03-29-47:
+  cmd: fdt=2021-03-29 loc=47 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/47
+    md5: c32425c97183b8f3f52a0cd0f5091e4a.dir
+    size: 115511
+    nfiles: 1
+healthdata-2021-03-29-48:
+  cmd: fdt=2021-03-29 loc=48 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/48
+    md5: adeb33be9ade3f24e3efce8950f35e71.dir
+    size: 133538
+    nfiles: 1
+healthdata-2021-03-29-49:
+  cmd: fdt=2021-03-29 loc=49 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/49
+    md5: e687a7f69c749d56a7e9e2fc63855441.dir
+    size: 100868
+    nfiles: 1
+healthdata-2021-03-29-50:
+  cmd: fdt=2021-03-29 loc=50 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/50
+    md5: 9be2c9cb7dcff3528b55e35b3e02cfdc.dir
+    size: 94259
+    nfiles: 1
+healthdata-2021-03-29-51:
+  cmd: fdt=2021-03-29 loc=51 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/51
+    md5: df8e7409725fee3b6f31a52bbbe630c8.dir
+    size: 112768
+    nfiles: 1
+healthdata-2021-03-29-53:
+  cmd: fdt=2021-03-29 loc=53 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/53
+    md5: 48b23acfdeecbe3cb247012b2875e968.dir
+    size: 111392
+    nfiles: 1
+healthdata-2021-03-29-54:
+  cmd: fdt=2021-03-29 loc=54 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/54
+    md5: 30fe2be2ea94bca45be53229ad1cc801.dir
+    size: 106538
+    nfiles: 1
+healthdata-2021-03-29-55:
+  cmd: fdt=2021-03-29 loc=55 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/55
+    md5: 34402f1cfa25d46ccf41c7aba1b9fb9a.dir
+    size: 115431
+    nfiles: 1
+healthdata-2021-03-29-56:
+  cmd: fdt=2021-03-29 loc=56 ./pull-healthdata-ts-from-date.R
+  deps:
+  - path: pull-healthdata-ts-from-date.R
+    md5: 42b46854846a4f774e8823ed95238800
+    size: 1130
+  outs:
+  - path: healthdata/2021-03-29/56
+    md5: 1328eeb724d10c39c5d9f1bb5fc3d571.dir
+    size: 100634
+    nfiles: 1

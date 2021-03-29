@@ -14,6 +14,8 @@ dvc run \
     -d fit-infection-kalman.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
+    -d hopkins-vaccine/$fdt \
+    -d healthdata/${fdt}/${loc} \
     -o fits/${fdt}-fips${loc}/fit.RData \
     --force \
     -n fit-$fdt-$loc \

@@ -198,25 +198,38 @@ tdat3 <- tdat2 %>%
   ) %>%
   select(target_end_date, hospitalizations)
 
-vacc_ts <- read_csv("vaccine_data_us_timeline.csv",
-                    col_types = cols_only(FIPS = col_double(),
-                                          Vaccine_Type = col_character(),
-                                          Doses_admin = col_double(),
-                                          Date = col_date())) %>%
-  mutate(FIPS = sprintf("%02d", FIPS)) %>%
-  filter(FIPS == forecast_loc & Vaccine_Type == "All") %>%
-  select(Date, Doses_admin) %>%
-  rename(target_end_date=Date, doses = Doses_admin)
-
-i <- 1 #replace leading NAs with 0
-while(is.na(vacc_ts$doses[i])){
-  vacc_ts$doses[i] <- 0
-  i <- i + 1
+vacc_path <- file.path("hopkins-vaccine",
+                       forecast_date,
+                       "vaccine_data_us_timeline.csv")
+if (file.exists(vacc_path)) {
+  vacc_ts <- read_csv(
+    "vaccine_data_us_timeline.csv",
+    col_types = cols_only(
+      FIPS = col_double(),
+      Vaccine_Type = col_character(),
+      Doses_admin = col_double(),
+      Date = col_date()
+    )
+  ) %>%
+    mutate(FIPS = sprintf("%02d", FIPS)) %>%
+    filter(FIPS == forecast_loc & Vaccine_Type == "All") %>%
+    select(Date, Doses_admin) %>%
+    rename(target_end_date = Date, doses = Doses_admin)
+  
+  i <- 1 #replace leading NAs with 0
+  while (is.na(vacc_ts$doses[i])) {
+    vacc_ts$doses[i] <- 0
+    i <- i + 1
+  }
+  
+  obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>%
+    left_join(vacc_ts, by = "target_end_date")
+  obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <-
+    0
+} else {
+  stop("Fitting not implemented for dates without vaccine data")
 }
 
-obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>% 
-  left_join(vacc_ts, by = "target_end_date")
-obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <- 0
 
 wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 wsize <- nrow(wind)
