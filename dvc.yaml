@@ -2236,3 +2236,15 @@ stages:
     - pull-healthdata-ts-from-date.R
     outs:
     - healthdata/2021-03-20/56
+  hopkins-vaccine-2021-03-20:
+    cmd: fdt=2021-03-20 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-20
+  hopkins-vaccine-2020-11-30:
+    cmd: fdt=2020-11-30 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2020-11-30

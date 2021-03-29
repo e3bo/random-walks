@@ -4368,3 +4368,25 @@ healthdata-2021-03-20-56:
     md5: 35232afda769b8a0501691bf56ae557a.dir
     size: 98788
     nfiles: 1
+hopkins-vaccine-2021-03-20:
+  cmd: fdt=2021-03-20 ./pull-hopkins-vaccine-ts-from-date.R
+  deps:
+  - path: pull-hopkins-vaccine-ts-from-date.R
+    md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+    size: 1067
+  outs:
+  - path: hopkins-vaccine/2021-03-20
+    md5: fd81fc488cec8490dfc6055b58cb2201.dir
+    size: 1623780
+    nfiles: 1
+hopkins-vaccine-2020-11-30:
+  cmd: fdt=2020-11-30 ./pull-hopkins-vaccine-ts-from-date.R
+  deps:
+  - path: pull-hopkins-vaccine-ts-from-date.R
+    md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+    size: 1067
+  outs:
+  - path: hopkins-vaccine/2020-11-30
+    md5: d751713988987e9331980363e24189ce.dir
+    size: 0
+    nfiles: 0

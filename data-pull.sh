@@ -2,7 +2,7 @@
 
 set -e
 
-fdt="${fdt:-2020-11-16}"
+fdt="${fdt:-2021-03-20}"
 loc="${loc:-36}"
 
 dvc run \
@@ -11,6 +11,13 @@ dvc run \
     -n hopkins-$fdt \
     --force \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
+
+dvc run \
+    -d pull-hopkins-vaccine-ts-from-date.R \
+    -o hopkins-vaccine/$fdt \
+    -n hopkins-vaccine-$fdt \
+    --force \
+    fdt=$fdt ./pull-hopkins-vaccine-ts-from-date.R
 
 dvc run \
     -d pull-healthdata-ts-from-date.R \
