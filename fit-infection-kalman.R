@@ -323,6 +323,8 @@ ti <- max(wind$target_end_date) + lubridate::ddays(1)
 fdtw <- lubridate::wday(forecast_date)
 if (fdtw > 2){
   extra <- 7 - fdtw ## extra days to ensure we simulate up to the end of the 4 week ahead target
+} else {
+  extra <- 0
 }
 tf <- lubridate::ymd(forecast_date) + lubridate::ddays(28 + extra)
 target_end_dates <- seq(from = ti, to = tf, by = "day")
