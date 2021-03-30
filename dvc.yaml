@@ -2590,3 +2590,9 @@ stages:
     - pull-healthdata-ts-from-date.R
     outs:
     - healthdata/2021-03-29/56
+  safegraph-hp7dav-2021-03-29:
+    cmd: fdt=2021-03-29 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covicast-safegraph-home-prop-7dav/2021-03-29

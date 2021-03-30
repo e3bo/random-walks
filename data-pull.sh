@@ -2,8 +2,14 @@
 
 set -e
 
-fdt="${fdt:-2021-03-20}"
-loc="${loc:-36}"
+fdt="${fdt:-2021-03-29}"
+
+dvc run \
+    -d pull-safegraph-ts-from-date.R \
+    -o covicast-safegraph-home-prop-7dav/$fdt \
+    -n safegraph-hp7dav-$fdt \
+    --force \
+    fdt=$fdt ./pull-safegraph-ts-from-date.R
 
 dvc run \
     -d pull-hopkins-ts-from-date.R \

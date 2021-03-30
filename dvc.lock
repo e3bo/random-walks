@@ -960,3 +960,14 @@ healthdata-2021-03-29-56:
     md5: 1328eeb724d10c39c5d9f1bb5fc3d571.dir
     size: 100634
     nfiles: 1
+safegraph-hp7dav-2021-03-29:
+  cmd: fdt=2021-03-29 ./pull-safegraph-ts-from-date.R
+  deps:
+  - path: pull-safegraph-ts-from-date.R
+    md5: 92a65c749eb7a38a28d84e44575ed397
+    size: 627
+  outs:
+  - path: covicast-safegraph-home-prop-7dav/2021-03-29
+    md5: c01e963a96900841742b78f59cb15604.dir
+    size: 4478595
+    nfiles: 1
