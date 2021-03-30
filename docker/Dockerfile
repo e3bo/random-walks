@@ -89,4 +89,6 @@ USER root
 WORKDIR ${RUNNER_PATH}
 RUN apt-get update && apt-get install --only-upgrade dvc
 RUN installGithub.r reichlab/zoltr epiforecasts/scoringutils reichlab/covidHubUtils
-RUN installGithub.r e3bo/epidatr@06024e8
+RUN installGithub.r e3bo/epidatr@1caf68c94a38c1775242f252fdc4288fbb777e87 && \
+    installGithub.r cmu-delphi/covidcast/R-packages/covidcast@5d2e96eb987703de326554f9cf1dabcd6ff5885a
+
