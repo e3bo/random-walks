@@ -40,8 +40,9 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         γd = exp(pvar[8])
         
         doseeffect = exp(pvar[9])
+        prophomeeffect = exp(pvar[10])
 
-        bvec = pvar[10:end]
+        bvec = pvar[11:end]
     elseif size(z, 2) == 1 && "cases" in names(z)
         l0 = exp(pvar[1])
         τc = exp(pvar[2])
@@ -90,7 +91,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = exp(logβ[i]) * exp(-cov.doses[i]*doseeffect)
+        β = exp(logβ[i] - cov.doses[i]*doseeffect - cov.prophome[i] * prophomeeffect)
         x = xlast[1]
         l = xlast[2]
         y = xlast[3]

@@ -25,6 +25,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$loghfp,
         p$loggammahd,
         p$logdoseeffect,
+        p$logprophomeeffect,
         p$bpars
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -87,6 +88,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$loghfp,
         p$loggammahd,
         p$logdoseeffect,
+        p$logprophomeeffect,
         p$bpars
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -158,7 +160,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
 
 ## main script
 
-forecast_date <- Sys.getenv("fdt", unset = "2021-03-20")
+forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
 forecast_loc <- Sys.getenv("loc", unset = "36")
 
 hopdir <- file.path("hopkins", forecast_date)
@@ -198,6 +200,20 @@ tdat3 <- tdat2 %>%
   ) %>%
   select(target_end_date, hospitalizations)
 
+mob_path <- file.path("covidcast-safegraph-home-prop-7dav",
+                      forecast_date,
+                      "epidata.csv")
+abbr <- covidcast::fips_to_abbr(forecast_loc) %>% tolower()
+mob_ts <- read_csv(mob_path, 
+                   col_types = cols_only(geo_value = col_character(),
+                                         time_value = col_date(),
+                                         value = col_double())) %>% 
+  filter(geo_value == abbr) %>% 
+  select(time_value, value) %>%
+  rename(target_end_date = time_value, 
+         prophome = value)
+
+
 vacc_path <- file.path("hopkins-vaccine",
                        forecast_date,
                        "vaccine_data_us_timeline.csv")
@@ -223,15 +239,19 @@ if (file.exists(vacc_path)) {
   }
   
   obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>%
-    left_join(vacc_ts, by = "target_end_date")
+    left_join(vacc_ts, by = "target_end_date") %>%
+    left_join(mob_ts, by = "target_end_date") %>%
+    mutate(prophome = lead(prophome, 3),
+           prophome = zoo::na.fill(prophome, "extend"))
+           
   obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <-
     0
 } else {
   stop("Fitting not implemented for dates without vaccine data")
 }
 
-
-wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
+#wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
+wind <- obs_data %>% slice(100:n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
@@ -247,7 +267,7 @@ wfixed <- c(
 )
 
 y <- wind %>% select(cases, hospitalizations, deaths)
-x <- wind %>% select(time, doses)
+x <- wind %>% select(time, doses, prophome)
 
 tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
 tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
@@ -261,7 +281,9 @@ chp_init <- sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases[hosp_obs], na.rm
 hfp_init <- max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE), 0.01)
 
 H0init <- hfp_init / mean(y$deaths)
-logdoseeffect_init = log(log(wfixed["N"]) - log(wfixed["N"] - 1)) # first dose reduces susceptibility by 1/N
+logdoseeffect_init <- log(log(wfixed["N"]) - log(wfixed["N"] - 1)) # first dose reduces susceptibility by 1/N
+
+logprophomeeffect_init <- -1
 
 binit <- unname(rep(log(wfixed["gamma"]), wsize))
 names(binit) <- paste0("b", seq_len(wsize))
@@ -275,6 +297,7 @@ winit <- c(
   loghfp = log(hfp_init),
   loggammahd = log(365.25 / 2),
   logdoseeffect = logdoseeffect_init,
+  logprophomeeffect = logprophomeeffect_init,
   binit
 )
 
@@ -293,7 +316,10 @@ fit_over_betagrid <- function(a, betasdgrid) {
     y = y[, ],
     pm = param_map,
     winit,
-    invisible = 0
+    invisible = 0,
+    orthantwise_c = 0,
+    orthantwise_start = 10,
+    orthantwise_end = 10
   )
   for (i in seq(2, length(betasdgrid))) {
     fits[[i]] <- lbfgs::lbfgs(
@@ -307,7 +333,10 @@ fit_over_betagrid <- function(a, betasdgrid) {
       y = y[, ],
       pm = param_map,
       fits[[i - 1]]$par,
-      invisible = 0
+      invisible = 0,
+      orthantwise_c = 0,
+      orthantwise_start = 10,
+      orthantwise_end = 10
     )
   }
   return(fits)

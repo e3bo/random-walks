@@ -168,6 +168,7 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     loghfp = p$loghfp,
     loggammahd = p$loggammahd,
     logdoseeffect = p$logdoseeffect,
+    logprophomeeffect = p$logprophomeeffect,
     eta = p$eta,
     gamma = p$gamma,
     N = p$N,
@@ -175,6 +176,7 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     t0 = p$t0,
     times = p$times,
     doses = p$doses,
+    prophome = p$prophome,
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases_deaths = "weekly",
@@ -274,6 +276,7 @@ kfnll <-
            loghfp,
            loggammahd,
            logdoseeffect,
+           logprophomeeffect,
            eta,
            gamma,
            N,
@@ -281,6 +284,7 @@ kfnll <-
            t0,
            times,
            doses,
+           prophome,
            Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases_deaths = "daily",
@@ -298,6 +302,7 @@ kfnll <-
     xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     doseeffect <- exp(logdoseeffect)
+    prophomeeffect <- exp(logprophomeeffect)
 
     if (ncol(z) == 1 && "cases" %in% names(z)){
       z$hospitalizations <- NA
@@ -356,7 +361,7 @@ kfnll <-
         chp = exp(logchp),
         hfp = exp(loghfp),
         N = N,
-        beta_t = exp(logbeta[i]) * exp(-doseeffect * doses[i]),
+        beta_t = exp(logbeta[i] -doseeffect * doses[i] - prophomeeffect * prophome[i]),
       )
       xhat_kkmo[, i] <- XP$xhat
       P_kkmo[, , i] <- XP$PN
@@ -409,7 +414,7 @@ kfnll <-
       step <- (logbeta[i + 1] - log(gamma)) - a * (logbeta[i] - log(gamma))
       rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
     }
-    
+
     nll <- 0
     for (i in seq(1, T)){
       sel <- !is_z_na[i, ]
