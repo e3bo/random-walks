@@ -257,14 +257,6 @@ iterate_f_and_P <-
     list(xhat = xhat_new, PN = PN_new, vf = vf$vf)
   }
 
-detect_frac <- function(t,
-                        max_detect_par = 0.4,
-                        detect_inc_rate = 1.1,
-                        half_detect = 30,
-                        base_detect_frac = 0.1) {
-  max_detect_par * (t ^ detect_inc_rate)  / ((half_detect ^ detect_inc_rate) + (t ^ detect_inc_rate)) + base_detect_frac
-}
-
 kfnll <-
   function(logbeta,
            logE0,
@@ -292,14 +284,13 @@ kfnll <-
            a = .98,
            betasd = 1,
            maxzscore = Inf,
-           just_nll = TRUE,
-           logmaxRt = 1.6) {
-    E0 = exp(logE0)
-    I0 = E0 * eta / gamma
-    H0 = exp(logH0)
+           just_nll = TRUE) {
+    E0 <- exp(logE0)
+    I0 <- E0 * eta / gamma
+    H0 <- exp(logH0)
     gamma_d <- gamma_h <- exp(loggammahd)
-    D0 = H0 * gamma_h / gamma_d
-    xhat0 = c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
+    D0 <- H0 * gamma_h / gamma_d
+    xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     doseeffect <- exp(logdoseeffect)
     prophomeeffect <- exp(logprophomeeffect)

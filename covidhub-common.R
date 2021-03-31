@@ -356,3 +356,11 @@ param_map <- function(x, w, fixed = wfixed){
   ret$t0 <- fixed["t0"]
   ret
 }
+
+detect_frac <- function(t,
+                        max_detect_par = 0.4,
+                        detect_inc_rate = 1.1,
+                        half_detect = 30,
+                        base_detect_frac = 0.1) {
+  max_detect_par * (t ^ detect_inc_rate)  / ((half_detect ^ detect_inc_rate) + (t ^ detect_inc_rate)) + base_detect_frac
+}

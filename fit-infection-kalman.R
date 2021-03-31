@@ -138,22 +138,63 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
 
 calc_kf_hess <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
-  JuliaCall::julia_assign("logE0", p$logE0)
-  JuliaCall::julia_assign("logtau", p$logtau)
-  JuliaCall::julia_assign("bpars", p$bpars)
-  JuliaCall::julia_assign("η", p$eta)
-  JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("N", p$N)
-  JuliaCall::julia_assign("ρ", p$rho1)
-  JuliaCall::julia_assign("η", p$eta)
-  JuliaCall::julia_assign("γ", p$gamma)
-  JuliaCall::julia_assign("z", data.matrix(y))
-  JuliaCall::julia_assign("a", a)
-  JuliaCall::julia_assign("betasd", betasd)
-  g <- JuliaCall::julia_eval(paste0(
-    "InfectionKalman.hess",
-    "(logE0, logtau, bpars, z; ρ = ρ, N = N, η = η, γ = γ, a = a, betasd = betasd)"
-  ))
+  if (ncol(y) == 3) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logH0,
+        p$logtauc,
+        p$logtauh,
+        p$logtaud,
+        p$logchp,
+        p$loghfp,
+        p$loggammahd,
+        p$logdoseeffect,
+        p$logprophomeeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.hess",
+      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+    ))
+  } else if(ncol(y) == 1 && "cases" %in% names(y)) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logtauc,
+        p$logdoseeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
+    JuliaCall::julia_assign("h0", exp(p$logH0))
+    JuliaCall::julia_assign("τh", exp(p$logtauh))
+    JuliaCall::julia_assign("τd", exp(p$logtaud))
+    JuliaCall::julia_assign("chp", exp(p$logchp))
+    JuliaCall::julia_assign("hfp", exp(p$loghfp))
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.hess",
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+    ))
+  }
   g
 }
 
@@ -251,7 +292,7 @@ if (file.exists(vacc_path)) {
 }
 
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
-wind <- obs_data %>% slice(100:n())
+wind <- obs_data %>% slice(370:n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
@@ -268,6 +309,7 @@ wfixed <- c(
 
 y <- wind %>% select(cases, hospitalizations, deaths)
 x <- wind %>% select(time, doses, prophome)
+x$doses <- rnorm(x$doses)
 
 tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
 tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
@@ -328,7 +370,7 @@ fit_over_betagrid <- function(a, betasdgrid) {
       x = x,
       betasd = betasdgrid[i],
       epsilon = 1e-4,
-      max_iterations = 2,
+      max_iterations = 20,
       a = a,
       y = y[, ],
       pm = param_map,
