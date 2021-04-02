@@ -661,3 +661,294 @@ initialize_estimates <- function(y, wfixed) {
   )
   winit
 }
+
+kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
+  p <- pm(x, w)
+  nll <- kfnll(
+    logbeta = p$bpars,
+    logE0 = p$logE0,
+    logH0 = p$logH0,
+    logtauc = p$logtauc,
+    logtauh = p$logtauh,
+    logtaud = p$logtaud,
+    logchp = p$logchp,
+    loghfp = p$loghfp,
+    loggammahd = p$loggammahd,
+    logdoseeffect = p$logdoseeffect,
+    logprophomeeffect = p$logprophomeeffect,
+    eta = p$eta,
+    gamma = p$gamma,
+    N = p$N,
+    z = y,
+    t0 = p$t0,
+    times = p$times,
+    doses = p$doses,
+    prophome = p$prophome,
+    fet = fet,
+    just_nll = FALSE,
+    fet_zero_cases_deaths = "weekly",
+    nsim = 20,
+    betasd = betasd,
+    a = a
+  )
+  nll
+}
+
+
+
+kfnll <-
+  function(logbeta,
+           logE0,
+           logH0,
+           logtauc,
+           logtauh,
+           logtaud,
+           logchp,
+           loghfp,
+           loggammahd,
+           logdoseeffect,
+           logprophomeeffect,
+           eta,
+           gamma,
+           N,
+           z,
+           t0,
+           times,
+           doses,
+           prophome,
+           Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
+           fets = NULL,
+           fet_zero_cases_deaths = "daily",
+           nsim,
+           a = .98,
+           betasd = 1,
+           maxzscore = Inf,
+           just_nll = TRUE) {
+    E0 <- exp(logE0)
+    I0 <- E0 * eta / gamma
+    H0 <- exp(logH0)
+    gamma_d <- gamma_h <- exp(loggammahd)
+    D0 <- H0 * gamma_h / gamma_d
+    xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
+    names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
+    doseeffect <- exp(logdoseeffect)
+    prophomeeffect <- exp(logprophomeeffect)
+    
+    if (ncol(z) == 1 && "cases" %in% names(z)){
+      z$hospitalizations <- NA
+      z$deaths <- NA
+    }
+    
+    z <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
+    is_z_na <- is.na(z)
+    T <- nrow(z)
+    dobs <- ncol(z)
+    dstate <- length(xhat0)
+    stopifnot(T > 0)
+    
+    ytilde_kk <- ytilde_k <- array(NA_real_, dim = c(dobs, T))
+    S <- array(NA_real_, dim = c(dobs, dobs, T))
+    K <- array(NA_real_, dim = c(dstate, dobs, T))
+    rdiagadj <- array(1, dim = c(dobs, T))
+    
+    xhat_kk <- xhat_kkmo <- array(NA_real_, dim = c(dstate, T))
+    rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
+    P_kk <- P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
+    
+    H <- function(time, t0 = 2020.164){
+      day <- (time - t0) * 365.25
+      rbind(c(0, 0, 0, detect_frac(day), 1, 0, 0, 0), 
+            c(0, 0, 0,    0, 1, 0, 0, 0),
+            c(0, 0, 0,    0, 0, 0, 0, 1))
+    }
+    R <- diag(exp(c(logtauc, logtauh, logtaud)))
+    
+    
+    for (i in seq(1, T)) {
+      if (i == 1) {
+        xhat_init <- xhat0
+        PNinit <- Phat0
+      } else {
+        xhat_init <- xhat_kk[, i - 1]
+        PNinit <- P_kk[, , i - 1]
+      }
+      
+      xhat_init["C"] <- 0
+      xhat_init["Hnew"] <- 0
+      xhat_init["Drep"] <- 0
+      
+      PNinit[, 4] <- PNinit[4,] <- 0
+      PNinit[, 5] <- PNinit[5,] <- 0
+      PNinit[, 8] <- PNinit[8,] <- 0
+      
+      #if(i == 360) browser()
+      XP <- iterate_f_and_P(
+        xhat_init,
+        PN = PNinit,
+        eta = eta,
+        gamma = gamma,
+        gamma_d = gamma_d,
+        gamma_h = gamma_h,
+        chp = exp(logchp),
+        hfp = exp(loghfp),
+        N = N,
+        beta_t = exp(logbeta[i] -doseeffect * doses[i] - prophomeeffect * prophome[i]),
+      )
+      xhat_kkmo[, i] <- XP$xhat
+      P_kkmo[, , i] <- XP$PN
+      
+      for (j in 1:dstate){
+        if (P_kkmo[j,j,i] < 0){
+          P_kkmo[j,,i] <- 0
+          P_kkmo[,j,i] <- 0
+        }
+      }
+      
+      ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
+        H(x$time[i]) %*% xhat_kkmo[, i, drop = FALSE]     
+      S[, , i] <- H(x$time[i]) %*% P_kkmo[, , i] %*% t(H(x$time[i])) + R
+      
+      for (j in 1:dobs){
+        if (is.na(z[i,j])){
+          zscore <- 0
+          rdiagadj[j,i] <- rdiagadj[j,i] + 0
+        } else {
+          sd <- sqrt(S[j,j,i])
+          zscore <- ytilde_k[j,i] / sd 
+          if (abs(zscore) > maxzscore){
+            adjzscore <- maxzscore / (1 + abs(zscore) - maxzscore)
+            newsd <- abs(ytilde_k[j,i]) / adjzscore
+            rdiagadj[j,i] <- rdiagadj[j,i] + (newsd) ^ 2 - sd ^ 2
+          } else {
+            rdiagadj[j,i] <- rdiagadj[j,i] + 0
+          }
+        }
+        S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
+      }
+      K[, , i] <- P_kkmo[, , i] %*% t(H(x$time[i])) %*% solve(S[, , i])
+      desel <- is_z_na[i, ]
+      K[, desel, i] <- 0
+      
+      xhat_kk[, i] <-
+        xhat_kkmo[, i, drop = FALSE] +
+        K[, !desel, i] %*% ytilde_k[!desel, i, drop = FALSE]
+      
+      xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
+      P_kk[, , i] <-
+        (diag(dstate) - K[, , i] %*% H(x$time[i])) %*% P_kkmo[, , i]
+      ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
+        H(x$time[i]) %*% xhat_kk[, i, drop = FALSE]
+    }
+    
+    rwlik <- 0
+    for (i in 1:(T - 1)){
+      step <- (logbeta[i + 1] - log(gamma)) - a * (logbeta[i] - log(gamma))
+      rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
+    }
+    
+    nll <- 0
+    for (i in seq(1, T)){
+      sel <- !is_z_na[i, ]
+      nll <- nll + 
+        t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] + 
+        log(det(S[,,i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
+    }
+    nll <- 0.5 * nll - rwlik
+    
+    if (!just_nll) {
+      if (!is.null(fets)) {
+        nsimdays <- nrow(fets)
+        sim_means <- array(NA_real_, dim = c(dobs, nsimdays, nsim))
+        sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays, nsim))
+        for (j in seq_len(nsim)) {
+          logbeta_fet <- numeric(nsimdays)
+          logbeta_fet[1] <-
+            log(gamma) + a * (logbeta[T] - log(gamma)) +  
+            rnorm(1, mean = 0, sd = betasd)
+          if (length(logbeta_fet) > 1) {
+            for (jj in seq(2, length(logbeta_fet))) {
+              logbeta_fet[jj] <-
+                log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + 
+                rnorm(1, mean = 0, sd = betasd)
+            }
+          }
+          xhat_init <- xhat_kk[, T]
+          PNinit <- P_kk[, , T]
+          if (fet_zero_cases_deaths == "daily" ||
+              fets$target_wday[1] == 1) {
+            xhat_init["C"] <- 0
+            PNinit[, 4] <- PNinit[4,] <- 0
+            xhat_init["Drep"] <- 0
+            PNinit[, 8] <- PNinit[8,] <- 0 
+          }
+          xhat_init["Hnew"] <- 0
+          PNinit[, 5] <- PNinit[5,] <- 0
+          
+          XP <- iterate_f_and_P(
+            xhat_init,
+            PN = PNinit,
+            eta = eta,
+            gamma = gamma,
+            gamma_d = gamma_d,
+            gamma_h = gamma_h,
+            chp = exp(logchp),
+            hfp = exp(loghfp),
+            N = N,
+            beta_t = exp(logbeta_fet[1]) * exp(-doseeffect * doses[T])
+          )
+          sim_means[, 1, j] <- H(fets$target_end_times[1]) %*% XP$xhat
+          sim_cov[, , 1, j] <- H(fets$target_end_times[1]) %*% XP$PN %*% t(H(fets$target_end_times[1])) + R
+          for (i in seq_along(fets$target_end_times[-1])) {
+            xhat_init <- XP$xhat
+            PNinit <- XP$PN
+            if (fet_zero_cases_deaths == "daily" ||
+                fets$target_wday[i + 1] == 1) {
+              xhat_init["C"] <- 0
+              PNinit[, 4] <- PNinit[4,] <- 0
+              xhat_init["Drep"] <- 0
+              PNinit[, 8] <- PNinit[8,] <- 0
+            }
+            xhat_init["Hnew"] <- 0
+            PNinit[, 5] <- PNinit[5,] <- 0
+            
+            XP <-
+              iterate_f_and_P(
+                xhat_init,
+                PN = PNinit,
+                eta = eta,
+                gamma = gamma,
+                gamma_d = gamma_d,
+                gamma_h = gamma_h,
+                chp = exp(logchp),
+                hfp = exp(loghfp),
+                N = N,
+                beta_t = exp(logbeta_fet[i + 1]) * exp(-doseeffect * doses[T])
+              )
+            sim_means[, i + 1, j] <- H(fets$target_end_times[i + 1]) %*% XP$xhat
+            sim_cov[, , i + 1, j] <-
+              H(fets$target_end_times[i + 1]) %*% XP$PN %*% t(H(fets$target_end_times[i + 1])) + R
+          }
+        }
+      } else {
+        sim_means <- sim_cov <- NULL
+      }
+      
+      list(
+        nll = nll,
+        xhat_kkmo = xhat_kkmo,
+        xhat_kk = xhat_kk,
+        P_kkmo = P_kkmo,
+        P_kk = P_kk,
+        ytilde_k = ytilde_k,
+        S = S,
+        sim_means = sim_means,
+        sim_cov = sim_cov,
+        logbeta = logbeta,
+        doseeffect = doseeffect,
+        gamma = gamma,
+        rdiagadj = rdiagadj
+      )
+    } else {
+      nll
+    }
+  }

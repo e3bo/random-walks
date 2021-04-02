@@ -338,7 +338,7 @@ fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = .1,
+  betasd = 0.001,
   epsilon = 1e-4,
   max_iterations = 1e4,
   a = .1,
@@ -347,3 +347,40 @@ fit <- lbfgs::lbfgs(
   winit,
   invisible = 0
 )
+
+dets <- kf_nll_details(w=fit$par, x=x, y=ysim, betasd = .001, a = 0.1, pm = param_map, fet = NULL)
+
+par(mfrow = c(3, 1))
+qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
+abline(0, 1)
+qqnorm(dets$ytilde_k[2, ] / sqrt(dets$S[2, 2, ]), sub = "Hospitalizations")
+abline(0, 1)
+qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
+abline(0, 1)
+
+rho_t <- detect_frac(x$time)
+plot(x$time, ysim$cases, xlab = "Time", ylab = "Cases")
+pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
+est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
+se_cases <- sqrt(dets$S[1, 1, ])
+lines(x$time, se_cases * 2 + pred_cases, col = "grey")
+lines(x$time, pred_cases)
+lines(x$time, est_cases, lty = 2)
+lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
+
+plot(x$time, ysim$hospitalizations, xlab = "Time",
+     ylab = "Hospitalizations")
+pred_hosps <- dets$xhat_kkmo["Hnew", ]
+se_hosps <- sqrt(dets$S[2, 2, ])
+lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
+lines(x$time, pred_hosps)
+lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
+
+plot(x$time, ysim$deaths, xlab = "Time",
+     ylab = "Deaths")
+pred_deaths <- dets$xhat_kkmo["Drep", ]
+se_deaths <- sqrt(dets$S[3, 3, ])
+lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
+lines(x$time, pred_deaths)
+lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
+
