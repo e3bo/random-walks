@@ -317,7 +317,7 @@ kfnll <-
     P_kk <- P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
     
     H <- function(time, t0 = 2020.164){
-      day <- time - t0
+      day <- (time - t0) * 365.25
       rbind(c(0, 0, 0, detect_frac(day), 1, 0, 0, 0), 
             c(0, 0, 0,    0, 1, 0, 0, 0),
             c(0, 0, 0,    0, 0, 0, 0, 1))

@@ -14,8 +14,9 @@ function detect_frac(t; max_detect_par::Float64 = 0.4, detect_inc_rate::Float64 
     return rho
 end
 
-function hmat(t)
-    H =  [0 0 0 detect_frac(t) 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1] 
+function hmat(t; t0 = 2020.164)
+    day = (t - t0) * 365.25
+    H =  [0 0 0 detect_frac(day) 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1] 
     return H
 end
 
@@ -165,7 +166,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             end
         end
         pkkmo[:,:,i] = pnext 
-        Σ[:,:,i] = hmat(i) * pkkmo[:,:,i] * hmat(i)' + r
+        Σ[:,:,i] = hmat(cov.time[i]) * pkkmo[:,:,i] * hmat(cov.time[i])' + r
 
         for j in 1:dobs
             if zmiss[i,j]
@@ -174,7 +175,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
                 zz[j] = zloc[i,j]
             end
         end       
-        ytkkmo[:,i] = zz - hmat(i) * reshape(xkkmo[:,i], dstate, 1)
+        ytkkmo[:,i] = zz - hmat(cov.time[i]) * reshape(xkkmo[:,i], dstate, 1)
         for j in 1:dobs
             if zmiss[i, j]
                 zscore = 0
@@ -192,14 +193,14 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             end
             Σ[j,j,i] += rdiagadj[j,i]
         end
-        k[:,:,i] = pkkmo[:,:,i] * hmat(i)' / Σ[:,:,i]
+        k[:,:,i] = pkkmo[:,:,i] * hmat(cov.time[i])' / Σ[:,:,i]
         for j in 1:dobs
             if zmiss[i,j]
                 k[:, j ,i] .= 0
             end
         end
         xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(i)) * pkkmo[:,:,i]
+        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(cov.time[i])) * pkkmo[:,:,i]
     end
     
     stepdensity = Normal(0, betasd)
