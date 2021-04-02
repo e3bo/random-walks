@@ -316,7 +316,8 @@ kfnll <-
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
     
-    H <- function(day){
+    H <- function(time, t0 = 2020.164){
+      day <- time - t0
       rbind(c(0, 0, 0, detect_frac(day), 1, 0, 0, 0), 
             c(0, 0, 0,    0, 1, 0, 0, 0),
             c(0, 0, 0,    0, 0, 0, 0, 1))
@@ -365,8 +366,8 @@ kfnll <-
       }
       
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
-        H(i) %*% xhat_kkmo[, i, drop = FALSE]     
-      S[, , i] <- H(i) %*% P_kkmo[, , i] %*% t(H(i)) + R
+        H(x$time[i]) %*% xhat_kkmo[, i, drop = FALSE]     
+      S[, , i] <- H(x$time[i]) %*% P_kkmo[, , i] %*% t(H(x$time[i])) + R
       
       for (j in 1:dobs){
         if (is.na(z[i,j])){
@@ -385,7 +386,7 @@ kfnll <-
         }
         S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
       }
-      K[, , i] <- P_kkmo[, , i] %*% t(H(i)) %*% solve(S[, , i])
+      K[, , i] <- P_kkmo[, , i] %*% t(H(x$time[i])) %*% solve(S[, , i])
       desel <- is_z_na[i, ]
       K[, desel, i] <- 0
       
@@ -395,9 +396,9 @@ kfnll <-
       
       xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
       P_kk[, , i] <-
-        (diag(dstate) - K[, , i] %*% H(i)) %*% P_kkmo[, , i]
+        (diag(dstate) - K[, , i] %*% H(x$time[i])) %*% P_kkmo[, , i]
       ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
-        H(i) %*% xhat_kk[, i, drop = FALSE]
+        H(x$time[i]) %*% xhat_kk[, i, drop = FALSE]
     }
     
     rwlik <- 0
@@ -456,8 +457,8 @@ kfnll <-
             N = N,
             beta_t = exp(logbeta_fet[1]) * exp(-doseeffect * doses[T])
           )
-          sim_means[, 1, j] <- H(T+1) %*% XP$xhat
-          sim_cov[, , 1, j] <- H(T+1) %*% XP$PN %*% t(H(T+1)) + R
+          sim_means[, 1, j] <- H(fets$target_end_times[1]) %*% XP$xhat
+          sim_cov[, , 1, j] <- H(fets$target_end_times[1]) %*% XP$PN %*% t(H(fets$target_end_times[1])) + R
           for (i in seq_along(fets$target_end_times[-1])) {
             xhat_init <- XP$xhat
             PNinit <- XP$PN
@@ -484,9 +485,9 @@ kfnll <-
                 N = N,
                 beta_t = exp(logbeta_fet[i + 1]) * exp(-doseeffect * doses[T])
               )
-            sim_means[, i + 1, j] <- H(T + i + 1) %*% XP$xhat
+            sim_means[, i + 1, j] <- H(fets$target_end_times[i + 1]) %*% XP$xhat
             sim_cov[, , i + 1, j] <-
-              H(T + i + 1) %*% XP$PN %*% t(H(T + i + 1)) + R
+              H(fets$target_end_times[i + 1]) %*% XP$PN %*% t(H(fets$target_end_times[i + 1])) + R
           }
         }
       } else {

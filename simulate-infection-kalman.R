@@ -3,8 +3,7 @@
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-sim_kf_nll <- function(w, x, betasd, a, pm,
-                       Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0))){
+kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0))){
   p <- pm(x, w)
   E0 <- exp(p$logE0)
   I0 <- E0 * p$eta / p$gamma
@@ -23,6 +22,7 @@ sim_kf_nll <- function(w, x, betasd, a, pm,
   stopifnot(T > 0)
   
   S <- array(NA_real_, dim = c(dobs, dobs, T))
+  ybar <- array(NA_real_, dim = c(dobs, T))
   rdiagadj <- array(1, dim = c(dobs, T))
   
   
@@ -30,7 +30,8 @@ sim_kf_nll <- function(w, x, betasd, a, pm,
   rownames(xhat_kkmo) <- names(xhat0)
   P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
   
-  H <- function(day){
+  H <- function(time, t0 = 2020.164){
+    day <- (time - t0) * 365.25
     rbind(c(0, 0, 0, detect_frac(day), 1, 0, 0, 0), 
           c(0, 0, 0,    0, 1, 0, 0, 0),
           c(0, 0, 0,    0, 0, 0, 0, 1))
@@ -75,8 +76,13 @@ sim_kf_nll <- function(w, x, betasd, a, pm,
         P_kkmo[,j,i] <- 0
       }
     }
-    S[, , i] <- H(i) %*% P_kkmo[, , i] %*% t(H(i)) + R + diag(rdiagadj[, i])
+    ybar[, i ] <- H(x$time[i]) %*% xhat_kkmo[, i]
+    S[, , i] <- H(x$time[i]) %*% P_kkmo[, , i] %*% t(H(x$time[i])) + R + diag(rdiagadj[, i])
   }
-  ret <- list(X = xhat_kkmo, P = P_kkmo, S)
+  ret <- list(X = xhat_kkmo, P = P_kkmo, ybar = ybar, S = S)
   ret
 }
+
+stats <- kf_nll_suff_stats(w = winit, x = x, pm = param_map)
+stats$ybar
+
