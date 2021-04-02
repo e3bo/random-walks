@@ -83,7 +83,7 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
   ret
 }
 
-winit <- c(logE0 = 8, logH0 = -6.44939753153512, logtauc = 1, 
+wsim <- c(logE0 = 8, logH0 = -6.44939753153512, logtauc = 1, 
   logtauh = .1, logtaud =.01, logchp = -2.54689972836648, 
   loghfp = -1.64459615121798, loggammahd = 5.20743487007086, logdoseeffect.N = -16.7835406339017, 
   logprophomeeffect = -20, b1 = 4.51428768951092, b2 = 4.51428768951092, 
@@ -309,13 +309,41 @@ x <-
 stats <- kf_nll_suff_stats(w = winit, x = x, pm = param_map)
 
 sampts <- function(stats){
-  y <- array(NA_real_, dim = dim(t(stats$ybar)))
+  y <- array(NA_real_, dim = dim(t(stats$ybar))) %>% as_tibble()
   for (i in 1:nrow(y)){
       y[i, ] <- mvtnorm::rmvnorm(mean = stats$ybar[, i], sigma = stats$S[,,i], n = 1) 
   }
+  colnames(y) <- c("cases", "hospitalizations", "deaths")
   y
 }
 
 ysim <- sampts(stats)
 
+JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
+JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
+JuliaCall::julia_eval("using DataFrames")
 
+wfixed <- c(
+  N = 19453561,
+  rho1 = 0.4,
+  gamma = 365.25 / 4,
+  gamma_h = 365.25 / 10,
+  gamma_d = 365.25 / 10,
+  eta = 365.25 / 4
+)
+
+winit <- initialize_estimates(y = ysim, wfixed = wfixed)
+
+fit <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x,
+  betasd = .1,
+  epsilon = 1e-4,
+  max_iterations = 1e4,
+  a = .1,
+  y = ysim,
+  pm = param_map,
+  winit,
+  invisible = 0
+)

@@ -434,3 +434,230 @@ iterate_f_and_P <-
     PN_new <- P_new * N
     list(xhat = xhat_new, PN = PN_new, vf = vf$vf)
 }
+
+
+calc_kf_nll <- function(w, x, y, betasd, a, pm) {
+  p <- pm(x, w)
+  if (ncol(y) == 3) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logH0,
+        p$logtauc,
+        p$logtauh,
+        p$logtaud,
+        p$logchp,
+        p$loghfp,
+        p$loggammahd,
+        p$logdoseeffect,
+        p$logprophomeeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    nll <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.obj",
+      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+    ))
+  } else if(ncol(y) == 1 && "cases" %in% names(y)) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logtauc,
+        p$logdoseeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
+    JuliaCall::julia_assign("h0", exp(p$logH0))
+    JuliaCall::julia_assign("τh", exp(p$logtauh))
+    JuliaCall::julia_assign("τd", exp(p$logtaud))
+    JuliaCall::julia_assign("chp", exp(p$logchp))
+    JuliaCall::julia_assign("hfp", exp(p$loghfp))
+    nll <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.obj",
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τh, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+    ))
+  }
+  
+  nll
+}
+
+calc_kf_grad <- function(w, x, y, betasd, a, pm) {
+  p <- pm(x, w)
+  if (ncol(y) == 3) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logH0,
+        p$logtauc,
+        p$logtauh,
+        p$logtaud,
+        p$logchp,
+        p$loghfp,
+        p$loggammahd,
+        p$logdoseeffect,
+        p$logprophomeeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.grad",
+      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+    ))
+  } else if(ncol(y) == 1 && "cases" %in% names(y)) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logtauc,
+        p$logdoseeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
+    JuliaCall::julia_assign("h0", exp(p$logH0))
+    JuliaCall::julia_assign("τh", exp(p$logtauh))
+    JuliaCall::julia_assign("τd", exp(p$logtaud))
+    JuliaCall::julia_assign("chp", exp(p$logchp))
+    JuliaCall::julia_assign("hfp", exp(p$loghfp))
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.grad",
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+    ))
+  }
+  g
+}
+
+calc_kf_hess <- function(w, x, y, betasd, a, pm) {
+  p <- pm(x, w)
+  if (ncol(y) == 3) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logH0,
+        p$logtauc,
+        p$logtauh,
+        p$logtaud,
+        p$logchp,
+        p$loghfp,
+        p$loggammahd,
+        p$logdoseeffect,
+        p$logprophomeeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.hess",
+      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+    ))
+  } else if(ncol(y) == 1 && "cases" %in% names(y)) {
+    pvar <-
+      c(
+        p$logE0,
+        p$logtauc,
+        p$logdoseeffect,
+        p$bpars
+      )
+    JuliaCall::julia_assign("pvar", pvar)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("N", p$N)
+    JuliaCall::julia_assign("η", p$eta)
+    JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("a", a)
+    JuliaCall::julia_assign("betasd", betasd)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
+    JuliaCall::julia_assign("h0", exp(p$logH0))
+    JuliaCall::julia_assign("τh", exp(p$logtauh))
+    JuliaCall::julia_assign("τd", exp(p$logtaud))
+    JuliaCall::julia_assign("chp", exp(p$logchp))
+    JuliaCall::julia_assign("hfp", exp(p$loghfp))
+    g <- JuliaCall::julia_eval(paste0(
+      "InfectionKalman.hess",
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τd, chp = chp, hfp = hfp, a = a, betasd = betasd, just_nll = true)"
+    ))
+  }
+  g
+}
+
+initialize_estimates <- function(y, wfixed) {
+  tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
+  tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
+  tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
+  
+  E0init <-
+    ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
+  
+  hosp_obs <- !is.na(y$hospitalizations)
+  chp_init <-
+    sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases[hosp_obs], na.rm = TRUE)
+  hfp_init <-
+    max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE),
+        0.01)
+  
+  H0init <- hfp_init / mean(y$deaths)
+  logdoseeffect_init <-
+    log(log(wfixed["N"]) - log(wfixed["N"] - 1)) # first dose reduces susceptibility by 1/N
+  
+  logprophomeeffect_init <- -1
+  
+  binit <- unname(rep(log(wfixed["gamma"]), wsize))
+  names(binit) <- paste0("b", seq_len(wsize))
+  winit <- c(
+    logE0 = log(E0init),
+    logH0 = log(H0init),
+    logtauc = log(tau_cases_init),
+    logtauh = log(tau_hosp_init),
+    logtaud = log(tau_deaths_init),
+    logchp = log(chp_init),
+    loghfp = log(hfp_init),
+    loggammahd = log(365.25 / 2),
+    logdoseeffect = logdoseeffect_init,
+    logprophomeeffect = logprophomeeffect_init,
+    binit
+  )
+  winit
+}
