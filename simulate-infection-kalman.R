@@ -9,7 +9,7 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
   I0 <- E0 * p$eta / p$gamma
   H0 <- exp(p$logH0)
   gamma_d <- gamma_h <- exp(p$loggammahd)
-  D0 <- H0 * gamma_h / gamma_d
+  D0 <- H0 * gamma_h / gamma_d * exp(p$loghfp)
   xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
   names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
   doseeffect <- exp(p$logdoseeffect)
@@ -83,7 +83,7 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
   ret
 }
 
-wsim <- c(logE0 = 8, logH0 = -6.44939753153512, logtauc = 1, 
+wsim <- c(logE0 = 8, logH0 = log(116), logtauc = 1, 
   logtauh = .1, logtaud =.01, logchp = -2.54689972836648, 
   loghfp = -1.64459615121798, loggammahd = 5.20743487007086, logdoseeffect.N = -16.7835406339017, 
   logprophomeeffect = -20, b1 = 4.51428768951092, b2 = 4.51428768951092, 
@@ -306,7 +306,7 @@ x <-
               "tbl", "data.frame")
   )
 
-stats <- kf_nll_suff_stats(w = winit, x = x, pm = param_map)
+stats <- kf_nll_suff_stats(w = wsim, x = x, pm = param_map)
 
 sampts <- function(stats){
   y <- array(NA_real_, dim = dim(t(stats$ybar))) %>% as_tibble()
