@@ -84,7 +84,7 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
 }
 
 wsim <- c(logE0 = 8, logH0 = log(116), logtauc = 1, 
-  logtauh = .1, logtaud =.01, logchp = -2.54689972836648, 
+  logtauh = 2.3, logtaud =.01, logchp = -2.54689972836648, 
   loghfp = -1.64459615121798, loggammahd = 5.20743487007086, logdoseeffect.N = -16.7835406339017, 
   logprophomeeffect = -20, b1 = 4.51428768951092, b2 = 4.51428768951092, 
   b3 = 4.51428768951092, b4 = 4.51428768951092, b5 = 4.51428768951092, 
@@ -338,17 +338,18 @@ fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.001,
-  epsilon = 1e-4,
+  betasd = 0.01,
+  epsilon = 1e-3,
   max_iterations = 1e4,
-  a = .1,
+  linesearch_algorithm = "LBFGS_LINESEARCH_BACKTRACKING",
+  a = .9,
   y = ysim,
   pm = param_map,
   winit,
   invisible = 0
 )
 
-dets <- kf_nll_details(w=fit$par, x=x, y=ysim, betasd = .001, a = 0.1, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit$par, x=x, y=ysim, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -358,7 +359,7 @@ abline(0, 1)
 qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
 abline(0, 1)
 
-rho_t <- detect_frac(x$time)
+rho_t <- detect_frac(365.25 * (x$time - 2020.164))
 plot(x$time, ysim$cases, xlab = "Time", ylab = "Cases")
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
@@ -369,7 +370,7 @@ lines(x$time, est_cases, lty = 2)
 lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
 
 plot(x$time, ysim$hospitalizations, xlab = "Time",
-     ylab = "Hospitalizations")
+     ylab = "Hospitalizations", ylim = c(0, 100))
 pred_hosps <- dets$xhat_kkmo["Hnew", ]
 se_hosps <- sqrt(dets$S[2, 2, ])
 lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")

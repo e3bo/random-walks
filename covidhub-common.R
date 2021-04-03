@@ -763,7 +763,6 @@ kfnll <-
     }
     R <- diag(exp(c(logtauc, logtauh, logtaud)))
     
-    
     for (i in seq(1, T)) {
       if (i == 1) {
         xhat_init <- xhat0
