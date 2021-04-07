@@ -10,7 +10,7 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
   H0 <- exp(p$logH0)
   gamma_d <- gamma_h <- exp(p$loggammahd)
   D0 <- H0 * gamma_h / gamma_d * exp(p$loghfp)
-  xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
+  xhat0 <- c(p$N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
   names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
   doseeffect <- exp(p$logdoseeffect)
   prophomeeffect <- exp(p$logprophomeeffect)
@@ -83,8 +83,8 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
   ret
 }
 
-wsim <- c(logE0 = 8, logH0 = log(116), logtauc = 1, 
-  logtauh = 2.3, logtaud =.01, logchp = -2.54689972836648, 
+wsim <- c(logE0 = 8, logH0 = log(116), logtauc = 4, 
+  logtauh = 3, logtaud =2, logchp = -2.54689972836648, 
   loghfp = -1.64459615121798, loggammahd = 5.20743487007086, logdoseeffect.N = -16.7835406339017, 
   logprophomeeffect = -20, b1 = 4.51428768951092, b2 = 4.51428768951092, 
   b3 = 4.51428768951092, b4 = 4.51428768951092, b5 = 4.51428768951092, 
@@ -306,48 +306,52 @@ x <-
               "tbl", "data.frame")
   )
 
-stats <- kf_nll_suff_stats(w = wsim, x = x, pm = param_map)
-
-sampts <- function(stats){
-  y <- array(NA_real_, dim = dim(t(stats$ybar))) %>% as_tibble()
-  for (i in 1:nrow(y)){
-      y[i, ] <- mvtnorm::rmvnorm(mean = stats$ybar[, i], sigma = stats$S[,,i], n = 1) 
-  }
-  colnames(y) <- c("cases", "hospitalizations", "deaths")
-  y
-}
-
-ysim <- sampts(stats)
-
-JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
-JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
-JuliaCall::julia_eval("using DataFrames")
-
 wfixed <- c(
-  N = 19453561,
+  N = 1e7,
   rho1 = 0.4,
   gamma = 365.25 / 4,
   gamma_h = 365.25 / 10,
   gamma_d = 365.25 / 10,
   eta = 365.25 / 4
 )
+stats <- kf_nll_suff_stats(w = wsim, x = x, pm = param_map)
+
+sampts <- function(stats){
+  y <- array(NA_real_, dim = dim(t(stats$ybar)), 
+             dimnames = list(NULL, c("cases", "hospitalizations", "deaths"))) %>% 
+    as_tibble()
+  for (i in 1:nrow(y)){
+      y[i, ] <- mvtnorm::rmvnorm(mean = stats$ybar[, i], sigma = stats$S[,,i], n = 1) 
+  }
+  y
+}
+
+ysim <- replicate(10, sampts(stats), simplify = FALSE)
+
+JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
+JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
+JuliaCall::julia_eval("using DataFrames")
 
 winit <- initialize_estimates(y = ysim, wfixed = wfixed)
 
+tmpf <- function(ys){
 fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
   betasd = 0.01,
-  epsilon = 1e-3,
+  epsilon = 1e-4,
   max_iterations = 1e4,
-  linesearch_algorithm = "LBFGS_LINESEARCH_BACKTRACKING",
-  a = .9,
-  y = ysim,
+  a = 0.9,
+  y = ys,
   pm = param_map,
   winit,
   invisible = 0
 )
+fit
+}
+
+fits <- lapply(ysim, tmpf)
 
 dets <- kf_nll_details(w=fit$par, x=x, y=ysim, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
@@ -378,7 +382,7 @@ lines(x$time, pred_hosps)
 lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
 
 plot(x$time, ysim$deaths, xlab = "Time",
-     ylab = "Deaths")
+     ylab = "Deaths", ylim = c(0, 30))
 pred_deaths <- dets$xhat_kkmo["Drep", ]
 se_deaths <- sqrt(dets$S[3, 3, ])
 lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")

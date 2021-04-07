@@ -627,6 +627,7 @@ initialize_estimates <- function(y, wfixed) {
   tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
   tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
   tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
+  wsize <- nrow(y)
   
   E0init <-
     ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
@@ -771,7 +772,7 @@ kfnll <-
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
       }
-      
+      if (i == 6) browser()
       xhat_init["C"] <- 0
       xhat_init["Hnew"] <- 0
       xhat_init["Drep"] <- 0
@@ -835,6 +836,13 @@ kfnll <-
       xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
       P_kk[, , i] <-
         (diag(dstate) - K[, , i] %*% H(x$time[i])) %*% P_kkmo[, , i]
+      
+      for (j in 1:dstate){
+        if (P_kk[j,j,i] < 0){
+          P_kk[j,,i] <- 0
+          P_kk[,j,i] <- 0
+        }
+      }
       ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
         H(x$time[i]) %*% xhat_kk[, i, drop = FALSE]
     }

@@ -1,9 +1,11 @@
 module InfectionKalman
 
 using DataFrames
+using DiffEqSensitivity
 using Distributions
 using ForwardDiff
 using LinearAlgebra
+using OrdinaryDiffEq
 
 export hess
 export obj
@@ -18,6 +20,33 @@ function hmat(t; t0 = 2020.164)
     day = (t - t0) * 365.25
     H =  [0 0 0 detect_frac(day) 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1] 
     return H
+end
+
+function xvectorfield(du, u, p, t)
+  x = u[1]
+  l = u[2]
+  y = u[3]
+  h = u[6]
+  d = u[7]
+  
+  β = p[1]
+  N = p[2]
+  ι = p[3]
+  η = p[4]
+  γ = p[5]
+  γd = p[6]
+  γh = p[7]
+  chp = p[8]
+  hfp = p[9]
+          
+  du[1] = dx = -β*x*y/N - ι*x
+  du[2] = dl = β*x*y/N + ι*x - η*l
+  du[3] = dy = η*l - γ*y 
+  du[4] = dc = (1 - chp) * γ*y
+  du[5] = dhnew = chp*γ*y
+  du[6] = dh = chp*γ*y - γh*h
+  du[7] = dd = hfp*γh*h - γd*d
+  du[8] = ddrep = γd*d
 end
 
 function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
@@ -93,12 +122,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             plast = pkk[:,:,i-1]
         end
         β = exp(logβ[i] - cov.doses[i]*doseeffect - cov.prophome[i] * prophomeeffect)
-        x = xlast[1]
-        l = xlast[2]
-        y = xlast[3]
-        h = xlast[6]
-        d = xlast[7]
-        
+
         xlast[4] = 0
         xlast[5] = 0
         xlast[8] = 0
@@ -109,18 +133,11 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         plast[8,:] .= 0
         plast[:,8] .= 0
         
-        vf = [
-        -β*x*y/N - ι*x, 
-        β*x*y/N + ι*x - η*l, 
-        η*l - γ*y, 
-        (1 - chp) * γ*y, 
-        chp*γ*y,
-        chp*γ*y - γh*h,
-        hfp*γh*h - γd*d,
-        γd*d
-        ]
+        par = [β, N,  ι, η, γ, γd, γh, chp, hfp]
+        prob = ODEProblem(xvectorfield, xlast, (0.0, dt), par)
+        xnext = solve(prob, Tsit5(), saveat = dt)[2]
 
-        xnext = xlast + dt * vf
+        #xnext = xlast + dt * vf
         for j in 1:dstate
             if xnext[j] < 0
                 xnext[j] = 0
@@ -128,6 +145,13 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         end
         xkkmo[:,i] = xnext
         
+        x = xlast[1]
+        l = xlast[2]
+        y = xlast[3]
+        h = xlast[6]
+        d = xlast[7]
+        
+
         f = [0, 
              β*x/N*y/N + ι*x/N, 
              η*l/N, 
