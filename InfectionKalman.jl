@@ -10,6 +10,7 @@ using OrdinaryDiffEq
 export hess
 export obj
 export grad
+export vectorfield
 
 function detect_frac(t; max_detect_par::Float64 = 0.4, detect_inc_rate::Float64 = 1.1, half_detect::Float64 = 30., base_detect_frac::Float64 = 0.1)
     rho =  max_detect_par * (t ^ detect_inc_rate)  / ((half_detect ^ detect_inc_rate) + (t ^ detect_inc_rate)) + base_detect_frac

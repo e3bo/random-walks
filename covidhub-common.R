@@ -435,6 +435,22 @@ iterate_f_and_P <-
     list(xhat = xhat_new, PN = PN_new, vf = vf$vf)
 }
 
+iterate_f_and_P <- function(xhat, PN, pvec, beta_t, time.steps){
+  P <- PN / pvec["N"]
+  init.vars <- c(xhat_trans, Pss = P[1,1], Pse = P[1,2], 
+                 Psi = P[1,3], Psc = P[1,4], Pee = P[2,2], Pei = P[2,3], Pec = P[2,4], 
+                 Pii = P[3,3], Pic = P[3,4], Pcc = P[4,4])
+  ret <- PsystemSEIR(pvec = pvec, init.vars = init.vars, beta_t = beta_t, time.steps)[2, ]
+  xhat_new <- c(exp(ret[c("lS", "lE", "lI")]), ret["C"])
+  names(xhat_new)[1:3] <- c("S", "E", "I")
+  P_new  <- with(as.list(ret),        
+                 rbind(c(Pss, Pse, Psi, Psc),
+                       c(Pse, Pee, Pei, Pec),
+                       c(Psi, Pei, Pii, Pic),
+                       c(Psc, Pec, Pic, Pcc)))
+  PN_new <- P_new * pvec["N"]
+  list(xhat = xhat_new, PN = PN_new)
+}
 
 calc_kf_nll <- function(w, x, y, betasd, a, pm) {
   p <- pm(x, w)
@@ -695,8 +711,6 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
   nll
 }
 
-
-
 kfnll <-
   function(logbeta,
            logE0,
@@ -725,6 +739,9 @@ kfnll <-
            betasd = 1,
            maxzscore = Inf,
            just_nll = TRUE) {
+    diffeqr::diffeq_setup()
+    JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
+    
     E0 <- exp(logE0)
     I0 <- E0 * eta / gamma
     H0 <- exp(logH0)
@@ -772,7 +789,6 @@ kfnll <-
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
       }
-      if (i == 6) browser()
       xhat_init["C"] <- 0
       xhat_init["Hnew"] <- 0
       xhat_init["Drep"] <- 0
@@ -781,21 +797,17 @@ kfnll <-
       PNinit[, 5] <- PNinit[5,] <- 0
       PNinit[, 8] <- PNinit[8,] <- 0
       
-      #if(i == 360) browser()
-      XP <- iterate_f_and_P(
-        xhat_init,
-        PN = PNinit,
-        eta = eta,
-        gamma = gamma,
-        gamma_d = gamma_d,
-        gamma_h = gamma_h,
-        chp = exp(logchp),
-        hfp = exp(loghfp),
-        N = N,
-        beta_t = exp(logbeta[i] -doseeffect * doses[i] - prophomeeffect * prophome[i]),
-      )
-      xhat_kkmo[, i] <- XP$xhat
-      P_kkmo[, , i] <- XP$PN
+      u0 <- cbind(xhat_init, PNinit)
+      beta_t <- exp(logbeta[i] -doseeffect * doses[i] - prophomeeffect * prophome[i])
+      par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
+      
+      JuliaCall::julia_assign("u0", u0)
+      JuliaCall::julia_assign("tspan", c(0, 0.00273224))
+      JuliaCall::julia_assign("par", par)
+      JuliaCall::julia_eval("prob = ODEProblem(InfectionKalman.vectorfield,u0,tspan,par)")
+      XP <- JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
+      xhat_kkmo[, i] <- XP[, 1]
+      P_kkmo[, , i] <- XP[, -1]
       
       for (j in 1:dstate){
         if (P_kkmo[j,j,i] < 0){
