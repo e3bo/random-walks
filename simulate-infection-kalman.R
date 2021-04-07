@@ -332,9 +332,12 @@ JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
 JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
 JuliaCall::julia_eval("using DataFrames")
 
-winit <- initialize_estimates(y = ysim, wfixed = wfixed)
+#winit <- initialize_estimates(y = ysim, wfixed = wfixed)
 
 tmpf <- function(ys){
+  
+  winit <- initialize_estimates(y = ys, wfixed = wfixed)
+  
 fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,

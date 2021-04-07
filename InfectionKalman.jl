@@ -22,31 +22,61 @@ function hmat(t; t0 = 2020.164)
     return H
 end
 
-function xvectorfield(du, u, p, t)
-  x = u[1]
-  l = u[2]
-  y = u[3]
-  h = u[6]
-  d = u[7]
+function vectorfield(du, u, par, t)
+  x = u[1,1]
+  l = u[2,1]
+  y = u[3,1]
+  h = u[6,1]
+  d = u[7,1]
   
-  β = p[1]
-  N = p[2]
-  ι = p[3]
-  η = p[4]
-  γ = p[5]
-  γd = p[6]
-  γh = p[7]
-  chp = p[8]
-  hfp = p[9]
+  β = par[1]
+  N = par[2]
+  ι = par[3]
+  η = par[4]
+  γ = par[5]
+  γd = par[6]
+  γh = par[7]
+  chp = par[8]
+  hfp = par[9]
           
-  du[1] = dx = -β*x*y/N - ι*x
-  du[2] = dl = β*x*y/N + ι*x - η*l
-  du[3] = dy = η*l - γ*y 
-  du[4] = dc = (1 - chp) * γ*y
-  du[5] = dhnew = chp*γ*y
-  du[6] = dh = chp*γ*y - γh*h
-  du[7] = dd = hfp*γh*h - γd*d
-  du[8] = ddrep = γd*d
+  du[1,1] = dx = -β*x*y/N - ι*x
+  du[2,1] = dl = β*x*y/N + ι*x - η*l
+  du[3,1] = dy = η*l - γ*y 
+  du[4,1] = dc = (1 - chp) * γ*y
+  du[5,1] = dhnew = chp*γ*y
+  du[6,1] = dh = chp*γ*y - γh*h
+  du[7,1] = dd = hfp*γh*h - γd*d
+  du[8,1] = ddrep = γd*d
+
+  f = [0, 
+       β*x/N*y/N + ι*x/N, 
+       η*l/N, 
+       (1 - chp)*γ*y/N,
+       chp*γ*y/N,
+       (1 - hfp) * γh * h / N,
+       hfp * γh * h / N,
+       γd * d / N]
+
+  q = [  f[1]+f[2]     -f[2]               0      0        0              0          0      0
+             -f[2] f[2]+f[3]           -f[3]      0        0              0          0      0
+                 0     -f[3]  f[3]+f[4]+f[5]  -f[4]    -f[5]           -f[5]         0      0
+                 0         0           -f[4]   f[4]        0              0          0      0
+                 0         0           -f[5]      0     f[5]              0          0      0
+                 0         0           -f[5]      0        0  f[7]+f[5]+f[6]      -f[7]     0
+                 0         0              0       0        0           -f[7]  f[8]+f[7]  -f[8]
+                 0         0              0       0        0              0       -f[8]   f[8] ]
+
+  jac= [-β*y/N    0         -β*x/N     0     0       0    0 0
+         β*y/N   -η          β*x/N     0     0       0    0 0
+             0    η             -γ     0     0       0    0 0
+             0    0    (1 - chp)*γ     0     0       0    0 0
+             0    0          chp*γ     0     0       0    0 0
+             0    0          chp*γ     0     0     -γh    0 0  
+             0    0              0     0     0  hfp*γh  -γd 0
+             0    0              0     0     0       0   γd 0]
+   
+   p = u[:,2:end]
+   du[:,2:end] .= jac * p + p * jac' + q * N
 end
 
 function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
@@ -115,14 +145,13 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
 
     for i in 1:nobs
         if i == 1
-            xlast =  x0
+            xlast = x0
             plast = p0
         else
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
         β = exp(logβ[i] - cov.doses[i]*doseeffect - cov.prophome[i] * prophomeeffect)
-
         xlast[4] = 0
         xlast[5] = 0
         xlast[8] = 0
@@ -132,64 +161,26 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         plast[:,5] .= 0
         plast[8,:] .= 0
         plast[:,8] .= 0
-        
         par = [β, N,  ι, η, γ, γd, γh, chp, hfp]
-        prob = ODEProblem(xvectorfield, xlast, (0.0, dt), par)
-        xnext = solve(prob, Tsit5(), saveat = dt)[2]
-
-        #xnext = xlast + dt * vf
+        xplast = hcat(xlast, plast)
+        prob = ODEProblem(vectorfield, xplast, (0.0, dt), par)
+        xpnext = solve(prob, Tsit5(), saveat = dt).u[2]
+        xnext = xpnext[:,1]
+        pnext = xpnext[:,2:end]
         for j in 1:dstate
             if xnext[j] < 0
                 xnext[j] = 0
             end
         end
-        xkkmo[:,i] = xnext
-        
-        x = xlast[1]
-        l = xlast[2]
-        y = xlast[3]
-        h = xlast[6]
-        d = xlast[7]
-        
-
-        f = [0, 
-             β*x/N*y/N + ι*x/N, 
-             η*l/N, 
-             (1 - chp)*γ*y/N,
-             chp*γ*y/N,
-             (1 - hfp) * γh * h / N,
-             hfp * γh * h / N,
-             γd * d / N
-        ]
-
-        q = [  f[1]+f[2]     -f[2]               0      0        0              0          0      0
-                   -f[2] f[2]+f[3]           -f[3]      0        0              0          0      0
-                       0     -f[3]  f[3]+f[4]+f[5]  -f[4]    -f[5]           -f[5]         0      0
-                       0         0           -f[4]   f[4]        0              0          0      0
-                       0         0           -f[5]      0     f[5]              0          0      0
-                       0         0           -f[5]      0        0  f[7]+f[5]+f[6]      -f[7]     0
-                       0         0              0       0        0           -f[7]  f[8]+f[7]  -f[8]
-                       0         0              0       0        0              0       -f[8]   f[8] ]
-                       
-        jac= [-β*y/N    0         -β*x/N     0     0       0    0 0
-               β*y/N   -η          β*x/N     0     0       0    0 0
-                   0    η             -γ     0     0       0    0 0
-                   0    0    (1 - chp)*γ     0     0       0    0 0
-                   0    0          chp*γ     0     0       0    0 0
-                   0    0          chp*γ     0     0     -γh    0 0  
-                   0    0              0     0     0  hfp*γh  -γd 0
-                   0    0              0     0     0       0   γd 0]
-                   
-        
-        dp = jac * plast + plast * jac' + q * N
-        pnext = plast + dp * dt
+        xkkmo[:,i] .= xnext
         for j in 1:dstate
             if pnext[j, j] < 0
                 pnext[j, :] .= 0
                 pnext[:, j] .= 0
             end
         end
-        pkkmo[:,:,i] = pnext 
+        pkkmo[:,:,i] .= pnext
+        
         Σ[:,:,i] = hmat(cov.time[i]) * pkkmo[:,:,i] * hmat(cov.time[i])' + r
 
         for j in 1:dobs
