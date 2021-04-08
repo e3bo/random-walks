@@ -335,16 +335,14 @@ JuliaCall::julia_eval("using DataFrames")
 #winit <- initialize_estimates(y = ysim, wfixed = wfixed)
 
 tmpf <- function(ys){
-  
   winit <- initialize_estimates(y = ys, wfixed = wfixed)
-  
 fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.01,
+  betasd = 0.0001,
   epsilon = 1e-4,
-  max_iterations = 1e4,
+  max_iterations = 1e1,
   a = 0.9,
   y = ys,
   pm = param_map,
@@ -356,7 +354,9 @@ fit
 
 fits <- lapply(ysim, tmpf)
 
-dets <- kf_nll_details(w=fit$par, x=x, y=ysim, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+system.time(fit <- tmpf(ysim[[1]]))
+
+dets <- kf_nll_details(w=fit$par, x=x, y=ysim[[1]], betasd = .0001, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -367,7 +367,7 @@ qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
 abline(0, 1)
 
 rho_t <- detect_frac(365.25 * (x$time - 2020.164))
-plot(x$time, ysim$cases, xlab = "Time", ylab = "Cases")
+plot(x$time, ysim[[1]]$cases, xlab = "Time", ylab = "Cases")
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
 se_cases <- sqrt(dets$S[1, 1, ])
@@ -376,7 +376,7 @@ lines(x$time, pred_cases)
 lines(x$time, est_cases, lty = 2)
 lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
 
-plot(x$time, ysim$hospitalizations, xlab = "Time",
+plot(x$time, ysim[[1]]$hospitalizations, xlab = "Time",
      ylab = "Hospitalizations", ylim = c(0, 100))
 pred_hosps <- dets$xhat_kkmo["Hnew", ]
 se_hosps <- sqrt(dets$S[2, 2, ])
@@ -384,7 +384,7 @@ lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
 lines(x$time, pred_hosps)
 lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
 
-plot(x$time, ysim$deaths, xlab = "Time",
+plot(x$time, ysim[[1]]$deaths, xlab = "Time",
      ylab = "Deaths", ylim = c(0, 30))
 pred_deaths <- dets$xhat_kkmo["Drep", ]
 se_deaths <- sqrt(dets$S[3, 3, ])

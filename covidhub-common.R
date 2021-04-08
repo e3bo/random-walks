@@ -859,7 +859,7 @@ kfnll <-
         H(x$time[i]) %*% xhat_kk[, i, drop = FALSE]
     }
     
-    rwlik <- 0
+    rwlik <- dnorm(logbeta[1] - log(gamma), mean = 0, sd = betasd / sqrt(1 - a^2), log = TRUE)
     for (i in 1:(T - 1)){
       step <- (logbeta[i + 1] - log(gamma)) - a * (logbeta[i] - log(gamma))
       rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)

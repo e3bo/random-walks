@@ -219,8 +219,10 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(cov.time[i])) * pkkmo[:,:,i]
     end
     
+    stationary_density = Normal(0, betasd / sqrt(1 - a^2))
     stepdensity = Normal(0, betasd)
-    rwlik = 0
+    ar1_start = logβ[1] - log(γ)
+    rwlik = logpdf(stationary_density, ar1_start)
     for i in 1:(nobs - 1)
         step = (logβ[i + 1] - log(γ)) - a * (logβ[i] - log(γ))
         rwlik += logpdf(stepdensity, step)
