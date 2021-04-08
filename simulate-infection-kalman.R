@@ -342,7 +342,7 @@ fit <- lbfgs::lbfgs(
   x = x,
   betasd = 0.0001,
   epsilon = 1e-4,
-  max_iterations = 1e1,
+  max_iterations = 1e2,
   a = 0.9,
   y = ys,
   pm = param_map,

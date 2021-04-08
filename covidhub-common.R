@@ -655,7 +655,7 @@ initialize_estimates <- function(y, wfixed) {
     max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE),
         0.01)
   
-  H0init <- hfp_init / mean(y$deaths)
+  H0init <-  mean(y$deaths) / hfp_init
   logdoseeffect_init <-
     log(log(wfixed["N"]) - log(wfixed["N"] - 1)) # first dose reduces susceptibility by 1/N
   
