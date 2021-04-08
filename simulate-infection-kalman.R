@@ -308,7 +308,6 @@ x <-
 
 wfixed <- c(
   N = 1e7,
-  rho1 = 0.4,
   gamma = 365.25 / 4,
   gamma_h = 365.25 / 10,
   gamma_d = 365.25 / 10,
@@ -334,15 +333,17 @@ JuliaCall::julia_eval("using DataFrames")
 
 #winit <- initialize_estimates(y = ysim, wfixed = wfixed)
 
-tmpf <- function(ys){
-  winit <- initialize_estimates(y = ys, wfixed = wfixed)
+tmpf <- function(ys, winit = NULL){
+  if (is.null(winit)){
+    winit <- initialize_estimates(y = ys, wfixed = wfixed)
+  }
 fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
   betasd = 0.0001,
   epsilon = 1e-4,
-  max_iterations = 3600,
+  max_iterations = 100,
   a = 0.9,
   y = ys,
   pm = param_map,
@@ -355,8 +356,12 @@ fit
 fits <- lapply(ysim, tmpf)
 
 system.time(fit <- tmpf(ysim[[1]]))
+winit2 <- fit$par
+winit2[10] <- -1
+system.time(fit2 <- tmpf(ysim[[1]], winit = winit2))
 
-dets <- kf_nll_details(w=fit$par, x=x, y=ysim[[1]], betasd = .0001, a = 0.9, pm = param_map, fet = NULL)
+
+dets <- kf_nll_details(w=fit2$par, x=x, y=ysim[[1]], betasd = .0001, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")

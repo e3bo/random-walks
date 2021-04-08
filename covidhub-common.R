@@ -552,30 +552,43 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
   g
 }
 
-initialize_estimates <- function(y, wfixed) {
+initialize_estimates <- function(x, y, wfixed, t0 = 2020.164) {
   tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
   tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
   tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
   wsize <- nrow(y)
-  
+  rhot <- detect_frac((x$time - t0) * 365.25)
   E0init <-
-    ((mean(y$cases) / wfixed["rho1"]) * (365.25 / wfixed["eta"])) %>% unname()
+    ((mean(y$cases) / rhot[1]) * (365.25 / wfixed["eta"])) %>% unname()
+  I0init <- E0init * wfixed["eta"] / wfixed["gamma"]
   
   hosp_obs <- !is.na(y$hospitalizations)
   chp_init <-
-    sum(y$hospitalizations, na.rm = TRUE) / sum(y$cases[hosp_obs], na.rm = TRUE)
+    sum(y$hospitalizations, na.rm = TRUE) / (sum(y$cases[hosp_obs], na.rm = TRUE) + sum(y$hospitalizations, na.rm = TRUE))
   hfp_init <-
     max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE),
         0.01)
   
   H0init <-  mean(y$deaths) / hfp_init
-  logdoseeffect_init <-
-    log(log(wfixed["N"]) - log(wfixed["N"] - 1)) # first dose reduces susceptibility by 1/N
+
+  l <- round(365.25 / wfixed["gamma"])
+  Rt <- lead(y$cases / rhot + y$hospitalizations, n = l) / (y$cases / rhot + y$hospitalizations)
+  Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 21) # how is this handling edge effects, assuming zeroes?
   
-  logprophomeeffect_init <- -20
+  D0 <- H0init * wfixed["gamma_h"] / wfixed["gamma_d"] * hfp_init
+  S0init <- wfixed["N"] - E0init - I0init - H0init - D0
+  Sdecrement <- cumsum(lead(y$cases / rhot + y$hospitalizations, n = l))
+  St <- S0init - Sdecrement
+  betat <- Rtfilt * wfixed["gamma"] * wfixed["N"] / na.omit(St)
+  betat2 <- c(betat, rep(betat[length(betat)], l))
   
-  binit <- unname(rep(log(wfixed["gamma"]), wsize))
+  df <- data.frame(logbeta = log(betat2), doses = x$doses, prophome = x$prophome)
+  mod <- lm(logbeta~doses + prophome, data = df)
+  doseeffect_init <- coef(mod)["doses"] %>% unname()
+  prophomeeffect_init <- coef(mod)["prophome"] %>% unname()
+  binit <- coef(mod)["(Intercept)"] + residuals(mod)
   names(binit) <- paste0("b", seq_len(wsize))
+
   winit <- c(
     logE0 = log(E0init),
     logH0 = log(H0init),
@@ -585,8 +598,8 @@ initialize_estimates <- function(y, wfixed) {
     logchp = log(chp_init),
     loghfp = log(hfp_init),
     loggammahd = log(365.25 / 2),
-    logdoseeffect = logdoseeffect_init,
-    logprophomeeffect = logprophomeeffect_init,
+    doseeffect = doseeffect_init,
+    prophomeeffect = prophomeeffect_init,
     binit
   )
   winit
