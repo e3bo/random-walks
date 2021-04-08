@@ -4,6 +4,10 @@ suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
 kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0))){
+  
+  diffeqr::diffeq_setup()
+  JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
+  
   p <- pm(x, w)
   E0 <- exp(p$logE0)
   I0 <- E0 * p$eta / p$gamma
@@ -12,9 +16,9 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
   D0 <- H0 * gamma_h / gamma_d * exp(p$loghfp)
   xhat0 <- c(p$N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
   names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
-  doseeffect <- exp(p$logdoseeffect)
-  prophomeeffect <- exp(p$logprophomeeffect)
-  logbeta <- p$bpars
+  doseeffect <- p$doseeffect
+  prophomeeffect <- p$prophomeeffect
+  bvec <- p$bpars
   
   T <- nrow(x)
   dobs <- 3
@@ -55,21 +59,19 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
     PNinit[, 5] <- PNinit[5,] <- 0
     PNinit[, 8] <- PNinit[8,] <- 0
     
-    XP <- iterate_f_and_P(
-      xhat_init,
-      PN = PNinit,
-      eta = p$eta,
-      gamma = p$gamma,
-      gamma_d = gamma_d,
-      gamma_h = gamma_h,
-      chp = exp(p$logchp),
-      hfp = exp(p$loghfp),
-      N = p$N,
-      beta_t = exp(logbeta[i] -doseeffect * x$doses[i] - prophomeeffect * x$prophome[i]),
-    )
-    xhat_kkmo[, i] <- XP$xhat
-    P_kkmo[, , i] <- XP$PN
+    u0 <- cbind(xhat_init, PNinit)
+    beta_t <- exp(bvec[i] + doseeffect * x$doses[i] + prophomeeffect * x$prophome[i])
+    par <- c(beta_t, p$N,  0, p$eta, p$gamma, gamma_d, gamma_h, exp(p$logchp), exp(p$loghfp))
     
+    JuliaCall::julia_assign("u0", u0)
+    JuliaCall::julia_assign("tspan", c(0, 0.00273224))
+    JuliaCall::julia_assign("par", par)
+    JuliaCall::julia_eval("prob = ODEProblem(InfectionKalman.vectorfield,u0,tspan,par)")
+    XP <- JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
+
+    xhat_kkmo[, i] <- XP[, 1]
+    P_kkmo[, , i] <- XP[, -1]
+
     for (j in 1:dstate){
       if (P_kkmo[j,j,i] < 0){
         P_kkmo[j,,i] <- 0
@@ -85,8 +87,8 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
 
 wsim <- c(logE0 = 8, logH0 = log(116), logtauc = 4, 
   logtauh = 3, logtaud =2, logchp = -2.54689972836648, 
-  loghfp = -1.64459615121798, loggammahd = 5.20743487007086, logdoseeffect.N = -16.7835406339017, 
-  logprophomeeffect = -20, b1 = 4.51428768951092, b2 = 4.51428768951092, 
+  loghfp = -1.64459615121798, loggammahd = 5.20743487007086, doseeffect = 0, 
+  prophomeeffect = 0, b1 = 4.51428768951092, b2 = 4.51428768951092, 
   b3 = 4.51428768951092, b4 = 4.51428768951092, b5 = 4.51428768951092, 
   b6 = 4.51428768951092, b7 = 4.51428768951092, b8 = 4.51428768951092, 
   b9 = 4.51428768951092, b10 = 4.51428768951092, b11 = 4.51428768951092, 

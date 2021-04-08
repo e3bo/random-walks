@@ -333,7 +333,6 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
     filter((nchar(location)) <= 2 | str_detect(target, "inc case$")) ## only case forecasts accepted for counties
 }
 
-
 param_map <- function(x, w, fixed = wfixed){
   ret <- list()
   ret$logE0 <- w[1]
@@ -344,9 +343,9 @@ param_map <- function(x, w, fixed = wfixed){
   ret$logchp <- w[6]
   ret$loghfp <- w[7]
   ret$loggammahd <- w[8]
-  ret$logdoseeffect <- w[9]
-  ret$logprophomeeffect <- w[10]
-  ret$bpars <- w[seq(11, length(w))]
+  ret$doseeffect <- w[9]
+  ret$prophomeeffect <- w[10]
+  ret$bvec <- w[seq(11, length(w))]
   ret$times <- x$time
   ret$doses <- x$doses
   ret$prophome <- x$prophome
@@ -378,9 +377,9 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$logchp,
         p$loghfp,
         p$loggammahd,
-        p$logdoseeffect,
-        p$logprophomeeffect,
-        p$bpars
+        p$doseeffect,
+        p$prophomeeffect,
+        p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
     JuliaCall::julia_assign("η", p$eta)
@@ -441,9 +440,9 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$logchp,
         p$loghfp,
         p$loggammahd,
-        p$logdoseeffect,
-        p$logprophomeeffect,
-        p$bpars
+        p$doseeffect,
+        p$prophomeeffect,
+        p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
     JuliaCall::julia_assign("η", p$eta)
@@ -608,7 +607,7 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164) {
 kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
   p <- pm(x, w)
   nll <- kfnll(
-    logbeta = p$bpars,
+    bvec = p$bvec,
     logE0 = p$logE0,
     logH0 = p$logH0,
     logtauc = p$logtauc,
@@ -617,8 +616,8 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     logchp = p$logchp,
     loghfp = p$loghfp,
     loggammahd = p$loggammahd,
-    logdoseeffect = p$logdoseeffect,
-    logprophomeeffect = p$logprophomeeffect,
+    doseeffect = p$doseeffect,
+    prophomeeffect = p$prophomeeffect,
     eta = p$eta,
     gamma = p$gamma,
     N = p$N,
@@ -638,7 +637,7 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
 }
 
 kfnll <-
-  function(logbeta,
+  function(bvec,
            logE0,
            logH0,
            logtauc,
@@ -647,8 +646,8 @@ kfnll <-
            logchp,
            loghfp,
            loggammahd,
-           logdoseeffect,
-           logprophomeeffect,
+           doseeffect,
+           prophomeeffect,
            eta,
            gamma,
            N,
@@ -675,9 +674,7 @@ kfnll <-
     D0 <- H0 * gamma_h / gamma_d * exp(loghfp)
     xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
-    doseeffect <- exp(logdoseeffect)
-    prophomeeffect <- exp(logprophomeeffect)
-    
+
     if (ncol(z) == 1 && "cases" %in% names(z)){
       z$hospitalizations <- NA
       z$deaths <- NA
@@ -724,7 +721,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- exp(logbeta[i] -doseeffect * doses[i] - prophomeeffect * prophome[i])
+      beta_t <- exp(bvec[i] + doseeffect * doses[i] + prophomeeffect * prophome[i])
       par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
       
       JuliaCall::julia_assign("u0", u0)
@@ -785,9 +782,9 @@ kfnll <-
         H(x$time[i]) %*% xhat_kk[, i, drop = FALSE]
     }
     
-    rwlik <- dnorm(logbeta[1] - log(gamma), mean = 0, sd = betasd / sqrt(1 - a^2), log = TRUE)
+    rwlik <- 0
     for (i in 1:(T - 1)){
-      step <- (logbeta[i + 1] - log(gamma)) - a * (logbeta[i] - log(gamma))
+      step <- bvec[i + 1] - bvec[i]
       rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
     }
     

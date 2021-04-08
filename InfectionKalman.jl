@@ -104,8 +104,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         
 
         
-        doseeffect = exp(pvar[9])
-        prophomeeffect = exp(pvar[10])
+        doseeffect = pvar[9]
+        prophomeeffect = pvar[10]
 
         bvec = pvar[11:end]
     elseif size(z, 2) == 1 && "cases" in names(z)
@@ -145,7 +145,6 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     xkkmo = Array{eltype(bvec)}(undef, dstate, nobs)
     pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
-    logβ = bvec
 
     @assert length(bvec) == nobs "length of bvec should equal number of observations"
 
@@ -157,7 +156,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = exp(logβ[i] - cov.doses[i]*doseeffect - cov.prophome[i] * prophomeeffect)
+        β = exp(bvec[i] + cov.doses[i] * doseeffect + cov.prophome[i] * prophomeeffect)
         xlast[4] = 0
         xlast[5] = 0
         xlast[8] = 0
@@ -224,12 +223,10 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(cov.time[i])) * pkkmo[:,:,i]
     end
     
-    stationary_density = Normal(0, betasd / sqrt(1 - a^2))
     stepdensity = Normal(0, betasd)
-    ar1_start = logβ[1] - log(γ)
-    rwlik = logpdf(stationary_density, ar1_start)
+    rwlik = 0
     for i in 1:(nobs - 1)
-        step = (logβ[i + 1] - log(γ)) - a * (logβ[i] - log(γ))
+        step = bvec[i + 1] - bvec[i]
         rwlik += logpdf(stepdensity, step)
     end
     kflik = 0
