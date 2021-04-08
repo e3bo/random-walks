@@ -551,25 +551,30 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
   g
 }
 
-initialize_estimates <- function(x, y, wfixed, t0 = 2020.164) {
+initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
   tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
   tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
   wsize <- nrow(y)
   rhot <- detect_frac((x$time - t0) * 365.25)
-  E0init <-
-    ((mean(y$cases) / rhot[1]) * (365.25 / wfixed["eta"])) %>% unname()
-  I0init <- E0init * wfixed["eta"] / wfixed["gamma"]
+  
+  est_true_cases_hosps <- (y$cases - y$hospitalizations) / rhot + y$hospitalizations
+  Iest <- est_true_cases_hosps / (wfixed["gamma"] * dt)
+  
+  I0init <- mean(Iest)
+  E0init <- I0init * wfixed["gamma"] / wfixed["eta"] 
   
   hosp_obs <- !is.na(y$hospitalizations)
   chp_init <-
-    sum(y$hospitalizations, na.rm = TRUE) / (sum(y$cases[hosp_obs], na.rm = TRUE) + sum(y$hospitalizations, na.rm = TRUE))
+    sum(y$hospitalizations, na.rm = TRUE) / sum(est_true_cases_hosps)
+  
+  Hest <- Iest  * wfixed["gamma"] * chp_init / wfixed["gamma_h"]
+  
+  H0init <- mean(Hest)
   hfp_init <-
     max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE),
         0.01)
   
-  H0init <-  mean(y$deaths) / hfp_init
-
   l <- round(365.25 / wfixed["gamma"])
   Rt <- lead(y$cases / rhot + y$hospitalizations, n = l) / (y$cases / rhot + y$hospitalizations)
   Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 21) # how is this handling edge effects, assuming zeroes?
@@ -787,7 +792,6 @@ kfnll <-
       step <- bvec[i + 1] - bvec[i]
       rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
     }
-    
     nll <- 0
     for (i in seq(1, T)){
       sel <- !is_z_na[i, ]
@@ -885,7 +889,7 @@ kfnll <-
         S = S,
         sim_means = sim_means,
         sim_cov = sim_cov,
-        logbeta = logbeta,
+        bvec = bvec,
         doseeffect = doseeffect,
         gamma = gamma,
         rdiagadj = rdiagadj

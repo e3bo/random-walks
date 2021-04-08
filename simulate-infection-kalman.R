@@ -60,7 +60,7 @@ kf_nll_suff_stats <- function(w, x, pm, Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)))
     PNinit[, 8] <- PNinit[8,] <- 0
     
     u0 <- cbind(xhat_init, PNinit)
-    beta_t <- exp(bvec[i] + doseeffect * x$doses[i] + prophomeeffect * x$prophome[i])
+    beta_t <- exp(p$bvec[i] + doseeffect * x$doses[i] + prophomeeffect * x$prophome[i])
     par <- c(beta_t, p$N,  0, p$eta, p$gamma, gamma_d, gamma_h, exp(p$logchp), exp(p$loghfp))
     
     JuliaCall::julia_assign("u0", u0)
@@ -311,8 +311,8 @@ x <-
 wfixed <- c(
   N = 1e7,
   gamma = 365.25 / 4,
-  gamma_h = 365.25 / 10,
-  gamma_d = 365.25 / 10,
+  gamma_h = unname(exp(wsim["loggammahd"])),
+  gamma_d = unname(exp(wsim["loggammahd"])),
   eta = 365.25 / 4
 )
 stats <- kf_nll_suff_stats(w = wsim, x = x, pm = param_map)
@@ -335,9 +335,9 @@ JuliaCall::julia_eval("using DataFrames")
 
 #winit <- initialize_estimates(y = ysim, wfixed = wfixed)
 
-tmpf <- function(ys, winit = NULL){
+tmpf <- function(ys, x, winit = NULL){
   if (is.null(winit)){
-    winit <- initialize_estimates(y = ys, wfixed = wfixed)
+    winit <- initialize_estimates(x = x, y = ys, wfixed = wfixed)
   }
 fit <- lbfgs::lbfgs(
   calc_kf_nll,
@@ -345,7 +345,7 @@ fit <- lbfgs::lbfgs(
   x = x,
   betasd = 0.0001,
   epsilon = 1e-4,
-  max_iterations = 100,
+  max_iterations = 200,
   a = 0.9,
   y = ys,
   pm = param_map,
@@ -357,10 +357,9 @@ fit
 
 fits <- lapply(ysim, tmpf)
 
-system.time(fit <- tmpf(ysim[[1]]))
+system.time(fit <- tmpf(ysim[[1]], x = x))
 winit2 <- fit$par
-winit2[10] <- -1
-system.time(fit2 <- tmpf(ysim[[1]], winit = winit2))
+system.time(fit2 <- tmpf(ysim[[1]], x=x, winit = winit2))
 
 
 dets <- kf_nll_details(w=fit2$par, x=x, y=ysim[[1]], betasd = .0001, a = 0.9, pm = param_map, fet = NULL)
@@ -398,4 +397,3 @@ se_deaths <- sqrt(dets$S[3, 3, ])
 lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
-
