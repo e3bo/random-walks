@@ -342,7 +342,7 @@ fit <- lbfgs::lbfgs(
   x = x,
   betasd = 0.0001,
   epsilon = 1e-4,
-  max_iterations = 1e2,
+  max_iterations = 3600,
   a = 0.9,
   y = ys,
   pm = param_map,
@@ -367,7 +367,7 @@ qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
 abline(0, 1)
 
 rho_t <- detect_frac(365.25 * (x$time - 2020.164))
-plot(x$time, ysim[[1]]$cases, xlab = "Time", ylab = "Cases")
+plot(x$time, ysim[[1]]$cases, xlab = "Time", ylab = "Cases", ylim =c(300, 500))
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
 se_cases <- sqrt(dets$S[1, 1, ])

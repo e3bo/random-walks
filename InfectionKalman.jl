@@ -88,7 +88,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     
         l0 = exp(pvar[1])
         h0 = exp(pvar[2])
-        d0 = h0 * γh / γd
+
     
         τc = exp(pvar[3])
         τh = exp(pvar[4])
@@ -97,8 +97,12 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         chp = exp(pvar[6])
         hfp = exp(pvar[7])
         
+        
+        
         γh = exp(pvar[8])
         γd = exp(pvar[8])
+        
+
         
         doseeffect = exp(pvar[9])
         prophomeeffect = exp(pvar[10])
@@ -116,7 +120,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
-    d0 = h0 * γh / γd
+    d0 = h0 * γh / γd * hfp
+    
     y0 = l0 * η / γ
     
     x0 = [N - l0 - y0 - h0 - d0; l0; y0; 0; 0; h0; d0; 0]

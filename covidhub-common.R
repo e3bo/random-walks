@@ -659,7 +659,7 @@ initialize_estimates <- function(y, wfixed) {
   logdoseeffect_init <-
     log(log(wfixed["N"]) - log(wfixed["N"] - 1)) # first dose reduces susceptibility by 1/N
   
-  logprophomeeffect_init <- -1
+  logprophomeeffect_init <- -20
   
   binit <- unname(rep(log(wfixed["gamma"]), wsize))
   names(binit) <- paste0("b", seq_len(wsize))
@@ -746,7 +746,7 @@ kfnll <-
     I0 <- E0 * eta / gamma
     H0 <- exp(logH0)
     gamma_d <- gamma_h <- exp(loggammahd)
-    D0 <- H0 * gamma_h / gamma_d
+    D0 <- H0 * gamma_h / gamma_d * exp(loghfp)
     xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     doseeffect <- exp(logdoseeffect)
