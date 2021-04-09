@@ -342,10 +342,10 @@ param_map <- function(x, w, fixed = wfixed){
   ret$logtaud <- w[5]
   ret$logchp <- w[6]
   ret$loghfp <- w[7]
-  ret$loggammahd <- w[8]
-  ret$doseeffect <- w[9]
-  ret$prophomeeffect <- w[10]
-  ret$bvec <- w[seq(11, length(w))]
+  ret$loggammahd <- log(fixed["gamma_h"])
+  ret$doseeffect <- w[8]
+  ret$prophomeeffect <- w[9]
+  ret$bvec <- w[seq(10, length(w))]
   ret$times <- x$time
   ret$dosesiqr <- x$dosesiqr
   ret$prophomeiqr <- x$prophomeiqr
@@ -376,7 +376,6 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$loggammahd,
         p$doseeffect,
         p$prophomeeffect,
         p$bvec
@@ -390,9 +389,11 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("z", y)
     JuliaCall::julia_assign("a", a)
     JuliaCall::julia_assign("betasd", betasd)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
     nll <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.obj",
-      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γh = γh, γd = γd, a = a, betasd = betasd, just_nll = true)"
     ))
   } else if(ncol(y) == 1 && "cases" %in% names(y)) {
     pvar <-
@@ -439,7 +440,6 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$loggammahd,
         p$doseeffect,
         p$prophomeeffect,
         p$bvec
@@ -449,13 +449,15 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
     JuliaCall::julia_assign("N", p$N)
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
     JuliaCall::julia_assign("z", y)
     JuliaCall::julia_assign("cov", x)
     JuliaCall::julia_assign("a", a)
     JuliaCall::julia_assign("betasd", betasd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, a = a, betasd = betasd, just_nll = true)"
     ))
   } else if(ncol(y) == 1 && "cases" %in% names(y)) {
     pvar <-
@@ -501,23 +503,24 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$loggammahd,
-        p$logdoseeffect,
-        p$logprophomeeffect,
-        p$bpars
+        p$doseeffect,
+        p$prophomeeffect,
+        p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("N", p$N)
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("γ", p$gamma)
+    JuliaCall::julia_assign("γd", exp(p$loggammahd))
+    JuliaCall::julia_assign("γh", exp(p$loggammahd))
     JuliaCall::julia_assign("z", y)
     JuliaCall::julia_assign("cov", x)
     JuliaCall::julia_assign("a", a)
     JuliaCall::julia_assign("betasd", betasd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
-      "(pvar, cov, z; N = N, η = η, γ = γ, a = a, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, a = a, betasd = betasd, just_nll = true)"
     ))
   } else if(ncol(y) == 1 && "cases" %in% names(y)) {
     pvar <-
@@ -609,7 +612,6 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
     logtaud = log(tau_deaths_init),
     logchp = log(chp_init),
     loghfp = log(hfp_init),
-    loggammahd = log(365.25 / 2),
     doseeffect = doseeffect_init,
     prophomeeffect = prophomeeffect_init,
     binit

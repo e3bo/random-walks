@@ -114,8 +114,8 @@ wfixed <- c(
   N = N,
   rho1 = 0.4,
   gamma = 365.25 / 4,
-  gamma_h = 365.25 / 10,
-  gamma_d = 365.25 / 10,
+  gamma_h = 365.25 / 1,
+  gamma_d = 365.25 / 1,
   eta = 365.25 / 4,
   t0 = min(wind$time) - 0.00273224
 )
@@ -146,7 +146,24 @@ fit <- lbfgs::lbfgs(
   invisible = 0
 )
 
+system.time(h <- calc_kf_hess(w=fit$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
+rbind(winit, fit$par, diag(solve(h)))
 
+fit2 <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x,
+  betasd = 0.1,
+  epsilon = 1e-1,
+  max_iterations = 100,
+  a = .9,
+  y = y,
+  pm = param_map,
+  fit$par,
+  invisible = 0
+)
+
+rbind(winit, fit$par, fit2$par)
 
 fit_over_betagrid <- function(a, betasdgrid) {
   fits <- list()
@@ -261,7 +278,7 @@ lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
 
-plot(exp(fit$par[-c(1:10)] + fit$par[9] * x$dosesiqr + fit$par[10] * x$prophomeiqr) / wfixed["gamma"], type = 'l', ylim = c(0, 2))
-lines(exp(fit$par[-c(1:10)] + fit$par[9] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"], col = 2)
-lines(exp(fit$par[-c(1:10)] + 0 * x$dosesiqr + fit$par[10] * x$prophomeiqr) / wfixed["gamma"], col = 3)
+plot(exp(fit$par[-c(1:9)] + fit$par[8] * x$dosesiqr + fit$par[9] * x$prophomeiqr) / wfixed["gamma"], type = 'l', ylim = c(0, 2))
+lines(exp(fit$par[-c(1:9)] + fit$par[8] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"], col = 2)
+lines(exp(fit$par[-c(1:9)] + 0 * x$dosesiqr + fit$par[9] * x$prophomeiqr) / wfixed["gamma"], col = 3)
 

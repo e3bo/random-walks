@@ -96,18 +96,11 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     
         chp = exp(pvar[6])
         hfp = exp(pvar[7])
-        
-        
-        
-        γh = exp(pvar[8])
-        γd = exp(pvar[8])
-        
 
-        
-        doseeffect = pvar[9]
-        prophomeeffect = pvar[10]
+        doseeffect = pvar[8]
+        prophomeeffect = pvar[9]
 
-        bvec = pvar[11:end]
+        bvec = pvar[10:end]
     elseif size(z, 2) == 1 && "cases" in names(z)
         l0 = exp(pvar[1])
         τc = exp(pvar[2])
