@@ -453,3 +453,9 @@ se_deaths <- sqrt(dets2$S[3, 3, ])
 lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
+
+
+
+## Now try joing fitting of prophomeffect and doses
+
+

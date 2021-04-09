@@ -347,8 +347,8 @@ param_map <- function(x, w, fixed = wfixed){
   ret$prophomeeffect <- w[10]
   ret$bvec <- w[seq(11, length(w))]
   ret$times <- x$time
-  ret$doses <- x$doses
-  ret$prophome <- x$prophome
+  ret$dosesiqr <- x$dosesiqr
+  ret$prophomeiqr <- x$prophomeiqr
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
@@ -558,10 +558,11 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   wsize <- nrow(y)
   rhot <- detect_frac((x$time - t0) * 365.25)
   
-  est_true_cases_hosps <- (y$cases - y$hospitalizations) / rhot + y$hospitalizations
+  hfill <- na.fill(y$hospitalizations, "extend")
+  est_true_cases_hosps <- (y$cases - hfill) / rhot + hfill
   Iest <- est_true_cases_hosps / (wfixed["gamma"] * dt)
   
-  I0init <- mean(Iest)
+  I0init <- mean(head(Iest, n = 7), na.rm = TRUE)
   E0init <- I0init * wfixed["gamma"] / wfixed["eta"] 
   
   hosp_obs <- !is.na(y$hospitalizations)
@@ -570,13 +571,13 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   
   Hest <- Iest  * wfixed["gamma"] * chp_init / wfixed["gamma_h"]
   
-  H0init <- mean(Hest)
+  H0init <- mean(head(Hest, n = 7), na.rm = TRUE)
   hfp_init <-
     max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE),
         0.01)
   
-  l <- round(365.25 / wfixed["gamma"])
-  Rt <- lead(y$cases / rhot + y$hospitalizations, n = l) / (y$cases / rhot + y$hospitalizations)
+  l <- 7 
+  Rt <- lead(y$cases / rhot + hfill, n = l) / (y$cases / rhot + hfill)
   m <- 10
   Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 2 * m  + 1) # edge effects seem biased
   Rtfilt[1:m] <- NA
@@ -585,17 +586,18 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   
   D0 <- H0init * wfixed["gamma_h"] / wfixed["gamma_d"] * hfp_init
   S0init <- wfixed["N"] - E0init - I0init - H0init - D0
-  Sdecrement <- cumsum(lead(y$cases / rhot + y$hospitalizations, n = l))
+  Sdecrement <- cumsum(lead(y$cases / rhot + hfill, n = l))
   St <- S0init - Sdecrement
   betat <- Rtfilt * wfixed["gamma"] * wfixed["N"] / na.omit(St)
   betat[1:m] <- betat[m + 1]
   betat[(lf - m + 1):lf] <- betat[lf - m]
   betat2 <- c(betat, rep(betat[lf - m], l))
   
-  df <- data.frame(logbeta = log(betat2), doses = x$doses, prophome = x$prophome)
-  mod <- lm(logbeta~doses + prophome, data = df)
-  doseeffect_init <- coef(mod)["doses"] %>% unname()
-  prophomeeffect_init <- coef(mod)["prophome"] %>% unname()
+  df <- data.frame(logbeta = log(betat2), dosesiqr = x$dosesiqr, prophomeiqr = x$prophomeiqr)
+  mod <- lm(logbeta~dosesiqr + prophomeiqr, data = df)
+  print(summary(mod))
+  doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
+  prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
   names(binit) <- paste0("b", seq_len(wsize))
 
@@ -635,8 +637,8 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     z = y,
     t0 = p$t0,
     times = p$times,
-    doses = p$doses,
-    prophome = p$prophome,
+    dosesiqr = p$dosesiqr,
+    prophomeiqr = p$prophomeiqr,
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases_deaths = "weekly",
@@ -665,8 +667,8 @@ kfnll <-
            z,
            t0,
            times,
-           doses,
-           prophome,
+           dosesiqr,
+           prophomeiqr,
            Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases_deaths = "daily",
@@ -732,7 +734,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- min(exp(bvec[i] + doseeffect * doses[i] + prophomeeffect * prophome[i]), 4 * gamma)
+      beta_t <- min(exp(bvec[i] + doseeffect * dosesiqr[i] + prophomeeffect * prophomeiqr[i]), 4 * gamma)
       par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
       
       JuliaCall::julia_assign("u0", u0)

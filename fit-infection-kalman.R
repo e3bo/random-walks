@@ -122,13 +122,31 @@ wfixed <- c(
 
 y <- wind %>% select(cases, hospitalizations, deaths)
 x <- wind %>% select(time, doses, prophome)
-x$doses <- rnorm(x$doses)
+x$dosesiqr <- x$doses /  diff(quantile(x$doses, c(.25, .75)))
+x$prophomeiqr <- x$prophome / diff(quantile(x$prophome, c(.25, .75)))
+#x$doses <- rnorm(x$doses)
 
 
 
-winit <- initialize_estimates(y = y, wfixed = wfixed)
+winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
 tictoc::tic("optimization")
+
+fit <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x,
+  betasd = 0.1,
+  epsilon = 1e-1,
+  max_iterations = 100,
+  a = .9,
+  y = y,
+  pm = param_map,
+  winit,
+  invisible = 0
+)
+
+
 
 fit_over_betagrid <- function(a, betasdgrid) {
   fits <- list()
@@ -203,3 +221,47 @@ if (!dir.exists(fit_dir))
 
 the_file <- file.path(fit_dir, "fit.RData")
 save(x, y, wfixed, fits, fet, agrid, betasdgrid, file = the_file)
+
+## 
+
+
+dets <- kf_nll_details(w=fit$par, x=x, y=y, betasd = .1, a = 0.9, pm = param_map, fet = NULL)
+
+par(mfrow = c(3, 1))
+qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
+abline(0, 1)
+qqnorm(dets$ytilde_k[2, ] / sqrt(dets$S[2, 2, ]), sub = "Hospitalizations")
+abline(0, 1)
+qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
+abline(0, 1)
+
+rho_t <- detect_frac(365.25 * (x$time - 2020.164))
+plot(x$time, y$cases, xlab = "Time", ylab = "Cases")
+pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
+est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
+se_cases <- sqrt(dets$S[1, 1, ])
+lines(x$time, se_cases * 2 + pred_cases, col = "grey")
+lines(x$time, pred_cases)
+lines(x$time, est_cases, lty = 2)
+lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
+
+plot(x$time, y$hospitalizations, xlab = "Time",
+     ylab = "Hospitalizations")
+pred_hosps <- dets$xhat_kkmo["Hnew", ]
+se_hosps <- sqrt(dets$S[2, 2, ])
+lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
+lines(x$time, pred_hosps)
+lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
+
+plot(x$time, y$deaths, xlab = "Time",
+     ylab = "Deaths")
+pred_deaths <- dets$xhat_kkmo["Drep", ]
+se_deaths <- sqrt(dets$S[3, 3, ])
+lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
+lines(x$time, pred_deaths)
+lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
+
+plot(exp(fit$par[-c(1:10)] + fit$par[9] * x$dosesiqr + fit$par[10] * x$prophomeiqr) / wfixed["gamma"], type = 'l', ylim = c(0, 2))
+lines(exp(fit$par[-c(1:10)] + fit$par[9] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"], col = 2)
+lines(exp(fit$par[-c(1:10)] + 0 * x$dosesiqr + fit$par[10] * x$prophomeiqr) / wfixed["gamma"], col = 3)
+
