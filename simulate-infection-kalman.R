@@ -343,9 +343,9 @@ fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.0001,
+  betasd = .1,
   epsilon = 1e-4,
-  max_iterations = 200,
+  max_iterations = 100,
   a = 0.9,
   y = ys,
   pm = param_map,
@@ -355,14 +355,18 @@ fit <- lbfgs::lbfgs(
 fit
 }
 
-fits <- lapply(ysim, tmpf)
 
-system.time(fit <- tmpf(ysim[[1]], x = x))
+system.time(fit <- tmpf(ysim[[1]], x = x)) ## should be pretty good fit
+winit <- initialize_estimates(x=x, y=ysim[[1]], wfixed = wfixed)
+rbind(wsim, fit$par, winit )
+
 winit2 <- fit$par
-system.time(fit2 <- tmpf(ysim[[1]], x=x, winit = winit2))
+winit2[10] <- -3
+system.time(fit2 <- tmpf(ysim[[1]], x=x, winit = winit2)) ## should recover small winit2[10]
+rbind(wsim, fit2$par, winit2 )
 
 
-dets <- kf_nll_details(w=fit2$par, x=x, y=ysim[[1]], betasd = .0001, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit2$par, x=x, y=ysim[[1]], betasd = .1, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -373,7 +377,7 @@ qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
 abline(0, 1)
 
 rho_t <- detect_frac(365.25 * (x$time - 2020.164))
-plot(x$time, ysim[[1]]$cases, xlab = "Time", ylab = "Cases", ylim =c(300, 500))
+plot(x$time, ysim[[1]]$cases, xlab = "Time", ylab = "Cases", ylim =c(0, 1000))
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
 se_cases <- sqrt(dets$S[1, 1, ])
@@ -383,7 +387,7 @@ lines(x$time, est_cases, lty = 2)
 lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
 
 plot(x$time, ysim[[1]]$hospitalizations, xlab = "Time",
-     ylab = "Hospitalizations", ylim = c(0, 100))
+     ylab = "Hospitalizations", ylim = c(0, 300))
 pred_hosps <- dets$xhat_kkmo["Hnew", ]
 se_hosps <- sqrt(dets$S[2, 2, ])
 lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
@@ -394,6 +398,58 @@ plot(x$time, ysim[[1]]$deaths, xlab = "Time",
      ylab = "Deaths", ylim = c(0, 30))
 pred_deaths <- dets$xhat_kkmo["Drep", ]
 se_deaths <- sqrt(dets$S[3, 3, ])
+lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
+lines(x$time, pred_deaths)
+lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
+
+## Now try simulating data with significatn prophomeeffect
+
+wsim2 <- wsim
+wsim2[1] <- 10
+wsim2[10] <- -1
+
+stats2 <- kf_nll_suff_stats(w = wsim2, x = x, pm = param_map)
+
+ysim2 <- sampts(stats2) 
+winit22 <- initialize_estimates(x=x, y=ysim2, wfixed = wfixed)
+
+system.time(fit22 <- tmpf(ysim2, x = x, winit = winit22)) ## should be pretty good fit
+rbind(wsim2, fit22$par, winit22)
+
+
+## 
+dets2 <- kf_nll_details(w=fit22$par, x=x, y=ysim2, betasd = .1, a = 0.9, pm = param_map, fet = NULL)
+
+par(mfrow = c(3, 1))
+qqnorm(dets2$ytilde_k[1, ] / sqrt(dets2$S[1, 1, ]), sub = "Cases")
+abline(0, 1)
+qqnorm(dets2$ytilde_k[2, ] / sqrt(dets2$S[2, 2, ]), sub = "Hospitalizations")
+abline(0, 1)
+qqnorm(dets2$ytilde_k[3, ] / sqrt(dets2$S[3, 3, ]), sub = "Deaths")
+abline(0, 1)
+
+rho_t <- detect_frac(365.25 * (x$time - 2020.164))
+plot(x$time, ysim2$cases, xlab = "Time", ylab = "Cases")
+pred_cases <- dets2$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
+est_cases <- dets2$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
+se_cases <- sqrt(dets2$S[1, 1, ])
+lines(x$time, se_cases * 2 + pred_cases, col = "grey")
+lines(x$time, pred_cases)
+lines(x$time, est_cases, lty = 2)
+lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
+
+plot(x$time, ysim2$hospitalizations, xlab = "Time",
+     ylab = "Hospitalizations")
+pred_hosps <- dets2$xhat_kkmo["Hnew", ]
+se_hosps <- sqrt(dets2$S[2, 2, ])
+lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
+lines(x$time, pred_hosps)
+lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
+
+plot(x$time, ysim2$deaths, xlab = "Time",
+     ylab = "Deaths")
+pred_deaths <- dets2$xhat_kkmo["Drep", ]
+se_deaths <- sqrt(dets2$S[3, 3, ])
 lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")

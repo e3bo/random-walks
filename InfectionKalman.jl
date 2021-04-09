@@ -156,7 +156,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = exp(bvec[i] + cov.doses[i] * doseeffect + cov.prophome[i] * prophomeeffect)
+        β = min(exp(bvec[i] + cov.doses[i] * doseeffect + cov.prophome[i] * prophomeeffect), 4 * γ) 
         xlast[4] = 0
         xlast[5] = 0
         xlast[8] = 0

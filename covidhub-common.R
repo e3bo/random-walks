@@ -577,14 +577,20 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   
   l <- round(365.25 / wfixed["gamma"])
   Rt <- lead(y$cases / rhot + y$hospitalizations, n = l) / (y$cases / rhot + y$hospitalizations)
-  Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 21) # how is this handling edge effects, assuming zeroes?
+  m <- 10
+  Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 2 * m  + 1) # edge effects seem biased
+  Rtfilt[1:m] <- NA
+  lf <- length(Rtfilt)
+  Rtfilt[(lf - m + 1):lf] <- NA
   
   D0 <- H0init * wfixed["gamma_h"] / wfixed["gamma_d"] * hfp_init
   S0init <- wfixed["N"] - E0init - I0init - H0init - D0
   Sdecrement <- cumsum(lead(y$cases / rhot + y$hospitalizations, n = l))
   St <- S0init - Sdecrement
   betat <- Rtfilt * wfixed["gamma"] * wfixed["N"] / na.omit(St)
-  betat2 <- c(betat, rep(betat[length(betat)], l))
+  betat[1:m] <- betat[m + 1]
+  betat[(lf - m + 1):lf] <- betat[lf - m]
+  betat2 <- c(betat, rep(betat[lf - m], l))
   
   df <- data.frame(logbeta = log(betat2), doses = x$doses, prophome = x$prophome)
   mod <- lm(logbeta~doses + prophome, data = df)
@@ -726,7 +732,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- exp(bvec[i] + doseeffect * doses[i] + prophomeeffect * prophome[i])
+      beta_t <- min(exp(bvec[i] + doseeffect * doses[i] + prophomeeffect * prophome[i]), 4 * gamma)
       par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
       
       JuliaCall::julia_assign("u0", u0)
