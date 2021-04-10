@@ -559,6 +559,7 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
   tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
   wsize <- nrow(y)
+  stopifnot(!wsize %% 7)
   rhot <- detect_frac((x$time - t0) * 365.25)
   
   hfill <- na.fill(y$hospitalizations, "extend")
@@ -602,7 +603,8 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
-  names(binit) <- paste0("b", seq_len(wsize))
+  binit_weekly <- matrix(binit, nrow = 7) %>% colMeans()
+  names(binit_weekly) <- paste0("b", seq_along(binit_weekly))
 
   winit <- c(
     logE0 = log(E0init),
@@ -614,7 +616,7 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
     loghfp = log(hfp_init),
     doseeffect = doseeffect_init,
     prophomeeffect = prophomeeffect_init,
-    binit
+    binit_weekly
   )
   winit
 }
@@ -736,7 +738,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- min(exp(bvec[i] + doseeffect * dosesiqr[i] + prophomeeffect * prophomeiqr[i]), 4 * gamma)
+      beta_t <- min(exp(bvec[(i - 1) %/% 7 + 1] + doseeffect * dosesiqr[i] + prophomeeffect * prophomeiqr[i]), 4 * gamma)
       par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
       
       JuliaCall::julia_assign("u0", u0)
@@ -798,7 +800,7 @@ kfnll <-
     }
     
     rwlik <- 0
-    for (i in 1:(T - 1)){
+    for (i in 1:((T %/% 7) - 1)){
       step <- bvec[i + 1] - bvec[i]
       rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
     }
