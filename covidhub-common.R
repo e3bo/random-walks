@@ -343,12 +343,13 @@ param_map <- function(x, w, fixed = wfixed){
   ret$logchp <- w[6]
   ret$loghfp <- w[7]
   ret$loggammahd <- log(fixed["gamma_h"])
-  ret$doseeffect <- w[8]
+  ret$noiseeffect <- w[8]
   ret$prophomeeffect <- w[9]
   ret$bvec <- w[seq(10, length(w))]
   ret$times <- x$time
   ret$dosesiqr <- x$dosesiqr
   ret$prophomeiqr <- x$prophomeiqr
+  ret$betanoise <- x$betanoise
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
@@ -376,7 +377,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$doseeffect,
+        p$noiseeffect,
         p$prophomeeffect,
         p$bvec
       )
@@ -440,7 +441,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$doseeffect,
+        p$noiseeffect,
         p$prophomeeffect,
         p$bvec
       )
@@ -503,7 +504,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$doseeffect,
+        p$noiseeffect,
         p$prophomeeffect,
         p$bvec
       )
@@ -562,7 +563,7 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   stopifnot(!wsize %% 7)
   rhot <- detect_frac((x$time - t0) * 365.25)
   
-  hfill <- na.fill(y$hospitalizations, "extend")
+  hfill <- zoo::na.fill(y$hospitalizations, "extend")
   est_true_cases_hosps <- (y$cases - hfill) / rhot + hfill
   Iest <- est_true_cases_hosps / (wfixed["gamma"] * dt)
   
@@ -598,9 +599,10 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   betat2 <- c(betat, rep(betat[lf - m], l))
   
   df <- data.frame(logbeta = log(betat2), dosesiqr = x$dosesiqr, prophomeiqr = x$prophomeiqr)
-  mod <- lm(logbeta~dosesiqr + prophomeiqr, data = df)
+  mod <- lm(logbeta~ prophomeiqr, data = df)
   print(summary(mod))
-  doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
+  #doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
+  noiseeffect_init <- sd(residuals(mod))
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
   binit_weekly <- matrix(binit, nrow = 7) %>% colMeans()
@@ -614,7 +616,7 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
     logtaud = log(tau_deaths_init),
     logchp = log(chp_init),
     loghfp = log(hfp_init),
-    doseeffect = doseeffect_init,
+    noiseeffect = noiseeffect_init,
     prophomeeffect = prophomeeffect_init,
     binit_weekly
   )
@@ -633,16 +635,14 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     logchp = p$logchp,
     loghfp = p$loghfp,
     loggammahd = p$loggammahd,
-    doseeffect = p$doseeffect,
+    noiseeffect = p$noiseeffect,
     prophomeeffect = p$prophomeeffect,
     eta = p$eta,
     gamma = p$gamma,
     N = p$N,
     z = y,
     t0 = p$t0,
-    times = p$times,
-    dosesiqr = p$dosesiqr,
-    prophomeiqr = p$prophomeiqr,
+    cov = x,
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases_deaths = "weekly",
@@ -663,16 +663,14 @@ kfnll <-
            logchp,
            loghfp,
            loggammahd,
-           doseeffect,
+           noiseeffect,
            prophomeeffect,
            eta,
            gamma,
            N,
            z,
            t0,
-           times,
-           dosesiqr,
-           prophomeiqr,
+           cov, 
            Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases_deaths = "daily",
@@ -738,7 +736,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- min(exp(bvec[(i - 1) %/% 7 + 1] + doseeffect * dosesiqr[i] + prophomeeffect * prophomeiqr[i]), 4 * gamma)
+      beta_t <- min(exp(bvec[(i - 1) %/% 7 + 1] + cov$betanoise[i] * noiseeffect + prophomeeffect * cov$prophomeiqr[i]), 4 * gamma)
       par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
       
       JuliaCall::julia_assign("u0", u0)
@@ -757,8 +755,8 @@ kfnll <-
       }
       
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
-        H(x$time[i]) %*% xhat_kkmo[, i, drop = FALSE]     
-      S[, , i] <- H(x$time[i]) %*% P_kkmo[, , i] %*% t(H(x$time[i])) + R
+        H(cov$time[i]) %*% xhat_kkmo[, i, drop = FALSE]     
+      S[, , i] <- H(cov$time[i]) %*% P_kkmo[, , i] %*% t(H(cov$time[i])) + R
       
       for (j in 1:dobs){
         if (is.na(z[i,j])){
@@ -777,7 +775,7 @@ kfnll <-
         }
         S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
       }
-      K[, , i] <- P_kkmo[, , i] %*% t(H(x$time[i])) %*% solve(S[, , i])
+      K[, , i] <- P_kkmo[, , i] %*% t(H(cov$time[i])) %*% solve(S[, , i])
       desel <- is_z_na[i, ]
       K[, desel, i] <- 0
       
@@ -787,7 +785,7 @@ kfnll <-
       
       xhat_kk[xhat_kk[, i] < 0, i] <- 1e-4
       P_kk[, , i] <-
-        (diag(dstate) - K[, , i] %*% H(x$time[i])) %*% P_kkmo[, , i]
+        (diag(dstate) - K[, , i] %*% H(cov$time[i])) %*% P_kkmo[, , i]
       
       for (j in 1:dstate){
         if (P_kk[j,j,i] < 0){
@@ -796,7 +794,7 @@ kfnll <-
         }
       }
       ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
-        H(x$time[i]) %*% xhat_kk[, i, drop = FALSE]
+        H(cov$time[i]) %*% xhat_kk[, i, drop = FALSE]
     }
     
     rwlik <- 0
@@ -902,7 +900,6 @@ kfnll <-
         sim_means = sim_means,
         sim_cov = sim_cov,
         bvec = bvec,
-        doseeffect = doseeffect,
         gamma = gamma,
         rdiagadj = rdiagadj
       )

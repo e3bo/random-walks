@@ -124,9 +124,8 @@ y <- wind %>% select(cases, hospitalizations, deaths)
 x <- wind %>% select(time, doses, prophome)
 x$dosesiqr <- x$doses /  diff(quantile(x$doses, c(.25, .75)))
 x$prophomeiqr <- (x$prophome - mean(x$prophome)) / diff(quantile(x$prophome, c(.25, .75)))
-x$dosesiqr <- rnorm(x$doses) # colinear with prophome in this case, so let's ignore
-
-
+set.seed(1)
+x$betanoise <- rnorm(n = nrow(x))
 
 winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
@@ -136,7 +135,7 @@ fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.01,
+  betasd = 0.1,
   epsilon = 1e-1,
   max_iterations = 100,
   a = .9,
@@ -146,14 +145,14 @@ fit <- lbfgs::lbfgs(
   invisible = 0
 )
 
-system.time(h <- calc_kf_hess(w=fit$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
+system.time(h <- calc_kf_hess(w=fit$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
 rbind(winit, fit$par, diag(solve(h)))
 
 fit2 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.01,
+  betasd = 0.1,
   epsilon = 1e-2,
   max_iterations = 100,
   a = .9,
@@ -163,13 +162,14 @@ fit2 <- lbfgs::lbfgs(
   invisible = 0
 )
 
-rbind(winit, fit$par, fit2$par)
+system.time(h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
+rbind(winit, fit$par, fit2$par, diag(solve(h2)))
 
 fit3 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.01,
+  betasd = 0.1,
   epsilon = 1e-3,
   max_iterations = 100,
   a = .9,
@@ -179,14 +179,14 @@ fit3 <- lbfgs::lbfgs(
   invisible = 0
 )
 
-system.time(h3 <- calc_kf_hess(w=fit3$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
+system.time(h3 <- calc_kf_hess(w=fit3$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
 rbind(winit, fit$par, fit2$par, fit3$par, diag(solve(h3)))
 
 fit4 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.01,
+  betasd = 0.1,
   epsilon = 1e-4,
   max_iterations = 100,
   a = .9,
@@ -196,105 +196,17 @@ fit4 <- lbfgs::lbfgs(
   invisible = 0
 )
 
-system.time(h4 <- calc_kf_hess(w=fit4$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
+system.time(h4 <- calc_kf_hess(w=fit4$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
 rbind(winit, fit$par, fit2$par, fit3$par, fit4$par, diag(solve(h4)))
 
-fit5 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x,
-  betasd = 0.001,
-  epsilon = 1e-5,
-  max_iterations = 400,
-  a = .9,
-  y = y,
-  pm = param_map,
-  fit4$par,
-  invisible = 0
-)
 
-system.time(h5 <- calc_kf_hess(w=fit5$par, x=x, y=y, betasd=0.001, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, fit3$par, fit4$par, fit5$par, diag(solve(h5)))
-
-
-fit_over_betagrid <- function(a, betasdgrid) {
-  fits <- list()
-  fits[[1]] <- lbfgs::lbfgs(
-    calc_kf_nll,
-    calc_kf_grad,
-    x = x,
-    betasd = betasdgrid[1],
-    epsilon = 1e-1,
-    max_iterations = 2,
-    a = a,
-    y = y[, ],
-    pm = param_map,
-    winit,
-    invisible = 0,
-    orthantwise_c = 0,
-    orthantwise_start = 10,
-    orthantwise_end = 10
-  )
-  for (i in seq(2, length(betasdgrid))) {
-    fits[[i]] <- lbfgs::lbfgs(
-      calc_kf_nll,
-      calc_kf_grad,
-      x = x,
-      betasd = betasdgrid[i],
-      epsilon = 1e-4,
-      max_iterations = 20,
-      a = a,
-      y = y[, ],
-      pm = param_map,
-      fits[[i - 1]]$par,
-      invisible = 0,
-      orthantwise_c = 0,
-      orthantwise_start = 10,
-      orthantwise_end = 10
-    )
-  }
-  return(fits)
-}
-
-betasdgrid <- seq(0.001, 0.1, len = 10)
-agrid <- c(0.94, 0.95)
-
-fits <- map(agrid, fit_over_betagrid, betasdgrid = betasdgrid)
 tictoc::toc()
 
-ti <- max(wind$target_end_date) + lubridate::ddays(1)
-fdtw <- lubridate::wday(forecast_date)
-if (fdtw > 2){
-  extra <- 7 - fdtw ## extra days to ensure we simulate up to the end of the 4 week ahead target
-} else {
-  extra <- 0
-}
-tf <- lubridate::ymd(forecast_date) + lubridate::ddays(28 + extra)
-target_end_dates <- seq(from = ti, to = tf, by = "day")
-
-target_end_times <- lubridate::decimal_date(target_end_dates)
-target_wday <- lubridate::wday(target_end_dates)
-
-fet <- tibble(target_end_times, target_wday, target_end_dates)
-
-fit_dir <-
-  file.path(
-    "fits",
-    paste0(
-      forecast_date,
-      "-fips",
-      forecast_loc))
-
-if (!dir.exists(fit_dir))
-  dir.create(fit_dir, recursive = TRUE)
-
-the_file <- file.path(fit_dir, "fit.RData")
-save(x, y, wfixed, fits, fet, agrid, betasdgrid, file = the_file)
 
 ## 
 
 
-dets <- kf_nll_details(w=fit5$par, x=x, y=y, betasd = .001, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit4$par, x=x, y=y, betasd = .1, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -330,7 +242,43 @@ lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
 
-plot(exp(fit5$par[-c(1:9)] + fit5$par[8] * x$dosesiqr + fit5$par[9] * x$prophomeiqr) / wfixed["gamma"], type = 'l')
-lines(exp(fit5$par[-c(1:9)] + fit5$par[8] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"], col = 2)
-lines(exp(fit$par[-c(1:9)] + 0 * x$dosesiqr + fit5$par[9] * x$prophomeiqr) / wfixed["gamma"], col = 3)
+par(mfrow = c(1, 1))
+plot(
+  x$time,
+  exp(fit4$par[-c(1:9)] + fit4$par[8] * x$betanoise + fit4$par[9] * x$prophomeiqr) / wfixed["gamma"],
+  type = 'l',
+  xlab = "Time",
+  ylab = expression(R[t])
+)
+legend(
+  "topleft",
+  col = c(1, "orange", "blue"),
+  lty = 1,
+  legend = c(
+    "MLE estimate",
+    "MLE - (effect of mobility)",
+    "MLE - (effect of heterogeneity)"
+  )
+)
+lines(x$time,
+      exp(fit4$par[-c(1:9)] + fit4$par[8] * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
+      col = "orange")
+lines(x$time,
+      exp(fit4$par[-c(1:9)] + 0 * x$betanoise + fit4$par[9] * x$prophomeiqr) / wfixed["gamma"],
+      col = "blue")
+
+par(mfrow = c(2, 1))
+plot(x$time, fit4$par[9] * x$prophomeiqr, xlab = "Time", 
+     ylab = expression(paste("Effect of mobility on ", log(beta[t]))))
+plot(x$time, fit4$par[8] * x$betanoise, 
+     xlab = "Time",
+     ylab = expression(paste("Effect of heterogeneity on ", log(beta[t]))))
+
+plot.new()
+est_tab <- rbind(initial = winit, MLE = fit4$par, var = diag(solve(h4))) %>% signif(3)
+gridExtra::grid.table(est_tab[, 1:9])
+
+plot.new()
+gridExtra::grid.table(est_tab[, 9+1:9])
+
 
