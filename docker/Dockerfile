@@ -69,16 +69,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
         subversion
 
-RUN install2.r --skipinstalled --error \
-ggforce \
-JuliaCall \
-KScorrect \
-lbfgs \
-lme4 \
-padr \
-tictoc \
-verification
-
 WORKDIR /opt
 RUN wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.3-linux-x86_64.tar.gz
 RUN tar zxvf julia-1.5.3-linux-x86_64.tar.gz
@@ -87,8 +77,26 @@ USER rstudio
 RUN /opt/julia-1.5.3/bin/julia -e 'using Pkg; Pkg.add(name = "MbedTLS", version = "0.7.0"); Pkg.add.(["CSVFiles", "DataFrames", "Distributions", "ForwardDiff", "LinearAlgebra", "Optim"])'
 USER root
 WORKDIR ${RUNNER_PATH}
-RUN apt-get update && apt-get install --only-upgrade dvc
+
+RUN apt remove -y dvc && wget \
+       https://dvc.org/deb/dvc.list \
+       -O /etc/apt/sources.list.d/dvc.list && \
+    wget -qO - https://dvc.org/deb/iterative.asc | sudo apt-key add - && \
+    apt update && apt install dvc
+
 RUN installGithub.r reichlab/zoltr epiforecasts/scoringutils reichlab/covidHubUtils
 RUN installGithub.r e3bo/epidatr@1caf68c94a38c1775242f252fdc4288fbb777e87 && \
     installGithub.r cmu-delphi/covidcast/R-packages/covidcast@5d2e96eb987703de326554f9cf1dabcd6ff5885a
+
+RUN install2.r --skipinstalled --error \
+ggforce \
+JuliaCall \
+KScorrect \
+lbfgs \
+lme4 \
+mvtnorm \
+padr \
+signal \
+tictoc \
+verification
 
