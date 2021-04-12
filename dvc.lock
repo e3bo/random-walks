@@ -2224,3 +2224,65 @@ visualize-forecast-2021-04-05-and-data-2021-04-05:
     md5: cd432bcdf7acadbba44497ffd3f1fe40
   - path: visuals/fdt2021-04-05-ddt2021-04-05-inc-death-forecasts.png
     md5: 96ba30fec592d7a3c394fc84cab317a5
+hopkins-2021-04-12:
+  cmd: fdt=2021-04-12 ./pull-hopkins-ts-from-date.R
+  deps:
+  - path: pull-hopkins-ts-from-date.R
+    md5: d350b3ca9b344dea811f07232d0ec8d8
+  outs:
+  - path: hopkins/2021-04-12
+    md5: b2134e0b32e4f54d5091630146816c76.dir
+forecast-2021-04-12:
+  cmd: fdt=2021-04-12 Rscript forecast-package-covidhub-forecast.R
+  deps:
+  - path: covidhub-common.R
+    md5: 1f55c954eadf100d55b57cabf1cf6403
+  - path: forecast-package-covidhub-forecast.R
+    md5: 335f9d16ef43206dbf928be515e11480
+  - path: hopkins/2021-04-12
+    md5: b2134e0b32e4f54d5091630146816c76.dir
+  - path: model.ini
+    md5: 3fdf49b0ef1f5242fd059e6e11f64034
+  outs:
+  - path: forecasts/2021-04-12-CEID-Walk.csv
+    md5: ff7c7bb2dcc38981525e72bf272138c8
+  - path: metrics/2021-04-12-forecast-calc-time.json
+    md5: ba1c9d1f9d332875338121bef0bf96ce
+score-2021-04-12:
+  cmd: ddt=2021-04-12 ./quantile-score.R
+  deps:
+  - path: covidhub-common.R
+    md5: 1f55c954eadf100d55b57cabf1cf6403
+  - path: forecasts
+    md5: 6440f718630503ca2ac8470f7e948f7b.dir
+  - path: hopkins/2021-04-12
+    md5: b2134e0b32e4f54d5091630146816c76.dir
+  - path: quantile-score.R
+    md5: 77eda0648caa45d816d5725ec07ae05b
+  outs:
+  - path: metrics/2021-04-12-residuals.rds
+    md5: 81b18d48fffd3193bc1adedd423fea66
+  - path: metrics/2021-04-12-score-by-loc-type-targ-type-forecast-date.csv
+    md5: 91785e531a619d4bbda9f6fe6b4f9929
+  - path: metrics/2021-04-12-score-by-loc-type-targ-type.csv
+    md5: 599f756a26b4bc3824abc227cb0dc7ba
+  - path: metrics/2021-04-12-score-by-loc-type.csv
+    md5: b79880c6451b9bc27f71808ad3b776cb
+visualize-forecast-2021-04-12-and-data-2021-04-12:
+  cmd: ddt=2021-04-12 fdt=2021-04-12 ./forecast-vis.R
+  deps:
+  - path: covidhub-common.R
+    md5: 1f55c954eadf100d55b57cabf1cf6403
+  - path: forecast-vis.R
+    md5: 0ae631494af9e58254c85498876fc0eb
+  - path: forecasts/2021-04-12-CEID-Walk.csv
+    md5: ff7c7bb2dcc38981525e72bf272138c8
+  - path: hopkins/2021-04-12
+    md5: b2134e0b32e4f54d5091630146816c76.dir
+  outs:
+  - path: visuals/fdt2021-04-12-ddt2021-04-12-cum-death-forecasts.png
+    md5: 352f2fdb8965230e5aeab68b0487988d
+  - path: visuals/fdt2021-04-12-ddt2021-04-12-inc-case-forecasts.pdf
+    md5: 0368b627c11a0ddd71ad810304ef7e39
+  - path: visuals/fdt2021-04-12-ddt2021-04-12-inc-death-forecasts.png
+    md5: 185ee70281a72f7355b47f6eb7024a8f
