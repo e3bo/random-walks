@@ -105,7 +105,7 @@ if (file.exists(vacc_path)) {
 }
 
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
-wind <- obs_data %>% slice(370:n())
+wind <- obs_data %>% slice(314:n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
@@ -135,7 +135,7 @@ fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.1,
+  betasd = 0.01,
   epsilon = 1e-1,
   max_iterations = 100,
   a = .9,
@@ -145,14 +145,14 @@ fit <- lbfgs::lbfgs(
   invisible = 0
 )
 
-system.time(h <- calc_kf_hess(w=fit$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
-rbind(winit, fit$par, diag(solve(h)))
+system.time(h <- calc_kf_hess(w=fit$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
+rbind(winit, fit$par, sqrt(diag(solve(h))))
 
 fit2 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.1,
+  betasd = 0.01,
   epsilon = 1e-2,
   max_iterations = 100,
   a = .9,
@@ -162,43 +162,8 @@ fit2 <- lbfgs::lbfgs(
   invisible = 0
 )
 
-system.time(h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, diag(solve(h2)))
-
-fit3 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x,
-  betasd = 0.1,
-  epsilon = 1e-3,
-  max_iterations = 100,
-  a = .9,
-  y = y,
-  pm = param_map,
-  fit2$par,
-  invisible = 0
-)
-
-system.time(h3 <- calc_kf_hess(w=fit3$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, fit3$par, diag(solve(h3)))
-
-fit4 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x,
-  betasd = 0.1,
-  epsilon = 1e-4,
-  max_iterations = 100,
-  a = .9,
-  y = y,
-  pm = param_map,
-  fit3$par,
-  invisible = 0
-)
-
-system.time(h4 <- calc_kf_hess(w=fit4$par, x=x, y=y, betasd=0.1, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, fit3$par, fit4$par, diag(solve(h4)))
-
+system.time(h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
+rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
 
 tictoc::toc()
 
@@ -206,7 +171,7 @@ tictoc::toc()
 ## 
 
 
-dets <- kf_nll_details(w=fit4$par, x=x, y=y, betasd = .1, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit2$par, x=x, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -242,10 +207,12 @@ lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
 
+
+
 par(mfrow = c(1, 1))
 plot(
   x$time,
-  exp(fit4$par[-c(1:9)] + fit4$par[8] * x$betanoise + fit4$par[9] * x$prophomeiqr) / wfixed["gamma"],
+  exp(fit2$par[-c(1:9)] + fit2$par[8] * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
   type = 'l',
   xlab = "Time",
   ylab = expression(R[t])
@@ -261,10 +228,10 @@ legend(
   )
 )
 lines(x$time,
-      exp(fit4$par[-c(1:9)] + fit4$par[8] * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
+      exp(fit2$par[-c(1:9)] + fit2$par[8] * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
       col = "orange")
 lines(x$time,
-      exp(fit4$par[-c(1:9)] + 0 * x$betanoise + fit4$par[9] * x$prophomeiqr) / wfixed["gamma"],
+      exp(fit2$par[-c(1:9)] + 0 * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
       col = "blue")
 
 par(mfrow = c(2, 1))
@@ -275,10 +242,10 @@ plot(x$time, fit4$par[8] * x$betanoise,
      ylab = expression(paste("Effect of heterogeneity on ", log(beta[t]))))
 
 plot.new()
-est_tab <- rbind(initial = winit, MLE = fit4$par, var = diag(solve(h4))) %>% signif(3)
+est_tab <- rbind(initial = winit, MLE = fit2$par, sd = sqrt(diag(solve(h2)))) %>% signif(3)
 gridExtra::grid.table(est_tab[, 1:9])
 
 plot.new()
-gridExtra::grid.table(est_tab[, 9+1:9])
+gridExtra::grid.table(est_tab[, -c(1:9)])
 
 
