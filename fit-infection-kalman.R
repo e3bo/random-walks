@@ -207,32 +207,34 @@ lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
 
-
-
 par(mfrow = c(1, 1))
 plot(
   x$time,
-  exp(fit2$par[-c(1:9)] + fit2$par[8] * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
+  exp(rep(fit2$par[-c(1:9)], each = 7) + fit2$par[8] * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
   type = 'l',
   xlab = "Time",
   ylab = expression(R[t])
 )
 legend(
-  "topleft",
-  col = c(1, "orange", "blue"),
+  "topright",
+  col = c(1, "orange", "blue", "grey"),
   lty = 1,
   legend = c(
     "MLE estimate",
     "MLE - (effect of mobility)",
-    "MLE - (effect of heterogeneity)"
+    "MLE - (effect of heterogeneity)",
+    "MLE random walk intercept"
   )
 )
 lines(x$time,
-      exp(fit2$par[-c(1:9)] + fit2$par[8] * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
+      exp(rep(fit2$par[-c(1:9)], each = 7) + fit2$par[8] * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
       col = "orange")
 lines(x$time,
-      exp(fit2$par[-c(1:9)] + 0 * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
+      exp(rep(fit2$par[-c(1:9)], each = 7) + 0 * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
       col = "blue")
+lines(x$time,
+      exp(rep(fit2$par[-c(1:9)], each = 7) + 0 * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
+      col = "grey")
 
 par(mfrow = c(2, 1))
 plot(x$time, fit4$par[9] * x$prophomeiqr, xlab = "Time", 
