@@ -105,7 +105,7 @@ if (file.exists(vacc_path)) {
 }
 
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
-wind <- obs_data %>% slice(314:n())
+wind <- obs_data %>% slice(293:n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
@@ -114,8 +114,8 @@ wfixed <- c(
   N = N,
   rho1 = 0.4,
   gamma = 365.25 / 4,
-  gamma_h = 365.25 / 1,
-  gamma_d = 365.25 / 1,
+  gamma_h = 365.25 / 5,
+  gamma_d = 365.25 / 5,
   eta = 365.25 / 4,
   t0 = min(wind$time) - 0.00273224
 )
@@ -171,7 +171,7 @@ tictoc::toc()
 ## 
 
 
-dets <- kf_nll_details(w=fit2$par, x=x, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit$par, x=x, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -210,7 +210,7 @@ lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
 par(mfrow = c(1, 1))
 plot(
   x$time,
-  exp(rep(fit2$par[-c(1:9)], each = 7) + fit2$par[8] * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
+  exp(rep(fit2$par[-c(1:9)], each = 28) + fit2$par[8] * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
   type = 'l',
   xlab = "Time",
   ylab = expression(R[t])
@@ -227,19 +227,19 @@ legend(
   )
 )
 lines(x$time,
-      exp(rep(fit2$par[-c(1:9)], each = 7) + fit2$par[8] * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
+      exp(rep(fit2$par[-c(1:9)], each = 28) + fit2$par[8] * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
       col = "orange")
 lines(x$time,
-      exp(rep(fit2$par[-c(1:9)], each = 7) + 0 * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
+      exp(rep(fit2$par[-c(1:9)], each = 28) + 0 * x$betanoise + fit2$par[9] * x$prophomeiqr) / wfixed["gamma"],
       col = "blue")
 lines(x$time,
-      exp(rep(fit2$par[-c(1:9)], each = 7) + 0 * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
+      exp(rep(fit2$par[-c(1:9)], each = 28) + 0 * x$betanoise + 0 * x$prophomeiqr) / wfixed["gamma"],
       col = "grey")
 
 par(mfrow = c(2, 1))
-plot(x$time, fit4$par[9] * x$prophomeiqr, xlab = "Time", 
+plot(x$time, fit2$par[9] * x$prophomeiqr, xlab = "Time", 
      ylab = expression(paste("Effect of mobility on ", log(beta[t]))))
-plot(x$time, fit4$par[8] * x$betanoise, 
+plot(x$time, fit2$par[8] * x$betanoise, 
      xlab = "Time",
      ylab = expression(paste("Effect of heterogeneity on ", log(beta[t]))))
 

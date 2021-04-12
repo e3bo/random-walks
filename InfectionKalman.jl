@@ -139,7 +139,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
 
-    @assert length(bvec) == (nobs ÷ 7) "length of bvec should equal number weeks of observations"
+    @assert length(bvec) == (nobs ÷ 28) "length of bvec should equal number 4-week months of observations"
 
     for i in 1:nobs
         if i == 1
@@ -149,7 +149,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = min(exp(bvec[1 + (i - 1)÷7] + cov.betanoise[i] * noiseeffect + cov.prophomeiqr[i] * prophomeeffect), 4 * γ) 
+        β = min(exp(bvec[1 + (i - 1)÷(28)] + cov.betanoise[i] * noiseeffect + cov.prophomeiqr[i] * prophomeeffect), 4 * γ) 
         xlast[4] = 0
         xlast[5] = 0
         xlast[8] = 0
@@ -218,7 +218,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     
     stepdensity = Normal(0, betasd)
     rwlik = 0
-    for i in 1:((nobs ÷ 7) - 1)
+    for i in 1:((nobs ÷ 28) - 1)
         step = bvec[i + 1] - bvec[i]
         rwlik += logpdf(stepdensity, step)
     end

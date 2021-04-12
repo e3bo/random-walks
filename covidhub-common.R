@@ -560,7 +560,7 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
   tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
   wsize <- nrow(y)
-  stopifnot(!wsize %% 7)
+  stopifnot(!wsize %% 28)
   rhot <- detect_frac((x$time - t0) * 365.25)
   
   hfill <- zoo::na.fill(y$hospitalizations, "extend")
@@ -599,13 +599,13 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
   betat2 <- c(betat, rep(betat[lf - m], l))
   
   df <- data.frame(logbeta = log(betat2), dosesiqr = x$dosesiqr, prophomeiqr = x$prophomeiqr)
-  mod <- lm(logbeta~ prophomeiqr, data = df)
+  mod <- lm(logbeta~ dosesiqr + prophomeiqr, data = df)
   print(summary(mod))
-  #doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
-  noiseeffect_init <- sd(residuals(mod))
+  doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
+  #noiseeffect_init <- sd(residuals(mod))
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
-  binit_weekly <- matrix(binit, nrow = 7) %>% colMeans()
+  binit_weekly <- matrix(binit, nrow = 28) %>% colMeans()
   names(binit_weekly) <- paste0("b", seq_along(binit_weekly))
 
   winit <- c(
@@ -616,7 +616,7 @@ initialize_estimates <- function(x, y, wfixed, t0 = 2020.164, dt = 0.00273224) {
     logtaud = log(tau_deaths_init),
     logchp = log(chp_init),
     loghfp = log(hfp_init),
-    noiseeffect = noiseeffect_init,
+    doseeffect = doseeffect_init,
     prophomeeffect = prophomeeffect_init,
     binit_weekly
   )
@@ -736,7 +736,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- min(exp(bvec[(i - 1) %/% 7 + 1] + cov$betanoise[i] * noiseeffect + prophomeeffect * cov$prophomeiqr[i]), 4 * gamma)
+      beta_t <- min(exp(bvec[(i - 1) %/% 28 + 1] + cov$betanoise[i] * noiseeffect + prophomeeffect * cov$prophomeiqr[i]), 4 * gamma)
       par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
       
       JuliaCall::julia_assign("u0", u0)
@@ -798,7 +798,7 @@ kfnll <-
     }
     
     rwlik <- 0
-    for (i in 1:((T %/% 7) - 1)){
+    for (i in 1:((T %/% 28) - 1)){
       step <- bvec[i + 1] - bvec[i]
       rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
     }
