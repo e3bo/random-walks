@@ -97,7 +97,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         chp = exp(pvar[6])
         hfp = exp(pvar[7])
 
-        noiseeffect = pvar[8]
+        doseeffect = pvar[8]
         prophomeeffect = pvar[9]
 
         bvec = pvar[10:end]
@@ -138,7 +138,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     xkkmo = Array{eltype(bvec)}(undef, dstate, nobs)
     pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
-
+    
     @assert length(bvec) == (nobs ÷ 28) "length of bvec should equal number 4-week months of observations"
 
     for i in 1:nobs
@@ -149,7 +149,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = min(exp(bvec[1 + (i - 1)÷(28)] + cov.betanoise[i] * noiseeffect + cov.prophomeiqr[i] * prophomeeffect), 4 * γ) 
+        β = min(exp(bvec[1 + (i - 1)÷(28)] + cov.dosesiqr[i] * doseeffect + cov.prophomeiqr[i] * prophomeeffect), 4 * γ) 
         xlast[4] = 0
         xlast[5] = 0
         xlast[8] = 0

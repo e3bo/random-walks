@@ -343,7 +343,7 @@ param_map <- function(x, w, fixed = wfixed){
   ret$logchp <- w[6]
   ret$loghfp <- w[7]
   ret$loggammahd <- log(fixed["gamma_h"])
-  ret$noiseeffect <- w[8]
+  ret$doseeffect <- w[8]
   ret$prophomeeffect <- w[9]
   ret$bvec <- w[seq(10, length(w))]
   ret$times <- x$time
@@ -377,7 +377,7 @@ calc_kf_nll <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$noiseeffect,
+        p$doseeffect,
         p$prophomeeffect,
         p$bvec
       )
@@ -441,7 +441,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$noiseeffect,
+        p$doseeffect,
         p$prophomeeffect,
         p$bvec
       )
@@ -504,7 +504,7 @@ calc_kf_hess <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$logchp,
         p$loghfp,
-        p$noiseeffect,
+        p$doseeffect,
         p$prophomeeffect,
         p$bvec
       )
@@ -635,7 +635,7 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     logchp = p$logchp,
     loghfp = p$loghfp,
     loggammahd = p$loggammahd,
-    noiseeffect = p$noiseeffect,
+    doseeffect = p$doseeffect,
     prophomeeffect = p$prophomeeffect,
     eta = p$eta,
     gamma = p$gamma,
@@ -663,7 +663,7 @@ kfnll <-
            logchp,
            loghfp,
            loggammahd,
-           noiseeffect,
+           doseeffect,
            prophomeeffect,
            eta,
            gamma,
@@ -736,7 +736,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- min(exp(bvec[(i - 1) %/% 28 + 1] + cov$betanoise[i] * noiseeffect + prophomeeffect * cov$prophomeiqr[i]), 4 * gamma)
+      beta_t <- min(exp(bvec[(i - 1) %/% 28 + 1] + cov$dosesiqr[i] * doseeffect + prophomeeffect * cov$prophomeiqr[i]), 4 * gamma)
       par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), exp(loghfp))
       
       JuliaCall::julia_assign("u0", u0)
