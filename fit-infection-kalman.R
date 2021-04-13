@@ -165,22 +165,6 @@ fit2 <- lbfgs::lbfgs(
 system.time(h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
 rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
 
-fit3 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x,
-  betasd = 0.01,
-  epsilon = 1e-3,
-  max_iterations = 2160,
-  a = .9,
-  y = y,
-  pm = param_map,
-  fit$par,
-  invisible = 0
-)
-
-system.time(h3 <- calc_kf_hess(w=fit3$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, fit3$par, sqrt(diag(solve(h2))))
 
 tictoc::toc()
 
@@ -188,7 +172,7 @@ tictoc::toc()
 ## 
 
 
-dets <- kf_nll_details(w=fit3$par, x=x, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit2$par, x=x, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -224,34 +208,50 @@ lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
 lines(x$time, pred_deaths)
 lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
 
-par(mfrow = c(1, 1))
-plot(
-  x$time,
-  exp(rep(fit3$par[-c(1:9)], each = 28) + fit3$par[8] * x$dosesiqr + fit3$par[9] * x$prophomeiqr) / wfixed["gamma"],
-  type = 'l',
-  xlab = "Time",
-  ylab = expression(R[t])
-)
-legend(
-  "topright",
-  col = c(1, "orange", "blue", "grey"),
-  lty = 1,
-  legend = c(
-    "MLE estimate",
-    "MLE - (effect of mobility)",
-    "MLE - (effect of vaccine)",
-    "MLE random walk intercept"
+make_rt_plot <- function(ft, x) {
+  par(mfrow = c(1, 1))
+  plot(
+    x$time,
+    exp(
+      rep(ft$par[-c(1:9)], each = 28) + ft$par[8] * x$dosesiqr + ft$par[9] * x$prophomeiqr
+    ) / wfixed["gamma"],
+    type = 'l',
+    xlab = "Time",
+    ylab = expression(R[t])
   )
-)
-lines(x$time,
-      exp(rep(fit3$par[-c(1:9)], each = 28) + fit3$par[8] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
-      col = "orange")
-lines(x$time,
-      exp(rep(fit3$par[-c(1:9)], each = 28) + 0 * x$dosesiqr + fit3$par[9] * x$prophomeiqr) / wfixed["gamma"],
-      col = "blue")
-lines(x$time,
-      exp(rep(fit3$par[-c(1:9)], each = 28) + 0 * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
-      col = "grey")
+  legend(
+    "topright",
+    col = c(1, "orange", "blue", "grey"),
+    lty = 1,
+    legend = c(
+      "MLE estimate",
+      "MLE - (effect of mobility)",
+      "MLE - (effect of vaccine)",
+      "MLE random walk intercept"
+    )
+  )
+  lines(x$time,
+        exp(rep(ft$par[-c(1:9)], each = 28) + ft$par[8] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
+        col = "orange")
+  lines(x$time,
+        exp(rep(ft$par[-c(1:9)], each = 28) + 0 * x$dosesiqr + ft$par[9] * x$prophomeiqr) / wfixed["gamma"],
+        col = "blue")
+  lines(x$time,
+        exp(rep(ft$par[-c(1:9)], each = 28) + 0 * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
+        col = "grey")
+}
+
+make_rt_plot(fit2, x)
+
+rho_t <- detect_frac(365.25 * (x$time - 2020.164))
+plot(x$time, y$cases, xlab = "Time", ylab = "Cases", xlim = c(2020.6, 2020.8), ylim = c(0, 2200))
+pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
+est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
+se_cases <- sqrt(dets$S[1, 1, ])
+lines(x$time, se_cases * 2 + pred_cases, col = "grey")
+lines(x$time, pred_cases)
+lines(x$time, est_cases, lty = 2)
+lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
 
 par(mfrow = c(2, 1))
 plot(x$time, fit2$par[9] * x$prophomeiqr, xlab = "Time", 
@@ -261,10 +261,8 @@ plot(x$time, fit2$par[8] * x$betanoise,
      ylab = expression(paste("Effect of heterogeneity on ", log(beta[t]))))
 
 plot.new()
-est_tab <- rbind(initial = winit, MLE = fit3$par, sd = sqrt(diag(solve(h3)))) %>% signif(3)
+est_tab <- rbind(initial = winit, MLE = fit2$par, sd = sqrt(diag(solve(h2)))) %>% signif(3)
 gridExtra::grid.table(est_tab[, 1:9])
 
 plot.new()
 gridExtra::grid.table(est_tab[, -c(1:9)])
-
-
