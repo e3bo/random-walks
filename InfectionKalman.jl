@@ -12,14 +12,8 @@ export obj
 export grad
 export vectorfield
 
-function detect_frac(t; max_detect_par::Float64 = 0.4, detect_inc_rate::Float64 = 1.1, half_detect::Float64 = 30., base_detect_frac::Float64 = 0.1)
-    rho =  max_detect_par * (t ^ detect_inc_rate)  / ((half_detect ^ detect_inc_rate) + (t ^ detect_inc_rate)) + base_detect_frac
-    return rho
-end
-
-function hmat(t; t0 = 2020.164)
-    day = (t - t0) * 365.25
-    H =  [0 0 0 detect_frac(day) 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1] 
+function hmat(rhot)
+    H =  [0 0 0 rhot 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1] 
     return H
 end
 
@@ -95,12 +89,11 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         τd = exp(pvar[5])
     
         chp = exp(pvar[6])
-        hfp = exp(pvar[7])
-
-        doseeffect = pvar[8]
-        prophomeeffect = pvar[9]
-
-        bvec = pvar[10:end]
+        doseeffect = pvar[7]
+        prophomeeffect = pvar[8]
+        
+        hfpvec = [exp(p) for p in pvar[9:10]]
+        bvec = pvar[11:end]
     elseif size(z, 2) == 1 && "cases" in names(z)
         l0 = exp(pvar[1])
         τc = exp(pvar[2])
@@ -113,7 +106,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
-    d0 = h0 * γh / γd * hfp
+    d0 = h0 * γh / γd * hfpvec[1]
     
     y0 = l0 * η / γ
     
@@ -159,6 +152,11 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         plast[:,5] .= 0
         plast[8,:] .= 0
         plast[:,8] .= 0
+        if cov.time[i] < 2020.47
+            hfp = hfpvec[1]
+        else
+            hfp = hfpvec[2]
+        end
         par = [β, N,  ι, η, γ, γd, γh, chp, hfp]
         xplast = hcat(xlast, plast)
         prob = ODEProblem(vectorfield, xplast, (0.0, dt), par)
@@ -179,7 +177,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         end
         pkkmo[:,:,i] .= pnext
         
-        Σ[:,:,i] = hmat(cov.time[i]) * pkkmo[:,:,i] * hmat(cov.time[i])' + r
+        Σ[:,:,i] = hmat(cov.rhot[i]) * pkkmo[:,:,i] * hmat(cov.rhot[i])' + r
 
         for j in 1:dobs
             if zmiss[i,j]
@@ -188,7 +186,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
                 zz[j] = zloc[i,j]
             end
         end       
-        ytkkmo[:,i] = zz - hmat(cov.time[i]) * reshape(xkkmo[:,i], dstate, 1)
+        ytkkmo[:,i] = zz - hmat(cov.rhot[i]) * reshape(xkkmo[:,i], dstate, 1)
         for j in 1:dobs
             if zmiss[i, j]
                 zscore = 0
@@ -206,14 +204,14 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             end
             Σ[j,j,i] += rdiagadj[j,i]
         end
-        k[:,:,i] = pkkmo[:,:,i] * hmat(cov.time[i])' / Σ[:,:,i]
+        k[:,:,i] = pkkmo[:,:,i] * hmat(cov.rhot[i])' / Σ[:,:,i]
         for j in 1:dobs
             if zmiss[i,j]
                 k[:, j ,i] .= 0
             end
         end
         xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(cov.time[i])) * pkkmo[:,:,i]
+        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(cov.rhot[i])) * pkkmo[:,:,i]
     end
     
     stepdensity = Normal(0, betasd)

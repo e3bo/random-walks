@@ -105,36 +105,50 @@ if (file.exists(vacc_path)) {
 }
 
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
-wind <- obs_data %>% slice(153:n())
+wind <- obs_data %>% slice(41:n())
 wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
 
 wfixed <- c(
   N = N,
-  rho1 = 0.4,
   gamma = 365.25 / 4,
   gamma_h = 365.25 / 5,
   gamma_d = 365.25 / 5,
-  eta = 365.25 / 4,
-  t0 = min(wind$time) - 0.00273224
+  eta = 365.25 / 4
 )
 
 y <- wind %>% select(cases, hospitalizations, deaths)
 x <- wind %>% select(time, doses, prophome)
-x$dosesiqr <- x$doses /  diff(quantile(x$doses, c(.25, .75)))
+x$dosesiqr <- x$doses /  diff(quantile(x$doses[x$doses > 0], c(.25, .75)))
 x$prophomeiqr <- (x$prophome - mean(x$prophome)) / diff(quantile(x$prophome, c(.25, .75)))
 set.seed(1)
-x$betanoise <- rnorm(n = nrow(x))
 
-winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
+# estimate the probability that a case is reported assuming that all deaths are reported
+cvd <- data.frame(time = x$time, r = y$cases / lead(y$deaths, 10)) %>% 
+  mutate(logr = log(r)) %>% filter(is.finite(logr)) %>% filter(time < 2020.47)
+mars <- earth::earth(logr~time, data = cvd)
+#plot(logr ~ time, data = cvd)
+#lines(cvd$time, predict(mars))
+cvd$rhat <- exp(predict(mars)) %>% as.numeric()
+right <- cvd %>% select("time", "rhat")
+
+x2 <- left_join(x, right, by = "time") %>% 
+  mutate(rhat2 = zoo::na.fill(rhat, "extend"),
+         rhot = rhat2 / (2 *rhat2[n()]))
+
+
+#pdf <- data.frame(date = wind$target_end_date, p = x2$rhat3)
+#ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
+
+winit <- initialize_estimates(x = x2, y = y, wfixed = wfixed)
 
 tictoc::tic("optimization")
 
-fit <- lbfgs::lbfgs(
+system.time(fit <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
-  x = x,
+  x = x2,
   betasd = 0.01,
   epsilon = 1e-1,
   max_iterations = 10,
@@ -143,27 +157,44 @@ fit <- lbfgs::lbfgs(
   pm = param_map,
   winit,
   invisible = 0
-)
+))
 
-system.time(h <- calc_kf_hess(w=fit$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
+system.time(h <- calc_kf_hess(w=fit$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
 rbind(winit, fit$par, sqrt(diag(solve(h))))
 
 fit2 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
-  x = x,
+  x = x2,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 2160,
-  a = .9,
+  max_iterations = 90,
+  a = 0.9,
   y = y,
   pm = param_map,
   fit$par,
   invisible = 0
 )
 
-system.time(h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=0.01, a =.1, pm = param_map))
+system.time(h2 <- calc_kf_hess(w=fit2$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
 rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
+
+fit3 <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x2,
+  betasd = 0.01,
+  epsilon = 1e-3,
+  max_iterations = 600,
+  a = 0.9,
+  y = y,
+  pm = param_map,
+  fit2$par,
+  invisible = 0
+)
+
+system.time(h3 <- calc_kf_hess(w=fit3$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
+rbind(winit, fit$par, fit2$par, fit3$par, sqrt(diag(solve(h3))))
 
 
 tictoc::toc()
@@ -172,7 +203,7 @@ tictoc::toc()
 ## 
 
 
-dets <- kf_nll_details(w=fit2$par, x=x, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit2$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -182,7 +213,7 @@ abline(0, 1)
 qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
 abline(0, 1)
 
-rho_t <- detect_frac(365.25 * (x$time - 2020.164))
+rho_t <- x2$rhot
 plot(x$time, y$cases, xlab = "Time", ylab = "Cases")
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
@@ -241,9 +272,9 @@ make_rt_plot <- function(ft, x) {
         col = "grey")
 }
 
-make_rt_plot(fit2, x)
+make_rt_plot(fit3, x)
 
-rho_t <- detect_frac(365.25 * (x$time - 2020.164))
+rho_t <- detect_frac(365.25 * (x$time - 2020.2))
 plot(x$time, y$cases, xlab = "Time", ylab = "Cases", xlim = c(2020.6, 2020.8), ylim = c(0, 2200))
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
