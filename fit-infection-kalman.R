@@ -187,7 +187,7 @@ fit3 <- lbfgs::lbfgs(
   x = x2,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 600,
+  max_iterations = 20,
   a = 0.9,
   y = y,
   pm = param_map,
@@ -198,6 +198,35 @@ fit3 <- lbfgs::lbfgs(
 system.time(h3 <- calc_kf_hess(w=fit3$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
 rbind(winit, fit$par, fit2$par, fit3$par, sqrt(diag(solve(h3))))
 
+fit4 <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x2,
+  betasd = 0.01,
+  epsilon = 1e-3,
+  max_iterations = 20,
+  a = 0.9,
+  y = y,
+  pm = param_map,
+  fit3$par,
+  invisible = 0
+)
+
+fit5 <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x2,
+  betasd = 0.01,
+  epsilon = 1e-3,
+  max_iterations = 100,
+  a = 0.9,
+  y = y,
+  pm = param_map,
+  fit4$par,
+  invisible = 0
+)
+
+
 
 tictoc::toc()
 
@@ -205,7 +234,7 @@ tictoc::toc()
 ## 
 
 
-dets <- kf_nll_details(w=fit$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit5$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -246,7 +275,7 @@ make_rt_plot <- function(ft, x) {
   plot(
     x$time,
     exp(
-      rep(ft$par[-c(1:10)], each = 28) + ft$par[7] * x$dosesiqr + ft$par[8] * x$prophomeiqr
+      ft$par[-c(1:10)][x$bvecmap] + ft$par[7] * x$dosesiqr + ft$par[8] * x$prophomeiqr
     ) / wfixed["gamma"],
     type = 'l',
     xlab = "Time",
@@ -264,17 +293,17 @@ make_rt_plot <- function(ft, x) {
     )
   )
   lines(x$time,
-        exp(rep(ft$par[-c(1:10)], each = 28) + ft$par[7] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
+        exp(ft$par[-c(1:10)][x$bvecmap]+ ft$par[7] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
         col = "orange")
   lines(x$time,
-        exp(rep(ft$par[-c(1:10)], each = 28) + 0 * x$dosesiqr + ft$par[8] * x$prophomeiqr) / wfixed["gamma"],
+        exp(ft$par[-c(1:10)][x$bvecmap] + 0 * x$dosesiqr + ft$par[8] * x$prophomeiqr) / wfixed["gamma"],
         col = "blue")
   lines(x$time,
-        exp(rep(ft$par[-c(1:10)], each = 28) + 0 * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
+        exp(ft$par[-c(1:10)][x$bvecmap] + 0 * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
         col = "grey")
 }
 
-make_rt_plot(fit3, x)
+make_rt_plot(fit5, x)
 
 rho_t <- detect_frac(365.25 * (x$time - 2020.2))
 plot(x$time, y$cases, xlab = "Time", ylab = "Cases", xlim = c(2020.6, 2020.8), ylim = c(0, 2200))
