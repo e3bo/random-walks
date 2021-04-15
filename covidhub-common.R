@@ -553,7 +553,6 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
   tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
   wsize <- nrow(y)
-  stopifnot(!wsize %% 28)
   rhot <- x$rhot
   
   hfill <- zoo::na.fill(y$hospitalizations, "extend")
@@ -577,7 +576,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   l <- 7 
   Rt <- lead(y$cases / rhot + hfill, n = l) / (y$cases / rhot + hfill)
   m <- 10
-  Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 2 * m  + 1) # edge effects seem biased
+  Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 2 * m  + 1) # edge values seem biased
   Rtfilt[1:m] <- NA
   lf <- length(Rtfilt)
   Rtfilt[(lf - m + 1):lf] <- NA
@@ -598,8 +597,9 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
-  binit_monthly <- matrix(binit, nrow = 28) %>% colMeans() %>% unname()
-  names(binit_monthly) <- paste0("b", seq_along(binit_monthly))
+  bsplit <- split(binit, x$bvecmap)
+  bvec <- sapply(bsplit, mean)
+  names(bvec) <- paste0("b", names(bvec))
 
   winit <- c(
     logE0 = log(E0init),
@@ -611,7 +611,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
     doseeffect = doseeffect_init,
     prophomeeffect = prophomeeffect_init,
     loghfpvec = rep(log(hfp_init), 2),
-    binit_monthly
+    bvec
   )
   winit
 }
@@ -729,7 +729,7 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- min(exp(bvec[(i - 1) %/% 28 + 1] + cov$dosesiqr[i] * doseeffect + prophomeeffect * cov$prophomeiqr[i]), 4 * gamma)
+      beta_t <- exp(bvec[cov$bvecmap[i]] + cov$dosesiqr[i] * doseeffect + prophomeeffect * cov$prophomeiqr[i])
       if (cov$time[i] < 2020.47){
         hfp <- hfpvec[1]
       } else {
@@ -796,7 +796,7 @@ kfnll <-
     }
     
     rwlik <- 0
-    for (i in 1:((T %/% 28) - 1)){
+    for (i in 1:(length(bvec) - 1)){
       step <- bvec[i + 1] - bvec[i]
       rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
     }

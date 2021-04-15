@@ -122,6 +122,8 @@ y <- wind %>% select(cases, hospitalizations, deaths)
 x <- wind %>% select(time, doses, prophome)
 x$dosesiqr <- x$doses /  diff(quantile(x$doses[x$doses > 0], c(.25, .75)))
 x$prophomeiqr <- (x$prophome - mean(x$prophome)) / diff(quantile(x$prophome, c(.25, .75)))
+x$bvecmap <- c(rep(1:4, each = 7), rep(5:17, each = 28))
+
 set.seed(1)
 
 # estimate the probability that a case is reported assuming that all deaths are reported
@@ -203,7 +205,7 @@ tictoc::toc()
 ## 
 
 
-dets <- kf_nll_details(w=fit3$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
