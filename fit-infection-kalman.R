@@ -113,8 +113,8 @@ N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>%
 wfixed <- c(
   N = N,
   gamma = 365.25 / 4,
-  gamma_h = 365.25 / 5,
-  gamma_d = 365.25 / 5,
+  gamma_h = 365.25 / 10,
+  gamma_d = 365.25 / 10,
   eta = 365.25 / 4
 )
 
@@ -203,7 +203,7 @@ tictoc::toc()
 ## 
 
 
-dets <- kf_nll_details(w=fit2$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit3$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
@@ -214,7 +214,7 @@ qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
 abline(0, 1)
 
 rho_t <- x2$rhot
-plot(x$time, y$cases, xlab = "Time", ylab = "Cases")
+plot(x$time, y$cases, xlab = "Time", ylab = "Cases", ylim = c(0, 55000))
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
 se_cases <- sqrt(dets$S[1, 1, ])
@@ -224,7 +224,7 @@ lines(x$time, est_cases, lty = 2)
 lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
 
 plot(x$time, y$hospitalizations, xlab = "Time",
-     ylab = "Hospitalizations")
+     ylab = "Hospitalizations", ylim = c(0, 2200))
 pred_hosps <- dets$xhat_kkmo["Hnew", ]
 se_hosps <- sqrt(dets$S[2, 2, ])
 lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
@@ -244,14 +244,14 @@ make_rt_plot <- function(ft, x) {
   plot(
     x$time,
     exp(
-      rep(ft$par[-c(1:9)], each = 28) + ft$par[8] * x$dosesiqr + ft$par[9] * x$prophomeiqr
+      rep(ft$par[-c(1:10)], each = 28) + ft$par[7] * x$dosesiqr + ft$par[8] * x$prophomeiqr
     ) / wfixed["gamma"],
     type = 'l',
     xlab = "Time",
     ylab = expression(R[t])
   )
   legend(
-    "topright",
+    "top",
     col = c(1, "orange", "blue", "grey"),
     lty = 1,
     legend = c(
@@ -262,13 +262,13 @@ make_rt_plot <- function(ft, x) {
     )
   )
   lines(x$time,
-        exp(rep(ft$par[-c(1:9)], each = 28) + ft$par[8] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
+        exp(rep(ft$par[-c(1:10)], each = 28) + ft$par[7] * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
         col = "orange")
   lines(x$time,
-        exp(rep(ft$par[-c(1:9)], each = 28) + 0 * x$dosesiqr + ft$par[9] * x$prophomeiqr) / wfixed["gamma"],
+        exp(rep(ft$par[-c(1:10)], each = 28) + 0 * x$dosesiqr + ft$par[8] * x$prophomeiqr) / wfixed["gamma"],
         col = "blue")
   lines(x$time,
-        exp(rep(ft$par[-c(1:9)], each = 28) + 0 * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
+        exp(rep(ft$par[-c(1:10)], each = 28) + 0 * x$dosesiqr + 0 * x$prophomeiqr) / wfixed["gamma"],
         col = "grey")
 }
 

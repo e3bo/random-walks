@@ -351,7 +351,6 @@ param_map <- function(x, w, fixed = wfixed){
   ret$times <- x$time
   ret$dosesiqr <- x$dosesiqr
   ret$prophomeiqr <- x$prophomeiqr
-  ret$betanoise <- x$betanoise
   ret$eta <- fixed["eta"]
   ret$gamma <- fixed["gamma"]
   ret$N <- fixed["N"]
@@ -599,7 +598,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
-  binit_monthly <- matrix(binit, nrow = 28) %>% colMeans()
+  binit_monthly <- matrix(binit, nrow = 28) %>% colMeans() %>% unname()
   names(binit_monthly) <- paste0("b", seq_along(binit_monthly))
 
   winit <- c(
@@ -612,7 +611,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
     doseeffect = doseeffect_init,
     prophomeeffect = prophomeeffect_init,
     loghfpvec = rep(log(hfp_init), 2),
-    binit_monthly = binit_monthly
+    binit_monthly
   )
   winit
 }
