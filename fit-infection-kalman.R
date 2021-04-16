@@ -113,8 +113,8 @@ N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>%
 wfixed <- c(
   N = N,
   gamma = 365.25 / 4,
-  gamma_h = 365.25 / 5,
-  gamma_d = 365.25 / 5,
+  gamma_h = 365.25 / 10,
+  gamma_d = 365.25 / 10,
   eta = 365.25 / 4
 )
 
@@ -130,8 +130,8 @@ set.seed(1)
 cvd <- data.frame(time = x$time, r = y$cases / lead(y$deaths, 20)) %>% 
   mutate(logr = log(r)) %>% filter(is.finite(logr)) %>% filter(time < 2020.47)
 mars <- earth::earth(logr~time, data = cvd)
-plot(logr ~ time, data = cvd)
-lines(cvd$time, predict(mars))
+#plot(logr ~ time, data = cvd)
+#lines(cvd$time, predict(mars))
 cvd$rhat <- exp(predict(mars)) %>% as.numeric()
 right <- cvd %>% select("time", "rhat")
 
@@ -147,14 +147,13 @@ winit <- initialize_estimates(x = x2, y = y, wfixed = wfixed)
 
 tictoc::tic("optimization")
 
-system.time(fit <- lbfgs::lbfgs(
+system.time(fit1 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x2,
   betasd = 0.01,
-  epsilon = 1e-1,
+  epsilon = 1e-3,
   max_iterations = 10,
-  a = .9,
   y = y,
   pm = param_map,
   winit,
@@ -170,8 +169,7 @@ fit2 <- lbfgs::lbfgs(
   x = x2,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 90,
-  a = 0.9,
+  max_iterations = 10,
   y = y,
   pm = param_map,
   fit$par,
@@ -181,46 +179,14 @@ fit2 <- lbfgs::lbfgs(
 system.time(h2 <- calc_kf_hess(w=fit2$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
 rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
 
-fit3 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x2,
-  betasd = 0.01,
-  epsilon = 1e-3,
-  max_iterations = 200,
-  a = 0.9,
-  y = y,
-  pm = param_map,
-  fit2$par,
-  invisible = 0
-)
-
-system.time(h3 <- calc_kf_hess(w=fit3$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, fit3$par, sqrt(diag(solve(h3))))
-
-fit4 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x2,
-  betasd = 0.01,
-  epsilon = 1e-3,
-  max_iterations = 100,
-  a = 0.9,
-  y = y,
-  pm = param_map,
-  fit3$par,
-  invisible = 0
-)
-
-system.time(h4 <- calc_kf_hess(w=fit4$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, fit3$par, fit4$par, sqrt(diag(solve(h4))))
 
 tictoc::toc()
 
 ## 
 
 
-dets <- kf_nll_details(w=fit4$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit2$par, x=x2, y=y, betasd = .01, a = 0.9, 
+                       pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
 
@@ -298,3 +264,19 @@ gridExtra::grid.table(est_tab[, 1:10])
 
 plot.new()
 gridExtra::grid.table(est_tab[, -c(1:10)])
+
+
+fit_dir <-
+  file.path(
+    "fits",
+    paste0(
+      forecast_date,
+      "-fips",
+      forecast_loc))
+
+if (!dir.exists(fit_dir))
+  dir.create(fit_dir, recursive = TRUE)
+
+the_file <- file.path(fit_dir, "fit.RData")
+save(x2, y, wfixed, fit1, fit2, h1, h2, file = the_file)
+
