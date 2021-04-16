@@ -144,6 +144,8 @@ x <- left_join(x0, right, by = "time") %>%
 winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
 ## fitting
+iter1 <- 1
+iter2 <- 1
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
@@ -152,7 +154,7 @@ fit1 <- lbfgs::lbfgs(
   x = x,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 1,
+  max_iterations = iter1,
   y = y,
   pm = param_map,
   winit,
@@ -173,7 +175,7 @@ fit2 <- lbfgs::lbfgs(
   x = x,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 1,
+  max_iterations = iter2,
   y = y,
   pm = param_map,
   fit1$par,
@@ -204,16 +206,22 @@ save(x, y, wfixed, fit1, fit2, h1, h2, file = the_file)
 
 ## Save metrics
 
-mets <- list(fit1nll = fit1$value,
-           fit1walltime = unname(tt1$toc - tt1$tic),
-           fit1hessposdef = all(eigen(h1)$values > 0),
-           fit1convergence = fit1$convergence,
-           fit2nll = fit2$value,
-           fit2hessposdef = all(eigen(h2)$values > 0),
-           fit2walltime = unname(tt2$toc - tt2$tic),
-           fit2convergence = fit2$convergence)
+mets <- list(
+  fit1nll = fit1$value,
+  fit1iter = iter1,
+  fit1walltime = unname(tt1$toc - tt1$tic),
+  fit1hessposdef = all(eigen(h1)$values > 0),
+  fit1convergence = fit1$convergence,
+  fit2nll = fit2$value,
+  fit2iter = iter2,
+  fit2hessposdef = all(eigen(h2)$values > 0),
+  fit2walltime = unname(tt2$toc - tt2$tic),
+  fit2convergence = fit2$convergence,
+  delta = (fit2$value - fit1$value) / iter2
+)
 
-jsonlite::toJSON(mets, auto_unbox = TRUE)
+met_path <- file.path(fit_dir, "fit-metrics.json")
+jsonlite::write_json(mets, path = met_path, auto_unbox = TRUE)
 
 q('no')
 ## scraps

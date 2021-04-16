@@ -18,6 +18,7 @@ dvc run \
     -d healthdata/${fdt}/${loc} \
     -d covidcast-safegraph-home-prop-7dav/${fdt} \
     -o fits/${fdt}-fips${loc}/fit.RData \
+    -M fits/${fdt}-fips${loc}/fit-metrics.json \
     --force \
     -n fit-$fdt-$loc \
     fdt=$fdt loc=$loc Rscript fit-infection-kalman.R
