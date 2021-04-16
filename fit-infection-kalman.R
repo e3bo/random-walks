@@ -205,8 +205,13 @@ save(x, y, wfixed, fit1, fit2, h1, h2, file = the_file)
 ## Save metrics
 
 mets <- list(fit1nll = fit1$value,
-           fit1walltime = unname(tt1$toc - tt1$tic)
-           )
+           fit1walltime = unname(tt1$toc - tt1$tic),
+           fit1hessposdef = all(eigen(h1)$values > 0),
+           fit1convergence = fit1$convergence,
+           fit2nll = fit2$value,
+           fit2hessposdef = all(eigen(h2)$values > 0),
+           fit2walltime = unname(tt2$toc - tt2$tic),
+           fit2convergence = fit2$convergence)
 
 jsonlite::toJSON(mets, auto_unbox = TRUE)
 
