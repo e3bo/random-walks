@@ -45,7 +45,7 @@ jobs:
           branchname=${tstamp}-fips${loc}-fdt${fdt}
           git checkout -b $branchname
           git add fips-${loc}/${fdt}/dvc.*
-          git add fits/${fdt}-${loc}/fit-metrics.json
+          git add fits/${fdt}-fips${loc}/fit-metrics.json
           if git commit -m "Forecast pipeline additions" && git push origin $branchname;
           then
             echo "Changes pushed to $branchname"

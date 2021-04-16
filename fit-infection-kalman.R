@@ -225,7 +225,7 @@ jsonlite::write_json(mets, path = met_path, auto_unbox = TRUE)
 
 q('no')
 ## scraps
-dets <- kf_nll_details(w=fit2$par, x=x2, y=y, betasd = .01, a = 0.9, 
+dets <- kf_nll_details(w=fit1$par, x=x, y=y, betasd = .01,
                        pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))

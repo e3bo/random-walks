@@ -610,7 +610,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   winit
 }
 
-kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
+kf_nll_details <- function(w, x, y, betasd, pm, fet) {
   p <- pm(x, w)
   nll <- kfnll(
     bvec = p$bvec,
@@ -633,10 +633,7 @@ kf_nll_details <- function(w, x, y, betasd, a, pm, fet) {
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases_deaths = "weekly",
-    nsim = 20,
-    betasd = betasd,
-    a = a
-  )
+    betasd = betasd)
   nll
 }
 
@@ -657,12 +654,10 @@ kfnll <-
            N,
            z,
            t0,
-           cov, 
+           cov,
            Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
            fet_zero_cases_deaths = "daily",
-           nsim,
-           a = .98,
            betasd = 1,
            maxzscore = Inf,
            just_nll = TRUE) {
@@ -677,8 +672,8 @@ kfnll <-
     D0 <- H0 * gamma_h / gamma_d * hfpvec[1]
     xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
-
-    if (ncol(z) == 1 && "cases" %in% names(z)){
+    
+    if (ncol(z) == 1 && "cases" %in% names(z)) {
       z$hospitalizations <- NA
       z$deaths <- NA
     }
@@ -699,8 +694,8 @@ kfnll <-
     rownames(xhat_kk) <- rownames(xhat_kkmo) <- names(xhat0)
     P_kk <- P_kkmo <- array(NA_real_, dim = c(dstate, dstate, T))
     
-    H <- function(rhot){
-      rbind(c(0, 0, 0, rhot, 1, 0, 0, 0), 
+    H <- function(rhot) {
+      rbind(c(0, 0, 0, rhot, 1, 0, 0, 0),
             c(0, 0, 0,    0, 1, 0, 0, 0),
             c(0, 0, 0,    0, 0, 0, 0, 1))
     }
@@ -723,51 +718,56 @@ kfnll <-
       PNinit[, 8] <- PNinit[8,] <- 0
       
       u0 <- cbind(xhat_init, PNinit)
-      beta_t <- exp(bvec[cov$bvecmap[i]] + cov$dosesiqr[i] * doseeffect + prophomeeffect * cov$prophomeiqr[i])
-      if (cov$time[i] < 2020.47){
+      beta_t <-
+        exp(bvec[cov$bvecmap[i]] + cov$dosesiqr[i] * doseeffect + prophomeeffect * cov$prophomeiqr[i])
+      if (cov$time[i] < 2020.47) {
         hfp <- hfpvec[1]
       } else {
         hfp <- hfpvec[2]
       }
-      par <- c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), hfp)
+      par <-
+        c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), hfp)
       
       JuliaCall::julia_assign("u0", u0)
       JuliaCall::julia_assign("tspan", c(0, 0.00273224))
       JuliaCall::julia_assign("par", par)
       JuliaCall::julia_eval("prob = ODEProblem(InfectionKalman.vectorfield,u0,tspan,par)")
-      XP <- JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
+      XP <-
+        JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
       xhat_kkmo[, i] <- XP[, 1]
       P_kkmo[, , i] <- XP[, -1]
       
-      for (j in 1:dstate){
-        if (P_kkmo[j,j,i] < 0){
-          P_kkmo[j,,i] <- 0
-          P_kkmo[,j,i] <- 0
+      for (j in 1:dstate) {
+        if (P_kkmo[j, j, i] < 0) {
+          P_kkmo[j, , i] <- 0
+          P_kkmo[, j, i] <- 0
         }
       }
       
-      ytilde_k[, i] <- matrix(z[i, ], ncol = 1) - 
-        H(cov$rhot[i]) %*% xhat_kkmo[, i, drop = FALSE]     
-      S[, , i] <- H(cov$rhot[i]) %*% P_kkmo[, , i] %*% t(H(cov$rhot[i])) + R
+      ytilde_k[, i] <- matrix(z[i, ], ncol = 1) -
+        H(cov$rhot[i]) %*% xhat_kkmo[, i, drop = FALSE]
+      S[, , i] <-
+        H(cov$rhot[i]) %*% P_kkmo[, , i] %*% t(H(cov$rhot[i])) + R
       
-      for (j in 1:dobs){
-        if (is.na(z[i,j])){
+      for (j in 1:dobs) {
+        if (is.na(z[i, j])) {
           zscore <- 0
-          rdiagadj[j,i] <- rdiagadj[j,i] + 0
+          rdiagadj[j, i] <- rdiagadj[j, i] + 0
         } else {
-          sd <- sqrt(S[j,j,i])
-          zscore <- ytilde_k[j,i] / sd 
-          if (abs(zscore) > maxzscore){
+          sd <- sqrt(S[j, j, i])
+          zscore <- ytilde_k[j, i] / sd
+          if (abs(zscore) > maxzscore) {
             adjzscore <- maxzscore / (1 + abs(zscore) - maxzscore)
-            newsd <- abs(ytilde_k[j,i]) / adjzscore
-            rdiagadj[j,i] <- rdiagadj[j,i] + (newsd) ^ 2 - sd ^ 2
+            newsd <- abs(ytilde_k[j, i]) / adjzscore
+            rdiagadj[j, i] <- rdiagadj[j, i] + (newsd) ^ 2 - sd ^ 2
           } else {
-            rdiagadj[j,i] <- rdiagadj[j,i] + 0
+            rdiagadj[j, i] <- rdiagadj[j, i] + 0
           }
         }
-        S[j,j,i] <- S[j,j,i] + rdiagadj[j,i]
+        S[j, j, i] <- S[j, j, i] + rdiagadj[j, i]
       }
-      K[, , i] <- P_kkmo[, , i] %*% t(H(cov$rhot[i])) %*% solve(S[, , i])
+      K[, , i] <-
+        P_kkmo[, , i] %*% t(H(cov$rhot[i])) %*% solve(S[, , i])
       desel <- is_z_na[i, ]
       K[, desel, i] <- 0
       
@@ -779,108 +779,92 @@ kfnll <-
       P_kk[, , i] <-
         (diag(dstate) - K[, , i] %*% H(cov$rhot[i])) %*% P_kkmo[, , i]
       
-      for (j in 1:dstate){
-        if (P_kk[j,j,i] < 0){
-          P_kk[j,,i] <- 0
-          P_kk[,j,i] <- 0
+      for (j in 1:dstate) {
+        if (P_kk[j, j, i] < 0) {
+          P_kk[j, , i] <- 0
+          P_kk[, j, i] <- 0
         }
       }
-      ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) - 
+      ytilde_kk[, i] <- matrix(z[i, ], ncol = 1) -
         H(cov$rhot[i]) %*% xhat_kk[, i, drop = FALSE]
     }
     
     rwlik <- 0
-    for (i in 1:(length(bvec) - 1)){
+    for (i in 1:(length(bvec) - 1)) {
       step <- bvec[i + 1] - bvec[i]
-      rwlik <- rwlik + dnorm(step, mean = 0, sd = betasd, log = TRUE)
+      rwlik <-
+        rwlik + dnorm(step,
+                      mean = 0,
+                      sd = betasd,
+                      log = TRUE)
     }
     nll <- 0
-    for (i in seq(1, T)){
+    for (i in seq(1, T)) {
       sel <- !is_z_na[i, ]
-      nll <- nll + 
-        t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] + 
-        log(det(S[,,i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
+      nll <- nll +
+        t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] +
+        log(det(S[, , i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
     }
     nll <- 0.5 * nll - rwlik
     
     if (!just_nll) {
       if (!is.null(fets)) {
         nsimdays <- nrow(fets)
-        sim_means <- array(NA_real_, dim = c(dobs, nsimdays, nsim))
-        sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays, nsim))
-        for (j in seq_len(nsim)) {
-          logbeta_fet <- numeric(nsimdays)
-          logbeta_fet[1] <-
-            log(gamma) + a * (logbeta[T] - log(gamma)) +  
-            rnorm(1, mean = 0, sd = betasd)
-          if (length(logbeta_fet) > 1) {
-            for (jj in seq(2, length(logbeta_fet))) {
-              logbeta_fet[jj] <-
-                log(gamma) + a * (logbeta_fet[jj - 1] - log(gamma)) + 
-                rnorm(1, mean = 0, sd = betasd)
-            }
+        sim_means <- array(NA_real_, dim = c(dobs, nsimdays))
+        sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays))
+        
+        for (j in seq_len(nsimdays)) {
+          if (j == 1) {
+            xhat_init <- xhat_kk[, T]
+            PNinit <- P_kk[, , T]
+          } else {
+            xhat_init <- sim_means[, j]
+            PNinit <- sim_cov[, , j]
           }
-          xhat_init <- xhat_kk[, T]
-          PNinit <- P_kk[, , T]
+          
           if (fet_zero_cases_deaths == "daily" ||
-              fets$target_wday[1] == 1) {
+              fets$target_wday[j] == 1) {
             xhat_init["C"] <- 0
-            PNinit[, 4] <- PNinit[4,] <- 0
+            PNinit[, 4] <- PNinit[4, ] <- 0
             xhat_init["Drep"] <- 0
-            PNinit[, 8] <- PNinit[8,] <- 0 
+            PNinit[, 8] <- PNinit[8, ] <- 0
           }
           xhat_init["Hnew"] <- 0
-          PNinit[, 5] <- PNinit[5,] <- 0
+          PNinit[, 5] <- PNinit[5, ] <- 0
           
-          XP <- iterate_f_and_P(
-            xhat_init,
-            PN = PNinit,
-            eta = eta,
-            gamma = gamma,
-            gamma_d = gamma_d,
-            gamma_h = gamma_h,
-            chp = exp(logchp),
-            hfp = exp(loghfp),
-            N = N,
-            beta_t = exp(logbeta_fet[1]) * exp(-doseeffect * doses[T])
-          )
-          sim_means[, 1, j] <- H(fets$target_end_times[1]) %*% XP$xhat
-          sim_cov[, , 1, j] <- H(fets$target_end_times[1]) %*% XP$PN %*% t(H(fets$target_end_times[1])) + R
-          for (i in seq_along(fets$target_end_times[-1])) {
-            xhat_init <- XP$xhat
-            PNinit <- XP$PN
-            if (fet_zero_cases_deaths == "daily" ||
-                fets$target_wday[i + 1] == 1) {
-              xhat_init["C"] <- 0
-              PNinit[, 4] <- PNinit[4,] <- 0
-              xhat_init["Drep"] <- 0
-              PNinit[, 8] <- PNinit[8,] <- 0
-            }
-            xhat_init["Hnew"] <- 0
-            PNinit[, 5] <- PNinit[5,] <- 0
-            
-            XP <-
-              iterate_f_and_P(
-                xhat_init,
-                PN = PNinit,
-                eta = eta,
-                gamma = gamma,
-                gamma_d = gamma_d,
-                gamma_h = gamma_h,
-                chp = exp(logchp),
-                hfp = exp(loghfp),
-                N = N,
-                beta_t = exp(logbeta_fet[i + 1]) * exp(-doseeffect * doses[T])
-              )
-            sim_means[, i + 1, j] <- H(fets$target_end_times[i + 1]) %*% XP$xhat
-            sim_cov[, , i + 1, j] <-
-              H(fets$target_end_times[i + 1]) %*% XP$PN %*% t(H(fets$target_end_times[i + 1])) + R
+          u0 <- cbind(xhat_init, PNinit)
+          beta_t <-
+            exp(bvec[cov$bvecmap[T]] + cov$dosesiqr[T] * doseeffect + prophomeeffect * cov$prophomeiqr[T])
+          if (cov$time[T] < 2020.47) {
+            hfp <- hfpvec[1]
+          } else {
+            hfp <- hfpvec[2]
           }
+          par <-
+            c(beta_t,
+              N,
+              0,
+              eta,
+              gamma,
+              gamma_d,
+              gamma_h,
+              exp(logchp),
+              hfp)
+          
+          JuliaCall::julia_assign("u0", u0)
+          JuliaCall::julia_assign("tspan", c(0, 0.00273224))
+          JuliaCall::julia_assign("par", par)
+          JuliaCall::julia_eval("prob = ODEProblem(InfectionKalman.vectorfield,u0,tspan,par)")
+          XP <-
+            JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
+          
+          sim_means[, j] <- H(cov$rhot[T]) %*% XP[, 1]
+          sim_cov[, , j] <-
+            H(cov$rhot[T]) %*% XP[,-1] %*% t(H(cov$rhot[T])) + R
         }
       } else {
         sim_means <- sim_cov <- NULL
       }
-      
       list(
         nll = nll,
         xhat_kkmo = xhat_kkmo,
