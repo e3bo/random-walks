@@ -597,9 +597,8 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
-  bsplit <- split(binit, ifelse(x$bvecmap < 5, 0, x$bvecmap))
+  bsplit <- split(binit, x$bvecmap)
   bvec <- sapply(bsplit, mean)
-  bvec <- c(rep(bvec[1], 4), bvec[-1])
   names(bvec) <- paste0("b", seq_along(bvec))
 
   winit <- c(

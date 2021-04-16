@@ -15,7 +15,7 @@ JuliaCall::julia_eval("using DataFrames")
 ## main script
 
 forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
-forecast_loc <- Sys.getenv("loc", unset = "36")
+forecast_loc <- Sys.getenv("loc", unset = "17")
 
 hopdir <- file.path("hopkins", forecast_date)
 tdat <- load_hopkins(hopdir, weekly = FALSE)
@@ -113,8 +113,8 @@ N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>%
 wfixed <- c(
   N = N,
   gamma = 365.25 / 4,
-  gamma_h = 365.25 / 10,
-  gamma_d = 365.25 / 10,
+  gamma_h = 365.25 / 5,
+  gamma_d = 365.25 / 5,
   eta = 365.25 / 4
 )
 
@@ -122,16 +122,16 @@ y <- wind %>% select(cases, hospitalizations, deaths)
 x <- wind %>% select(time, doses, prophome)
 x$dosesiqr <- x$doses /  diff(quantile(x$doses[x$doses > 0], c(.25, .75)))
 x$prophomeiqr <- (x$prophome - mean(x$prophome)) / diff(quantile(x$prophome, c(.25, .75)))
-x$bvecmap <- c(rep(1:4, each = 7), rep(5:17, each = 28))
+x$bvecmap <- rep(1:14, each = 28)
 
 set.seed(1)
 
 # estimate the probability that a case is reported assuming that all deaths are reported
-cvd <- data.frame(time = x$time, r = y$cases / lead(y$deaths, 10)) %>% 
+cvd <- data.frame(time = x$time, r = y$cases / lead(y$deaths, 20)) %>% 
   mutate(logr = log(r)) %>% filter(is.finite(logr)) %>% filter(time < 2020.47)
 mars <- earth::earth(logr~time, data = cvd)
-#plot(logr ~ time, data = cvd)
-#lines(cvd$time, predict(mars))
+plot(logr ~ time, data = cvd)
+lines(cvd$time, predict(mars))
 cvd$rhat <- exp(predict(mars)) %>% as.numeric()
 right <- cvd %>% select("time", "rhat")
 
@@ -187,7 +187,7 @@ fit3 <- lbfgs::lbfgs(
   x = x2,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 20,
+  max_iterations = 200,
   a = 0.9,
   y = y,
   pm = param_map,
@@ -204,7 +204,7 @@ fit4 <- lbfgs::lbfgs(
   x = x2,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 20,
+  max_iterations = 100,
   a = 0.9,
   y = y,
   pm = param_map,
@@ -212,31 +212,18 @@ fit4 <- lbfgs::lbfgs(
   invisible = 0
 )
 
-fit5 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x2,
-  betasd = 0.01,
-  epsilon = 1e-3,
-  max_iterations = 100,
-  a = 0.9,
-  y = y,
-  pm = param_map,
-  fit4$par,
-  invisible = 0
-)
-
-
+system.time(h4 <- calc_kf_hess(w=fit4$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
+rbind(winit, fit$par, fit2$par, fit3$par, fit4$par, sqrt(diag(solve(h4))))
 
 tictoc::toc()
-
 
 ## 
 
 
-dets <- kf_nll_details(w=fit5$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
+dets <- kf_nll_details(w=fit4$par, x=x2, y=y, betasd = .01, a = 0.9, pm = param_map, fet = NULL)
 
 par(mfrow = c(3, 1))
+
 qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
 abline(0, 1)
 qqnorm(dets$ytilde_k[2, ] / sqrt(dets$S[2, 2, ]), sub = "Hospitalizations")
@@ -245,7 +232,7 @@ qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
 abline(0, 1)
 
 rho_t <- x2$rhot
-plot(x$time, y$cases, xlab = "Time", ylab = "Cases", ylim = c(0, 55000))
+plot(x2$time, y$cases, xlab = "Time", ylab = "Cases")
 pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
 est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
 se_cases <- sqrt(dets$S[1, 1, ])
@@ -303,28 +290,11 @@ make_rt_plot <- function(ft, x) {
         col = "grey")
 }
 
-make_rt_plot(fit5, x)
-
-rho_t <- detect_frac(365.25 * (x$time - 2020.2))
-plot(x$time, y$cases, xlab = "Time", ylab = "Cases", xlim = c(2020.6, 2020.8), ylim = c(0, 2200))
-pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
-est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
-se_cases <- sqrt(dets$S[1, 1, ])
-lines(x$time, se_cases * 2 + pred_cases, col = "grey")
-lines(x$time, pred_cases)
-lines(x$time, est_cases, lty = 2)
-lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
-
-par(mfrow = c(2, 1))
-plot(x$time, fit2$par[9] * x$prophomeiqr, xlab = "Time", 
-     ylab = expression(paste("Effect of mobility on ", log(beta[t]))))
-plot(x$time, fit2$par[8] * x$betanoise, 
-     xlab = "Time",
-     ylab = expression(paste("Effect of heterogeneity on ", log(beta[t]))))
+make_rt_plot(fit2, x)
 
 plot.new()
 est_tab <- rbind(initial = winit, MLE = fit2$par, sd = sqrt(diag(solve(h2)))) %>% signif(3)
-gridExtra::grid.table(est_tab[, 1:9])
+gridExtra::grid.table(est_tab[, 1:10])
 
 plot.new()
-gridExtra::grid.table(est_tab[, -c(1:9)])
+gridExtra::grid.table(est_tab[, -c(1:10)])
