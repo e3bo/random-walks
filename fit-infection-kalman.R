@@ -146,13 +146,14 @@ winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 ## fitting
 iter1 <- 1
 iter2 <- 1
+bsd <- 0.01
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.01,
+  betasd = bsd,
   epsilon = 1e-3,
   max_iterations = iter1,
   y = y,
@@ -163,7 +164,7 @@ fit1 <- lbfgs::lbfgs(
 tt1 <- tictoc::toc()
 
 tictoc::tic("hessian 1")
-h1 <- calc_kf_hess(w=fit1$par, x=x, y=y, betasd=0.01, pm=param_map)
+h1 <- calc_kf_hess(w=fit1$par, x=x, y=y, betasd=bsd, pm=param_map)
 tictoc::toc()
 
 #rbind(winit, fit$par, sqrt(diag(solve(h))))
@@ -173,7 +174,7 @@ fit2 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = 0.01,
+  betasd = bsd,
   epsilon = 1e-3,
   max_iterations = iter2,
   y = y,
@@ -184,7 +185,7 @@ fit2 <- lbfgs::lbfgs(
 tt2 <- tictoc::toc()
 
 tictoc::tic("hessian 2")
-h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=0.01, pm = param_map)
+h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=bsd, pm = param_map)
 tictoc::toc()
 #rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
 
@@ -206,13 +207,26 @@ save(x, y, wfixed, fit1, fit2, h1, h2, file = the_file)
 
 ## Save metrics
 
+dets1 <- kf_nll_details(w=fit1$par, x=x, y=y, betasd = bsd, pm = param_map, fet = NULL)
+mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
+naive_error <- colMeans(abs(apply(y, 2, diff)), na.rm = TRUE)
+mase1 <- mae1 / naive_error
+
+dets2 <- kf_nll_details(w=fit2$par, x=x, y=y, betasd = bsd, pm = param_map, fet = NULL)
+mae2 <- rowMeans(abs(dets2$ytilde_k), na.rm = TRUE)
+mase2 <- mae2 / naive_error
+
 mets <- list(
   fit1nll = fit1$value,
+  fit1mae = mae1,
+  fit1mase = mase1, 
   fit1iter = iter1,
   fit1walltime = unname(tt1$toc - tt1$tic),
   fit1hessposdef = all(eigen(h1)$values > 0),
   fit1convergence = fit1$convergence,
   fit2nll = fit2$value,
+  fit2mae = mae2,
+  fit2mase = mase2, 
   fit2iter = iter2,
   fit2hessposdef = all(eigen(h2)$values > 0),
   fit2walltime = unname(tt2$toc - tt2$tic),
