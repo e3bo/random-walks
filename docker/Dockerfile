@@ -90,7 +90,7 @@ RUN installGithub.r e3bo/epidatr@1caf68c94a38c1775242f252fdc4288fbb777e87 && \
 
 RUN install2.r --skipinstalled --error \
 diffeqr \
-ggforce \
+earth \
 JuliaCall \
 KScorrect \
 lbfgs \
