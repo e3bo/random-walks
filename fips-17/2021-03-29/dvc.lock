@@ -8,11 +8,11 @@ stages:
       size: 4478595
       nfiles: 1
     - path: covidhub-common.R
-      md5: 0c6bee098dc8310f9ede79cb87de5a97
-      size: 27766
+      md5: b6b3e08767379b579d9a3d753d06440e
+      size: 26882
     - path: fit-infection-kalman.R
-      md5: 4c5d9f322c909c1166b4e6cc394cccd1
-      size: 9368
+      md5: 3b1fabac03cccf05888e8f6d6d1404ab
+      size: 9845
     - path: healthdata/2021-03-29/17
       md5: 1c37977efc3055fcdbda18448dba8c89.dir
       size: 121287
@@ -27,11 +27,11 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2021-03-29-fips17/fit-metrics.json
-      md5: dccb71e5e095b9787e722c9f4f17782c
-      size: 224
+      md5: f309d2acada550d8f193473cf33e5cff
+      size: 367
     - path: fits/2021-03-29-fips17/fit.RData
-      md5: b54af5baac80c8f2a79e7f6a062a2aa7
-      size: 20534
+      md5: 71668be1eda8100a6c379f041c923801
+      size: 20375
   forecast-2021-03-29-17:
     cmd: fdt=2021-03-29 loc=17 Rscript write-formatted-forecast.R
     deps:
