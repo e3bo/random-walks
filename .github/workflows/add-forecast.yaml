@@ -36,6 +36,7 @@ jobs:
           dvc pull forecasts/${fdt}-fips${loc} || true
           dvc pull healthdata/${fdt}/${loc} || true
           dvc pull hopkins-vaccine/$fdt || true
+          dvc pull covidcast-safegraph-home-prop-7dav/$fdt || true
           fdt=$fdt loc=$loc bash -x ./forecast.sh
           dvc push --run-cache
           git config --local user.email "actions@users.noreply.github.com"
