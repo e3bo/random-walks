@@ -1,6 +1,6 @@
 #!/usr/bin/env R
 
-tictoc::tic()
+## Environment prep
 
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
@@ -9,10 +9,7 @@ JuliaCall::julia_setup("/opt/julia-1.5.3/bin")
 JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
 JuliaCall::julia_eval("using DataFrames")
 
-## main functions
-
-
-## main script
+## Data prep
 
 forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
 forecast_loc <- Sys.getenv("loc", unset = "17")
@@ -67,7 +64,6 @@ mob_ts <- read_csv(mob_path,
   rename(target_end_date = time_value, 
          prophome = value)
 
-
 vacc_path <- file.path("hopkins-vaccine",
                        forecast_date,
                        "vaccine_data_us_timeline.csv")
@@ -110,24 +106,26 @@ wsize <- nrow(wind)
 N <- covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>% 
   pull(population)
 
+case_to_death_lag <- 20
+
 wfixed <- c(
   N = N,
   gamma = 365.25 / 4,
-  gamma_h = 365.25 / 10,
-  gamma_d = 365.25 / 10,
+  gamma_h = 365.25 / (case_to_death_lag / 2),
+  gamma_d = 365.25 / (case_to_death_lag / 2),
   eta = 365.25 / 4
 )
 
 y <- wind %>% select(cases, hospitalizations, deaths)
-x <- wind %>% select(time, doses, prophome)
-x$dosesiqr <- x$doses /  diff(quantile(x$doses[x$doses > 0], c(.25, .75)))
-x$prophomeiqr <- (x$prophome - mean(x$prophome)) / diff(quantile(x$prophome, c(.25, .75)))
-x$bvecmap <- rep(1:14, each = 28)
+x0 <- wind %>% select(time, doses, prophome)
+x0$dosesiqr <- x0$doses /  diff(quantile(x0$doses[x0$doses > 0], c(.25, .75)))
+x0$prophomeiqr <- (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
+x0$bvecmap <- rep(1:14, each = 28)
 
 set.seed(1)
 
 # estimate the probability that a case is reported assuming that all deaths are reported
-cvd <- data.frame(time = x$time, r = y$cases / lead(y$deaths, 20)) %>% 
+cvd <- data.frame(time = x0$time, r = y$cases / lead(y$deaths, case_to_death_lag)) %>% 
   mutate(logr = log(r)) %>% filter(is.finite(logr)) %>% filter(time < 2020.47)
 mars <- earth::earth(logr~time, data = cvd)
 #plot(logr ~ time, data = cvd)
@@ -135,7 +133,7 @@ mars <- earth::earth(logr~time, data = cvd)
 cvd$rhat <- exp(predict(mars)) %>% as.numeric()
 right <- cvd %>% select("time", "rhat")
 
-x2 <- left_join(x, right, by = "time") %>% 
+x <- left_join(x0, right, by = "time") %>% 
   mutate(rhat2 = zoo::na.fill(rhat, "extend"),
          rhot = rhat2 / (2 *rhat2[n()]))
 
@@ -143,48 +141,77 @@ x2 <- left_join(x, right, by = "time") %>%
 #pdf <- data.frame(date = wind$target_end_date, p = x2$rhat3)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
 
-winit <- initialize_estimates(x = x2, y = y, wfixed = wfixed)
+winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
-tictoc::tic("optimization")
+## fitting
 
-system.time(fit1 <- lbfgs::lbfgs(
+tictoc::tic("fit 1")
+fit1 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
-  x = x2,
+  x = x,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 10,
+  max_iterations = 1,
   y = y,
   pm = param_map,
   winit,
   invisible = 0
-))
+)
+tt1 <- tictoc::toc()
 
-system.time(h <- calc_kf_hess(w=fit$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
-rbind(winit, fit$par, sqrt(diag(solve(h))))
+tictoc::tic("hessian 1")
+h1 <- calc_kf_hess(w=fit1$par, x=x, y=y, betasd=0.01, pm=param_map)
+tictoc::toc()
 
+#rbind(winit, fit$par, sqrt(diag(solve(h))))
+
+tictoc::tic("fit 2")
 fit2 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
-  x = x2,
+  x = x,
   betasd = 0.01,
   epsilon = 1e-3,
-  max_iterations = 10,
+  max_iterations = 1,
   y = y,
   pm = param_map,
-  fit$par,
+  fit1$par,
   invisible = 0
 )
+tt2 <- tictoc::toc()
 
-system.time(h2 <- calc_kf_hess(w=fit2$par, x=x2, y=y, betasd=0.01, a =.1, pm = param_map))
-rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
-
-
+tictoc::tic("hessian 2")
+h2 <- calc_kf_hess(w=fit2$par, x=x, y=y, betasd=0.01, pm = param_map)
 tictoc::toc()
+#rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
 
-## 
+## Save outputs
 
+fit_dir <-
+  file.path(
+    "fits",
+    paste0(
+      forecast_date,
+      "-fips",
+      forecast_loc))
 
+if (!dir.exists(fit_dir))
+  dir.create(fit_dir, recursive = TRUE)
+
+the_file <- file.path(fit_dir, "fit.RData")
+save(x, y, wfixed, fit1, fit2, h1, h2, file = the_file)
+
+## Save metrics
+
+mets <- list(fit1nll = fit1$value,
+           fit1walltime = unname(tt1$toc - tt1$tic)
+           )
+
+jsonlite::toJSON(mets, auto_unbox = TRUE)
+
+q('no')
+## scraps
 dets <- kf_nll_details(w=fit2$par, x=x2, y=y, betasd = .01, a = 0.9, 
                        pm = param_map, fet = NULL)
 
@@ -266,17 +293,4 @@ plot.new()
 gridExtra::grid.table(est_tab[, -c(1:10)])
 
 
-fit_dir <-
-  file.path(
-    "fits",
-    paste0(
-      forecast_date,
-      "-fips",
-      forecast_loc))
-
-if (!dir.exists(fit_dir))
-  dir.create(fit_dir, recursive = TRUE)
-
-the_file <- file.path(fit_dir, "fit.RData")
-save(x2, y, wfixed, fit1, fit2, h1, h2, file = the_file)
 
