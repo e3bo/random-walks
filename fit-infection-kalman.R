@@ -211,22 +211,36 @@ dets1 <- kf_nll_details(w=fit1$par, x=x, y=y, betasd = bsd, pm = param_map, fet 
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(y, 2, diff)), na.rm = TRUE)
 mase1 <- mae1 / naive_error
+g1 <- calc_kf_grad(w=fit1$par, x=x, y=y, betasd = bsd, pm = param_map)
 
 dets2 <- kf_nll_details(w=fit2$par, x=x, y=y, betasd = bsd, pm = param_map, fet = NULL)
 mae2 <- rowMeans(abs(dets2$ytilde_k), na.rm = TRUE)
 mase2 <- mae2 / naive_error
+g2 <- calc_kf_grad(w=fit2$par, x=x, y=y, betasd = bsd, pm = param_map)
 
 mets <- list(
   fit1nll = fit1$value,
-  fit1mae = mae1,
-  fit1mase = mase1, 
+  fit1xnorm = sqrt(sum(fit1$par^2)),
+  fit1gnorm = sqrt(sum(g1 ^2)),
+  fit1mae_cases = mae1[1],
+  fit1mae_hosps = mae1[2],
+  fit1mae_death = mae1[3],
+  fit1mase_cases = mase1[1],
+  fit1mase_hosps = mase1[2],
+  fit1mase_death = mase1[3],
   fit1iter = iter1,
   fit1walltime = unname(tt1$toc - tt1$tic),
   fit1hessposdef = all(eigen(h1)$values > 0),
   fit1convergence = fit1$convergence,
   fit2nll = fit2$value,
-  fit2mae = mae2,
-  fit2mase = mase2, 
+  fit2xnorm = sqrt(sum(fit2$par^2)),
+  fit2gnorm = sqrt(sum(g2 ^2)),
+  fit2mae_cases = mae2[1],
+  fit2mae_hosps = mae2[2],
+  fit2mae_death = mae2[3],
+  fit2mase_cases = mase2[1],
+  fit2mase_hosps = mase2[2],
+  fit2mase_death = mase2[3],
   fit2iter = iter2,
   fit2hessposdef = all(eigen(h2)$values > 0),
   fit2walltime = unname(tt2$toc - tt2$tic),
