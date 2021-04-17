@@ -166,8 +166,8 @@ x <- left_join(x0, right, by = "time") %>%
 winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
 ## fitting
-iter1 <- 400
-iter2 <- 100
+iter1 <- 4
+iter2 <- 1
 bsd <- 0.01
 
 tictoc::tic("fit 1")

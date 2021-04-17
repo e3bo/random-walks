@@ -2,8 +2,8 @@
 
 set -e
 
-fdt="${fdt:-2020-12-07}"
-loc="${loc:-06}"
+fdt="${fdt:-2021-03-29}"
+loc="${loc:-36}"
 
 dirname=fips-${loc}/${fdt}
 mkdir -p $dirname
@@ -22,7 +22,7 @@ dvc run \
     --force \
     -n fit-$fdt-$loc \
     fdt=$fdt loc=$loc Rscript fit-infection-kalman.R
-exit 0
+
 dvc run \
     -w ../.. \
     -d write-formatted-forecast.R \

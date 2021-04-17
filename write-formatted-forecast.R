@@ -136,7 +136,8 @@ write_forecasts <-
       h = hess,
       betasd = betasd,
       fdt = fdt,
-      forecast_loc = forecast_loc
+      forecast_loc = forecast_loc,
+      fit = fit
     )
     case_inds <- which(fet$target_wday == 7)
     if (lubridate::wday(fdt) > 2) {
@@ -197,7 +198,7 @@ write_forecasts <-
     write_csv(x = fcst, path = fcst_path)
   }
 
-make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc) {
+make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
   plot_dir <-
     file.path("plots",
               paste0(forecast_date,
