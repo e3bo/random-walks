@@ -345,16 +345,15 @@ param_map <- function(x, w, fixed = wfixed){
   ret$prophomeeffect <- w[8] 
   
   ret$loghfpvec <- w[c(9, 10)]
-  ret$loggammahd <- log(fixed["gamma_h"])
+  ret$loggammahd <- unname(log(fixed["gamma_h"]))
 
   ret$bvec <- w[seq(11, length(w))]
   ret$times <- x$time
   ret$dosesiqr <- x$dosesiqr
   ret$prophomeiqr <- x$prophomeiqr
-  ret$eta <- fixed["eta"]
-  ret$gamma <- fixed["gamma"]
-  ret$N <- fixed["N"]
-  ret$t0 <- fixed["t0"]
+  ret$eta <- unname(fixed["eta"])
+  ret$gamma <- unname(fixed["gamma"])
+  ret$N <- unname(fixed["N"])
   ret
 }
 
@@ -709,9 +708,9 @@ kfnll <-
         xhat_init <- xhat_kk[, i - 1]
         PNinit <- P_kk[, , i - 1]
       }
-      xhat_init["C"] <- 0
-      xhat_init["Hnew"] <- 0
-      xhat_init["Drep"] <- 0
+      xhat_init[4] <- 0
+      xhat_init[5] <- 0
+      xhat_init[8] <- 0
       
       PNinit[, 4] <- PNinit[4,] <- 0
       PNinit[, 5] <- PNinit[5,] <- 0
@@ -806,7 +805,7 @@ kfnll <-
         log(det(S[, , i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
     }
     nll <- 0.5 * nll - rwlik
-    
+
     if (!just_nll) {
       if (!is.null(fets)) {
         nsimdays <- nrow(fets)
@@ -818,18 +817,18 @@ kfnll <-
             xhat_init <- xhat_kk[, T]
             PNinit <- P_kk[, , T]
           } else {
-            xhat_init <- sim_means[, j]
-            PNinit <- sim_cov[, , j]
+            xhat_init <- XP[, 1]
+            PNinit <- XP[, -1]
           }
           
           if (fet_zero_cases_deaths == "daily" ||
               fets$target_wday[j] == 1) {
-            xhat_init["C"] <- 0
+            xhat_init[4] <- 0
             PNinit[, 4] <- PNinit[4, ] <- 0
-            xhat_init["Drep"] <- 0
+            xhat_init[8] <- 0
             PNinit[, 8] <- PNinit[8, ] <- 0
           }
-          xhat_init["Hnew"] <- 0
+          xhat_init[5] <- 0
           PNinit[, 5] <- PNinit[5, ] <- 0
           
           u0 <- cbind(xhat_init, PNinit)

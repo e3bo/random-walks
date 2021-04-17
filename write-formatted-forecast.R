@@ -5,6 +5,46 @@ tictoc::tic()
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
+make_rt_plot <- function(ft, x) {
+  par(mfrow = c(1, 1))
+  intercept <- ft$par[-c(1:10)][x$bvecmap]
+  X <- cbind(x$dosesiqr, x$prophomeiqr)
+  effects <- ft$par[c(7, 8)]
+  num_all <- exp(intercept + X %*% effects)
+  plot(
+    x$time,
+    num_all / wfixed["gamma"],
+    type = 'l',
+    xlab = "Time",
+    ylab = expression(R[t])
+  )
+  legend(
+    "top",
+    col = c(1, "orange", "blue", "grey"),
+    lty = 1,
+    legend = c(
+      "MLE estimate",
+      "MLE - (effect of mobility)",
+      "MLE - (effect of vaccine)",
+      "MLE random walk intercept"
+    )
+  )
+  effects_no_dose <- effects_no_mob <- effects
+  effects_no_mob[2] <- 0
+  num_nomob <- exp(intercept + X %*% effects_no_mob)
+  lines(x$time,
+        num_nomob / wfixed["gamma"],
+        col = "orange")
+  effects_no_dose[1] <- 0
+  num_nodose <- exp(intercept + X %*% effects_no_dose)
+  lines(x$time,
+        num_nodose / wfixed["gamma"],
+        col = "blue")
+  lines(x$time,
+        exp(intercept) / wfixed["gamma"],
+        col = "grey")
+}
+
 create_forecast_df <- function(means,
                                vars,
                                target_type = "cases",
@@ -31,8 +71,8 @@ create_forecast_df <- function(means,
   } else {
     stop("not implemented")
   }
-  n <- nrow(means)
-  stopifnot(nrow(vars) == n)
+  n <- length(means)
+  stopifnot(length(vars) == n)
   stopifnot(n <= maxn)
   step_ahead <- seq_len(n)
   targets <- paste0(step_ahead, targ_string)
@@ -58,18 +98,14 @@ create_forecast_df <- function(means,
       forecast_date = fdt,
       type = "quantile"
     ) %>%
-    mutate(q1 = map2_dbl(
-      quantile,
-      h,
-      ~ KScorrect::qmixnorm(
-        p = .x,
-        mean = means[.y,],
-        sd = sqrt(vars[.y,]),
-        pro = rep(1, ncol(means)),
-        expand = 0.0
-      )
-    ),
-    value = ifelse(q1 < 0, 0, q1)) %>%
+    mutate(q1 = map2_dbl(quantile,
+                         h,
+                         ~ qnorm(
+                           p = .x,
+                           mean = means[.y],
+                           sd = sqrt(vars[.y])
+                         )),
+           value = ifelse(q1 < 0, 0, q1)) %>%
     mutate(value = format(value, digits = 4),
            quantile = as.character(quantile))
   t2 <- t1 %>% filter(quantile == "0.5") %>%
@@ -84,91 +120,91 @@ create_forecast_df <- function(means,
                                       value)
 }
 
-write_forecasts <- function(fits, fet, agrid, betagrid, fdt = forecast_date) {
-  n1 <- length(agrid)
-  n2 <- length(betagrid)
-  for (ind1 in 1:n1) {
-    for (ind2 in 1:n2) {
-      wfit <- fits[[ind1]][[ind2]]$par
-      a <- agrid[ind1]
-      betasd <- betagrid[ind2]
-      dets <-
-        kf_nll_details(
-          wfit,
-          x,
-          y,
-          param_map,
-          betasd = betasd,
-          a = a,
-          fet = fet
-        )
-      make_fit_plots(dets, x = x, a = a, betasd = betasd)
-      case_inds <- which(fet$target_wday == 7)
-      if (lubridate::wday(fdt) > 2){
-        case_inds <- case_inds[-1] # drop first epiweek, which has been observed too much to be forecasted
-      }
-      case_fcst <- create_forecast_df(means = dets$sim_means[1, case_inds,],
-                                      vars = dets$sim_cov[1, 1, case_inds,],
-                                      location = forecast_loc)
-      stopifnot(setequal(
-        fet$target_end_dates[case_inds],
-        case_fcst$target_end_date %>% unique()
-      ))
-      hosp_inds <- fet$target_end_dates %in% 
-        (lubridate::ymd(forecast_date) + 1:28)
-      hosp_fcst <- create_forecast_df(means = dets$sim_means[2, hosp_inds,],
-                                      vars = dets$sim_cov[2, 2, hosp_inds,],
-                                      target_type = "hospitalizations",
-                                      location = forecast_loc)
-      stopifnot(setequal(
-        fet$target_end_dates[hosp_inds],
-        hosp_fcst$target_end_date %>% unique()
-      ))
-      
-      death_inds <- case_inds
-      death_fcst <- create_forecast_df(means = dets$sim_means[3, death_inds,],
-                                       vars = dets$sim_cov[3, 3, death_inds,],
-                                       target_type = "inc deaths",
-                                       location = forecast_loc)
-      fcst <- bind_rows(case_fcst, hosp_fcst, death_fcst)
-      
-      lambda <- 1 / betasd
-      fcst_dir <-
-        file.path(
-          "forecasts",
-          paste0(
-            forecast_date,
-            "-fips",
-            forecast_loc))
-      
-      fcst_name <- paste0("lambda",
-                          sprintf("%06.2f", lambda),
-                          "-a",
-                          sprintf("%02.2f", a),
-                          "-CEID-InfectionKalman.csv"
-      )
-      fcst_path <- file.path(fcst_dir, fcst_name)
-      if (!dir.exists(fcst_dir))
-        dir.create(fcst_dir, recursive = TRUE)
-      write_csv(x = fcst, path = fcst_path)
+write_forecasts <-
+  function(fit, x, y, winit, hess, fet, betasd, fdt, forecast_loc) {
+    dets <-
+      kf_nll_details(fit$par,
+                     x,
+                     y,
+                     param_map,
+                     betasd = betasd,
+                     fet = fet)
+    make_fit_plots(
+      dets,
+      x = x,
+      winit = winit, 
+      h = hess,
+      betasd = betasd,
+      fdt = fdt,
+      forecast_loc = forecast_loc
+    )
+    case_inds <- which(fet$target_wday == 7)
+    if (lubridate::wday(fdt) > 2) {
+      case_inds <-
+        case_inds[-1] # drop first epiweek, which has been observed too much 
     }
+    case_fcst <-
+      create_forecast_df(
+        means = dets$sim_means[1, case_inds],
+        vars = dets$sim_cov[1, 1, case_inds],
+        location = forecast_loc,
+        fdt = fdt
+      )
+    stopifnot(setequal(
+      fet$target_end_dates[case_inds],
+      case_fcst$target_end_date %>% unique()
+    ))
+    hosp_inds <- fet$target_end_dates %in%
+      (lubridate::ymd(forecast_date) + 1:28)
+    hosp_fcst <-
+      create_forecast_df(
+        means = dets$sim_means[2, hosp_inds],
+        vars = dets$sim_cov[2, 2, hosp_inds],
+        target_type = "hospitalizations",
+        location = forecast_loc,
+        fdt = fdt
+      )
+    stopifnot(setequal(
+      fet$target_end_dates[hosp_inds],
+      hosp_fcst$target_end_date %>% unique()
+    ))
+    
+    death_inds <- case_inds
+    death_fcst <-
+      create_forecast_df(
+        means = dets$sim_means[3, death_inds],
+        vars = dets$sim_cov[3, 3, death_inds],
+        target_type = "inc deaths",
+        location = forecast_loc,
+        fdt = fdt
+      )
+    fcst <- bind_rows(case_fcst, hosp_fcst, death_fcst)
+    
+    lambda <- 1 / betasd
+    fcst_dir <-
+      file.path("forecasts",
+                paste0(forecast_date,
+                       "-fips",
+                       forecast_loc))
+    
+    fcst_name <- paste0("lambda",
+                        sprintf("%06.2f", lambda),
+                        "-status-quo",
+                        "-CEID-InfectionKalman.csv")
+    fcst_path <- file.path(fcst_dir, fcst_name)
+    if (!dir.exists(fcst_dir))
+      dir.create(fcst_dir, recursive = TRUE)
+    write_csv(x = fcst, path = fcst_path)
   }
-}
 
-make_fit_plots <- function(dets, x, a, betasd) {
-  
+make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc) {
   plot_dir <-
-    file.path(
-      "plots",
-      paste0(
-        forecast_date,
-        "-fips",
-        forecast_loc),
-      paste0(
-        "lambda",
-        sprintf("%06.2f", 1 / betasd),
-        "-a",
-        sprintf("%02.2f", a)))
+    file.path("plots",
+              paste0(forecast_date,
+                     "-fips",
+                     forecast_loc),
+              paste0("lambda",
+                     sprintf("%06.2f", 1 / betasd)))
   
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
@@ -184,11 +220,11 @@ make_fit_plots <- function(dets, x, a, betasd) {
   )
   
   par(mfrow = c(3, 1))
-  qqnorm(dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]), sub = "Cases")
+  qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1, 1,]), sub = "Cases")
   abline(0, 1)
-  qqnorm(dets$ytilde_k[2, ] / sqrt(dets$S[2, 2, ]), sub = "Hospitalizations")
+  qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2, 2,]), sub = "Hospitalizations")
   abline(0, 1)
-  qqnorm(dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]), sub = "Deaths")
+  qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3, 3,]), sub = "Deaths")
   abline(0, 1)
   dev.off()
   
@@ -202,41 +238,44 @@ make_fit_plots <- function(dets, x, a, betasd) {
   )
   par(mfrow = c(3, 1))
   
-  
-  rho_t <- detect_frac(x$time[seq_len(nrow(y))])
+  rho_t <- x$rhot
   plot(x$time, y$cases, xlab = "Time", ylab = "Cases")
-  pred_cases <- dets$xhat_kkmo["C", ] * rho_t + dets$xhat_kkmo["Hnew", ]
-  est_cases <- dets$xhat_kkmo["C", ] + dets$xhat_kkmo["Hnew", ]
-  se_cases <- sqrt(dets$S[1, 1, ])
+  pred_cases <-
+    dets$xhat_kkmo["C",] * rho_t + dets$xhat_kkmo["Hnew",]
+  est_cases <- dets$xhat_kkmo["C",] + dets$xhat_kkmo["Hnew",]
+  se_cases <- sqrt(dets$S[1, 1,])
   lines(x$time, se_cases * 2 + pred_cases, col = "grey")
   lines(x$time, pred_cases)
   lines(x$time, est_cases, lty = 2)
-  lines(x$time,-se_cases * 2 + pred_cases, col = "grey")
+  lines(x$time, -se_cases * 2 + pred_cases, col = "grey")
   
-  plot(x$time, y$hospitalizations, xlab = "Time",
+  plot(x$time,
+       y$hospitalizations,
+       xlab = "Time",
        ylab = "Hospitalizations")
-  pred_hosps <- dets$xhat_kkmo["Hnew", ]
-  se_hosps <- sqrt(dets$S[2, 2, ])
+  pred_hosps <- dets$xhat_kkmo["Hnew",]
+  se_hosps <- sqrt(dets$S[2, 2,])
   lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
   lines(x$time, pred_hosps)
-  lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
+  lines(x$time, -se_hosps * 2 + pred_hosps, col = "grey")
   
   plot(x$time, y$deaths, xlab = "Time",
        ylab = "Deaths")
-  pred_deaths <- dets$xhat_kkmo["Drep", ]
-  se_deaths <- sqrt(dets$S[3, 3, ])
+  pred_deaths <- dets$xhat_kkmo["Drep",]
+  se_deaths <- sqrt(dets$S[3, 3,])
   lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
   lines(x$time, pred_deaths)
-  lines(x$time,-se_deaths * 2 + pred_deaths, col = "grey")
+  lines(x$time, -se_deaths * 2 + pred_deaths, col = "grey")
   dev.off()
   
   plot_path3 <- file.path(plot_dir, "case-forecasts.png")
   case_inds <- which(fet$target_wday == 7)
   case_fcst <-
     create_forecast_df(
-      means = dets$sim_means[1, case_inds, ],
-      vars = dets$sim_cov[1, 1, case_inds, ],
-      location = forecast_loc
+      means = dets$sim_means[1, case_inds],
+      vars = dets$sim_cov[1, 1, case_inds],
+      location = forecast_loc,
+      fdt = fdt
     )
   p3 <- case_fcst %>%
     ggplot(aes(
@@ -254,10 +293,11 @@ make_fit_plots <- function(dets, x, a, betasd) {
   
   hosp_fcst <-
     create_forecast_df(
-      means = dets$sim_means[2, hosp_inds, ],
-      vars = dets$sim_cov[2, 2, hosp_inds, ],
+      means = dets$sim_means[2, hosp_inds],
+      vars = dets$sim_cov[2, 2, hosp_inds],
       target_type = "hospitalizations",
-      location = forecast_loc
+      location = forecast_loc,
+      fdt = fdt
     )
   
   p4 <- hosp_fcst %>%
@@ -272,10 +312,11 @@ make_fit_plots <- function(dets, x, a, betasd) {
   plot_path5 <- file.path(plot_dir, "death-forecasts.png")
   death_fcst <-
     create_forecast_df(
-      means = dets$sim_means[3, case_inds, ],
-      vars = dets$sim_cov[3, 3, case_inds, ],
+      means = dets$sim_means[3, case_inds],
+      vars = dets$sim_cov[3, 3, case_inds],
       target_type = "inc deaths",
-      location = forecast_loc
+      location = forecast_loc,
+      fdt = fdt
     )
   
   p5 <- death_fcst %>%
@@ -287,48 +328,74 @@ make_fit_plots <- function(dets, x, a, betasd) {
     geom_line() + geom_point() + labs(y = "Weekly deaths")
   
   ggsave(filename = plot_path5, plot = p5)
-
+  
   plot_path6 <- file.path(plot_dir, "Rt-time-series.png")
+  png(
+    plot_path6,
+    width = 7.5,
+    height = 10,
+    units = "in",
+    res = 90
+  )
+  make_rt_plot(fit, x)
+  dev.off()
   
-  df <- tibble(
-    time = x$time,
-    beta_t = exp(dets$logbeta),
-    doses = x$doses,
-    gamma = dets$gamma,
-    de = dets$doseeffect
-  ) %>%
-    mutate(
-      Rtnovacc = beta_t / gamma,
-      u = exp(-doses * de),
-      Rt = beta_t * u / gamma,
-      vacc_reduction = Rtnovacc - Rt
-    ) %>%
-    select(time, vacc_reduction, Rt) %>%
-    pivot_longer(-time) %>%
-    mutate(Estimate = factor(
-      name,
-      levels = c("vacc_reduction", "Rt"),
-      labels = c("Reduction in reproduction number due to vaccination", "Value")
-    ))
+  plot_path7 <- file.path(plot_dir, "params-tab-1.png")  
+  png(plot_path7,
+      width = 10,
+      height = 2,
+      units = "in",
+      res = 90)
+  est_tab <-
+    rbind(init = winit,
+          MLE = fit$par,
+          sd = sqrt(diag(solve(h)))) %>% signif(3)
+  gridExtra::grid.table(est_tab[, 1:10])
+  dev.off()
   
-  p6 <- ggplot(df, aes(x = time, y = value, fill = Estimate)) +
-    geom_area() +
-    labs(x = "Time", y = expression(paste("Instantaneous reproduction number, ", R[t]))) +
-    theme_light() +
-    theme(legend.position = "top")
-  ggsave(filename = plot_path6, plot = p6)
+  plot_path8 <- file.path(plot_dir, "params-tab-2.png")
+  png(plot_path8,
+      width = 12,
+      height = 2,
+      units = "in",
+      res = 90)
+  gridExtra::grid.table(est_tab[, -c(1:10)])
+  dev.off()
 }
 
-forecast_date <- Sys.getenv("fdt", unset = "2021-03-20")
+forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
 forecast_loc <- Sys.getenv("loc", unset = "36")
 
 fit_dir <-
-  file.path(
-    "fits",
-    paste0(
-      forecast_date,
-      "-fips",
-      forecast_loc))
+  file.path("fits",
+            paste0(forecast_date,
+                   "-fips",
+                   forecast_loc))
 
 load(file.path(fit_dir, "fit.RData"))
-write_forecasts(fits, fet, agrid, betasdgrid)
+
+ti <- max(x$target_end_date) + lubridate::ddays(1)
+fdtw <- lubridate::wday(forecast_date)
+if (fdtw > 2) {
+  extra <-
+    7 - fdtw ## extra days to ensure we sim up to the end of the 4 ahead target
+} else {
+  extra <- 0
+}
+tf <- lubridate::ymd(forecast_date) + lubridate::ddays(28 + extra)
+target_end_dates <- seq(from = ti, to = tf, by = "day")
+target_end_times <- lubridate::decimal_date(target_end_dates)
+target_wday <- lubridate::wday(target_end_dates)
+fet <- tibble(target_end_times, target_wday, target_end_dates)
+
+write_forecasts(
+  fit = fit2,
+  x = x,
+  y = y,
+  winit = winit, 
+  hess = h2,
+  betasd = bsd,
+  fet = fet,
+  fdt = forecast_date,
+  forecast_loc = forecast_loc
+)
