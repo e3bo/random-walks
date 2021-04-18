@@ -12,7 +12,7 @@ JuliaCall::julia_eval("using DataFrames")
 ## Data prep
 
 forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
-forecast_loc <- Sys.getenv("loc", unset = "17")
+forecast_loc <- Sys.getenv("loc", unset = "46")
 
 hopdir <- file.path("hopkins", forecast_date)
 tdat <- load_hopkins(hopdir, weekly = FALSE)
@@ -166,8 +166,8 @@ x <- left_join(x0, right, by = "time") %>%
 winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
 ## fitting
-iter1 <- 4
-iter2 <- 1
+iter1 <- 400
+iter2 <- 100
 bsd <- 0.01
 
 tictoc::tic("fit 1")

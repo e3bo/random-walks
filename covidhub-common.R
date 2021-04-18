@@ -595,8 +595,8 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   names(bvec) <- paste0("b", seq_along(bvec))
 
   winit <- c(
-    logE0 = log(E0init),
-    logH0 = log(H0init),
+    logE0 = log(E0init + 1),
+    logH0 = log(H0init + 1),
     logtauc = log(tau_cases_init),
     logtauh = log(tau_hosp_init),
     logtaud = log(tau_deaths_init),
