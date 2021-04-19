@@ -166,7 +166,7 @@ x <- left_join(x0, right, by = "time") %>%
 winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
 ## fitting
-iter1 <- 4
+iter1 <- 100
 iter2 <- 1
 bsd <- 0.01
 
