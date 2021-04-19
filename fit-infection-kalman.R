@@ -64,7 +64,7 @@ tdat3 <- tdat2 %>%
 mob_path <- file.path("covidcast-safegraph-home-prop-7dav",
                       forecast_date,
                       "epidata.csv")
-abbr <- covidcast::fips_to_abbr(forecast_loc) %>% tolower()
+abbr <- covidcast::fips_to_abbr(paste0(forecast_loc, "000")) %>% tolower()
 mob_ts <- read_csv(
   mob_path,
   col_types = cols_only(
