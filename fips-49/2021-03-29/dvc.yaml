@@ -3,6 +3,7 @@ stages:
     cmd: fdt=2021-03-29 loc=49 Rscript fit-infection-kalman.R
     wdir: ../..
     deps:
+    - covidcast-safegraph-home-prop-7dav/2021-03-29
     - covidhub-common.R
     - fit-infection-kalman.R
     - healthdata/2021-03-29/49
@@ -10,6 +11,9 @@ stages:
     - hopkins/2021-03-29
     outs:
     - fits/2021-03-29-fips49/fit.RData
+    metrics:
+    - fits/2021-03-29-fips49/fit-metrics.json:
+        cache: false
   forecast-2021-03-29-49:
     cmd: fdt=2021-03-29 loc=49 Rscript write-formatted-forecast.R
     wdir: ../..
