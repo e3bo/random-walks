@@ -660,7 +660,7 @@ kfnll <-
            betasd = 1,
            maxzscore = Inf,
            just_nll = TRUE) {
-    diffeqr::diffeq_setup()
+    diffeqr::diffeq_setup("/opt/julia-1.5.3/bin")
     JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
     
     E0 <- exp(logE0)
