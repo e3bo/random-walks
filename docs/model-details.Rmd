@@ -1,0 +1,349 @@
+---
+output:
+  html_document:
+    df_print: paged
+header-includes: \usepackage{amsmath}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(here)
+library(tidyverse)
+source(here::here("code/plotting/plotoverview.R"))
+```
+
+## Model of COVID-19 transmission in the U.S.A. by state
+Updated `r format(Sys.time(), '%B %d, %Y')`
+
+The epidemiology of COVID-19 is poorly understood.
+To better understand the potential range of epidemic outcomes in the U.S.A., we developed a model based on the accumulation of knowledge from various locations and fit it to state-level observations of the number of reported cases, hospital admissions, and deaths.
+
+### Data
+
+#### Incident Case Data & Death Reports
+
+Fitted data on incident case and death reports for each state in the U.S.A. were collated by the <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University"</a>.
+We show a subset of the state-level data here for Georgia, New York, Washington, and Wyoming.
+We did not smooth the reported data but we did exclude all negative case and death reports.
+
+```{r collate-data}
+all_files <- list.files(path = here::here("output/current/"), pattern = ".csv")
+param_files <- list.files(path = here::here("output/current/"), pattern = "params-natural.rds")
+state_summaries <- tibble()
+state_parameters <- tibble()
+state_logliks <- tibble()
+statedf <-readRDS(here::here("output/current", "statedf.rds"))
+for(i in 1:length(all_files)) {
+  do_file <- all_files[i]
+  location <- sub(".csv", "", do_file)
+  state_metadata <- statedf %>% filter(state_full == sub(".csv", "", do_file))
+  state_pop <- state_metadata %>% pull(total_pop)
+  state_initR0 <- state_metadata %>% pull(initR0)
+  state_beta_s <- (state_initR0*.1)
+  
+  tmpfile <- here::here("output/current", do_file)
+  tmp <- read.csv(tmpfile) %>%
+    filter(sim_type == "status_quo" | is.na(sim_type),
+           variable %in% c("daily_cases", "daily_deaths",
+                           "actual_daily_cases", "actual_daily_deaths",
+                           "mobility_trend", "latent_trend")) %>%
+    mutate(date = as.Date(date)) %>%
+    dplyr::select(location, sim_type, period, date, variable, mean_value) %>% 
+    pivot_wider(names_from = variable, values_from = mean_value) %>%
+    mutate(beta_s = state_beta_s) %>% 
+    mutate(omega = mobility_trend * latent_trend * beta_s) %>% 
+    pivot_longer(cols = !c(location, sim_type, period, date), 
+                 names_to = "variable", 
+                 values_to = "mean_value",
+                 values_drop_na = TRUE)
+  state_summaries <- bind_rows(state_summaries, tmp) # ? was this missing?
+  tmpparamfile <- here::here("output/current", param_files[i])
+  tmpparams <- readRDS(tmpparamfile)
+  tmp_loglik <- data.frame(location = unique(tmp$location),
+                        log_lik = tmpparams["LogLik", 2])
+  rnms <- row.names(tmpparams)
+  tmpparams <- tmpparams %>%
+    mutate(parameter = rnms) %>%
+    filter(is_fitted == "yes") %>%
+    dplyr::select(-is_fitted) %>%
+    gather("key", "value", -parameter) %>%
+    filter(key == "X1") %>%
+    dplyr::select(-key) %>%
+    mutate(location = unique(tmp$location)) %>%
+    dplyr::select(location, value, parameter)
+  
+  state_parameters <- bind_rows(state_parameters, tmpparams)
+  state_logliks <- bind_rows(state_logliks, tmp_loglik)
+}
+# Fixed parameters table
+betas_names <- rnms[grep("b[0-9]+", rnms)] # find parameters starting with b followed by any number
+spline_coefficients <- paste("Spline coefficient", gsub("b","", betas_names))
+names(spline_coefficients) <- betas_names
+params_vec <- c(MIF_ID = "MIF id", 
+                LogLik = "Log Likelihood", 
+                LogLik_SE = "SE of Log Likelihood", 
+                beta_s = "Transmission rate",
+                # Relative Transmissibility
+                frac_trans_e = "Relative transmissibility of latent infections",
+                frac_trans_a = "Relative transmissibility of asymptomatic individuals",
+                frac_trans_c = "Relative transmissibility of detected symptomatic individuals post-reporting",
+                frac_trans_h = "Relative transmissibility of hospitalized individuals",
+                # Time in compartments
+                time_e = "Time spent in latent compartments (days)",
+                time_a = "Time spent in asymptomatic compartments (days)",
+                time_su = "Time spent in symptomatic, undetected compartments (days)",
+                time_sd = "Time spent in symptomatic, detected compartments (days)",
+                time_c = "Time spent in diagnosed cases compartments (days)",
+                time_h = "Time spent in hospitalized compartments (days)",
+                # Detection time
+                max_diag_factor = "Maximum for factor by which movement through Isd happens faster (quicker diagnosis)",
+                diag_rampup = "Rate at which faster diagnosis ramps up to max",
+                t_half_diag = "Time at which diagnosis is at 50% of max (in days since t = 1)",
+                # Detection fraction
+                max_detect_frac = "Maximum fraction of cases that are detected",
+                detect_rampup = "Speed at which fraction detected ramps up",
+                t_half_detect = "Time at which infection detection fraction is at 50% of max (in days since t = 1)",
+                base_detect_frac = "Minimum fraction detected at t = 1",
+                # Fraction asymptomatic
+                frac_asym = "Fraction of latent infections that move to asymptomatic",
+                # Fraction hosptilized
+                frac_hosp = "Fraction of detected cases that are hospitalized",
+                # Fraction of hospitalizations that result in death
+                min_frac_dead = "Maximum fraction of hospitalizations that result in death",
+                max_frac_dead = "Maximum fraction of hospitalizations that result in death",
+                log_half_dead = "Time at which death fraction is at 50% of max (in days since t = 1)",
+                # Dispersion parameters
+                theta_cases = "Dispersion parameter for case reporting observation process",
+                theta_hosps = "Dispersion parameter for hospitalization reporting observation process",
+                theta_deaths = "Dispersion parameter for death reporting obsercation process",
+                sigma_dw = "Variance of the stochastics process noise",
+                # Spline coefficients
+                spline_coefficients,
+                # Initial conditions
+                S_0 = "Initial number of susceptible individuals on t = 1",
+                E1_0 = "Initial number of latent infectious individuals on t = 1",
+                Ia1_0 = "Initial number of asymptomatic individuals on t = 1",
+                Isu1_0 = "Initial number of symptomatic, undetected individuals on t = 1",
+                Isd1_0 = "Initial number of symptomatic, detected individuals on t = 1",
+                C1_0 = "Initial number of diagnosed cases on t = 1",
+                H1_0 = "Initial number of hospitalized cases on t = 1",
+                R_0 = "Initial number of recovered individuals on t = 1",
+                D_0 = "Initial number of deaths after hospitalization on t = 1",
+                trend_start = "Trend")
+tmpparams <- readRDS(tmpparamfile)
+rnms <- row.names(tmpparams)
+params_map <- tibble(Parameter = names(params_vec),
+                     Description = params_vec)
+fixed_parameters <- tmpparams %>%
+  mutate(Parameter = rnms) %>%
+  filter(is_fitted == "no") %>%
+  dplyr::select(-is_fitted) %>%
+  gather("key", "value", -Parameter) %>%
+  filter(key == "X1") %>%
+  left_join(params_map, by = "Parameter") %>%
+  filter(!Parameter %in% c("MIF_ID", "LogLik", "LogLik_SE", "trend_start", "theta_hosps", "S_0")) %>%
+  dplyr::select(Parameter, Description, value) %>%
+  mutate(Parameter = ifelse(Parameter == "E1_0", "L1_0", Parameter))
+```
+
+<!-- ```{r read-data, fig.height = 10, fig.width = 8} -->
+<!-- states <- c("Georgia", "New York", "Washington", "Wyoming") -->
+
+<!-- all_data <- state_summaries %>% -->
+<!--   filter(location %in% states) %>% -->
+<!--   filter(is.na(sim_type)) %>% -->
+<!--   mutate(variable = ifelse(variable == "actual_daily_cases",  -->
+<!--                            "Daily case reports",  -->
+<!--                            "Daily death reports")) -->
+
+<!-- ggplot(all_data, aes(x = date, y = median_value, color = location)) + -->
+<!--   geom_col(width = 0.3) + -->
+<!--   ylab("Number of persons") + -->
+<!--   facet_wrap(location~variable, scales = "free", ncol = 2) + -->
+<!--   theme_minimal(base_size = 14, base_line_size = 0.5) + -->
+<!--   # scale_color_brewer(type = "qual") + -->
+<!--   guides(color = FALSE) #+  -->
+<!--   #theme_dark() -->
+<!-- ``` -->
+
+![](data-legend.png){ width=280px }
+
+```{r read-data, fig.width=7}
+all_data <- state_summaries %>%
+  mutate(location = as.character(location)) %>% 
+  filter(is.na(sim_type)) %>%
+  pivot_wider(names_from = variable,
+                values_from = mean_value)
+  
+  # mutate(variable = ifelse(variable == "actual_daily_cases", "cases", "deaths"))
+plot_data <- function(database, state, legend = FALSE) {
+  
+  statedata <- database %>% filter(location == state)
+  col.cases <- 'rgba(0, 0, 0, .35)'
+  col.deaths <- 'rgba(0, 0, 0, 1.0)'
+  data.lwd <- 2
+  serif <- function(x) {
+    htmltools::tags$span(x, style = htmltools::css(font.family = "serif"))
+  }
+  
+  display <- function(x) {
+    format(round(x), big.mark=",", trim = TRUE)
+  }
+  
+  plotfont <- list(family = "serif")
+  hoverlabel <- list(namelength = -1,
+                     font = list(family = "serif"))
+  
+  p_data <- plotly::plot_ly(data = statedata, x = ~date, showlegend = legend) %>% 
+    plotly::add_trace(y = ~actual_daily_cases, type = 'bar',
+                      name = 'New case notifications',
+                      marker = list(color = col.cases),
+                      legendgroup = 'group1',
+                      hoverinfo = "x+text",
+                      hoverlabel = hoverlabel,
+                      text = ~paste(display(actual_daily_cases),serif("new case reports")) ) %>% 
+    plotly::add_trace(y = ~actual_daily_deaths, 
+                      name = 'New death notifications', type = 'scatter', mode = 'lines',
+                      line = list(color = col.deaths, width = data.lwd, shape = 'hvh'),
+                      legendgroup = 'group2',
+                      hoverinfo = "x+text",
+                      hoverlabel = hoverlabel,
+                      text = ~paste(display(actual_daily_deaths),serif("new deaths")) ) %>% 
+    plotly::layout(yaxis = list(title = state))
+  p_data
+}
+plots <- list()
+plots[[1]] <- plot_data(all_data, "Georgia", legend = FALSE) 
+plots[[2]] <- plot_data(all_data, "New York") 
+plots[[3]] <- plot_data(all_data, "Washington") 
+plots[[4]] <- plot_data(all_data, "Wyoming") 
+dash <- plotly::subplot(plots, nrows = length(plots), shareX = TRUE, titleY = TRUE) %>%
+  plotly::layout(
+    xaxis = list(
+      spikethickness = 1,
+      spikedash = "dot",
+      spikecolor = "black",
+      spikemode = "across+marker",
+      spikesnap = "cursor"
+    ),
+    yaxis = list(spikethickness = 0)
+  )
+dash
+```
+
+#### Social distancing / mobility data
+
+To date, the primary intervention in all states has been the adoption of social distancing behaviors and improved hygiene.
+We measure social distancing using aggregated, anonymized locations recorded by location-based mobile phone apps, collected by <a href="https://www.unacast.com/covid19/social-distancing-scoreboard" target="_blank">Unacast</a>.
+We summarize the effectiveness of social distancing behaviors as the average deviation from baseline, a statistic ranging from 0% (complete cessation of movements) to 100% (no difference from baseline).
+
+The trajectories of human mobility in all 50 states is shown below.
+
+```{r covariate, fig.height=3, fig.width=7, eval = TRUE}
+all_phi <- state_summaries %>%
+  filter(variable == "mobility_trend") %>%
+  dplyr::select(location, date, mean_value) %>%
+  filter(date <= Sys.Date())
+g <- ggplot(all_phi, aes(x = date, y = mean_value, color = location)) +
+  geom_line(size = 0.5) +
+  # ylab("Human movement\n(% of normal)") +
+  scale_y_continuous(limits = c(0,1), labels = scales::percent) +
+  scale_color_viridis_d(option = "D", direction = -1, alpha = .6, end = .75) +
+  # theme_dark(base_line_size = 0.5) +
+  theme_minimal() +
+  guides(color = FALSE)
+p <- g %>% plotly::ggplotly() %>% 
+  plotly::layout(showlegend = FALSE,
+                 # margin = list(l = 150),
+                 yaxis = list(title = "Human movement\n(% of normal)\n&nbsp;")
+                 )
+p
+```
+
+### Scenarios
+
+We explore a range of scenarios for transmission.
+Simulations in each state start on the data on which at least 1 case was first reported.
+The model is fit to data on reported cases and deaths to `r format(Sys.time(), '%B %d, %Y')` and propagated six weeks into the future.
+
+*Possible futures scenarios*
+
+We consider three possible futures scenarios. Our scenarios are all driven by changes in human mobility: increasing human mobility increases transmission rate, while decreasing mobility decreases transmission rate.
+Our model includes a latent trend in transmission to account for all other factors that make transmission rate vary over time.
+When projecting into the future, we extract the fitted latent trend effect over the last 30 days and then take the mean over the first 20 days of that 30 day period.
+We ignore the last 10 days to avoid undue influence of the latent trend as it adapts to fit the most recent data.
+
+1. **Increasing social distancing.** Social distancing increases, reducing movements from the current observed level to 30% of normal, which is the reduction observed in New York City that enabled transmission to decline there. Social distancing has the impact of reducing transmission rate. Thus, it is possible that other measures -- such as wide-spread, consistent wearing of face masks -- could achieve the same or similar level of transmission reduction that we model as an affect of social distancing.
+
+2. **Maintain social distancing.** Social distancing continues at the last observed level of human movement patterns and the epidemic trajectory continues to follow it's most recent path, which is also influenced by the latent trend. Our model captures current increases in case/death reports by allowing transmission rate to increase either due to mobility or the fitted latent trend. Thus, even if mobility remains constant, the most recent increase in transmission causes the trajectory to increase in many cases. As during the beginning of the epidemic, such exponential growth can, and likely will be, averted by increase vigilance through social distancing and other practices that reduce transmission.
+
+4. **Return to normal.** Social distancing returns to a level of human movement equivalent to baseline. 
+
+
+### Model details
+
+Key features of this model include:
+
+* Stochastic transmission process with a realistic level of **random variation**.
+* Realistic distributions of **presymptomatic and symptomatic periods**.
+* Different **transmission rates for asymptomatic, presymptomatic, and symptomatic individuals**.[^1]
+* Time varying **rates of case detection, isolation, and case notification**.  
+* Time varying **mortality**.  
+* Accounting for the effect on transmission of **human mobility** (i.e., **social distancing**), as measured by data.
+* A "latent" process that captures the effect of **environmental factors and other behaviors** that can reduce transmission but are difficult to quantify with data (e.g., hand washing or face masks).
+* Realistic intervention scenarios (e.g. improving case detection, faster testing).
+
+The model comprises susceptible, presymptomatic, asymptomatic, symptomatic, diagnosed, hospitalized, deceased, and recovered persons. 
+The following compartments are included:  
+
+* $\boldsymbol{S}$ - Uninfected and *susceptible* individuals. Susceptible individuals can become infected by individuals in the $L$, $I_a$, $I_{su}$, $I_{sd}$, $C$, and $H$ stages. Rates of transmission from these stages can be adjusted individually.
+* $\boldsymbol{L}$ - Individuals with *latent* infections who do not yet show symptoms. Those individuals can be infectious. At the end of the $L$ stage, a fraction moves into the $I_a$ stage, another fraction moves into the $I_{su}$ stage, and the remainder into the $I_{sd}$ stage.
+* $\boldsymbol{I_a}$ - Individuals who are *infected* and *asymptomatic*. Those individuals are likely infectious, but the model allows to adjust this.
+* $\boldsymbol{I_{su}}$ - Individuals who are *infected* and *symptomatic*, but are *undetected*. Those individuals are likely infectious. Individuals in this compartment never get diagnosed, and are assumed to recover.
+* $\boldsymbol{I_{sd}}$ - Individuals who are *infected* and *symptomatic*, and are *detected*. Those individuals are likely infectious. Individuals in this compartment will be diagnosed and move to $C$.
+* $\boldsymbol{C}$ - Individuals who have been diagnosed as *cases*. Those individuals are likely isolated and not infectious, but the model allows to adjust this. A fraction of individuals in the $C$ stage will naturally recover, without the need for hospitalization. The remainder moves into the $H$ stage.
+* $\boldsymbol{H}$ - Individuals who have been *hospitalized*. Those individuals are likely isolated and not infectious, but the model allows to adjust this. A fraction of individuals in the $H$ stage will recover, the remainder will die.
+* $\boldsymbol{R}$ - *Recovered/removed* individuals. Those individuals have recovered and are immune. 
+* $\boldsymbol{D}$ - Individuals who *died* from the infection. 
+
+To allow more realistic distributions of movement through compartments, several of these compartments are internally split into multiple stages using the *linear chain trick*.[^2]
+
+* $\boldsymbol{L}$ - 4 compartments
+* $\boldsymbol{I_a}$ - 4 compartments 
+* $\boldsymbol{I_{su}}$ - 4 compartments
+* $\boldsymbol{I_{sd}}$ - 4 compartments
+* $\boldsymbol{C}$ - 4 compartments
+* $\boldsymbol{H}$ - 4 compartments
+
+The flow diagram for this model shown below.
+
+```{r pomp-model}
+knitr::include_graphics(here::here("docs",'pomp-model.png'))
+```
+
+#### Interventions
+
+The following interventions are implemented:
+
+* Social distancing is assumed to reduce all transmission rates by some factor. This is provided as a covariate based on mobility data.
+* Decreasing time to diagnosis, which speeds up the transition from the detected class (I_sd) to the diagnosed cases class (C).
+* Improving detection, which is assumed to increase the fraction of symptomatic individuals that move into the $I_{sd}$ compartment and will eventually be diagnosed. It is assumed to increase sigmoidally up to a maximum value.
+
+#### Parameterization
+
+This model was initially parameterized using clinical outcome reports from the epidemic in Hubei province, China and further calibrated with information about COVID-19 elsewhere in China and the United States.
+Transmissibility of the virus is assumed to be proportional to the level of human movement.
+
+Key parameters estimated using maximum likelihood by iterated filtering (MIF)[^3] include baseline transmissibility ($\beta_0$), maximum ascertainment (i.e. maximum fraction of cases detected), fraction of known cases that are hospitalized, fatality rate among hospitalized cases, and the initial size of the latent class. 
+Auxiliary parameters estimated using MIF include the intensity of the parameter random walk and dispersion parameters for observables.
+
+<small>**Disclaimer:** The COVID-19 epidemic is changing rapidly, and information that was used in the construction of this model may be incomplete or contain errors.
+Accordingly, these results are preliminary, provisional, and subject to change.
+These results have not been peer-reviewed, but have been prepared to a professional standard with the intention of providing useful interpretation of a rapidly developing event.</small>
+
+
+[^1]:[Rong et al. 2020](https://wwwnc.cdc.gov/eid/article/26/5/20-0198_article?deliveryName=DM20712), [Du et al. 2020](https://www.medrxiv.org/content/10.1101/2020.02.19.20025452v3)
+
+[^2]:[Hurtado & Kirosingh 2019](https://link.springer.com/article/10.1007/s00285-019-01412-w)
+
+[^3]:[Ionides et al. 2006](https://www.pnas.org/content/103/49/18438)
