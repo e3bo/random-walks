@@ -568,10 +568,11 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   
   l <- 7 
   Rt <- lead(y$cases / rhot + hfill, n = l) / (y$cases / rhot + hfill)
+  Rt[Rt > 4] <- 4
+  Rt[Rt < 0] <- 0.1
   m <- 10
   Rtfilt <- signal::sgolayfilt(na.omit(Rt), p = 2, n = 2 * m  + 1) # edge values seem biased
-  Rtfilt[Rtfilt > 4] <- 4
-  Rtfilt[Rtfilt < 0] <- 0.1
+
   Rtfilt[1:m] <- NA
   lf <- length(Rtfilt)
   Rtfilt[(lf - m + 1):lf] <- NA
