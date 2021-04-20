@@ -110,7 +110,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     
     y0 = l0 * η / γ
     
-    x0 = [N - l0 - y0 - h0 - d0; l0; y0; 0; 0; h0; d0; 0]
+    x0 = [max(N - l0 - y0 - h0 - d0, 100); min(l0, N); min(y0, N); 0; 0; min(h0, N); min(d0, N); 0]
     p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
     
     if (eltype(bvec) == Float64)

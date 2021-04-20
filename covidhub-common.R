@@ -672,7 +672,7 @@ kfnll <-
     gamma_d <- gamma_h <- exp(loggammahd)
     hfpvec = exp(loghfpvec)
     D0 <- H0 * gamma_h / gamma_d * hfpvec[1]
-    xhat0 <- c(N - E0 - I0 - H0 - D0, E0, I0, 0, 0, H0, D0, 0)
+    xhat0 <- c(max(N - E0 - I0 - H0 - D0, 100), min(E0, N), min(I0, N), 0, 0, min(H0, N), min(D0, N), 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     
     if (ncol(z) == 1 && "cases" %in% names(z)) {
