@@ -141,6 +141,14 @@ x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
 x0$bvecmap <- rep(1:14, each = 28)
 
+## removal of untrusted data points
+
+if(forecast_loc == 33){
+  isuntrusted <- x$target_end_date >= "2020-08-16" & x$target_end_date <= "2020-09-02"
+  y$hospitalizations[isuntrusted] <- NA
+  #rationale: inconsistent with deaths data from hopkins and hospitalization data from https://carlsonschool.umn.edu/mili-misrc-covid19-tracking-project/download-data
+}
+
 set.seed(1)
 
 # estimate the probability that a case is reported assuming that all deaths are reported
@@ -149,8 +157,8 @@ cvd <-
              r = y$cases / lead(y$deaths, case_to_death_lag)) %>%
   mutate(logr = log(r)) %>% filter(is.finite(logr)) %>% filter(time < 2020.47)
 mars <- earth::earth(logr ~ time, data = cvd)
-plot(logr ~ time, data = cvd)
-lines(cvd$time, predict(mars))
+#plot(logr ~ time, data = cvd)
+#lines(cvd$time, predict(mars))
 cvd$rhat <- exp(predict(mars)) %>% as.numeric() %>% cummax() # make monotonic
 right <- cvd %>% select("time", "rhat")
 
