@@ -160,7 +160,7 @@ x <- left_join(x0, right, by = "time") %>%
   select(-rhat,-rhat2)
 
 
-#pdf <- data.frame(date = wind$target_end_date, p = x2$rhat3)
+#pdf <- data.frame(date = wind$target_end_date, p = x$rhot)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
 
 winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)

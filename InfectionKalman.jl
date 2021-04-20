@@ -113,6 +113,10 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     x0 = [N - l0 - y0 - h0 - d0; l0; y0; 0; 0; h0; d0; 0]
     p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
     
+    if (eltype(bvec) == Float64)
+        println(pvar)
+    end
+    
     dstate = size(x0, 1)
     dobs = size(zloc, 2)
     r = Diagonal([τc, τh, τd]) 
