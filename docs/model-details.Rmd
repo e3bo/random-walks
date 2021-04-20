@@ -9,7 +9,8 @@ header-includes: \usepackage{amsmath}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(here)
 library(tidyverse)
-source(here::here("code/plotting/plotoverview.R"))
+source("../covidhub-common.R")
+#source(here::here("code/plotting/plotoverview.R"))
 ```
 
 ## Model of COVID-19 transmission in the U.S.A. by state
@@ -23,8 +24,8 @@ To better understand the potential range of epidemic outcomes in the U.S.A., we 
 #### Incident Case Data & Death Reports
 
 Fitted data on incident case and death reports for each state in the U.S.A. were collated by the <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University"</a>.
+Fitted data on hospital admissions were provided by the U.S. Department of Health & Human Services (HHS), which we accessed via the Delphi Epidata API [^4]. 
 We show a subset of the state-level data here for Georgia, New York, Washington, and Wyoming.
-We did not smooth the reported data but we did exclude all negative case and death reports.
 
 ```{r collate-data}
 all_files <- list.files(path = here::here("output/current/"), pattern = ".csv")
@@ -169,66 +170,45 @@ fixed_parameters <- tmpparams %>%
 ![](data-legend.png){ width=280px }
 
 ```{r read-data, fig.width=7}
-all_data <- state_summaries %>%
-  mutate(location = as.character(location)) %>% 
-  filter(is.na(sim_type)) %>%
-  pivot_wider(names_from = variable,
-                values_from = mean_value)
-  
-  # mutate(variable = ifelse(variable == "actual_daily_cases", "cases", "deaths"))
-plot_data <- function(database, state, legend = FALSE) {
-  
-  statedata <- database %>% filter(location == state)
-  col.cases <- 'rgba(0, 0, 0, .35)'
-  col.deaths <- 'rgba(0, 0, 0, 1.0)'
-  data.lwd <- 2
-  serif <- function(x) {
-    htmltools::tags$span(x, style = htmltools::css(font.family = "serif"))
-  }
-  
-  display <- function(x) {
-    format(round(x), big.mark=",", trim = TRUE)
-  }
-  
-  plotfont <- list(family = "serif")
-  hoverlabel <- list(namelength = -1,
-                     font = list(family = "serif"))
-  
-  p_data <- plotly::plot_ly(data = statedata, x = ~date, showlegend = legend) %>% 
-    plotly::add_trace(y = ~actual_daily_cases, type = 'bar',
-                      name = 'New case notifications',
-                      marker = list(color = col.cases),
-                      legendgroup = 'group1',
-                      hoverinfo = "x+text",
-                      hoverlabel = hoverlabel,
-                      text = ~paste(display(actual_daily_cases),serif("new case reports")) ) %>% 
-    plotly::add_trace(y = ~actual_daily_deaths, 
-                      name = 'New death notifications', type = 'scatter', mode = 'lines',
-                      line = list(color = col.deaths, width = data.lwd, shape = 'hvh'),
-                      legendgroup = 'group2',
-                      hoverinfo = "x+text",
-                      hoverlabel = hoverlabel,
-                      text = ~paste(display(actual_daily_deaths),serif("new deaths")) ) %>% 
-    plotly::layout(yaxis = list(title = state))
-  p_data
-}
-plots <- list()
-plots[[1]] <- plot_data(all_data, "Georgia", legend = FALSE) 
-plots[[2]] <- plot_data(all_data, "New York") 
-plots[[3]] <- plot_data(all_data, "Washington") 
-plots[[4]] <- plot_data(all_data, "Wyoming") 
-dash <- plotly::subplot(plots, nrows = length(plots), shareX = TRUE, titleY = TRUE) %>%
-  plotly::layout(
-    xaxis = list(
-      spikethickness = 1,
-      spikedash = "dot",
-      spikecolor = "black",
-      spikemode = "across+marker",
-      spikesnap = "cursor"
-    ),
-    yaxis = list(spikethickness = 0)
+
+
+forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
+forecast_locs <- c("13", "36", "54", "53", "56") 
+
+hopdir <- file.path("../hopkins", forecast_date)
+tdat <- load_hopkins(hopdir, weekly = FALSE)
+ltdat <- tdat %>% filter(location %in% forecast_locs) %>%
+  filter(target_type == "day ahead inc case" |
+           target_type == "day ahead inc death")
+ltdat2 <-
+  ltdat %>% mutate(time = lubridate::decimal_date(target_end_date)) %>%
+  pivot_wider(names_from = target_type, values_from = value)
+
+jhu_data <- ltdat2 %>% ungroup() %>%
+  mutate(wday = lubridate::wday(target_end_date)) %>%
+  rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
+  select(location, target_end_date, time, wday, cases, deaths)
+
+load_healthd <- function(loc, dt) {
+  healthd <-
+    file.path("..", "healthdata", dt, loc, "epidata.csv")
+  cov_thresh <- .5
+  tdat2 <- read_csv(
+    healthd,
+    col_types = cols_only(
+      date = col_date("%Y%m%d"),
+      previous_day_admission_adult_covid_confirmed = col_integer(),
+      previous_day_admission_pediatric_covid_confirmed = col_integer(),
+      previous_day_admission_adult_covid_confirmed_coverage = col_integer()
+    )
   )
-dash
+}
+
+hd <- map(forecast_locs, load_healthd, dt = forecast_date)
+names(hd) <- forecast_locs
+hd1 <- bind_rows(hd, .id = "location")
+
+
 ```
 
 #### Social distancing / mobility data
@@ -347,3 +327,5 @@ These results have not been peer-reviewed, but have been prepared to a professio
 [^2]:[Hurtado & Kirosingh 2019](https://link.springer.com/article/10.1007/s00285-019-01412-w)
 
 [^3]:[Ionides et al. 2006](https://www.pnas.org/content/103/49/18438)
+
+[^4]:[Delphi Epidata API](David C. Farrow, Logan C. Brooks, Aaron Rumack, Ryan J. Tibshirani, Roni Rosenfeld (2015). Delphi Epidata API. https://github.com/cmu-delphi/delphi-epidata)
