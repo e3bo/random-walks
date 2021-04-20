@@ -149,9 +149,9 @@ cvd <-
              r = y$cases / lead(y$deaths, case_to_death_lag)) %>%
   mutate(logr = log(r)) %>% filter(is.finite(logr)) %>% filter(time < 2020.47)
 mars <- earth::earth(logr ~ time, data = cvd)
-#plot(logr ~ time, data = cvd)
-#lines(cvd$time, predict(mars))
-cvd$rhat <- exp(predict(mars)) %>% as.numeric()
+plot(logr ~ time, data = cvd)
+lines(cvd$time, predict(mars))
+cvd$rhat <- exp(predict(mars)) %>% as.numeric() %>% cummax() # make monotonic
 right <- cvd %>% select("time", "rhat")
 
 x <- left_join(x0, right, by = "time") %>%
@@ -159,6 +159,8 @@ x <- left_join(x0, right, by = "time") %>%
          rhot = rhat2 / (2 * rhat2[n()])) %>%
   select(-rhat,-rhat2)
 
+stopifnot(all(x$rhot <= 1))
+stopifnot(all(x$rhot >= 0))
 
 #pdf <- data.frame(date = wind$target_end_date, p = x$rhot)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
