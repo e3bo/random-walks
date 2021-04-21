@@ -606,12 +606,10 @@ kf_nll_details <- function(w, x, y, betasd, pm, fet) {
     logE0 = p$logE0,
     logH0 = p$logH0,
     logtauc = p$logtauc,
-    logtauh = p$logtauh,
     logtaud = p$logtaud,
     logchp = p$logchp,
     loghfpvec = p$loghfpvec,
     loggammahd = p$loggammahd,
-    doseeffect = p$doseeffect,
     prophomeeffect = p$prophomeeffect,
     eta = p$eta,
     gamma = p$gamma,
@@ -631,12 +629,11 @@ kfnll <-
            logE0,
            logH0,
            logtauc,
-           logtauh,
+           logtauh = log(10),
            logtaud,
            logchp,
            loghfpvec,
            loggammahd,
-           doseeffect,
            prophomeeffect,
            eta,
            gamma,
@@ -662,9 +659,8 @@ kfnll <-
     xhat0 <- c(max(N - E0 - I0 - H0 - D0, 100), min(E0, N), min(I0, N), 0, 0, min(H0, N), min(D0, N), 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     
-    if (ncol(z) == 1 && "cases" %in% names(z)) {
+    if (ncol(z) == 2 && !("hospitalizations" %in% names(z))) {
       z$hospitalizations <- NA
-      z$deaths <- NA
     }
     
     z <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
@@ -708,12 +704,9 @@ kfnll <-
       
       u0 <- cbind(xhat_init, PNinit)
       beta_t <-
-        exp(bvec[cov$bvecmap[i]] + cov$dosesiqr[i] * doseeffect + prophomeeffect * cov$prophomeiqr[i])
-      if (cov$time[i] < 2020.47) {
-        hfp <- hfpvec[1]
-      } else {
-        hfp <- hfpvec[2]
-      }
+      exp(bvec[cov$bvecmap[i]] + prophomeeffect * cov$prophomeiqr[i])
+      hfp <- hfpvec[1]
+
       par <-
         c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), hfp)
       
@@ -823,12 +816,8 @@ kfnll <-
           
           u0 <- cbind(xhat_init, PNinit)
           beta_t <-
-            exp(bvec[cov$bvecmap[T]] + cov$dosesiqr[T] * doseeffect + prophomeeffect * cov$prophomeiqr[T])
-          if (cov$time[T] < 2020.47) {
+            exp(bvec[cov$bvecmap[T]] + prophomeeffect * cov$prophomeiqr[T])
             hfp <- hfpvec[1]
-          } else {
-            hfp <- hfpvec[2]
-          }
           par <-
             c(beta_t,
               N,
