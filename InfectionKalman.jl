@@ -78,31 +78,25 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
 
     zloc = deepcopy(z)
     if size(z, 2) == 3
-
-    
         l0 = exp(pvar[1])
         h0 = exp(pvar[2])
-
-    
         τc = exp(pvar[3])
         τh = exp(pvar[4])
         τd = exp(pvar[5])
-    
         chp = exp(pvar[6])
         doseeffect = pvar[7]
         prophomeeffect = pvar[8]
-        
         hfpvec = [exp(p) for p in pvar[9:10]]
         bvec = pvar[11:end]
-    elseif size(z, 2) == 1 && "cases" in names(z)
+    elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
         l0 = exp(pvar[1])
-        τc = exp(pvar[2])
-        doseeffect = exp(pvar[3])
-        
+        h0 = exp(pvar[2])
+        τc = exp(pvar[3])
+        τd = exp(pvar[4])
+        prophomeeffect = pvar[5]
+        hfpvec = exp(pvar[6])
+        bvec = pvar[7:end]
         zloc[!, "hospitalizations"] .= missing
-        zloc[!, "deaths"] .= missing
-    
-        bvec = pvar[4:end]
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
@@ -146,7 +140,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = exp(bvec[cov.bvecmap[i]] + cov.dosesiqr[i] * doseeffect + cov.prophomeiqr[i] * prophomeeffect)
+        β = exp(bvec[cov.bvecmap[i]] + cov.prophomeiqr[i] * prophomeeffect)
         xlast[4] = 0
         xlast[5] = 0
         xlast[8] = 0
@@ -156,11 +150,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         plast[:,5] .= 0
         plast[8,:] .= 0
         plast[:,8] .= 0
-        if cov.time[i] < 2020.47
-            hfp = hfpvec[1]
-        else
-            hfp = hfpvec[2]
-        end
+        hfp = hfpvec[1]
+      
         par = [β, N,  ι, η, γ, γd, γh, chp, hfp]
         xplast = hcat(xlast, plast)
         prob = ODEProblem(vectorfield, xplast, (0.0, dt), par)

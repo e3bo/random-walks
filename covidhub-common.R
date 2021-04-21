@@ -338,18 +338,15 @@ param_map <- function(x, w, fixed = wfixed){
   ret$logE0 <- w[1]
   ret$logH0 <- w[2]
   ret$logtauc <- w[3]
-  ret$logtauh <- w[4]
-  ret$logtaud <- w[5]
-  ret$logchp <- w[6]
-  ret$doseeffect <- w[7]
-  ret$prophomeeffect <- w[8] 
+  ret$logtaud <- w[4]
+  ret$logchp <- log(fixed["chp"])
+  ret$prophomeeffect <- w[5]
   
-  ret$loghfpvec <- w[c(9, 10)]
+  ret$loghfpvec <- w[6]
   ret$loggammahd <- unname(log(fixed["gamma_h"]))
 
-  ret$bvec <- w[seq(11, length(w))]
+  ret$bvec <- w[seq(7, length(w))]
   ret$times <- x$time
-  ret$dosesiqr <- x$dosesiqr
   ret$prophomeiqr <- x$prophomeiqr
   ret$eta <- unname(fixed["eta"])
   ret$gamma <- unname(fixed["gamma"])
@@ -387,33 +384,33 @@ calc_kf_nll <- function(w, x, y, betasd, pm) {
       "InfectionKalman.obj",
       "(pvar, cov, z; N = N, η = η, γ = γ, γh = γh, γd = γd, betasd = betasd, just_nll = true)"
     ))
-  } else if(ncol(y) == 1 && "cases" %in% names(y)) {
+  } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
     pvar <-
       c(
         p$logE0,
+        p$logH0,
         p$logtauc,
-        p$logdoseeffect,
-        p$bpars
+        p$logtaud,
+        p$prophomeeffect,
+        p$loghfpvec,
+        p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("N", p$N)
     JuliaCall::julia_assign("η", p$eta)
     JuliaCall::julia_assign("γ", p$gamma)
-    JuliaCall::julia_assign("z", y)
     JuliaCall::julia_assign("cov", x)
+    JuliaCall::julia_assign("z", y)
+    JuliaCall::julia_assign("chp", exp(p$logchp))
     JuliaCall::julia_assign("betasd", betasd)
     JuliaCall::julia_assign("γd", exp(p$loggammahd))
     JuliaCall::julia_assign("γh", exp(p$loggammahd))
-    JuliaCall::julia_assign("h0", exp(p$logH0))
-    JuliaCall::julia_assign("τh", exp(p$logtauh))
-    JuliaCall::julia_assign("τd", exp(p$logtaud))
-    JuliaCall::julia_assign("chp", exp(p$logchp))
-    JuliaCall::julia_assign("hfp", exp(p$loghfp))
     nll <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.obj",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, h0 = h0, τh = τh, τd = τh, chp = chp, hfp = hfp, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, just_nll = true)"
     ))
+
   }
   
   nll
@@ -543,31 +540,25 @@ calc_kf_hess <- function(w, x, y, betasd, pm) {
 
 initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
-  tau_hosp_init <- max(var(y$hospitalizations, na.rm = TRUE), 1)
   tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
   wsize <- nrow(y)
   rhot <- x$rhot
-  
-  hfill <- zoo::na.fill(y$hospitalizations, "extend")
-  est_true_cases_hosps <- ifelse(y$cases > hfill,  (y$cases - hfill) / rhot + hfill, y$cases / rhot)
+
+  est_true_cases_hosps <- y$cases / rhot
   Iest <- est_true_cases_hosps / (wfixed["gamma"] * dt)
   
   I0init <- mean(head(Iest, n = 7), na.rm = TRUE)
   E0init <- (I0init * wfixed["gamma"] / wfixed["eta"])  %>% unname()
   
-  hosp_obs <- !is.na(y$hospitalizations)
-  chp_init <-
-    sum(y$hospitalizations, na.rm = TRUE) / sum(est_true_cases_hosps)
-  
-  Hest <- Iest  * wfixed["gamma"] * chp_init / wfixed["gamma_h"]
+  Hest <- Iest  * wfixed["gamma"] * wfixed["chp"] / wfixed["gamma_h"]
   
   H0init <- mean(head(Hest, n = 7), na.rm = TRUE)
   hfp_init <-
-    max(sum(y$deaths[hosp_obs], na.rm = TRUE) / sum(y$hospitalizations, na.rm = TRUE),
+    max(sum(y$deaths, na.rm = TRUE) / sum(Hest, na.rm = TRUE),
         0.01)
   
   l <- 7 
-  Rt <- lead(y$cases / rhot + hfill, n = l) / (y$cases / rhot + hfill)
+  Rt <- lead(y$cases / rhot, n = l) / (y$cases / rhot)
   Rt[Rt > 4] <- 4
   Rt[Rt < 0] <- 0.1
   m <- 10
@@ -580,17 +571,16 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   
   D0 <- H0init * wfixed["gamma_h"] / wfixed["gamma_d"] * hfp_init
   S0init <- wfixed["N"] - E0init - I0init - H0init - D0
-  Sdecrement <- cumsum(lead(y$cases / rhot + hfill, n = l))
+  Sdecrement <- cumsum(lead(y$cases / rhot, n = l))
   St <- S0init - Sdecrement
   betat <- Rtfilt * wfixed["gamma"] * wfixed["N"] / na.omit(St)
   betat[1:m] <- betat[m + 1]
   betat[(lf - m + 1):lf] <- betat[lf - m]
   betat2 <- c(betat, rep(betat[lf - m], l))
   
-  df <- data.frame(logbeta = log(betat2), dosesiqr = x$dosesiqr, prophomeiqr = x$prophomeiqr)
-  mod <- lm(logbeta~ dosesiqr + prophomeiqr, data = df)
+  df <- data.frame(logbeta = log(betat2), prophomeiqr = x$prophomeiqr)
+  mod <- lm(logbeta~ prophomeiqr, data = df)
   print(summary(mod))
-  doseeffect_init <- coef(mod)["dosesiqr"] %>% unname()
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
   binit <- coef(mod)["(Intercept)"] + residuals(mod)
   bsplit <- split(binit, x$bvecmap)
@@ -601,12 +591,9 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
     logE0 = log(E0init + 1),
     logH0 = log(H0init + 1),
     logtauc = log(tau_cases_init),
-    logtauh = log(tau_hosp_init),
     logtaud = log(tau_deaths_init),
-    logchp = log(chp_init),
-    doseeffect = doseeffect_init,
     prophomeeffect = prophomeeffect_init,
-    loghfpvec = rep(log(hfp_init), 2),
+    loghfpvec = log(hfp_init),
     bvec
   )
   winit

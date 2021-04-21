@@ -11,8 +11,8 @@ JuliaCall::julia_eval("using DataFrames")
 
 ## Data prep
 
-forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
-forecast_loc <- Sys.getenv("loc", unset = "46")
+forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
+forecast_loc <- Sys.getenv("loc", unset = "06")
 
 hopdir <- file.path("hopkins", forecast_date)
 tdat <- load_hopkins(hopdir, weekly = FALSE)
@@ -27,6 +27,28 @@ jhu_data <- ltdat2 %>% ungroup() %>%
   mutate(wday = lubridate::wday(target_end_date)) %>%
   rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
   select(target_end_date, time, wday, cases, deaths)
+
+
+mob_path <- file.path("covidcast-safegraph-home-prop",
+                      forecast_date,
+                      "epidata.csv")
+abbr <- covidcast::fips_to_abbr(paste0(forecast_loc, "000")) %>% tolower()
+mob_ts <- read_csv(
+  mob_path,
+  col_types = cols_only(
+    geo_value = col_character(),
+    time_value = col_date(),
+    value = col_double()
+  )
+) %>%
+  filter(geo_value == abbr) %>%
+  select(time_value, value) %>%
+  rename(target_end_date = time_value,
+         prophome = value)
+
+
+
+if (fdt > "2020-11-30"){
 
 healthd <-
   file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
@@ -60,24 +82,21 @@ tdat3 <- tdat2 %>%
     target_end_date = date - lubridate::ddays(1)
   ) %>%
   select(target_end_date, hospitalizations)
+} else {
 
-mob_path <- file.path("covidcast-safegraph-home-prop-7dav",
-                      forecast_date,
-                      "epidata.csv")
-abbr <- covidcast::fips_to_abbr(paste0(forecast_loc, "000")) %>% tolower()
-mob_ts <- read_csv(
-  mob_path,
-  col_types = cols_only(
-    geo_value = col_character(),
-    time_value = col_date(),
-    value = col_double()
-  )
-) %>%
-  filter(geo_value == abbr) %>%
-  select(time_value, value) %>%
-  rename(target_end_date = time_value,
-         prophome = value)
+  obs_data <- left_join(jhu_data, mob_ts, by = "target_end_date") %>%
+    mutate(
+      prophome = zoo::na.fill(prophome, "extend")
+    )
+  
+  
+}
 
+
+
+
+
+if (fdt > "2020-12-31"){
 vacc_path <- file.path("hopkins-vaccine",
                        forecast_date,
                        "vaccine_data_us_timeline.csv")
@@ -115,6 +134,9 @@ if (file.exists(vacc_path)) {
 } else {
   stop("Fitting not implemented for dates without vaccine data")
 }
+}
+
+
 
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 wind <- obs_data %>% slice(41:n())
@@ -130,16 +152,15 @@ wfixed <- c(
   gamma = 365.25 / 4,
   gamma_h = 365.25 / (case_to_death_lag / 2),
   gamma_d = 365.25 / (case_to_death_lag / 2),
+  chp = 0.03,
   eta = 365.25 / 4
 )
 
-y <- wind %>% select(cases, hospitalizations, deaths)
-x0 <- wind %>% select(target_end_date, time, doses, prophome)
-x0$dosesiqr <-
-  x0$doses /  diff(quantile(x0$doses[x0$doses > 0], c(.25, .75)))
+y <- wind %>% select(cases, deaths)
+x0 <- wind %>% select(target_end_date, time, prophome)
 x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
-x0$bvecmap <- rep(1:14, each = 28)
+x0$bvecmap <- rep(1:17, each = 7)
 
 ## removal of untrusted data points
 
