@@ -144,7 +144,7 @@ x0$bvecmap <- rep(1:14, each = 28)
 ## removal of untrusted data points
 
 if(forecast_loc == 33){
-  isuntrusted <- x$target_end_date >= "2020-08-16" & x$target_end_date <= "2020-09-02"
+  isuntrusted <- x0$target_end_date >= "2020-08-16" & x0$target_end_date <= "2020-09-02"
   y$hospitalizations[isuntrusted] <- NA
   #rationale: inconsistent with deaths data from hopkins and hospitalization data from https://carlsonschool.umn.edu/mili-misrc-covid19-tracking-project/download-data
 }
