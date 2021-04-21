@@ -344,8 +344,8 @@ param_map <- function(x, w, fixed = wfixed){
   
   ret$loghfpvec <- w[6]
   ret$loggammahd <- unname(log(fixed["gamma_h"]))
-
-  ret$bvec <- w[seq(7, length(w))]
+  ret$loggammad12 = w[7]
+  ret$bvec <- w[seq(8, length(w))]
   ret$times <- x$time
   ret$prophomeiqr <- x$prophomeiqr
   ret$eta <- unname(fixed["eta"])
@@ -393,6 +393,7 @@ calc_kf_nll <- function(w, x, y, betasd, pm) {
         p$logtaud,
         p$prophomeeffect,
         p$loghfpvec,
+        p$loggammad12, 
         p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -455,6 +456,7 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$prophomeeffect,
         p$loghfpvec,
+        p$loggammad12, 
         p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -515,6 +517,7 @@ calc_kf_hess <- function(w, x, y, betasd, pm) {
         p$logtaud,
         p$prophomeeffect,
         p$loghfpvec,
+        p$loggammad12, 
         p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -592,6 +595,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
     logtaud = log(tau_deaths_init),
     prophomeeffect = prophomeeffect_init,
     loghfpvec = log(hfp_init),
+    loggammad12 = log(365.25 / 10),
     bvec
   )
   winit

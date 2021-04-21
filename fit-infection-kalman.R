@@ -157,7 +157,7 @@ wfixed <- c(
 )
 
 y <- wind %>% select(cases, deaths)
-x0 <- wind %>% select(target_end_date, time, prophome)
+x0 <- wind %>% select(target_end_date, time, wday, prophome)
 x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
 x0$bvecmap <- rep(1:17, each = 7)
@@ -198,7 +198,7 @@ winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
 ## fitting
 iter1 <- 100
-iter2 <- 1
+iter2 <- 100
 bsd <- 0.01
 
 tictoc::tic("fit 1")
