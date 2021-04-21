@@ -197,8 +197,8 @@ stopifnot(all(x$rhot >= 0))
 winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
 ## fitting
-iter1 <- 300
-iter2 <- 100
+iter1 <- 100
+iter2 <- 1
 bsd <- 0.01
 
 tictoc::tic("fit 1")
