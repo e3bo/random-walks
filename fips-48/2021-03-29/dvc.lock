@@ -11,8 +11,8 @@ stages:
       md5: d6d3f848f3d9b7cbc3ddacc4793a40ee
       size: 26919
     - path: fit-infection-kalman.R
-      md5: 32af6ea79878de20946d839be8bf12b8
-      size: 8072
+      md5: bf20efa3697c8c25aecbee109d872acf
+      size: 8514
     - path: healthdata/2021-03-29/48
       md5: adeb33be9ade3f24e3efce8950f35e71.dir
       size: 133538
@@ -27,11 +27,11 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2021-03-29-fips48/fit-metrics.json
-      md5: 06b3a7df1c02ba094549337c2823730e
+      md5: af03ba010e83380925bd97221c5e71fb
       size: 597
     - path: fits/2021-03-29-fips48/fit.RData
-      md5: 493f5de1f8339c8b572fe30dd276fc31
-      size: 21261
+      md5: aedbbb673c827811dd8488978a1b9cda
+      size: 20900
   forecast-2021-03-29-48:
     cmd: fdt=2021-03-29 loc=48 Rscript write-formatted-forecast.R
     deps:
@@ -39,17 +39,17 @@ stages:
       md5: d6d3f848f3d9b7cbc3ddacc4793a40ee
       size: 26919
     - path: fits/2021-03-29-fips48/fit.RData
-      md5: 493f5de1f8339c8b572fe30dd276fc31
-      size: 21261
+      md5: aedbbb673c827811dd8488978a1b9cda
+      size: 20900
     - path: write-formatted-forecast.R
       md5: 12776c858af76dc59cddf7ace0717996
       size: 11366
     outs:
     - path: forecasts/2021-03-29-fips48
-      md5: a74357184fa0d157b93b69428cc39baf.dir
-      size: 55154
+      md5: 52e901a7cac1293b24692a951fbc1aa5.dir
+      size: 54386
       nfiles: 1
     - path: plots/2021-03-29-fips48
-      md5: 83f81174ed7e9554aed13037620016c3.dir
-      size: 1438325
+      md5: d34fb59b44194f84fd0d7a974d12f4ac.dir
+      size: 1420929
       nfiles: 8
