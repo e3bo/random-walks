@@ -199,8 +199,10 @@ if(forecast_date_start == forecast_date){
   attach(fp, pos = 2)
   winit <- get("fit1", pos = 2)$par
   detach(pos = 2)
-  if (x$bvecmap[wsize] != x$bvecmap[wsize - 1]){
-    winit <- c(winit, winit[length(winit)]) # extend the bvec by repeating last value
+  datediff <- (lubridate::ymd(forecast_date) - lubridate::ymd(forecast_date_start)) / lubridate::ddays(1)
+  sizediff <- x$bvecmap[wsize] - x$bvecmap[wsize - datediff]
+  if (sizediff > 0){
+    winit <- c(winit, rep(winit[length(winit)], sizediff)) # extend the bvec by repeating last value
   }
 }
 
