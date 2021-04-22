@@ -11,7 +11,7 @@ dirname=fips-${loc}/${fdt}
 mkdir -p $dirname
 cd $dirname
 
-if [$fdtstart == $fdt]; then
+if [ ${fdtstart} == ${fdt} ]; then
   dvc run \
       -w ../.. \
       -d fit-infection-kalman.R \

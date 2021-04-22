@@ -1028,3 +1028,25 @@ stages:
       md5: 1c4f3cca26587dfd86df6d0493bacdb1.dir
       size: 3008141
       nfiles: 1
+  safegraph-hp-2020-07-01:
+    cmd: fdt=2020-07-01 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2020-07-01
+      md5: 2bf56765d2e86a056578a757308f6c00.dir
+      size: 3030039
+      nfiles: 1
+  hopkins-2020-07-01:
+    cmd: fdt=2020-07-01 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2020-07-01
+      md5: e20b2f4181073bf3b5d450746c7064c5.dir
+      size: 3554650
+      nfiles: 8
