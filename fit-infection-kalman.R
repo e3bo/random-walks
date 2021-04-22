@@ -11,7 +11,7 @@ JuliaCall::julia_eval("using DataFrames")
 
 ## Data prep
 
-forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
+forecast_date <- Sys.getenv("fdt", unset = "2020-06-30")
 forecast_loc <- Sys.getenv("loc", unset = "06")
 
 hopdir <- file.path("hopkins", forecast_date)
@@ -27,7 +27,6 @@ jhu_data <- ltdat2 %>% ungroup() %>%
   mutate(wday = lubridate::wday(target_end_date)) %>%
   rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
   select(target_end_date, time, wday, cases, deaths)
-
 
 mob_path <- file.path("covidcast-safegraph-home-prop",
                       forecast_date,
@@ -46,9 +45,7 @@ mob_ts <- read_csv(
   rename(target_end_date = time_value,
          prophome = value)
 
-
-
-if (fdt > "2020-11-30"){
+if (forecast_date > "2020-11-30"){
 
 healthd <-
   file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
@@ -92,11 +89,7 @@ tdat3 <- tdat2 %>%
   
 }
 
-
-
-
-
-if (fdt > "2020-12-31"){
+if (forecast_date > "2020-12-31"){
 vacc_path <- file.path("hopkins-vaccine",
                        forecast_date,
                        "vaccine_data_us_timeline.csv")
@@ -136,8 +129,6 @@ if (file.exists(vacc_path)) {
 }
 }
 
-
-
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 wind <- obs_data %>% slice(41:n())
 wsize <- nrow(wind)
@@ -160,7 +151,7 @@ y <- wind %>% select(cases, deaths)
 x0 <- wind %>% select(target_end_date, time, wday, prophome)
 x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
-x0$bvecmap <- rep(1:17, each = 7)
+x0$bvecmap <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 
 ## removal of untrusted data points
 
@@ -194,11 +185,42 @@ stopifnot(all(x$rhot >= 0))
 #pdf <- data.frame(date = wind$target_end_date, p = x$rhot)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
 
-winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
+#winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
+
+
+
+if (forecast_date == "2020-06-29" && forecast_loc == "06") {
+  winit <-
+    c(
+      8.84525442487002,
+      -1.9410973262972,
+      12.4822240973189,
+      5.62041865346974,
+      -0.215231653815656,
+      -0.985527447518198,
+      2.8253984751295,
+      4.68123234065946,
+      4.68070637757278,
+      4.67844012908105,
+      4.67339401927969,
+      4.66485980762512,
+      4.6533866117208,
+      4.63997699124128,
+      4.62550077865006,
+      4.6116270964086,
+      4.59946956774516,
+      4.5902455935586,
+      4.58440251810939,
+      4.58207964451701,
+      4.58370322953008,
+      4.58817592970655,
+      4.59186894945956,
+      4.59167559076008
+    )
+}
 
 ## fitting
-iter1 <- 100
-iter2 <- 100
+iter1 <- 1000
 bsd <- 0.01
 
 tictoc::tic("fit 1")
@@ -226,51 +248,6 @@ h1 <- calc_kf_hess(
 )
 tictoc::toc()
 
-#rbind(winit, fit$par, sqrt(diag(solve(h))))
-
-tictoc::tic("fit 2")
-fit2 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x,
-  betasd = bsd,
-  epsilon = 1e-3,
-  max_iterations = iter2,
-  y = y,
-  pm = param_map,
-  fit1$par,
-  invisible = 0
-)
-tt2 <- tictoc::toc()
-
-tictoc::tic("hessian 2")
-h2 <- calc_kf_hess(
-  w = fit2$par,
-  x = x,
-  y = y,
-  betasd = bsd,
-  pm = param_map
-)
-tictoc::toc()
-#rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
-
-
-tictoc::tic("fit 3")
-fit2 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  x = x,
-  betasd = bsd,
-  epsilon = 1e-3,
-  max_iterations = 1500,
-  y = y,
-  pm = param_map,
-  fit2$par,
-  invisible = 0
-)
-tt2 <- tictoc::toc()
-
-
 
 ## Save outputs
 
@@ -284,7 +261,7 @@ if (!dir.exists(fit_dir))
   dir.create(fit_dir, recursive = TRUE)
 
 the_file <- file.path(fit_dir, "fit.RData")
-save(x, y, winit, wfixed, fit1, fit2, h1, h2, bsd, file = the_file)
+save(x, y, winit, wfixed, fit1, h1, bsd, file = the_file)
 
 ## Save metrics
 
@@ -301,34 +278,12 @@ mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(y, 2, diff)), na.rm = TRUE)
 naive_error_weekly <- colMeans(abs(y[-c(1:7),] - y[-((nrow(y) - 6):nrow(y)),]))
 
-mase1 <- mae1[-2] / naive_error
-mase1w <- mae1[-2] / naive_error_weekly
+mase1 <- mae1 / c(naive_error["cases"], NA, naive_error["deaths"])
+mase1w <- mae1 / c(naive_error_weekly["cases"], hosps=NA, naive_error_weekly["deaths"])
 
 g1 <-
   calc_kf_grad(
     w = fit1$par,
-    x = x,
-    y = y,
-    betasd = bsd,
-    pm = param_map
-  )
-
-dets2 <-
-  kf_nll_details(
-    w = fit2$par,
-    x = x,
-    y = y,
-    betasd = bsd,
-    pm = param_map,
-    fet = NULL
-  )
-mae2 <- rowMeans(abs(dets2$ytilde_k), na.rm = TRUE)
-mase2 <- mae2[-2] / naive_error
-mase2w <- mae2[-2] / naive_error_weekly
-
-g2 <-
-  calc_kf_grad(
-    w = fit2$par,
     x = x,
     y = y,
     betasd = bsd,
@@ -345,24 +300,13 @@ mets <- list(
   fit1mase_cases = mase1[1],
   fit1mase_hosps = mase1[2],
   fit1mase_death = mase1[3],
+  fit1mase_cases_w = mase1w[1],
+  fit1mase_hosps_w = mase1w[2],
+  fit1mase_death_w = mase1w[3],  
   fit1iter = iter1,
   fit1walltime = unname(tt1$toc - tt1$tic),
   fit1hessposdef = all(eigen(h1)$values > 0),
-  fit1convergence = fit1$convergence,
-  fit2nll = fit2$value,
-  fit2xnorm = sqrt(sum(fit2$par ^ 2)),
-  fit2gnorm = sqrt(sum(g2 ^ 2)),
-  fit2mae_cases = mae2[1],
-  fit2mae_hosps = mae2[2],
-  fit2mae_death = mae2[3],
-  fit2mase_cases = mase2[1],
-  fit2mase_hosps = mase2[2],
-  fit2mase_death = mase2[3],
-  fit2iter = iter2,
-  fit2hessposdef = all(eigen(h2)$values > 0),
-  fit2walltime = unname(tt2$toc - tt2$tic),
-  fit2convergence = fit2$convergence,
-  delta = (fit2$value - fit1$value) / iter2
+  fit1convergence = fit1$convergence
 )
 
 met_path <- file.path(fit_dir, "fit-metrics.json")

@@ -541,7 +541,7 @@ calc_kf_hess <- function(w, x, y, betasd, pm) {
 
 initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
-  tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1)
+  tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1) #/ mean(y$deaths)
   wsize <- nrow(y)
   rhot <- x$rhot
 

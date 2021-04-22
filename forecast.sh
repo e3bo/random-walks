@@ -14,8 +14,6 @@ dvc run \
     -d fit-infection-kalman.R \
     -d covidhub-common.R \
     -d hopkins/$fdt \
-    -d hopkins-vaccine/$fdt \
-    -d healthdata/${fdt}/${loc} \
     -d covidcast-safegraph-home-prop/${fdt} \
     -o fits/${fdt}-fips${loc}/fit.RData \
     -M fits/${fdt}-fips${loc}/fit-metrics.json \

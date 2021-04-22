@@ -7,9 +7,9 @@ source("covidhub-common.R")
 
 make_rt_plot <- function(ft, x) {
   par(mfrow = c(1, 1))
-  intercept <- ft$par[-c(1:10)][x$bvecmap]
-  X <- cbind(x$dosesiqr, x$prophomeiqr)
-  effects <- ft$par[c(7, 8)]
+  intercept <- ft$par[-c(1:7)][x$bvecmap]
+  X <- cbind(x$prophomeiqr)
+  effects <- ft$par[6]
   num_all <- exp(intercept + X %*% effects)
   plot(
     x$time,
@@ -18,28 +18,47 @@ make_rt_plot <- function(ft, x) {
     xlab = "Time",
     ylab = expression(R[t])
   )
-  legend(
-    "top",
-    col = c(1, "orange", "blue", "grey"),
-    lty = 1,
-    legend = c(
-      "MLE estimate",
-      "MLE - (effect of mobility)",
-      "MLE - (effect of vaccine)",
-      "MLE random walk intercept"
+  if (length(effects) == 2) {
+    legend(
+      "top",
+      col = c(1, "orange", "blue", "grey"),
+      lty = 1,
+      legend = c(
+        "MLE estimate",
+        "MLE - (effect of mobility)",
+        "MLE - (effect of vaccine)",
+        "MLE random walk intercept"
+      )
     )
-  )
-  effects_no_dose <- effects_no_mob <- effects
-  effects_no_mob[2] <- 0
-  num_nomob <- exp(intercept + X %*% effects_no_mob)
-  lines(x$time,
-        num_nomob / wfixed["gamma"],
-        col = "orange")
-  effects_no_dose[1] <- 0
-  num_nodose <- exp(intercept + X %*% effects_no_dose)
-  lines(x$time,
-        num_nodose / wfixed["gamma"],
-        col = "blue")
+    effects_no_dose <- effects_no_mob <- effects
+    effects_no_mob[2] <- 0
+    num_nomob <- exp(intercept + X %*% effects_no_mob)
+    lines(x$time,
+          num_nomob / wfixed["gamma"],
+          col = "orange")
+    effects_no_dose[1] <- 0
+    num_nodose <- exp(intercept + X %*% effects_no_dose)
+    lines(x$time,
+          num_nodose / wfixed["gamma"],
+          col = "blue")
+  } else {
+    legend(
+      "top",
+      col = c(1, "orange", "grey"),
+      lty = 1,
+      legend = c(
+        "MLE estimate",
+        "MLE - (effect of mobility)",
+        "MLE random walk intercept"
+      )
+    )
+    effects_no_mob <- effects
+    effects_no_mob[1] <- 0
+    num_nomob <- exp(intercept + X %*% effects_no_mob)
+    lines(x$time,
+          num_nomob / wfixed["gamma"],
+          col = "orange")
+  }
   lines(x$time,
         exp(intercept) / wfixed["gamma"],
         col = "grey")
@@ -210,6 +229,8 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
   
+  no_hosps <- all(is.na(dets$ytilde_k[2,]))
+  
   plot_path1 <- file.path(plot_dir, "qqplots.png")
   
   png(
@@ -223,8 +244,12 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
   par(mfrow = c(3, 1))
   qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1, 1,]), sub = "Cases")
   abline(0, 1)
-  qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2, 2,]), sub = "Hospitalizations")
-  abline(0, 1)
+  if(no_hosps){
+    plot.new()
+  } else {
+    qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2, 2,]), sub = "Hospitalizations")
+    abline(0, 1)
+  }
   qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3, 3,]), sub = "Deaths")
   abline(0, 1)
   dev.off()
@@ -250,15 +275,19 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
   lines(x$time, est_cases, lty = 2)
   lines(x$time, -se_cases * 2 + pred_cases, col = "grey")
   
-  plot(x$time,
-       y$hospitalizations,
-       xlab = "Time",
-       ylab = "Hospitalizations")
-  pred_hosps <- dets$xhat_kkmo["Hnew",]
-  se_hosps <- sqrt(dets$S[2, 2,])
-  lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
-  lines(x$time, pred_hosps)
-  lines(x$time, -se_hosps * 2 + pred_hosps, col = "grey")
+  if (no_hosps) {
+    plot.new()
+  } else {
+    plot(x$time,
+         y$hospitalizations,
+         xlab = "Time",
+         ylab = "Hospitalizations")
+    pred_hosps <- dets$xhat_kkmo["Hnew", ]
+    se_hosps <- sqrt(dets$S[2, 2, ])
+    lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
+    lines(x$time, pred_hosps)
+    lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
+  }
   
   plot(x$time, y$deaths, xlab = "Time",
        ylab = "Deaths")
@@ -334,7 +363,7 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
   png(
     plot_path6,
     width = 7.5,
-    height = 10,
+    height = 7,
     units = "in",
     res = 90
   )
@@ -351,16 +380,16 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
     rbind(init = winit,
           MLE = fit$par,
           sd = sqrt(diag(solve(h)))) %>% signif(3)
-  gridExtra::grid.table(est_tab[, 1:10])
+  gridExtra::grid.table(est_tab[, 1:7])
   dev.off()
   
   plot_path8 <- file.path(plot_dir, "params-tab-2.png")
   png(plot_path8,
-      width = 12,
+      width = 15,
       height = 2,
       units = "in",
       res = 90)
-  gridExtra::grid.table(est_tab[, -c(1:10)])
+  gridExtra::grid.table(est_tab[, -c(1:7)])
   dev.off()
 }
 
@@ -390,11 +419,11 @@ target_wday <- lubridate::wday(target_end_dates)
 fet <- tibble(target_end_times, target_wday, target_end_dates)
 
 write_forecasts(
-  fit = fit2,
+  fit = fit1,
   x = x,
   y = y,
   winit = winit, 
-  hess = h2,
+  hess = h1,
   betasd = bsd,
   fet = fet,
   fdt = forecast_date,
