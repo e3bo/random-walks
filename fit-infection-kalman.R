@@ -254,6 +254,24 @@ h2 <- calc_kf_hess(
 tictoc::toc()
 #rbind(winit, fit$par, fit2$par, sqrt(diag(solve(h2))))
 
+
+tictoc::tic("fit 3")
+fit2 <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  x = x,
+  betasd = bsd,
+  epsilon = 1e-3,
+  max_iterations = 1500,
+  y = y,
+  pm = param_map,
+  fit2$par,
+  invisible = 0
+)
+tt2 <- tictoc::toc()
+
+
+
 ## Save outputs
 
 fit_dir <-
@@ -281,7 +299,11 @@ dets1 <-
   )
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(y, 2, diff)), na.rm = TRUE)
-mase1 <- mae1 / naive_error
+naive_error_weekly <- colMeans(abs(y[-c(1:7),] - y[-((nrow(y) - 6):nrow(y)),]))
+
+mase1 <- mae1[-2] / naive_error
+mase1w <- mae1[-2] / naive_error_weekly
+
 g1 <-
   calc_kf_grad(
     w = fit1$par,
@@ -301,7 +323,9 @@ dets2 <-
     fet = NULL
   )
 mae2 <- rowMeans(abs(dets2$ytilde_k), na.rm = TRUE)
-mase2 <- mae2 / naive_error
+mase2 <- mae2[-2] / naive_error
+mase2w <- mae2[-2] / naive_error_weekly
+
 g2 <-
   calc_kf_grad(
     w = fit2$par,
