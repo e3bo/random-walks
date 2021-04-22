@@ -11,7 +11,8 @@ JuliaCall::julia_eval("using DataFrames")
 
 ## Data prep
 
-forecast_date <- Sys.getenv("fdt", unset = "2020-06-30")
+forecast_date_start <- Sys.getenv("fdtstart", unset = "2020-06-29")
+forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
 forecast_loc <- Sys.getenv("loc", unset = "06")
 
 hopdir <- file.path("hopkins", forecast_date)
@@ -185,9 +186,23 @@ stopifnot(all(x$rhot >= 0))
 #pdf <- data.frame(date = wind$target_end_date, p = x$rhot)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
 
-#winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 
-
+if(forecast_date_start == forecast_date){
+  winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
+} else {
+  fit_dir_start <-
+    file.path("fits",
+              paste0(forecast_date_start,
+                     "-fips",
+                     forecast_loc))
+  fp <- file.path(fit_dir_start, "fit.RData")
+  attach(fp, pos = 2)
+  winit <- get("fit1", pos = 2)$par
+  detach(pos = 2)
+  if (x$bvecmap[wsize] != x$bvecmap[wsize - 1]){
+    winit <- c(winit, winit[length(winit)]) # extend the bvec by repeating last value
+  }
+}
 
 if (forecast_date == "2020-06-29" && forecast_loc == "06") {
   winit <-
