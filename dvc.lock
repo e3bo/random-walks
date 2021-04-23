@@ -1116,3 +1116,47 @@ stages:
       md5: 2007ff7aefab4e4633503c75aff73b6c.dir
       size: 3825292
       nfiles: 8
+  safegraph-hp-2020-07-20:
+    cmd: fdt=2020-07-20 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2020-07-20
+      md5: e9c2dc6e132cc1d328b6c2f97f939917.dir
+      size: 3134650
+      nfiles: 1
+  hopkins-2020-07-20:
+    cmd: fdt=2020-07-20 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2020-07-20
+      md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
+      size: 4049279
+      nfiles: 8
+  safegraph-hp-2020-07-27:
+    cmd: fdt=2020-07-27 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2020-07-27
+      md5: cde8dbf53479fb0f170d871f2c29ee75.dir
+      size: 3173481
+      nfiles: 1
+  hopkins-2020-07-27:
+    cmd: fdt=2020-07-27 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2020-07-27
+      md5: 13dc696d512db6d01cf50e17d5e8fbc0.dir
+      size: 4238629
+      nfiles: 8
