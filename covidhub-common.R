@@ -345,7 +345,8 @@ param_map <- function(x, w, fixed = wfixed){
   ret$loghfpvec <- w[6]
   ret$loggammahd <- unname(log(fixed["gamma_h"]))
   ret$loggammad12 = w[7]
-  ret$bvec <- w[seq(8, length(w))]
+  ret$loggammad34 = w[8]
+  ret$bvec <- w[seq(9, length(w))]
   ret$times <- x$time
   ret$prophomeiqr <- x$prophomeiqr
   ret$eta <- unname(fixed["eta"])
@@ -393,7 +394,8 @@ calc_kf_nll <- function(w, x, y, betasd, pm) {
         p$logtaud,
         p$prophomeeffect,
         p$loghfpvec,
-        p$loggammad12, 
+        p$loggammad12,
+        p$loggammad34,
         p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -456,7 +458,8 @@ calc_kf_grad <- function(w, x, y, betasd, a, pm) {
         p$logtaud,
         p$prophomeeffect,
         p$loghfpvec,
-        p$loggammad12, 
+        p$loggammad12,
+        p$loggammad34, 
         p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -517,7 +520,8 @@ calc_kf_hess <- function(w, x, y, betasd, pm) {
         p$logtaud,
         p$prophomeeffect,
         p$loghfpvec,
-        p$loggammad12, 
+        p$loggammad12,
+        p$loggammad34,
         p$bvec
       )
     JuliaCall::julia_assign("pvar", pvar)
@@ -613,6 +617,7 @@ kf_nll_details <- function(w, x, y, betasd, pm, fet) {
     loghfpvec = p$loghfpvec,
     loggammahd = p$loggammahd,
     loggammad12 = p$loggammad12,
+    loggammad34 = p$loggammad34,
     prophomeeffect = p$prophomeeffect,
     eta = p$eta,
     gamma = p$gamma,
@@ -637,7 +642,8 @@ kfnll <-
            logchp,
            loghfpvec,
            loggammahd,
-           loggammad12, 
+           loggammad12,
+           loggammad34,
            prophomeeffect,
            eta,
            gamma,
@@ -715,6 +721,8 @@ kfnll <-
         c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), hfp)
       if(cov$wday[i] %in% c(1, 2)){
         par[6] <- exp(loggammad12) 
+      } else if (cov$wday[i] %in% c(3, 4)){
+        par[6] <- exp(loggammad34)
       }
       JuliaCall::julia_assign("u0", u0)
       JuliaCall::julia_assign("tspan", c(0, 0.00273224))
@@ -836,6 +844,8 @@ kfnll <-
               hfp)
           if(cov$wday[i] %in% c(1, 2)){
             par[6] <- exp(loggammad12) 
+          } else if (cov$wday[i] %in% c(3, 4)){
+            par[6] <- exp(loggammad34)
           }
           JuliaCall::julia_assign("u0", u0)
           JuliaCall::julia_assign("tspan", c(0, 0.00273224))

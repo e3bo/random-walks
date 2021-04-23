@@ -1,18 +1,50 @@
-forecast-2020-08-03-06:
-  cmd: fdt=2020-08-03 loc=06 Rscript InfectionKalmanRegularization.R
-  deps:
-  - path: InfectionKalmanRegularization.R
-    md5: f90b2c6631383d77ed0b978d3ebba3dc
-    size: 15869
-  - path: covidhub-common.R
-    md5: f20b6b459c901a0109be2e9b32b71b0d
-    size: 9944
-  - path: hopkins/2020-08-03
-    md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
-    size: 4404607
-    nfiles: 8
-  outs:
-  - path: forecasts/2020-08-03-fips06
-    md5: 71c27525497d6ffabccaf281983993b9.dir
-    size: 42440
-    nfiles: 20
+schema: '2.0'
+stages:
+  forecast-2020-08-03-06:
+    cmd: fdt=2020-08-03 loc=06 Rscript write-formatted-forecast.R
+    deps:
+    - path: covidhub-common.R
+      md5: 648be2719015543ca6cf1d44b4dde5a2
+      size: 25867
+    - path: fits/2020-08-03-fips06/fit.RData
+      md5: 8911fe28e205476e5006ed115f669538
+      size: 11063
+    - path: write-formatted-forecast.R
+      md5: 3e260abb84a9dcab310eb841a324abeb
+      size: 11999
+    outs:
+    - path: forecasts/2020-08-03-fips06
+      md5: 3e352221bf2f523e72ed600f9763e637.dir
+      size: 53682
+      nfiles: 1
+    - path: plots/2020-08-03-fips06
+      md5: 0be7b16e24bc8dac606b7a3c2f1dc16b.dir
+      size: 1700440
+      nfiles: 8
+  fit-2020-08-03-06:
+    cmd: fdtstart=2020-07-27 fdt=2020-08-03 loc=06 Rscript fit-infection-kalman.R
+    deps:
+    - path: covidcast-safegraph-home-prop/2020-08-03
+      md5: 9b594651fe0427ebd691249399f9474d.dir
+      size: 3218051
+      nfiles: 1
+    - path: covidhub-common.R
+      md5: 648be2719015543ca6cf1d44b4dde5a2
+      size: 25867
+    - path: fit-infection-kalman.R
+      md5: e54e828b32df821da5c0642619cd469a
+      size: 9128
+    - path: fits/2020-07-27-fips06/fit.RData
+      md5: 575e169051064003771e7f989095bd3a
+      size: 10482
+    - path: hopkins/2020-08-03
+      md5: 9c3c1622b6db037f1f35994cfa67b9ad.dir
+      size: 4404607
+      nfiles: 8
+    outs:
+    - path: fits/2020-08-03-fips06/fit-metrics.json
+      md5: fc367117329c6ee7209ef41b979cd22e
+      size: 360
+    - path: fits/2020-08-03-fips06/fit.RData
+      md5: 8911fe28e205476e5006ed115f669538
+      size: 11063

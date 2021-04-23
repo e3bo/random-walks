@@ -96,7 +96,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         prophomeeffect = pvar[5]
         hfpvec = exp(pvar[6])
         gammad12 = exp(pvar[7])
-        bvec = pvar[8:end]
+        gammad34 = exp(pvar[8])
+        bvec = pvar[9:end]
         zloc[!, "hospitalizations"] .= missing
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
@@ -156,6 +157,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         par = [β, N,  ι, η, γ, γd, γh, chp, hfp]
         if cov.wday[i] == 1 || cov.wday[i] == 2
            par[6] = gammad12
+        elseif cov.wday[i] == 3 || cov.wday[i] == 4
+           par[6] = gammad34
         end
         xplast = hcat(xlast, plast)
         prob = ODEProblem(vectorfield, xplast, (0.0, dt), par)

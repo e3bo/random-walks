@@ -2686,3 +2686,165 @@ stages:
     - pull-safegraph-ts-from-date.R
     outs:
     - covidcast-safegraph-home-prop/2020-07-27
+  safegraph-hp-2020-08-03:
+    cmd: fdt=2020-08-03 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-08-03
+  safegraph-hp-2020-08-10:
+    cmd: fdt=2020-08-10 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-08-10
+  safegraph-hp-2020-08-17:
+    cmd: fdt=2020-08-17 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-08-17
+  safegraph-hp-2020-08-24:
+    cmd: fdt=2020-08-24 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-08-24
+  safegraph-hp-2020-08-31:
+    cmd: fdt=2020-08-31 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-08-31
+  safegraph-hp-2020-09-07:
+    cmd: fdt=2020-09-07 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-09-07
+  safegraph-hp-2020-09-14:
+    cmd: fdt=2020-09-14 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-09-14
+  safegraph-hp-2020-09-21:
+    cmd: fdt=2020-09-21 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-09-21
+  safegraph-hp-2020-09-28:
+    cmd: fdt=2020-09-28 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-09-28
+  safegraph-hp-2020-10-05:
+    cmd: fdt=2020-10-05 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-10-05
+  safegraph-hp-2020-10-12:
+    cmd: fdt=2020-10-12 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-10-12
+  safegraph-hp-2020-10-19:
+    cmd: fdt=2020-10-19 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-10-19
+  safegraph-hp-2020-10-26:
+    cmd: fdt=2020-10-26 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-10-26
+  safegraph-hp-2020-11-02:
+    cmd: fdt=2020-11-02 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-11-02
+  safegraph-hp-2020-11-09:
+    cmd: fdt=2020-11-09 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-11-09
+  safegraph-hp-2020-11-16:
+    cmd: fdt=2020-11-16 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-11-16
+  safegraph-hp-2020-11-23:
+    cmd: fdt=2020-11-23 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-11-23
+  safegraph-hp-2020-11-30:
+    cmd: fdt=2020-11-30 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-11-30
+  safegraph-hp-2020-12-07:
+    cmd: fdt=2020-12-07 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-12-07
+  safegraph-hp-2020-12-14:
+    cmd: fdt=2020-12-14 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-12-14
+  healthdata-2020-12-14-01:
+    cmd: fdt=2020-12-14 loc=01 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-12-14/01
+  healthdata-2020-12-14-02:
+    cmd: fdt=2020-12-14 loc=02 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-12-14/02
+  healthdata-2020-12-14-04:
+    cmd: fdt=2020-12-14 loc=04 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-12-14/04
+  healthdata-2020-12-14-05:
+    cmd: fdt=2020-12-14 loc=05 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-12-14/05
+  healthdata-2020-12-14-06:
+    cmd: fdt=2020-12-14 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-12-14/06
+  healthdata-2020-12-14-08:
+    cmd: fdt=2020-12-14 loc=08 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-12-14/08
+  healthdata-2020-12-14-09:
+    cmd: fdt=2020-12-14 loc=09 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2020-12-14/09
