@@ -29,22 +29,22 @@ stages:
       size: 3134650
       nfiles: 1
     - path: covidhub-common.R
-      md5: 648be2719015543ca6cf1d44b4dde5a2
-      size: 25867
+      md5: 89cca14856e3484f57a0d2c212b2e196
+      size: 26270
     - path: fit-infection-kalman.R
-      md5: e54e828b32df821da5c0642619cd469a
-      size: 9128
+      md5: 43a0708679277a22a2263131fed66d53
+      size: 9147
     - path: fits/2020-07-13-fips06/fit.RData
-      md5: 8638c80a79f2952ce592a8893b26b0c2
-      size: 9426
+      md5: 35488114a2f09b650439657b714d9257
+      size: 9745
     - path: hopkins/2020-07-20
       md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
       size: 4049279
       nfiles: 8
     outs:
     - path: fits/2020-07-20-fips06/fit-metrics.json
-      md5: db407b4586b519be9c73dd0b30fbfdcc
-      size: 362
+      md5: 5e735f992a164958067349ed8a25cc8a
+      size: 359
     - path: fits/2020-07-20-fips06/fit.RData
-      md5: 1e921f23221946269cad20bce440f915
-      size: 9953
+      md5: c6bd1481da4510681906b3ad5a369df8
+      size: 10219

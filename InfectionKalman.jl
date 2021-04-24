@@ -115,7 +115,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     
     dstate = size(x0, 1)
     dobs = size(zloc, 2)
-    r = Diagonal([τc, τh, τd]) 
+    #r = Diagonal([τc, τh, τd]) 
 
     zmiss = [ismissing(x) for x in zloc]
     zz = Array{eltype(zloc)}(undef, dobs)
@@ -179,7 +179,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         end
         pkkmo[:,:,i] .= pnext
         
-        #r = Diagonal([τc, τh, τd * xlast[7]]) 
+        r = Diagonal([τc * xlast[3], τh, τd]) 
         rhot = cov.rhot[i]
         Σ[:,:,i] = hmat(rhot) * pkkmo[:,:,i] * hmat(rhot)' + r
 

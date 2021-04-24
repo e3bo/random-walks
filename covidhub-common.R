@@ -694,8 +694,7 @@ kfnll <-
             c(0, 0, 0,    0, 1, 0, 0, 0),
             c(0, 0, 0,    0, 0, 0, 0, 1))
     }
-    R <- diag(exp(c(logtauc, logtauh, logtaud)))
-    
+
     for (i in seq(1, T)) {
       if (i == 1) {
         xhat_init <- xhat0
@@ -739,7 +738,8 @@ kfnll <-
           P_kkmo[, j, i] <- 0
         }
       }
-      
+
+      R <- diag(c(exp(logtauc) * xhat_init[3], exp(c(logtauh, logtaud))))      
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) -
         H(cov$rhot[i]) %*% xhat_kkmo[, i, drop = FALSE]
       S[, , i] <-
@@ -853,7 +853,7 @@ kfnll <-
           JuliaCall::julia_eval("prob = ODEProblem(InfectionKalman.vectorfield,u0,tspan,par)")
           XP <-
             JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
-          
+          R <- diag(c(exp(logtauc) * xhat_init[3], exp(c(logtauh, logtaud)))) 
           sim_means[, j] <- H(cov$rhot[T]) %*% XP[, 1]
           sim_cov[, , j] <-
             H(cov$rhot[T]) %*% XP[,-1] %*% t(H(cov$rhot[T])) + R
