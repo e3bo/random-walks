@@ -333,28 +333,6 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
     filter((nchar(location)) <= 2 | str_detect(target, "inc case$")) ## only case forecasts accepted for counties
 }
 
-param_map <- function(x, w, fixed = wfixed){
-  ret <- list()
-  ret$logE0 <- w[1]
-  ret$logH0 <- w[2]
-  ret$logtauc <- w[3]
-  ret$logtaud <- w[4]
-  ret$logitchp <- log(fixed["chp"])
-  ret$prophomeeffect <- w[5]
-  
-  ret$loghfpvec <- w[6]
-  ret$loggammahd <- unname(log(fixed["gamma_h"]))
-  ret$loggammad12 = w[7]
-  ret$loggammad34 = w[8]
-  ret$bvec <- w[seq(9, length(w))]
-  ret$times <- x$time
-  ret$prophomeiqr <- x$prophomeiqr
-  ret$eta <- unname(fixed["eta"])
-  ret$gamma <- unname(fixed["gamma"])
-  ret$N <- unname(fixed["N"])
-  ret
-}
-
 julia_assign2 <- function(w, wfixed, betasd){
   JuliCall::julia_assign("pvar", w)
   JuliaCall::julia_assign("η", wfixed["eta"])
@@ -494,25 +472,46 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   winit
 }
 
-kf_nll_details <- function(w, x, y, betasd, pm, fet) {
-  p <- pm(x, w)
+kf_nll_details <- function(w, x, y, fixed, betasd, fet) {
+  eta <- unname(fixed["eta"])
+  gamma <- unname(fixed["gamma"])
+  N <- unname(fixed["N"]) 
+  loggammahd <- unname(log(fixed["gamma_h"]))
+  if (ncol(y) == 2){
+    logtauh <- log(10)
+    logitchp <- qlogis(fixed["chp"])
+    w2 <- w
+  } else {
+    logtauh <- w[4]
+    logitchp <- w[6]
+    w2 <- w[-c(4, 6)]
+  }
+  logE0 <- w2[1]
+  logH0 <- w2[2]
+  logtauc <- w2[3]
+  logtaud <- w2[4]
+  prophomeeffect <- w2[5]
+  loghfpvec <- w2[6]
+  loggammad12 = w2[7]
+  loggammad34 = w2[8]
+  bvec <- w2[seq(9, length(w2))]
   nll <- kfnll(
-    bvec = p$bvec,
-    logE0 = p$logE0,
-    logH0 = p$logH0,
-    logtauc = p$logtauc,
-    logtaud = p$logtaud,
-    logchp = p$logchp,
-    loghfpvec = p$loghfpvec,
-    loggammahd = p$loggammahd,
-    loggammad12 = p$loggammad12,
-    loggammad34 = p$loggammad34,
-    prophomeeffect = p$prophomeeffect,
-    eta = p$eta,
-    gamma = p$gamma,
-    N = p$N,
+    bvec = bvec,
+    logE0 = w[1],
+    logH0 = w[2],
+    logtauc = logtauc,
+    logtauh = logtauh,
+    logtaud = logtaud,
+    logitchp = logitchp,
+    loghfpvec = loghfpvec,
+    loggammahd = loggammahd,
+    loggammad12 = loggammad12,
+    loggammad34 = loggammad34,
+    prophomeeffect = prophomeeffect,
+    eta = eta,
+    gamma = gamma,
+    N = N,
     z = y,
-    t0 = p$t0,
     cov = x,
     fet = fet,
     just_nll = FALSE,
@@ -526,9 +525,9 @@ kfnll <-
            logE0,
            logH0,
            logtauc,
-           logtauh = log(10),
+           logtauh,
            logtaud,
-           logchp,
+           logitchp,
            loghfpvec,
            loggammahd,
            loggammad12,
@@ -538,7 +537,6 @@ kfnll <-
            gamma,
            N,
            z,
-           t0,
            cov,
            Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
            fets = NULL,
@@ -555,6 +553,10 @@ kfnll <-
     gamma_d <- gamma_h <- exp(loggammahd)
     hfpvec = exp(loghfpvec)
     D0 <- H0 * gamma_h / gamma_d * hfpvec[1]
+    
+    hfp <- hfpvec[1]
+    chp <- plogis(logitchp)
+    
     xhat0 <- c(max(N - E0 - I0 - H0 - D0, 100), min(E0, N), min(I0, N), 0, 0, min(H0, N), min(D0, N), 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     
@@ -603,10 +605,9 @@ kfnll <-
       u0 <- cbind(xhat_init, PNinit)
       beta_t <-
       exp(bvec[cov$bvecmap[i]] + prophomeeffect * cov$prophomeiqr[i])
-      hfp <- hfpvec[1]
 
       par <-
-        c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, exp(logchp), hfp)
+        c(beta_t, N,  0, eta, gamma, gamma_d, gamma_h, chp, hfp)
       if(cov$wday[i] %in% c(1, 2)){
         par[6] <- exp(loggammad12) 
       } else if (cov$wday[i] %in% c(3, 4)){
@@ -720,7 +721,6 @@ kfnll <-
           u0 <- cbind(xhat_init, PNinit)
           beta_t <-
             exp(bvec[cov$bvecmap[T]] + prophomeeffect * cov$prophomeiqr[T])
-            hfp <- hfpvec[1]
           par <-
             c(beta_t,
               N,
@@ -729,7 +729,7 @@ kfnll <-
               gamma,
               gamma_d,
               gamma_h,
-              exp(logchp),
+              chp,
               hfp)
           if(cov$wday[i] %in% c(1, 2)){
             par[6] <- exp(loggammad12) 
