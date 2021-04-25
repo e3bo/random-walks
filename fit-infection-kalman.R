@@ -46,49 +46,46 @@ mob_ts <- read_csv(
   rename(target_end_date = time_value,
          prophome = value)
 
-if (forecast_date > "2020-11-30"){
-
-healthd <-
-  file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
-cov_thresh <- .5
-tdat2 <- read_csv(
-  healthd,
-  col_types = cols_only(
-    date = col_date("%Y%m%d"),
-    previous_day_admission_adult_covid_confirmed = col_integer(),
-    previous_day_admission_pediatric_covid_confirmed = col_integer(),
-    previous_day_admission_adult_covid_confirmed_coverage = col_integer()
-  )
-)
-
-most_recent_coverage <- tdat2 %>% arrange(date) %>%
-  pull(previous_day_admission_adult_covid_confirmed_coverage) %>%
-  tail(n = 1)
-
-tdat3 <- tdat2 %>%
-  filter(
-    previous_day_admission_adult_covid_confirmed_coverage >
-      most_recent_coverage * cov_thresh
-  ) %>%
-  filter(
-    previous_day_admission_adult_covid_confirmed_coverage <
-      most_recent_coverage / cov_thresh
-  ) %>%
-  mutate(
-    hospitalizations = previous_day_admission_adult_covid_confirmed +
-      previous_day_admission_pediatric_covid_confirmed,
-    target_end_date = date - lubridate::ddays(1)
-  ) %>%
-  select(target_end_date, hospitalizations)
-} else {
-
-  obs_data <- left_join(jhu_data, mob_ts, by = "target_end_date") %>%
-    mutate(
-      prophome = zoo::na.fill(prophome, "extend")
+if (forecast_date > "2020-11-15") {
+  healthd <-
+    file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
+  cov_thresh <- .5
+  tdat2 <- read_csv(
+    healthd,
+    col_types = cols_only(
+      date = col_date("%Y%m%d"),
+      previous_day_admission_adult_covid_confirmed = col_integer(),
+      previous_day_admission_pediatric_covid_confirmed = col_integer(),
+      previous_day_admission_adult_covid_confirmed_coverage = col_integer()
     )
-  
-  
+  )
+  most_recent_coverage <- tdat2 %>% arrange(date) %>%
+    pull(previous_day_admission_adult_covid_confirmed_coverage) %>%
+    tail(n = 1)
+  tdat3 <- tdat2 %>%
+    filter(
+      previous_day_admission_adult_covid_confirmed_coverage >
+        most_recent_coverage * cov_thresh
+    ) %>%
+    filter(
+      previous_day_admission_adult_covid_confirmed_coverage <
+        most_recent_coverage / cov_thresh
+    ) %>%
+    mutate(
+      hospitalizations = previous_day_admission_adult_covid_confirmed +
+        previous_day_admission_pediatric_covid_confirmed,
+      target_end_date = date - lubridate::ddays(1)
+    ) %>%
+    select(target_end_date, hospitalizations)
+  obs_data <-
+    left_join(jhu_data, mob_ts, by = "target_end_date") %>%
+    mutate(prophome = zoo::na.fill(prophome, "extend")) %>%
+    left_join(tdat3, by = "target_end_date")
+} else {
+  obs_data <- left_join(jhu_data, mob_ts, by = "target_end_date") %>%
+    mutate(prophome = zoo::na.fill(prophome, "extend"))
 }
+
 
 if (forecast_date > "2020-12-31"){
 vacc_path <- file.path("hopkins-vaccine",
@@ -131,6 +128,9 @@ if (file.exists(vacc_path)) {
 }
 
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
+
+
+
 wind <- obs_data %>% slice(41:n())
 wsize <- nrow(wind)
 N <-
@@ -148,7 +148,12 @@ wfixed <- c(
   eta = 365.25 / 4
 )
 
-y <- wind %>% select(cases, deaths)
+if (forecast_date > "2020-11-15") {
+  y <- wind %>% select(cases, hospitalizations, deaths)
+} else {
+  y <- wind %>% select(cases, deaths)
+}
+
 x0 <- wind %>% select(target_end_date, time, wday, prophome)
 x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
@@ -186,8 +191,8 @@ stopifnot(all(x$rhot >= 0))
 #pdf <- data.frame(date = wind$target_end_date, p = x$rhot)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
 
-
-if(forecast_date_start == forecast_date){
+if (forecast_date_start == forecast_date){
+  stopifnot(forecast_date < "2020-11-16") # initializer not implemented for data with hospitalizations
   winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
 } else {
   fit_dir_start <-
@@ -204,6 +209,14 @@ if(forecast_date_start == forecast_date){
   if (sizediff > 0){
     winit <- c(winit, rep(winit[length(winit)], sizediff)) # extend the bvec by repeating last value
   }
+}
+
+if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
+  tauh_init <- var(na.omit(diff(y$hospitalizations)))
+  is_NA_hosps <- is.na(y$hospitalizations)
+  chp_init <- sum(y$hospitalizations[!is_NA_hosps]) / sum(y$cases[!is_NA_hosps])
+  winit0 <- winit
+  winit <- c(winit0[1:3], log(tauh_init), winit0[4], qlogis(chp_init), winit0[5:length(winit0)])
 }
 
 if (forecast_date == "2020-06-29" && forecast_loc == "06") {
