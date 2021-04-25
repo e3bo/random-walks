@@ -263,8 +263,8 @@ fit1 <- lbfgs::lbfgs(
   epsilon = 1e-3,
   max_iterations = iter1,
   y = y,
-  pm = param_map,
   winit,
+  wfixed = wfixed,
   invisible = 0
 )
 tt1 <- tictoc::toc()
@@ -302,15 +302,21 @@ dets1 <-
     x = x,
     y = y,
     betasd = bsd,
-    pm = param_map,
+    fixed = wfixed,
     fet = NULL
   )
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(y, 2, diff)), na.rm = TRUE)
-naive_error_weekly <- colMeans(abs(y[-c(1:7),] - y[-((nrow(y) - 6):nrow(y)),]))
+naive_error_weekly <- colMeans(abs(y[-c(1:7),] - y[-((nrow(y) - 6):nrow(y)),]), na.rm = TRUE)
 
-mase1 <- mae1 / c(naive_error["cases"], NA, naive_error["deaths"])
-mase1w <- mae1 / c(naive_error_weekly["cases"], hosps=NA, naive_error_weekly["deaths"])
+if (ncol(y) == 2) {
+  mase1 <- mae1 / c(naive_error["cases"], NA, naive_error["deaths"])
+  mase1w <-
+    mae1 / c(naive_error_weekly["cases"], hosps = NA, naive_error_weekly["deaths"])
+} else {
+  mase1 <- mae1 / naive_error
+  mase1w <- mae1 / naive_error_weekly
+}
 
 g1 <-
   calc_kf_grad(
@@ -318,7 +324,7 @@ g1 <-
     x = x,
     y = y,
     betasd = bsd,
-    pm = param_map
+    wfixed = wfixed
   )
 
 mets <- list(
