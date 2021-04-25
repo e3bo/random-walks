@@ -18,7 +18,7 @@ dvc run \
     --force \
     fdt=$fdt ./pull-hopkins-ts-from-date.R
 
-if [[ ${fdt} < "2020-12-01" ]]; then
+if [[ ${fdt} < "2020-11-16" ]]; then
     exit 0
 fi
 
