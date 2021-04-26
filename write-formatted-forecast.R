@@ -140,12 +140,12 @@ create_forecast_df <- function(means,
 }
 
 write_forecasts <-
-  function(fit, x, y, winit, hess, fet, betasd, fdt, forecast_loc) {
+  function(fit, x, y, winit, wfixed, hess, fet, betasd, fdt, forecast_loc) {
     dets <-
       kf_nll_details(fit$par,
                      x,
                      y,
-                     param_map,
+                     wfixed,
                      betasd = betasd,
                      fet = fet)
     make_fit_plots(
@@ -376,11 +376,18 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
       height = 2,
       units = "in",
       res = 90)
+  
+  if(no_hosps){
+    t1inds <- seq_len(8)
+  } else{
+    t1inds <- seq_len(10)
+  }
+  
   est_tab <-
     rbind(init = winit,
           MLE = fit$par,
           sd = sqrt(diag(solve(h)))) %>% signif(3)
-  gridExtra::grid.table(est_tab[, 1:7])
+  gridExtra::grid.table(est_tab[, t1inds])
   dev.off()
   
   plot_path8 <- file.path(plot_dir, "params-tab-2.png")
@@ -389,7 +396,7 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
       height = 2,
       units = "in",
       res = 90)
-  gridExtra::grid.table(est_tab[, -c(1:7)])
+  gridExtra::grid.table(est_tab[, -t1inds])
   dev.off()
 }
 
@@ -422,7 +429,8 @@ write_forecasts(
   fit = fit1,
   x = x,
   y = y,
-  winit = winit, 
+  winit = winit,
+  wfixed = wfixed,
   hess = h1,
   betasd = bsd,
   fet = fet,

@@ -86,12 +86,12 @@ if (forecast_date > "2020-11-15") {
     mutate(prophome = zoo::na.fill(prophome, "extend"))
 }
 
-
-if (forecast_date > "2020-12-31"){
 vacc_path <- file.path("hopkins-vaccine",
                        forecast_date,
                        "vaccine_data_us_timeline.csv")
 if (file.exists(vacc_path)) {
+  stop("Fitting not fully implemented for dates with vaccine data")
+  
   vacc_ts <- read_csv(
     vacc_path,
     col_types = cols_only(
@@ -111,27 +111,21 @@ if (file.exists(vacc_path)) {
     vacc_ts$doses[i] <- 0
     i <- i + 1
   }
-  
-  obs_data <- left_join(jhu_data, tdat3, by = "target_end_date") %>%
+  obs_data <-
+    left_join(jhu_data, tdat3, by = "target_end_date") %>%
     left_join(vacc_ts, by = "target_end_date") %>%
     left_join(mob_ts, by = "target_end_date") %>%
     mutate(
       prophome = lead(prophome, 3),
       prophome = zoo::na.fill(prophome, "extend")
     )
-  
   obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <-
     0
-} else {
-  stop("Fitting not implemented for dates without vaccine data")
-}
 }
 
 #wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 
-
-
-wind <- obs_data %>% slice(41:n())
+wind <- obs_data %>% filter(target_end_date >= "2020-03-02")
 wsize <- nrow(wind)
 N <-
   covidHubUtils::hub_locations %>% filter(fips == forecast_loc) %>%
@@ -275,7 +269,7 @@ h1 <- calc_kf_hess(
   x = x,
   y = y,
   betasd = bsd,
-  pm = param_map
+  wfixed = wfixed
 )
 tictoc::toc()
 

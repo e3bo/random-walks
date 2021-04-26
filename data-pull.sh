@@ -33,7 +33,7 @@ dvc run \
     fdt=$fdt loc=$loc ./pull-healthdata-ts-from-date.R
 done
 
-if [[ ${fdt} < "2021-01-01" ]]; then
+if [[ ${fdt} < "2021-02-12" ]]; then
     exit 0
 fi
 
