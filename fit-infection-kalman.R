@@ -49,7 +49,7 @@ mob_ts <- read_csv(
 if (forecast_date > "2020-11-15") {
   healthd <-
     file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
-  cov_thresh <- .5
+  cov_thresh <- .9
   tdat2 <- read_csv(
     healthd,
     col_types = cols_only(
