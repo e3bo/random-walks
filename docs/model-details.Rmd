@@ -172,8 +172,8 @@ fixed_parameters <- tmpparams %>%
 ```{r read-data, fig.width=7}
 
 
-forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
-forecast_locs <- c("13", "36", "54", "53", "56") 
+forecast_date <- Sys.getenv("fdt", unset = "2020-11-16")
+forecast_locs <- c("13", "36", "53", "56") 
 
 hopdir <- file.path("../hopkins", forecast_date)
 tdat <- load_hopkins(hopdir, weekly = FALSE)
@@ -192,7 +192,8 @@ jhu_data <- ltdat2 %>% ungroup() %>%
 load_healthd <- function(loc, dt) {
   healthd <-
     file.path("..", "healthdata", dt, loc, "epidata.csv")
-  cov_thresh <- .5
+  cov_thresh <- .9
+  
   tdat2 <- read_csv(
     healthd,
     col_types = cols_only(
@@ -202,12 +203,42 @@ load_healthd <- function(loc, dt) {
       previous_day_admission_adult_covid_confirmed_coverage = col_integer()
     )
   )
+  most_recent_coverage <- tdat2 %>%
+    arrange(date) %>%
+    pull(previous_day_admission_adult_covid_confirmed_coverage) %>%
+    tail(n = 1)
+  
+  tdat3 <- tdat2 %>%
+    filter(
+      previous_day_admission_adult_covid_confirmed_coverage >
+        most_recent_coverage * cov_thresh
+    ) %>%
+    filter(
+      previous_day_admission_adult_covid_confirmed_coverage <
+        most_recent_coverage / cov_thresh
+    ) %>%
+    mutate(
+      hospitalizations = previous_day_admission_adult_covid_confirmed +
+        previous_day_admission_pediatric_covid_confirmed,
+      target_end_date = date - lubridate::ddays(1)
+    ) %>%
+    select(target_end_date, hospitalizations)
+  tdat3
 }
 
 hd <- map(forecast_locs, load_healthd, dt = forecast_date)
 names(hd) <- forecast_locs
 hd1 <- bind_rows(hd, .id = "location")
 
+obs_data <- left_join(jhu_data, hd1, by = c("target_end_date", "location"))
+
+wind <- obs_data %>% filter(target_end_date >= "2020-03-02") %>%
+  pivot_longer(c(cases, hospitalizations, deaths)) %>%
+  mutate(state = covidcast::fips_to_name(paste0(location, "000")))
+
+wind %>% ggplot(aes(x=target_end_date,  y = value)) + geom_col() + 
+  facet_grid(name ~ state, scales = "free") + scale_y_log10() + 
+  labs(x = "Date", y = "Count")
 
 ```
 
