@@ -477,24 +477,28 @@ kf_nll_details <- function(w, x, y, fixed, betasd, fet) {
   gamma <- unname(fixed["gamma"])
   N <- unname(fixed["N"]) 
   loggammahd <- unname(log(fixed["gamma_h"]))
+  ntaucvec <- tail(x$τcvecmap, 1)
   if (ncol(y) == 2){
     logtauh <- log(10)
     logitchp <- qlogis(fixed["chp"])
     w2 <- w
   } else {
-    logtauh <- w[4]
-    logitchp <- w[6]
-    w2 <- w[-c(4, 6)]
+    logtauh <- w[3]
+    logitchp <- w[5]
+    w2 <- w[-c(3, 5)]
   }
   logE0 <- w2[1]
   logH0 <- w2[2]
+  
   logtauc <- w2[3]
-  logtaud <- w2[4]
-  prophomeeffect <- w2[5]
-  loghfpvec <- w2[6]
-  loggammad12 = w2[7]
-  loggammad34 = w2[8]
-  bvec <- w2[seq(9, length(w2))]
+  
+  logtaud <- w2[3]
+  prophomeeffect <- w2[4]
+  loghfpvec <- w2[5]
+  loggammad12 = w2[6]
+  loggammad34 = w2[7]
+  logtauc <- w2[seq(8, 8 + ntaucvec - 1)]
+  bvec <- w2[seq(8 + ntaucvec, length(w2))]
   nll <- kfnll(
     bvec = bvec,
     logE0 = w[1],
@@ -629,7 +633,7 @@ kfnll <-
         }
       }
 
-      R <- diag(c(exp(logtauc) * xhat_init[3], exp(c(logtauh, logtaud))))      
+      R <- diag(c((logtauc[cov$τcvecmap[i]]) * xhat_init[3], exp(c(logtauh, logtaud))))      
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) -
         H(cov$rhot[i]) %*% xhat_kkmo[, i, drop = FALSE]
       S[, , i] <-

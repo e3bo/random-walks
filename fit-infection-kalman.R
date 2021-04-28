@@ -152,6 +152,7 @@ x0 <- wind %>% select(target_end_date, time, wday, prophome)
 x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
 x0$bvecmap <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
+x0$τcvecmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
 ## removal of untrusted data points
 
@@ -248,6 +249,11 @@ if (forecast_date == "2020-06-29" && forecast_loc == "06") {
 iter1 <- 1000
 bsd <- 0.01
 
+
+## mod par vector for experimental new structure
+ntv <- tail(x$τcvecmap, n = 1)
+winit2 <- c(winit[1:2], winit[4:10], rep(winit[3], ntv) , winit[11:length(winit)])
+
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
   calc_kf_nll,
@@ -257,7 +263,7 @@ fit1 <- lbfgs::lbfgs(
   epsilon = 1e-3,
   max_iterations = iter1,
   y = y,
-  winit,
+  winit2,
   wfixed = wfixed,
   invisible = 0
 )

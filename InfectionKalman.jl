@@ -77,28 +77,29 @@ end
 function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
 
     zloc = deepcopy(z)
+    ntauc = cov.τcvecmap[end]
     if size(z, 2) == 3
         l0 = exp(pvar[1])
         h0 = exp(pvar[2])
-        τc = exp(pvar[3])
-        τh = exp(pvar[4])
-        τd = exp(pvar[5])
-        chp = 1 / (1 + exp(-pvar[6]))
-        prophomeeffect = pvar[7]
-        hfpvec = exp(pvar[8])
-        gammad12 = exp(pvar[9])
-        gammad34 = exp(pvar[10])
-        bvec = pvar[11:end]
+        τh = exp(pvar[3])
+        τd = exp(pvar[4])
+        chp = 1 / (1 + exp(-pvar[5]))
+        prophomeeffect = pvar[6]
+        hfpvec = exp(pvar[7])
+        gammad12 = exp(pvar[8])
+        gammad34 = exp(pvar[9])
+        τcvec = pvar[10:(10 + ntauc - 1)]
+        bvec = pvar[(10 + ntauc):end]
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
         l0 = exp(pvar[1])
         h0 = exp(pvar[2])
-        τc = exp(pvar[3])
-        τd = exp(pvar[4])
-        prophomeeffect = pvar[5]
-        hfpvec = exp(pvar[6])
-        gammad12 = exp(pvar[7])
-        gammad34 = exp(pvar[8])
-        bvec = pvar[9:end]
+        τd = exp(pvar[3])
+        prophomeeffect = pvar[4]
+        hfpvec = exp(pvar[5])
+        gammad12 = exp(pvar[6])
+        gammad34 = exp(pvar[7])
+        τcvec = pvar[8:(8 + ntauc)]
+        bvec = pvar[(8 + ntauc + 1):end]
         zloc[!, "hospitalizations"] .= missing
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
@@ -179,8 +180,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             end
         end
         pkkmo[:,:,i] .= pnext
-        
-        r = Diagonal([τc * xlast[3], τh, τd]) 
+        r = Diagonal([τcvec[cov.τcvecmap[i]] * xlast[3], τh, τd]) 
         rhot = cov.rhot[i]
         Σ[:,:,i] = hmat(rhot) * pkkmo[:,:,i] * hmat(rhot)' + r
 
