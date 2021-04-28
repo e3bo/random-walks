@@ -18,57 +18,50 @@ function hmat(rhot)
 end
 
 function vectorfield(du, u, par, t)
-  x = u[1,1]
-  l = u[2,1]
-  y = u[3,1]
-  h = u[6,1]
-  d = u[7,1]
-  
-  β = par[1]
-  N = par[2]
-  ι = par[3]
-  η = par[4]
-  γ = par[5]
-  γd = par[6]
-  γh = par[7]
-  chp = par[8]
-  hfp = par[9]
-          
+  x, l, y, removed, hnew, crep, h, d, drep = u[:,1]
+
+  β, N,  ι, η, γ, γd, γh,  γr, γhnew, chp, hfp, rhot = par
+
   du[1,1] = dx = -β*x*y/N - ι*x
   du[2,1] = dl = β*x*y/N + ι*x - η*l
-  du[3,1] = dy = η*l - γ*y 
-  du[4,1] = dc = (1 - chp) * γ*y
+  du[3,1] = dy = η*l - γ*y
+  du[4,1] = dremoved = rhot * (1 - chp) * γ * y - removed * γr
   du[5,1] = dhnew = chp*γ*y
-  du[6,1] = dh = chp*γ*y - γh*h
-  du[7,1] = dd = hfp*γh*h - γd*d
-  du[8,1] = ddrep = γd*d
+  du[6,1] = dcrep = hnew * γh + removed * γr
+  du[7,1] = dh = chp*γ*y - γh*h
+  du[8,1] = dd = hfp*γh*h - γd*d
+  du[9,1] = ddrep = γd*d
 
-  f = [0, 
-       β*x/N*y/N + ι*x/N, 
-       η*l/N, 
-       (1 - chp)*γ*y/N,
-       chp*γ*y/N,
-       (1 - hfp) * γh * h / N,
-       hfp * γh * h / N,
-       γd * d / N]
+  f = [0,                             # x; 
+       β*x/N*y/N + ι*x/N,             # x-> l; 1, 2
+       η*l/N,                         # l -> y;, 2, 3
+       rhot * (1 - chp)*γ*y/N,        # y -> removed; 3, 4
+       chp*γ*y/N,                     # y -> hnew, y -> h; 3, 5  (3 , 7)
+       (1 - hfp) * γh * h / N,        # h -> not death; 7
+       hfp * γh * h / N,              # h -> d; 7, 8
+       γd * d / N,                    # d -> drep; 8, 9
+       γh * hnew,                     # hnew -> crep; 5, 6
+       γr * removed]                  # removed -> crep; 4, 6
 
-  q = [  f[1]+f[2]     -f[2]               0      0        0              0          0      0
-             -f[2] f[2]+f[3]           -f[3]      0        0              0          0      0
-                 0     -f[3]  f[3]+f[4]+f[5]  -f[4]    -f[5]           -f[5]         0      0
-                 0         0           -f[4]   f[4]        0              0          0      0
-                 0         0           -f[5]      0     f[5]              0          0      0
-                 0         0           -f[5]      0        0  f[7]+f[5]+f[6]      -f[7]     0
-                 0         0              0       0        0           -f[7]  f[8]+f[7]  -f[8]
-                 0         0              0       0        0              0       -f[8]   f[8] ]
+  q = [  f[1]+f[2]     -f[2]               0              0          0              0                0             0       0
+             -f[2] f[2]+f[3]           -f[3]              0          0              0                0             0       0
+                 0     -f[3]  f[3]+f[4]+f[5]          -f[4]      -f[5]              0            -f[5]             0       0
+                 0         0           -f[4]   f[4] + f[10]          0         -f[10]                0             0       0
+                 0         0           -f[5]              0  f[5]+f[9]          -f[9]                0             0       0
+                 0         0              0          -f[10]      -f[9]   f[10] + f[9]                0             0       0
+                 0         0          -f[5]               0          0              0   f[7]+f[5]+f[6]         -f[7]       0
+                 0         0              0               0          0              0            -f[7]   f[7] + f[8]   -f[8]
+                 0         0              0               0          0              0                0         -f[8]    f[8]]
 
-  jac= [-β*y/N    0         -β*x/N     0     0       0    0 0
-         β*y/N   -η          β*x/N     0     0       0    0 0
-             0    η             -γ     0     0       0    0 0
-             0    0    (1 - chp)*γ     0     0       0    0 0
-             0    0          chp*γ     0     0       0    0 0
-             0    0          chp*γ     0     0     -γh    0 0  
-             0    0              0     0     0  hfp*γh  -γd 0
-             0    0              0     0     0       0   γd 0]
+  jac= [-β*y/N - ι    0               -β*x/N     0     0       0       0    0 0
+         β*y/N + ι   -η                β*x/N     0     0       0       0    0 0
+                 0    η                   -γ     0     0       0       0    0 0
+                 0    0    rhot *(1 - chp)*γ   -γr     0       0       0    0 0
+                 0    0                chp*γ     0     0       0       0    0 0
+                 0    0                    0    γr    γh       0       0    0 0 
+                 0    0                chp*γ     0     0       0     -γh    0 0
+                 0    0                    0     0     0       0  γh*hfp  -γd 0
+                 0    0                    0     0     0       0       0   γd 0]
    
    p = u[:,2:end]
    du[:,2:end] .= jac * p + p * jac' + q * N
@@ -98,8 +91,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         hfpvec = exp(pvar[5])
         gammad12 = exp(pvar[6])
         gammad34 = exp(pvar[7])
-        τcvec = [exp(p) for p in pvar[8:(8 + ntauc)]]
-        bvec = pvar[(8 + ntauc + 1):end]
+        τcvec = [exp(p) for p in pvar[8:(8 + ntauc - 1)]]
+        bvec = pvar[(8 + ntauc):end]
         zloc[!, "hospitalizations"] .= missing
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
@@ -107,8 +100,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     d0 = h0 * γh / γd * hfpvec[1]
     
     y0 = l0 * η / γ
-    
-    x0 = [max(N - l0 - y0 - h0 - d0, 100); min(l0, N); min(y0, N); 0; 0; min(h0, N); min(d0, N); 0]
+    #                                   x,          l,          y, removed, hnew, crep,          h,          d, drep
+    x0 = [max(N - l0 - y0 - h0 - d0, 100); min(l0, N); min(y0, N);       0;    0;    0; min(h0, N); min(d0, N);    0]
     p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
     
     if (eltype(bvec) == Float64)
@@ -155,7 +148,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         plast[:,8] .= 0
         hfp = hfpvec[1]
       
-        par = [β, N,  ι, η, γ, γd, γh, chp, hfp]
+        par = [β, N,  ι, η, γ, γd, γh,  γr, γhnew, chp, hfp, cov.rhot[i]]
         if cov.wday[i] == 1 || cov.wday[i] == 2
            par[6] = gammad12
         elseif cov.wday[i] == 3 || cov.wday[i] == 4
@@ -180,7 +173,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         end
         pkkmo[:,:,i] .= pnext
         r = Diagonal([τcvec[cov.τcvecmap[i]] * xlast[3], τh, τd]) 
-        rhot = cov.rhot[i]
+        
         Σ[:,:,i] = hmat(rhot) * pkkmo[:,:,i] * hmat(rhot)' + r
 
         for j in 1:dobs
