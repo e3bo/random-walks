@@ -246,8 +246,9 @@ if (forecast_date == "2020-06-29" && forecast_loc == "06") {
 }
 
 ## fitting
-iter1 <- 1000
+iter1 <- 1500
 bsd <- 0.01
+tcsd <- 0.1
 
 
 ## mod par vector for experimental new structure
@@ -260,6 +261,7 @@ fit1 <- lbfgs::lbfgs(
   calc_kf_grad,
   x = x,
   betasd = bsd,
+  tcsd = tcsd, 
   epsilon = 1e-3,
   max_iterations = iter1,
   y = y,
