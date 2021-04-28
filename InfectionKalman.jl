@@ -88,7 +88,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         hfpvec = exp(pvar[7])
         gammad12 = exp(pvar[8])
         gammad34 = exp(pvar[9])
-        τcvec = pvar[10:(10 + ntauc - 1)]
+        τcvec = [exp(p) for p in pvar[10:(10 + ntauc - 1)]]
         bvec = pvar[(10 + ntauc):end]
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
         l0 = exp(pvar[1])

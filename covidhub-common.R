@@ -638,7 +638,7 @@ kfnll <-
         }
       }
 
-      R <- diag(c((logtauc[cov$τcvecmap[i]]) * xhat_init[3], 
+      R <- diag(c(exp(logtauc[cov$τcvecmap[i]]) * xhat_init[3], 
                   exp(c(logtauh, logtaud))))      
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) -
         H(cov$rhot[i]) %*% xhat_kkmo[, i, drop = FALSE]
