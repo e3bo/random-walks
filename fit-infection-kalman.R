@@ -304,6 +304,7 @@ dets1 <-
     x = x,
     y = y,
     betasd = bsd,
+    tcsd = tcsd,
     fixed = wfixed,
     fet = NULL
   )

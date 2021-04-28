@@ -475,7 +475,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   winit
 }
 
-kf_nll_details <- function(w, x, y, fixed, betasd, fet) {
+kf_nll_details <- function(w, x, y, fixed, betasd, tcsd, fet) {
   eta <- unname(fixed["eta"])
   gamma <- unname(fixed["gamma"])
   N <- unname(fixed["N"]) 
@@ -523,7 +523,8 @@ kf_nll_details <- function(w, x, y, fixed, betasd, fet) {
     fet = fet,
     just_nll = FALSE,
     fet_zero_cases_deaths = "weekly",
-    betasd = betasd)
+    betasd = betasd,
+    tcsd = tcsd)
   nll
 }
 
@@ -549,6 +550,7 @@ kfnll <-
            fets = NULL,
            fet_zero_cases_deaths = "daily",
            betasd = 1,
+           tcsd, 
            maxzscore = Inf,
            just_nll = TRUE) {
     diffeqr::diffeq_setup("/opt/julia-1.5.3/bin")
@@ -636,7 +638,7 @@ kfnll <-
         }
       }
 
-      R <- diag(c(exp(logtauc[cov$τcvecmap[i]]) * xhat_init[3], 
+      R <- diag(c((logtauc[cov$τcvecmap[i]]) * xhat_init[3], 
                   exp(c(logtauh, logtaud))))      
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) -
         H(cov$rhot[i]) %*% xhat_kkmo[, i, drop = FALSE]
@@ -692,6 +694,17 @@ kfnll <-
                       sd = betasd,
                       log = TRUE)
     }
+    
+    for (i in 1:(length(logtauc) - 1)) {
+      tcstep <- log(logtauc[i + 1]) - log(logtauc[i])
+      rwlik <-
+        rwlik + dnorm(tcstep,
+                      mean = 0,
+                      sd = tcsd,
+                      log = TRUE)
+    }
+    
+    
     nll <- 0
     for (i in seq(1, T)) {
       sel <- !is_z_na[i, ]
