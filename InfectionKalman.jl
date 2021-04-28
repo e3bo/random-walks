@@ -12,11 +12,6 @@ export obj
 export grad
 export vectorfield
 
-function hmat(rhot)
-    H =  [0 0 0 rhot 1 0 0 0; 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 1] 
-    return H
-end
-
 function vectorfield(du, u, par, t)
   x, l, y, removed, hnew, crep, h, d, drep = u[:,1]
 
@@ -26,8 +21,8 @@ function vectorfield(du, u, par, t)
   du[2,1] = dl = β*x*y/N + ι*x - η*l
   du[3,1] = dy = η*l - γ*y
   du[4,1] = dremoved = rhot * (1 - chp) * γ * y - removed * γr
-  du[5,1] = dhnew = chp*γ*y
-  du[6,1] = dcrep = hnew * γh + removed * γr
+  du[5,1] = dhnew = chp*γ*y - hnew * γhnew
+  du[6,1] = dcrep = hnew * γhew + removed * γr
   du[7,1] = dh = chp*γ*y - γh*h
   du[8,1] = dd = hfp*γh*h - γd*d
   du[9,1] = ddrep = γd*d
@@ -40,7 +35,7 @@ function vectorfield(du, u, par, t)
        (1 - hfp) * γh * h / N,        # h -> not death; 7
        hfp * γh * h / N,              # h -> d; 7, 8
        γd * d / N,                    # d -> drep; 8, 9
-       γh * hnew,                     # hnew -> crep; 5, 6
+       γhew * hnew,                   # hnew -> crep; 5, 6
        γr * removed]                  # removed -> crep; 4, 6
 
   q = [  f[1]+f[2]     -f[2]               0              0          0              0                0             0       0
@@ -53,15 +48,15 @@ function vectorfield(du, u, par, t)
                  0         0              0               0          0              0            -f[7]   f[7] + f[8]   -f[8]
                  0         0              0               0          0              0                0         -f[8]    f[8]]
 
-  jac= [-β*y/N - ι    0               -β*x/N     0     0       0       0    0 0
-         β*y/N + ι   -η                β*x/N     0     0       0       0    0 0
-                 0    η                   -γ     0     0       0       0    0 0
-                 0    0    rhot *(1 - chp)*γ   -γr     0       0       0    0 0
-                 0    0                chp*γ     0     0       0       0    0 0
-                 0    0                    0    γr    γh       0       0    0 0 
-                 0    0                chp*γ     0     0       0     -γh    0 0
-                 0    0                    0     0     0       0  γh*hfp  -γd 0
-                 0    0                    0     0     0       0       0   γd 0]
+  jac= [-β*y/N - ι    0               -β*x/N     0       0       0       0    0 0
+         β*y/N + ι   -η                β*x/N     0       0       0       0    0 0
+                 0    η                   -γ     0       0       0       0    0 0
+                 0    0    rhot *(1 - chp)*γ   -γr       0       0       0    0 0
+                 0    0                chp*γ     0  -γhnew       0       0    0 0
+                 0    0                    0    γr      γh       0       0    0 0 
+                 0    0                chp*γ     0       0       0     -γh    0 0
+                 0    0                    0     0       0       0  γh*hfp  -γd 0
+                 0    0                    0     0       0       0       0   γd 0]
    
    p = u[:,2:end]
    du[:,2:end] .= jac * p + p * jac' + q * N
@@ -100,9 +95,19 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     d0 = h0 * γh / γd * hfpvec[1]
     
     y0 = l0 * η / γ
-    #                                   x,          l,          y, removed, hnew, crep,          h,          d, drep
-    x0 = [max(N - l0 - y0 - h0 - d0, 100); min(l0, N); min(y0, N);       0;    0;    0; min(h0, N); min(d0, N);    0]
-    p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 0, 0, 1, 1, 0]))
+    # x, l, y, removed, hnew, crep, h, d, drep
+    
+    x0 = [             max(N - l0 - y0 - h0 - d0, 100) 
+                                            min(l0, N) 
+                                            min(y0, N)  
+          min(cov.rhot[1] * y0 * γ * (1 - chp)/ γr, N)
+                          min(chp * y0 * γ / γhnew, N)
+                                                     0 
+                                            min(h0, N)
+                                            min(d0, N)    
+                                                     0]
+                                                     
+    p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 1, 1, 0, 1, 1, 0]))
     
     if (eltype(bvec) == Float64)
         println(pvar)
@@ -127,7 +132,9 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
     
     @assert length(bvec) == cov.bvecmap[end] "length of bvec should equal the final value in cov.bvecmap"
-
+    
+    hmat =  [0 0 0 0 0 1 0 0 0; 0 0 0 0 1 0 0 0 0; 0 0 0 0 0 0 0 0 1] 
+    
     for i in 1:nobs
         if i == 1
             xlast = x0
@@ -137,15 +144,12 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             plast = pkk[:,:,i-1]
         end
         β = exp(bvec[cov.bvecmap[i]] + cov.prophomeiqr[i] * prophomeeffect)
-        xlast[4] = 0
-        xlast[5] = 0
-        xlast[8] = 0
-        plast[4,:] .= 0
-        plast[:,4] .= 0
-        plast[5,:] .= 0
-        plast[:,5] .= 0
-        plast[8,:] .= 0
-        plast[:,8] .= 0
+        xlast[6] = 0
+        xlast[9] = 0
+        plast[6,:] .= 0
+        plast[:,6] .= 0
+        plast[9,:] .= 0
+        plast[:,9] .= 0
         hfp = hfpvec[1]
       
         par = [β, N,  ι, η, γ, γd, γh,  γr, γhnew, chp, hfp, cov.rhot[i]]
@@ -174,7 +178,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         pkkmo[:,:,i] .= pnext
         r = Diagonal([τcvec[cov.τcvecmap[i]] * xlast[3], τh, τd]) 
         
-        Σ[:,:,i] = hmat(rhot) * pkkmo[:,:,i] * hmat(rhot)' + r
+        Σ[:,:,i] = hmat * pkkmo[:,:,i] * hmat' + r
 
         for j in 1:dobs
             if zmiss[i,j]
@@ -183,7 +187,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
                 zz[j] = zloc[i,j]
             end
         end       
-        ytkkmo[:,i] = zz - hmat(rhot) * reshape(xkkmo[:,i], dstate, 1)
+        ytkkmo[:,i] = zz - hmat * reshape(xkkmo[:,i], dstate, 1)
         for j in 1:dobs
             if zmiss[i, j]
                 zscore = 0
@@ -201,14 +205,14 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             end
             Σ[j,j,i] += rdiagadj[j,i]
         end
-        k[:,:,i] = pkkmo[:,:,i] * hmat(rhot)' / Σ[:,:,i]
+        k[:,:,i] = pkkmo[:,:,i] * hmat' / Σ[:,:,i]
         for j in 1:dobs
             if zmiss[i,j]
                 k[:, j ,i] .= 0
             end
         end
         xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat(rhot)) * pkkmo[:,:,i]
+        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat * pkkmo[:,:,i]
     end
     
     stepdensity = Normal(0, betasd)
