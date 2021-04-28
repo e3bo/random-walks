@@ -333,7 +333,7 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
     filter((nchar(location)) <= 2 | str_detect(target, "inc case$")) ## only case forecasts accepted for counties
 }
 
-julia_assign2 <- function(w, wfixed, betasd){
+julia_assign2 <- function(w, wfixed, betasd, tcsd){
   JuliCall::julia_assign("pvar", w)
   JuliaCall::julia_assign("η", wfixed["eta"])
   JuliaCall::julia_assign("N", wfixed["N"])
@@ -342,11 +342,12 @@ julia_assign2 <- function(w, wfixed, betasd){
   JuliaCall::julia_assign("z", y)
   JuliaCall::julia_assign("chp", wfixed["chp"])
   JuliaCall::julia_assign("betasd", betasd)
+  JuliaCall::julia_assign("tcsd", tcsd)  
   JuliaCall::julia_assign("γd", wfixed["gamma_h"])
   JuliaCall::julia_assign("γh", wfixed["gamma_d"])
 }
 
-julia_assign3 <- function(w, wfixed, betasd){
+julia_assign3 <- function(w, wfixed, betasd, tcsd){
   JuliaCall::julia_assign("pvar", w)
   JuliaCall::julia_assign("η", wfixed["eta"])
   JuliaCall::julia_assign("N", wfixed["N"])
@@ -354,57 +355,59 @@ julia_assign3 <- function(w, wfixed, betasd){
   JuliaCall::julia_assign("cov", x)
   JuliaCall::julia_assign("z", y)
   JuliaCall::julia_assign("betasd", betasd)
+  JuliaCall::julia_assign("tcsd", tcsd)
   JuliaCall::julia_assign("γd", wfixed["gamma_d"])
   JuliaCall::julia_assign("γh", wfixed["gamma_h"])
+  
 }
 
-calc_kf_nll <- function(w, x, y, betasd, wfixed) {
+calc_kf_nll <- function(w, x, y, betasd, tcsd, wfixed) {
   if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, betasd)
+    julia_assign3(w, wfixed, betasd, tcsd)
     nll <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.obj",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γh = γh, γd = γd, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
     ))
   } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, betasd)
+    julia_assign2(w, wfixed, betasd, tcsd)
     nll <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.obj",
-      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
     ))
 }
   
   nll
 }
 
-calc_kf_grad <- function(w, x, y, betasd, wfixed) {
+calc_kf_grad <- function(w, x, y, betasd, tcsd, wfixed) {
   if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, betasd)
+    julia_assign3(w, wfixed, betasd, tcsd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, betasd = betasd, tcsd = tcsd, just_nll = true)"
     ))
   } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, betasd)
+    julia_assign2(w, wfixed, betasd, tcsd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
     ))
   }
   g
 }
 
-calc_kf_hess <- function(w, x, y, betasd, wfixed) {
+calc_kf_hess <- function(w, x, y, betasd, tcsd, wfixed) {
   if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, betasd)
+    julia_assign3(w, wfixed, betasd, tcsd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, betasd = betasd, tcsd = tcsd, just_nll = true)"
     ))
   } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, betasd)
+    julia_assign2(w, wfixed, betasd, tcsd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
-      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
     ))
   }
   g
@@ -633,7 +636,8 @@ kfnll <-
         }
       }
 
-      R <- diag(c((logtauc[cov$τcvecmap[i]]) * xhat_init[3], exp(c(logtauh, logtaud))))      
+      R <- diag(c(exp(logtauc[cov$τcvecmap[i]]) * xhat_init[3], 
+                  exp(c(logtauh, logtaud))))      
       ytilde_k[, i] <- matrix(z[i, ], ncol = 1) -
         H(cov$rhot[i]) %*% xhat_kkmo[, i, drop = FALSE]
       S[, , i] <-
@@ -746,8 +750,11 @@ kfnll <-
           JuliaCall::julia_eval("prob = ODEProblem(InfectionKalman.vectorfield,u0,tspan,par)")
           XP <-
             JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
-          R <- diag(c(exp(logtauc) * xhat_init[3], exp(c(logtauh, logtaud)))) 
-          sim_means[, j] <- H(cov$rhot[T]) %*% XP[, 1]
+      
+          R <- diag(c(exp(logtauc[cov$τcvecmap[i]]) * xhat_init[3], 
+                      exp(c(logtauh, logtaud))))
+          
+              sim_means[, j] <- H(cov$rhot[T]) %*% XP[, 1]
           sim_cov[, , j] <-
             H(cov$rhot[T]) %*% XP[,-1] %*% t(H(cov$rhot[T])) + R
         }
