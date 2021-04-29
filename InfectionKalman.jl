@@ -1,5 +1,6 @@
 module InfectionKalman
 
+using Catalyst
 using DataFrames
 using DiffEqSensitivity
 using Distributions
@@ -12,6 +13,28 @@ export obj
 export grad
 export vectorfield
 
+
+function genvectorfield
+
+  rn = @reaction_network begin
+     β, S + Y --> L + Y
+     η, L --> Y
+     rhot * (1 - chp) * γ, Y --> R
+     γr, R --> C
+     chp * γ, Y --> H
+     chp * γ, Y --> Hnew
+     Hnew * γhnew, Hnew --> C
+     γr * hfp, H --> D
+     γr * (1 - hfp), H --> 0
+     γd, D --> Drep
+  end β η γ γr γhnew γh chp hfp rhot
+
+
+
+end
+
+
+
 function vectorfield(du, u, par, t)
   x, l, y, removed, hnew, crep, h, d, drep = u[:,1]
 
@@ -22,7 +45,7 @@ function vectorfield(du, u, par, t)
   du[3,1] = dy = η*l - γ*y
   du[4,1] = dremoved = rhot * (1 - chp) * γ * y - removed * γr
   du[5,1] = dhnew = chp*γ*y - hnew * γhnew
-  du[6,1] = dcrep = hnew * γhew + removed * γr
+  du[6,1] = dcrep = hnew * γhnew + removed * γr
   du[7,1] = dh = chp*γ*y - γh*h
   du[8,1] = dd = hfp*γh*h - γd*d
   du[9,1] = ddrep = γd*d
@@ -35,7 +58,7 @@ function vectorfield(du, u, par, t)
        (1 - hfp) * γh * h / N,        # h -> not death; 7
        hfp * γh * h / N,              # h -> d; 7, 8
        γd * d / N,                    # d -> drep; 8, 9
-       γhew * hnew,                   # hnew -> crep; 5, 6
+       γhnew * hnew,                   # hnew -> crep; 5, 6
        γr * removed]                  # removed -> crep; 4, 6
 
   q = [  f[1]+f[2]     -f[2]               0              0          0              0                0             0       0
@@ -62,7 +85,7 @@ function vectorfield(du, u, par, t)
    du[:,2:end] .= jac * p + p * jac' + q * N
 end
 
-function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., tcsd::Float64 = 0.1, just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
+function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., tcsd::Float64 = 0.1, just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, γhnew::Float64 = 365.25 / 1, γr::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
 
     zloc = deepcopy(z)
     ntauc = cov.τcvecmap[end]
@@ -159,6 +182,10 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
            par[6] = gammad34
         end
         xplast = hcat(xlast, plast)
+        println(i)
+        println(xlast)
+        println(par)
+        println("\n")
         prob = ODEProblem(vectorfield, xplast, (0.0, dt), par)
         xpnext = solve(prob, Tsit5(), saveat = dt).u[2]
         xnext = xpnext[:,1]
@@ -212,7 +239,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             end
         end
         xkk[:,i] = reshape(xkkmo[:,i], dstate) + reshape(k[:,:,i], dstate, dobs) * ytkkmo[:,i]
-        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat * pkkmo[:,:,i]
+        pkk[:,:,i] = (I - reshape(k[:,:,i], dstate, dobs) * hmat) * pkkmo[:,:,i]
     end
     
     stepdensity = Normal(0, betasd)
