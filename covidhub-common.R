@@ -382,18 +382,18 @@ calc_kf_nll <- function(w, x, y,  β_0sd,  τ_csd, wfixed) {
   nll
 }
 
-calc_kf_grad <- function(w, x, y, betasd, tcsd, wfixed) {
+calc_kf_grad <- function(w, x, y, β_0sd,  τ_csd, wfixed) {
   if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, betasd, tcsd)
+    julia_assign3(w, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, betasd = betasd, tcsd = tcsd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
   } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, betasd, tcsd)
+    julia_assign2(w, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
+      "(pvar, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
   }
   g

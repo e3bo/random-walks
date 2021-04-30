@@ -216,22 +216,21 @@ if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
 
 
 ## fitting
-iter1 <- 1500
+iter1 <- 100
 β_0sd <- 0.01
 τ_csd <- 0.1
-
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   x = x,
-  betasd = bsd,
-  tcsd = tcsd, 
+  β_0sd = β_0sd,
+  τ_csd = τ_csd, 
   epsilon = 1e-3,
   max_iterations = iter1,
   y = y,
-  winit2,
+  winit,
   wfixed = wfixed,
   invisible = 0
 )
