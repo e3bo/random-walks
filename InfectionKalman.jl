@@ -19,18 +19,36 @@ function genvectorfield
   rn = @reaction_network begin
      β, S + Y --> L + Y
      η, L --> Y
-     rhot * (1 - chp) * γ, Y --> R
-     γr, R --> C
-     chp * γ, Y --> H
-     chp * γ, Y --> Hnew
-     Hnew * γhnew, Hnew --> C
-     γr * hfp, H --> D
-     γr * (1 - hfp), H --> 0
-     γd, D --> Drep
-  end β η γ γr γhnew γh chp hfp rhot
+     ρ * (1 - p_h) * γ, Y --> R
+     (1 - ρ) * (1 - p_h) * γ, Y --> 0
+     γ_r, R --> C
+     p_h * γ, Y --> H + A
+     γ_a, A --> C
+     γ_r * p_d, H --> D
+     γ_r * (1 - p_d), H --> 0
+     γ_d, D --> D_r
+  end β η γ γ_d γ_r γ_a γ_h p_h p_d ρ
 
+  odesys = convert(ODESystem, rn)
+  odefun = ODEFunction(odesys, jac=true)
+  
+  F = (u, p, t) -> odefun(u, p, t)
+  J = (u, p, t) -> odefun.jac(u,p, t)
+  
+  S = netstoichmat(rn)
 
-
+  u0 = [1e7, 10, 1, 10, 0, 0, 0, 0, 0] 
+  pars = [400, 365/4, 91.24, 365 / 10, 365 / 1, 365 / 1, 365 / 10, .1, .1, .4]
+  
+  jls = [jumpratelaw(r) for r in reactions(rn)]
+  ffuns =  [build_function(jl, states(rn), parameters(rn), independent_variable(rn), expression=Val{false}) for jl in jls] # there may be a nicer way to do this soon: https://github.com/SciML/Catalyst.jl/issues/306
+  function vf(du, u, par, t)
+  
+    du[:,1] .= F(u[:,1], par)
+    f = [ffun(u, par, t) for ffun in ffuns]
+    q = S' * Diag(f) * S
+  
+  end
 end
 
 
