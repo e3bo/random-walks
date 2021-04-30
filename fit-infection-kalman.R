@@ -135,11 +135,11 @@ case_to_death_lag <- 20
 
 wfixed <- c(
   N = N,
-  gamma = 365.25 / 4,
-  gamma_h = 365.25 / (case_to_death_lag / 2),
-  gamma_d = 365.25 / (case_to_death_lag / 2),
-  chp = 0.03,
-  eta = 365.25 / 4
+  γ = 365.25 / 4,
+  γ_h = 365.25 / (case_to_death_lag / 2),
+  γ_d = 365.25 / (case_to_death_lag / 2),
+  p_h = 0.03,
+  η = 365.25 / 4
 )
 
 if (forecast_date > "2020-11-15") {
@@ -151,8 +151,8 @@ if (forecast_date > "2020-11-15") {
 x0 <- wind %>% select(target_end_date, time, wday, prophome)
 x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
-x0$bvecmap <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
-x0$τcvecmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
+x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
+x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
 ## removal of untrusted data points
 
@@ -177,11 +177,11 @@ right <- cvd %>% select("time", "rhat")
 
 x <- left_join(x0, right, by = "time") %>%
   mutate(rhat2 = zoo::na.fill(rhat, "extend"),
-         rhot = rhat2 / (2 * rhat2[n()])) %>%
+         ρ = rhat2 / (2 * rhat2[n()])) %>%
   select(-rhat,-rhat2)
 
-stopifnot(all(x$rhot <= 1))
-stopifnot(all(x$rhot >= 0))
+stopifnot(all(x$ρ <= 1))
+stopifnot(all(x$ρ >= 0))
 
 #pdf <- data.frame(date = wind$target_end_date, p = x$rhot)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
@@ -214,36 +214,6 @@ if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
   winit <- c(winit0[1:3], log(tauh_init), winit0[4], qlogis(chp_init), winit0[5:length(winit0)])
 }
 
-if (forecast_date == "2020-06-29" && forecast_loc == "06") {
-  winit <-
-    c(
-      8.84525442487002,
-      -1.9410973262972,
-      4.22, #12.4822240973189,
-      5.62041865346974,
-      -0.215231653815656,
-      -0.985527447518198,
-      2.8253984751295,
-      3.59,
-      4.68123234065946,
-      4.68070637757278,
-      4.67844012908105,
-      4.67339401927969,
-      4.66485980762512,
-      4.6533866117208,
-      4.63997699124128,
-      4.62550077865006,
-      4.6116270964086,
-      4.59946956774516,
-      4.5902455935586,
-      4.58440251810939,
-      4.58207964451701,
-      4.58370322953008,
-      4.58817592970655,
-      4.59186894945956,
-      4.59167559076008
-    )
-}
 
 ## fitting
 iter1 <- 1500
