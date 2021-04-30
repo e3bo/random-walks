@@ -333,49 +333,52 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
     filter((nchar(location)) <= 2 | str_detect(target, "inc case$")) ## only case forecasts accepted for counties
 }
 
-julia_assign2 <- function(w, wfixed, betasd, tcsd){
-  JuliCall::julia_assign("pvar", w)
-  JuliaCall::julia_assign("η", wfixed["eta"])
-  JuliaCall::julia_assign("N", wfixed["N"])
-  JuliaCall::julia_assign("γ", wfixed["gamma"])
-  JuliaCall::julia_assign("cov", x)
-  JuliaCall::julia_assign("z", y)
-  JuliaCall::julia_assign("chp", wfixed["chp"])
-  JuliaCall::julia_assign("betasd", betasd)
-  JuliaCall::julia_assign("tcsd", tcsd)  
-  JuliaCall::julia_assign("γd", wfixed["gamma_h"])
-  JuliaCall::julia_assign("γh", wfixed["gamma_d"])
-}
-
-julia_assign3 <- function(w, wfixed, betasd, tcsd){
+julia_assign2 <- function(w, wfixed, β_0sd,  τ_csd){
   JuliaCall::julia_assign("pvar", w)
-  JuliaCall::julia_assign("η", wfixed["eta"])
+  JuliaCall::julia_assign("η", wfixed["η"])
   JuliaCall::julia_assign("N", wfixed["N"])
-  JuliaCall::julia_assign("γ", wfixed["gamma"])
+  JuliaCall::julia_assign("γ", wfixed["γ"])
   JuliaCall::julia_assign("cov", x)
   JuliaCall::julia_assign("z", y)
-  JuliaCall::julia_assign("betasd", betasd)
-  JuliaCall::julia_assign("tcsd", tcsd)
-  JuliaCall::julia_assign("γd", wfixed["gamma_d"])
-  JuliaCall::julia_assign("γh", wfixed["gamma_h"])
+  JuliaCall::julia_assign("p_h", wfixed["p_h"])
+  JuliaCall::julia_assign("β_0sd", β_0sd)
+  JuliaCall::julia_assign("τ_csd", τ_csd)  
+  JuliaCall::julia_assign("γ_d", wfixed["γ_d"])
+  JuliaCall::julia_assign("γ_h", wfixed["γ_h"])
+}
+
+julia_assign3 <- function(w, wfixed, β_0sd, τ_csd){
+  JuliaCall::julia_assign("pvar", w)
+  JuliaCall::julia_assign("η", wfixed["η"])
+  JuliaCall::julia_assign("N", wfixed["N"])
+  JuliaCall::julia_assign("γ", wfixed["γ"])
+  JuliaCall::julia_assign("cov", x)
+  JuliaCall::julia_assign("z", y)
+  JuliaCall::julia_assign("β_0sd", β_0sd)
+  JuliaCall::julia_assign("τ_csd", τ_csd)
+  JuliaCall::julia_assign("γ_d", wfixed["γ_d"])
+  JuliaCall::julia_assign("γ_h", wfixed["γ_h"])
   
 }
 
-calc_kf_nll <- function(w, x, y, betasd, tcsd, wfixed) {
+calc_kf_nll <- function(w, x, y,  β_0sd,  τ_csd, wfixed) {
   if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, betasd, tcsd)
-    nll <- JuliaCall::julia_eval(paste0(
-      "InfectionKalman.obj",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
-    ))
-  } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, betasd, tcsd)
-    nll <- JuliaCall::julia_eval(paste0(
-      "InfectionKalman.obj",
-      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
-    ))
-}
-  
+    julia_assign3(w, wfixed,  β_0sd,  τ_csd)
+    nll <- JuliaCall::julia_eval(
+      paste0(
+        "InfectionKalman.obj",
+        "(pvar, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
+      )
+    )
+  } else if (ncol(y) == 2 && !"hospitalizations" %in% names(y)) {
+    julia_assign2(w, wfixed,  β_0sd,  τ_csd)
+    nll <- JuliaCall::julia_eval(
+      paste0(
+        "InfectionKalman.obj",
+        "(pvar, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
+      )
+    )
+  }
   nll
 }
 
@@ -414,26 +417,27 @@ calc_kf_hess <- function(w, x, y, betasd, tcsd, wfixed) {
 }
 
 initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
-  tau_cases_init <- max(var(y$cases, na.rm = TRUE), 1)
-  tau_deaths_init <- max(var(y$deaths, na.rm = TRUE), 1) #/ mean(y$deaths)
+  τ_c_init <- max(var(y$cases, na.rm = TRUE), 1)
+  nτ_c = tail(x$τ_cmap, n = 1)
+  
+  τ_d_init <- max(var(y$deaths, na.rm = TRUE), 1) #/ mean(y$deaths)
   wsize <- nrow(y)
-  rhot <- x$rhot
 
-  est_true_cases_hosps <- y$cases / rhot
-  Iest <- est_true_cases_hosps / (wfixed["gamma"] * dt)
+  est_true_cases_hosps <- y$cases / x$ρ
+  Yest <- est_true_cases_hosps / (wfixed["γ"] * dt)
   
-  I0init <- mean(head(Iest, n = 7), na.rm = TRUE)
-  E0init <- (I0init * wfixed["gamma"] / wfixed["eta"])  %>% unname()
+  Y0init <- mean(head(Yest, n = 7), na.rm = TRUE)
+  L0init <- (Y0init * wfixed["γ"] / wfixed["η"])  %>% unname()
   
-  Hest <- Iest  * wfixed["gamma"] * wfixed["chp"] / wfixed["gamma_h"]
+  Hest <- Yest  * wfixed["γ"] * wfixed["p_h"] / wfixed["γ_h"]
   
   H0init <- mean(head(Hest, n = 7), na.rm = TRUE)
-  hfp_init <-
+  p_d_init <-
     max(sum(y$deaths, na.rm = TRUE) / sum(Hest, na.rm = TRUE),
         0.01)
   
   l <- 7 
-  Rt <- lead(y$cases / rhot, n = l) / (y$cases / rhot)
+  Rt <- lead(y$cases / x$ρ, n = l) / (y$cases / x$ρ)
   Rt[Rt > 4] <- 4
   Rt[Rt < 0] <- 0.1
   m <- 10
@@ -444,33 +448,34 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   Rtfilt[(lf - m + 1):lf] <- NA
   Rtfilt[Rtfilt < 0] <- 0.1
   
-  D0 <- H0init * wfixed["gamma_h"] / wfixed["gamma_d"] * hfp_init
-  S0init <- wfixed["N"] - E0init - I0init - H0init - D0
-  Sdecrement <- cumsum(lead(y$cases / rhot, n = l))
-  St <- S0init - Sdecrement
-  betat <- Rtfilt * wfixed["gamma"] * wfixed["N"] / na.omit(St)
-  betat[1:m] <- betat[m + 1]
-  betat[(lf - m + 1):lf] <- betat[lf - m]
-  betat2 <- c(betat, rep(betat[lf - m], l))
+  D0 <- H0init * wfixed["γ_h"] / wfixed["γ_d"] * p_d_init
+  X0init <- wfixed["N"] - L0init - Y0init - H0init - D0
+  Xdecrement <- cumsum(lead(y$cases / x$ρ, n = l))
+  Xt <- X0init - Xdecrement
+  β <- Rtfilt * wfixed["γ"] * wfixed["N"] / na.omit(Xt)
+  β[1:m] <- β[m + 1]
+  β[(lf - m + 1):lf] <- β[lf - m]
+  β2 <- c(β, rep(β[lf - m], l))
   
-  df <- data.frame(logbeta = log(betat2), prophomeiqr = x$prophomeiqr)
-  mod <- lm(logbeta~ prophomeiqr, data = df)
+  df <- data.frame(logβ = log(β2), prophomeiqr = x$prophomeiqr)
+  mod <- lm(logβ ~ prophomeiqr, data = df)
   print(summary(mod))
   prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
-  binit <- coef(mod)["(Intercept)"] + residuals(mod)
-  bsplit <- split(binit, x$bvecmap)
-  bvec <- sapply(bsplit, mean)
-  names(bvec) <- paste0("b", seq_along(bvec))
+  intercept_init <- coef(mod)["(Intercept)"] + residuals(mod)
+  intercept_split <- split(intercept_init, x$β_0map)
+  β_0 <- sapply(intercept_split, mean)
+  names(β_0) <- paste0("β_0_", seq_along(β_0))
 
   winit <- c(
-    logE0 = log(E0init + 1),
+    logL0 = log(L0init + 1),
     logH0 = log(H0init + 1),
-    logtauc = log(tau_cases_init),
-    logtaud = log(tau_deaths_init),
+    logτ_d = log(τ_d_init),
     prophomeeffect = prophomeeffect_init,
-    loghfpvec = log(hfp_init),
-    loggammad12 = log(365.25 / 10),
-    bvec
+    logitp_d = qlogis(p_d_init),
+    logγ_d12 = log(365.25 / 10),
+    logγ_d34 = log(365.25 / 10),
+    logτ_c = rep(log(τ_c_init), times = nτ_c),
+    β_0
   )
   winit
 }

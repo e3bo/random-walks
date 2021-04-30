@@ -217,13 +217,9 @@ if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
 
 ## fitting
 iter1 <- 1500
-bsd <- 0.01
-tcsd <- 0.1
+β_0sd <- 0.01
+τ_csd <- 0.1
 
-
-## mod par vector for experimental new structure
-ntv <- tail(x$τcvecmap, n = 1)
-winit2 <- c(winit[1:2], winit[4:10], rep(winit[3], ntv) , winit[11:length(winit)])
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(

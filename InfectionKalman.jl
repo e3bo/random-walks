@@ -43,12 +43,13 @@ function genvectorfield()
     f = [ffun(u, par, t) for ffun in ffuns]
     q = s' * Diagonal(f) * s
     jac = odefun.jac(u[:,1], par, t)
+    p = u[:,2:end]
     du[:,2:end] .= jac * p + p * jac' + q
   end
 end
 
 
-function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_a::Float64 = 365.25 / 1, γ_r::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
+function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
 
     zloc = deepcopy(z)
     nτ_c = cov.τ_cmap[end]
@@ -59,7 +60,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         τ_d = exp(pvar[4])
         p_h = 1 / (1 + exp(-pvar[5]))
         prophomeeffect = pvar[6]
-        p_d = exp(pvar[7])
+        p_d = 1 / (1 + exp(-pvar[7]))
         γ_d12 = exp(pvar[8])
         γ_d34 = exp(pvar[9])
         τ_c = [exp(p) for p in pvar[10:(10 + nτ_c - 1)]]
@@ -69,7 +70,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         H0 = exp(pvar[2])
         τ_d = exp(pvar[3])
         prophomeeffect = pvar[4]
-        p_d = exp(pvar[5])
+        p_d = 1 / (1 + exp(-pvar[5]))
         γ_d12 = exp(pvar[6])
         γ_d34 = exp(pvar[7])
         τ_c = [exp(p) for p in pvar[8:(8 + nτ_c - 1)]]
@@ -77,17 +78,17 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
         zloc[!, "hospitalizations"] .= missing
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
-    
+    println(β_0)
     D0 = H0 * γ_h / γ_d * p_d
     Y0 = L0 * η / γ
     
     x0 = [         max(N - L0 - Y0 - H0 - D0, N * 0.1) #X
                                             min(Y0, N) #Y
                                             min(L0, N) #L
-           min(cov.ρ[1] * Y0 * γ * (1 - p_h) / γ_r, N) #Z
+           min(cov.ρ[1] * Y0 * γ * (1 - p_h) / γ_z, N) #Z
                                                     0  #Z_r
                                             min(H0, N) #H
-                            min(Y0 * γ * p_h / γ_a, N) #A
+                                                    0  #A
                                             min(D0, N) #D
                                                     0] #D_r
                                                      
@@ -102,7 +103,6 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
 
     zmiss = [ismissing(x) for x in zloc]
     zz = Array{eltype(zloc)}(undef, dobs)
-    maxzscore = Inf
 
     nobs = size(zloc, 1)
     rdiagadj = ones(eltype(β_0), dobs, nobs) # make non-zero to ensure Σ is not singular
@@ -158,7 +158,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             end
         end
         pkkmo[:,:,i] .= pnext
-        r = Diagonal([τcvec[cov.τ_cmap[i]] * xlast[3], τ_h, τ_d]) 
+        r = Diagonal([τ_c[cov.τ_cmap[i]] * xlast[3], τ_h, τ_d]) 
         
         Σ[:,:,i] = hmat * pkkmo[:,:,i] * hmat' + r
 
