@@ -13,8 +13,7 @@ export obj
 export grad
 export vectorfield
 
-
-function genvectorfield
+function genvectorfield()
 
   rn = @reaction_network begin
      β, S + Y --> L + Y
@@ -34,123 +33,70 @@ function genvectorfield
   
   F = (u, p, t) -> odefun(u, p, t)
   J = (u, p, t) -> odefun.jac(u,p, t)
-  
   S = netstoichmat(rn)
 
-  u0 = [1e7, 10, 1, 10, 0, 0, 0, 0, 0] 
-  pars = [400, 365/4, 91.24, 365 / 10, 365 / 1, 365 / 1, 365 / 10, .1, .1, .4]
+  #u0 = [1e7, 10, 1, 10, 0, 0, 0, 0, 0] 
+  #pars = [400, 365/4, 91.24, 365 / 10, 365 / 1, 365 / 1, 365 / 10, .1, .1, .4]
   
   jls = [jumpratelaw(r) for r in reactions(rn)]
   ffuns =  [build_function(jl, states(rn), parameters(rn), independent_variable(rn), expression=Val{false}) for jl in jls] # there may be a nicer way to do this soon: https://github.com/SciML/Catalyst.jl/issues/306
+  
   function vf(du, u, par, t)
-  
-    du[:,1] .= F(u[:,1], par)
+    du[:,1] .= F(u[:,1], par, t)
     f = [ffun(u, par, t) for ffun in ffuns]
-    q = S' * Diag(f) * S
-  
+    q = S' * Diagonal(f) * S
+    jac = J(u[:,1], par, t)
+    du[:,2:end] .= jac * p + p * jac' + q
   end
 end
 
 
-
-function vectorfield(du, u, par, t)
-  x, l, y, removed, hnew, crep, h, d, drep = u[:,1]
-
-  β, N,  ι, η, γ, γd, γh,  γr, γhnew, chp, hfp, rhot = par
-
-  du[1,1] = dx = -β*x*y/N - ι*x
-  du[2,1] = dl = β*x*y/N + ι*x - η*l
-  du[3,1] = dy = η*l - γ*y
-  du[4,1] = dremoved = rhot * (1 - chp) * γ * y - removed * γr
-  du[5,1] = dhnew = chp*γ*y - hnew * γhnew
-  du[6,1] = dcrep = hnew * γhnew + removed * γr
-  du[7,1] = dh = chp*γ*y - γh*h
-  du[8,1] = dd = hfp*γh*h - γd*d
-  du[9,1] = ddrep = γd*d
-
-  f = [0,                             # x; 
-       β*x/N*y/N + ι*x/N,             # x-> l; 1, 2
-       η*l/N,                         # l -> y;, 2, 3
-       rhot * (1 - chp)*γ*y/N,        # y -> removed; 3, 4
-       chp*γ*y/N,                     # y -> hnew, y -> h; 3, 5  (3 , 7)
-       (1 - hfp) * γh * h / N,        # h -> not death; 7
-       hfp * γh * h / N,              # h -> d; 7, 8
-       γd * d / N,                    # d -> drep; 8, 9
-       γhnew * hnew,                   # hnew -> crep; 5, 6
-       γr * removed]                  # removed -> crep; 4, 6
-
-  q = [  f[1]+f[2]     -f[2]               0              0          0              0                0             0       0
-             -f[2] f[2]+f[3]           -f[3]              0          0              0                0             0       0
-                 0     -f[3]  f[3]+f[4]+f[5]          -f[4]      -f[5]              0            -f[5]             0       0
-                 0         0           -f[4]   f[4] + f[10]          0         -f[10]                0             0       0
-                 0         0           -f[5]              0  f[5]+f[9]          -f[9]                0             0       0
-                 0         0              0          -f[10]      -f[9]   f[10] + f[9]                0             0       0
-                 0         0          -f[5]               0          0              0   f[7]+f[5]+f[6]         -f[7]       0
-                 0         0              0               0          0              0            -f[7]   f[7] + f[8]   -f[8]
-                 0         0              0               0          0              0                0         -f[8]    f[8]]
-
-  jac= [-β*y/N - ι    0               -β*x/N     0       0       0       0    0 0
-         β*y/N + ι   -η                β*x/N     0       0       0       0    0 0
-                 0    η                   -γ     0       0       0       0    0 0
-                 0    0    rhot *(1 - chp)*γ   -γr       0       0       0    0 0
-                 0    0                chp*γ     0  -γhnew       0       0    0 0
-                 0    0                    0    γr      γh       0       0    0 0 
-                 0    0                chp*γ     0       0       0     -γh    0 0
-                 0    0                    0     0       0       0  γh*hfp  -γd 0
-                 0    0                    0     0       0       0       0   γd 0]
-   
-   p = u[:,2:end]
-   du[:,2:end] .= jac * p + p * jac' + q * N
-end
-
-function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, ι::Float64 = 0., η::Float64 = 365.25 / 4, N::Float64 = 7e6, a::Float64 = 1., betasd::Float64 = 1., tcsd::Float64 = 0.1, just_nll::Bool = true, maxlogRt::Float64 = 1.6, γd::Float64 = 365.25 / 1, γh::Float64 = 365.25 / 1, γhnew::Float64 = 365.25 / 1, γr::Float64 = 365.25 / 1, h0::Float64 = 10., τh::Float64 = 10., τd::Float64 = 10., chp::Float64 = 0.01, hfp::Float64 = 0.01)
+function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_a::Float64 = 365.25 / 1, γ_r::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
 
     zloc = deepcopy(z)
-    ntauc = cov.τcvecmap[end]
+    nτ_c = cov.τ_cmap[end]
     if size(z, 2) == 3
-        l0 = exp(pvar[1])
-        h0 = exp(pvar[2])
-        τh = exp(pvar[3])
-        τd = exp(pvar[4])
-        chp = 1 / (1 + exp(-pvar[5]))
+        L0 = exp(pvar[1])
+        H0 = exp(pvar[2])
+        τ_h = exp(pvar[3])
+        τ_d = exp(pvar[4])
+        p_h = 1 / (1 + exp(-pvar[5]))
         prophomeeffect = pvar[6]
-        hfpvec = exp(pvar[7])
-        gammad12 = exp(pvar[8])
-        gammad34 = exp(pvar[9])
-        τcvec = [exp(p) for p in pvar[10:(10 + ntauc - 1)]]
-        bvec = pvar[(10 + ntauc):end]
+        p_d = exp(pvar[7])
+        γ_d12 = exp(pvar[8])
+        γ_d34 = exp(pvar[9])
+        τ_c = [exp(p) for p in pvar[10:(10 + nτ_c - 1)]]
+        β_0 = pvar[(10 + nτ_c):end]
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
-        l0 = exp(pvar[1])
-        h0 = exp(pvar[2])
-        τd = exp(pvar[3])
+        L0 = exp(pvar[1])
+        H0 = exp(pvar[2])
+        τ_d = exp(pvar[3])
         prophomeeffect = pvar[4]
-        hfpvec = exp(pvar[5])
-        gammad12 = exp(pvar[6])
-        gammad34 = exp(pvar[7])
-        τcvec = [exp(p) for p in pvar[8:(8 + ntauc - 1)]]
-        bvec = pvar[(8 + ntauc):end]
+        p_d = exp(pvar[5])
+        γ_d12 = exp(pvar[6])
+        γ_d34 = exp(pvar[7])
+        τ_c = [exp(p) for p in pvar[8:(8 + nτ_c - 1)]]
+        β_0 = pvar[(8 + nτ_c):end]
         zloc[!, "hospitalizations"] .= missing
     end
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
-    d0 = h0 * γh / γd * hfpvec[1]
+    D0 = H0 * γ_h / γ_d * p_d
+    Y0 = L0 * η / γ
     
-    y0 = l0 * η / γ
-    # x, l, y, removed, hnew, crep, h, d, drep
-    
-    x0 = [             max(N - l0 - y0 - h0 - d0, 100) 
-                                            min(l0, N) 
-                                            min(y0, N)  
-          min(cov.rhot[1] * y0 * γ * (1 - chp)/ γr, N)
-                          min(chp * y0 * γ / γhnew, N)
-                                                     0 
-                                            min(h0, N)
-                                            min(d0, N)    
-                                                     0]
+    x0 = [         max(N - L0 - Y0 - H0 - D0, N * 0.1) #S
+                                            min(Y0, N) #Y
+                                            min(L0, N) #L
+           min(cov.ρ[1] * Y0 * γ * (1 - p_h) / γ_r, N) #R
+                                                    0  #C
+                                            min(H0, N) #H
+                            min(Y0 * γ * p_h / γ_a, N) #A
+                                            min(D0, N) #D
+                                                    0] #D_r
                                                      
-    p0 = convert(Array{eltype(bvec), 2}, Diagonal([1, 1, 1, 1, 1, 0, 1, 1, 0]))
+    p0 = convert(Array{eltype(β_0), 2}, Diagonal([1, 1, 1, 1, 0, 1, 1, 1, 0]))
     
-    if (eltype(bvec) == Float64)
+    if (eltype(β_0) == Float64)
         println(pvar)
     end
     
@@ -161,21 +107,21 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     zz = Array{eltype(zloc)}(undef, dobs)
     maxzscore = Inf
 
-    # filter (assuming first observation at time 1)
     nobs = size(zloc, 1)
-    rdiagadj = ones(eltype(bvec), dobs, nobs) # make non-zero to ensure Σ is not singular
-    Σ = Array{eltype(bvec)}(undef, dobs, dobs, nobs)
-    ytkkmo = Array{eltype(bvec)}(undef, dobs, nobs)
-    k = Array{eltype(bvec)}(undef, dstate, dobs, nobs)
-    xkk = Array{eltype(bvec)}(undef, dstate, nobs)
-    xkkmo = Array{eltype(bvec)}(undef, dstate, nobs)
-    pkk = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
-    pkkmo = Array{eltype(bvec)}(undef, dstate, dstate, nobs)
+    rdiagadj = ones(eltype(β_0), dobs, nobs) # make non-zero to ensure Σ is not singular
+    Σ = Array{eltype(β_0)}(undef, dobs, dobs, nobs)
+    ytkkmo = Array{eltype(β_0)}(undef, dobs, nobs)
+    k = Array{eltype(β_0)}(undef, dstate, dobs, nobs)
+    xkk = Array{eltype(β_0)}(undef, dstate, nobs)
+    xkkmo = Array{eltype(β_0)}(undef, dstate, nobs)
+    pkk = Array{eltype(β_0)}(undef, dstate, dstate, nobs)
+    pkkmo = Array{eltype(β_0)}(undef, dstate, dstate, nobs)
     
-    @assert length(bvec) == cov.bvecmap[end] "length of bvec should equal the final value in cov.bvecmap"
+    @assert length(β_0) == cov.β_0map[end] "length of β_0 should be equal to the final value in cov.β_0map"
     
     hmat =  [0 0 0 0 0 1 0 0 0; 0 0 0 0 1 0 0 0 0; 0 0 0 0 0 0 0 0 1] 
-    
+    vectorfield = genvectorfield()
+
     for i in 1:nobs
         if i == 1
             xlast = x0
@@ -184,7 +130,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = exp(bvec[cov.bvecmap[i]] + cov.prophomeiqr[i] * prophomeeffect)
+        β = exp(β_0[cov.β_0map[i]] + cov.prophomeiqr[i] * prophomeeffect)
         xlast[6] = 0
         xlast[9] = 0
         plast[6,:] .= 0
@@ -262,8 +208,8 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     
     stepdensity = Normal(0, betasd)
     rwlik = 0
-    for i in 1:(length(bvec) - 1)
-        step = bvec[i + 1] - bvec[i]
+    for i in 1:(length(β_0) - 1)
+        step = β_0[i + 1] - β_0[i]
         rwlik += logpdf(stepdensity, step)
     end
     
