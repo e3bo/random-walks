@@ -190,7 +190,7 @@ stopifnot(all(x$ρ >= 0))
 
 if (forecast_date_start == forecast_date){
   stopifnot(forecast_date < "2020-11-16") # initializer not implemented for data with hospitalizations
-  winit <- initialize_estimates(x = x, y = y, wfixed = wfixed)
+  winit <- initialize_estimates(x = x, y = z, wfixed = wfixed)
 } else {
   fit_dir_start <-
     file.path("fits",
@@ -262,7 +262,7 @@ if (!dir.exists(fit_dir))
   dir.create(fit_dir, recursive = TRUE)
 
 the_file <- file.path(fit_dir, "fit.RData")
-save(x, y, winit, wfixed, fit1, h1, bsd, file = the_file)
+save(x, z, winit, wfixed, fit1, h1, β_0sd, τ_csd, file = the_file)
 
 ## Save metrics
 
@@ -270,17 +270,17 @@ dets1 <-
   calc_kf_nll_r(
     w = fit1$par,
     cov = x,
-    z = y,
+    z = z,
     β_0sd = β_0sd,
     τ_csd = τ_csd,
     wfixed = wfixed,
     just_nll = FALSE
   )
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
-naive_error <- colMeans(abs(apply(y, 2, diff)), na.rm = TRUE)
-naive_error_weekly <- colMeans(abs(y[-c(1:7),] - y[-((nrow(y) - 6):nrow(y)),]), na.rm = TRUE)
+naive_error <- colMeans(abs(apply(z, 2, diff)), na.rm = TRUE)
+naive_error_weekly <- colMeans(abs(z[-c(1:7),] - z[-((nrow(z) - 6):nrow(z)),]), na.rm = TRUE)
 
-if (ncol(y) == 2) {
+if (ncol(z) == 2) {
   mase1 <- mae1 / c(naive_error["cases"], NA, naive_error["deaths"])
   mase1w <-
     mae1 / c(naive_error_weekly["cases"], hosps = NA, naive_error_weekly["deaths"])
@@ -292,8 +292,8 @@ if (ncol(y) == 2) {
 g1 <-
   calc_kf_grad(
     w = fit1$par,
-    x = x,
-    y = y,
+    cov = x,
+    z = z,
     β_0sd = β_0sd,
     τ_csd = τ_csd,
     wfixed = wfixed

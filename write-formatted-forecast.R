@@ -264,15 +264,11 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
   )
   par(mfrow = c(3, 1))
   
-  rho_t <- x$rhot
-  plot(x$time, y$cases, xlab = "Time", ylab = "Cases")
-  pred_cases <-
-    dets$xhat_kkmo["C",] * rho_t + dets$xhat_kkmo["Hnew",]
-  est_cases <- dets$xhat_kkmo["C",] + dets$xhat_kkmo["Hnew",]
+  plot(x$time, z$cases, xlab = "Time", ylab = "Cases")
+  pred_cases <- dets$xhat_kkmo["Z_r",]
   se_cases <- sqrt(dets$S[1, 1,])
   lines(x$time, se_cases * 2 + pred_cases, col = "grey")
   lines(x$time, pred_cases)
-  lines(x$time, est_cases, lty = 2)
   lines(x$time, -se_cases * 2 + pred_cases, col = "grey")
   
   if (no_hosps) {
@@ -282,16 +278,16 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
          y$hospitalizations,
          xlab = "Time",
          ylab = "Hospitalizations")
-    pred_hosps <- dets$xhat_kkmo["Hnew", ]
+    pred_hosps <- dets$xhat_kkmo["A", ]
     se_hosps <- sqrt(dets$S[2, 2, ])
     lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
     lines(x$time, pred_hosps)
     lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
   }
   
-  plot(x$time, y$deaths, xlab = "Time",
+  plot(x$time, z$deaths, xlab = "Time",
        ylab = "Deaths")
-  pred_deaths <- dets$xhat_kkmo["Drep",]
+  pred_deaths <- dets$xhat_kkmo["D_r",]
   se_deaths <- sqrt(dets$S[3, 3,])
   lines(x$time, se_deaths * 2 + pred_deaths, col = "grey")
   lines(x$time, pred_deaths)

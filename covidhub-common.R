@@ -371,7 +371,7 @@ calc_kf_nll <- function(w, cov, z,  β_0sd,  τ_csd, wfixed) {
         "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
       )
     )
-  } else if (ncol(z) == 2 && !"hospitalizations" %in% names(y)) {
+  } else if (ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
     julia_assign2(w, cov, z, wfixed,  β_0sd,  τ_csd)
     nll <- JuliaCall::julia_eval(
       paste0(
@@ -390,7 +390,7 @@ calc_kf_grad <- function(w, cov, z, β_0sd,  τ_csd, wfixed) {
       "InfectionKalman.grad",
       "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
-  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(y)) {
+  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(z)) {
     julia_assign2(w, cov, z, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
@@ -407,7 +407,7 @@ calc_kf_hess <- function(w, cov, z, β_0sd,  τ_csd, wfixed) {
       "InfectionKalman.hess",
       "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
-  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(y)) {
+  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(z)) {
     julia_assign2(w, cov, z, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
