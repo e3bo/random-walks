@@ -541,10 +541,11 @@ kfnll_nll_r <- function(w, cov, z, β_0sd, τ_csd, wfixed, fet, fet_zero_cases_d
     γ_h <- unname(wfixed["γ_h"])
     γ_d <- unname(wfixed["γ_d"])
     nτ_c <- tail(cov$τ_cmap, 1)
-    if (ncol(z) == 2){
+    if (ncol(z) == 2 && !("hospitalizations" %in% names(z))){
       τ_h <- wfixed["τ_h"]
       p_h <- wfixed["p_h"]
       w2 <- w
+      z$hospitalizations <- NA
     } else {
       τ_h <- exp(w[3])
       p_h <- plogis(w[5])
@@ -560,17 +561,27 @@ kfnll_nll_r <- function(w, cov, z, β_0sd, τ_csd, wfixed, fet, fet_zero_cases_d
     τ_c <- exp(w2[seq(8, 8 + nτ_c- 1)])
     β_0 <- w2[seq(8 +  nτ_c, length(w2))]
     
+    zloc <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
 
-    D0 <- H0 * gamma_h / gamma_d * hfpvec[1]
-
-    xhat0 <- c(max(N - E0 - I0 - H0 - D0, 100), min(E0, N), min(I0, N), 0, 0, min(H0, N), min(D0, N), 0)
-    names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
+    D0 <- H0 * γ_h / γ_d * p_d
+    Y0 <- L0 * η / γ
+    x0 <- c(       max(N - L0 - Y0 - H0 - D0, N * 0.1), #X
+                   min(Y0, N), #Y
+                   min(L0, N), #L
+                   min(cov$ρ[1] * Y0 * γ * (1 - p_h) / γ_z, N), #Z
+                   0,  #Z_r
+                   min(H0, N), #H
+                   0,  #A
+                   min(D0, N), #D
+                   0) #D_r
     
-    if (ncol(z) == 2 && !("hospitalizations" %in% names(z))) {
-      z$hospitalizations <- NA
-    }
+    names(x0) <- c("X", "Y", "L", "Z", "Z_r", "H", "A", "D", "D_r")
     
-    z <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
+    p0 <- diag(c(1, 1, 1, 1, 0, 1, 0, 1, 0))
+    
+    dstate = length(x0)
+    dobs = ncol(zloc)
+    
     is_z_na <- is.na(z)
     T <- nrow(z)
     dobs <- ncol(z)
