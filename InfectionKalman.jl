@@ -48,38 +48,33 @@ function genvectorfield()
   end
 end
 
-function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
+function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
 
     zloc = deepcopy(z)
-    nτ_c = cov.τ_cmap[end]
     if size(z, 2) == 3
-        L0 = exp(pvar[1])
-        H0 = exp(pvar[2])
-        τ_h = exp(pvar[3])
-        τ_d = exp(pvar[4])
-        p_h = 1 / (1 + exp(-pvar[5]))
-        prophomeeffect = pvar[6]
-        p_d = 1 / (1 + exp(-pvar[7]))
-        γ_d12 = exp(pvar[8])
-        γ_d34 = exp(pvar[9])
-        τ_c = [exp(p) for p in pvar[10:(10 + nτ_c - 1)]]
-        β_0 = pvar[(10 + nτ_c):end]
+        τ_h = exp(w[3])
+        p_h = 1 / (1 + exp(-w[5]))
+        w2 = vcat(w[1:2], w[4], w[6:end])
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
-        L0 = exp(pvar[1])
-        H0 = exp(pvar[2])
-        τ_d = exp(pvar[3])
-        prophomeeffect = pvar[4]
-        p_d = 1 / (1 + exp(-pvar[5]))
-        γ_d12 = exp(pvar[6])
-        γ_d34 = exp(pvar[7])
-        τ_c = [exp(p) for p in pvar[8:(8 + nτ_c - 1)]]
-        β_0 = pvar[(8 + nτ_c):end]
+        w2 = w
         zloc[!, "hospitalizations"] .= missing
     end
+    
+    L0 = exp(w2[1])
+    H0 = exp(w2[2])
+    τ_d = exp(w2[3])
+    prophomeeffect = w2[4]
+    p_d = 1 / (1 + exp(-w2[5]))
+    γ_d12 = exp(w2[6])
+    γ_d34 = exp(w[7])
+    nτ_c = cov.τ_cmap[end]
+    τ_c = [exp(p) for p in w2[8:(8 + nτ_c - 1)]]
+    β_0 = w2[(8 + nτ_c):end]
+
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
+    
     D0 = H0 * γ_h / γ_d * p_d
     Y0 = L0 * η / γ
-    
     x0 = [         max(N - L0 - Y0 - H0 - D0, N * 0.1) #X
                                             min(Y0, N) #Y
                                             min(L0, N) #L
@@ -93,7 +88,7 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     p0 = convert(Array{eltype(β_0), 2}, Diagonal([1, 1, 1, 1, 0, 1, 0, 1, 0]))
     
     if (eltype(β_0) == Float64)
-        println(pvar)
+        println(w)
     end
     
     dstate = size(x0, 1)
@@ -208,13 +203,13 @@ function obj(pvar::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002
     end
 end
 
-function grad(pvar, x, z; args...)
-    g = ForwardDiff.gradient(par -> obj(par, x, z; args...), pvar)
+function grad(w, x, z; args...)
+    g = ForwardDiff.gradient(par -> obj(par, x, z; args...), w)
     g
 end
 
-function hess(pvar, x, z; args...)
-    h = ForwardDiff.hessian(par -> obj(par, x, z; args...), pvar)
+function hess(w, x, z; args...)
+    h = ForwardDiff.hessian(par -> obj(par, x, z; args...), w)
     h
 end
 

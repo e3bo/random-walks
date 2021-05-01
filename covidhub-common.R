@@ -334,13 +334,14 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
 }
 
 julia_assign2 <- function(w, wfixed, β_0sd,  τ_csd){
-  JuliaCall::julia_assign("pvar", w)
+  JuliaCall::julia_assign("w", w)
   JuliaCall::julia_assign("η", wfixed["η"])
   JuliaCall::julia_assign("N", wfixed["N"])
   JuliaCall::julia_assign("γ", wfixed["γ"])
   JuliaCall::julia_assign("cov", x)
   JuliaCall::julia_assign("z", y)
   JuliaCall::julia_assign("p_h", wfixed["p_h"])
+  JuliaCall::julia_assign("τ_h", wfixed["τ_h"])
   JuliaCall::julia_assign("β_0sd", β_0sd)
   JuliaCall::julia_assign("τ_csd", τ_csd)  
   JuliaCall::julia_assign("γ_d", wfixed["γ_d"])
@@ -348,7 +349,7 @@ julia_assign2 <- function(w, wfixed, β_0sd,  τ_csd){
 }
 
 julia_assign3 <- function(w, wfixed, β_0sd, τ_csd){
-  JuliaCall::julia_assign("pvar", w)
+  JuliaCall::julia_assign("w", w)
   JuliaCall::julia_assign("η", wfixed["η"])
   JuliaCall::julia_assign("N", wfixed["N"])
   JuliaCall::julia_assign("γ", wfixed["γ"])
@@ -367,7 +368,7 @@ calc_kf_nll <- function(w, x, y,  β_0sd,  τ_csd, wfixed) {
     nll <- JuliaCall::julia_eval(
       paste0(
         "InfectionKalman.obj",
-        "(pvar, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
+        "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
       )
     )
   } else if (ncol(y) == 2 && !"hospitalizations" %in% names(y)) {
@@ -375,7 +376,7 @@ calc_kf_nll <- function(w, x, y,  β_0sd,  τ_csd, wfixed) {
     nll <- JuliaCall::julia_eval(
       paste0(
         "InfectionKalman.obj",
-        "(pvar, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
+        "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
       )
     )
   }
@@ -387,30 +388,30 @@ calc_kf_grad <- function(w, x, y, β_0sd,  τ_csd, wfixed) {
     julia_assign3(w, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
+      "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
   } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
     julia_assign2(w, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
-      "(pvar, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
+      "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
   }
   g
 }
 
-calc_kf_hess <- function(w, x, y, betasd, tcsd, wfixed) {
+calc_kf_hess <- function(w, x, y, β_0sd,  τ_csd, wfixed) {
   if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, betasd, tcsd)
+    julia_assign3(w, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
-      "(pvar, cov, z; N = N, η = η, γ = γ, γd = γd, γh = γh, betasd = betasd, tcsd = tcsd, just_nll = true)"
+      "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
   } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, betasd, tcsd)
+    julia_assign2(w, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
-      "(pvar, cov, z; N = N, η = η, γ = γ, chp = chp, γh = γh, γd = γd, betasd = betasd, tcsd = tcsd, just_nll = true)"
+      "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
   }
   g
@@ -480,29 +481,26 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   winit
 }
 
-kf_nll_details <- function(w, x, y, fixed, betasd, tcsd, fet) {
-  eta <- unname(fixed["eta"])
-  gamma <- unname(fixed["gamma"])
+kf_nll_details <- function(w, x, y, β_0sd, τ_csd, wfixed, fet) {
+  η <- unname(wfixed["η"])
+  γ <- unname(wfixed["γ"])
   N <- unname(fixed["N"]) 
-  loggammahd <- unname(log(fixed["gamma_h"]))
-  ntaucvec <- tail(x$τcvecmap, 1)
+  logγ_hd <- unname(log(wfixed["γ_h"]))
+  nτ_c <- tail(x$τ_cmap, 1)
   if (ncol(y) == 2){
-    logtauh <- log(10)
-    logitchp <- qlogis(fixed["chp"])
+    logτ_h <- log(10)
+    p_h <- wfixed["p_h"]
     w2 <- w
   } else {
-    logtauh <- w[3]
-    logitchp <- w[5]
+    logτ_h <- w[3]
+    p_h <- plogis(w[5])
     w2 <- w[-c(3, 5)]
   }
-  logE0 <- w2[1]
+  logL0 <- w2[1]
   logH0 <- w2[2]
-  
-  logtauc <- w2[3]
-  
-  logtaud <- w2[3]
+  logτ_d <- w2[3]
   prophomeeffect <- w2[4]
-  loghfpvec <- w2[5]
+  p_d <- plogis(w2[5])
   loggammad12 = w2[6]
   loggammad34 = w2[7]
   logtauc <- w2[seq(8, 8 + ntaucvec - 1)]
@@ -533,44 +531,38 @@ kf_nll_details <- function(w, x, y, fixed, betasd, tcsd, fet) {
   nll
 }
 
-kfnll <-
-  function(bvec,
-           logE0,
-           logH0,
-           logtauc,
-           logtauh,
-           logtaud,
-           logitchp,
-           loghfpvec,
-           loggammahd,
-           loggammad12,
-           loggammad34,
-           prophomeeffect,
-           eta,
-           gamma,
-           N,
-           z,
-           cov,
-           Phat0 = diag(c(1, 1, 1, 0, 0, 1, 1, 0)),
-           fets = NULL,
-           fet_zero_cases_deaths = "daily",
-           betasd = 1,
-           tcsd, 
-           maxzscore = Inf,
-           just_nll = TRUE) {
+kfnll_nll_r <- function(w, cov, z, β_0sd, τ_csd, wfixed, fet, fet_zero_cases_deaths = "daily", just_nll = TRUE) {
     diffeqr::diffeq_setup("/opt/julia-1.5.3/bin")
     JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
     
-    E0 <- exp(logE0)
-    I0 <- E0 * eta / gamma
-    H0 <- exp(logH0)
-    gamma_d <- gamma_h <- exp(loggammahd)
-    hfpvec = exp(loghfpvec)
+    η <- unname(wfixed["η"])
+    γ <- unname(wfixed["γ"])
+    N <- unname(fixed["N"]) 
+    γ_h <- unname(wfixed["γ_h"])
+    γ_d <- unname(wfixed["γ_d"])
+    nτ_c <- tail(cov$τ_cmap, 1)
+    if (ncol(z) == 2){
+      τ_h <- wfixed["τ_h"]
+      p_h <- wfixed["p_h"]
+      w2 <- w
+    } else {
+      τ_h <- exp(w[3])
+      p_h <- plogis(w[5])
+      w2 <- w[-c(3, 5)]
+    }
+    L0 <- exp(w2[1])
+    H0 <- exp(w2[2])
+    τ_d <- exp(w2[3])
+    prophomeeffect <- w2[4]
+    p_d <- plogis(w2[5])
+    γ_d12 = exp(w2[6])
+    γ_d34 = exp(w2[7])
+    τ_c <- exp(w2[seq(8, 8 + nτ_c- 1)])
+    β_0 <- w2[seq(8 +  nτ_c, length(w2))]
+    
+
     D0 <- H0 * gamma_h / gamma_d * hfpvec[1]
-    
-    hfp <- hfpvec[1]
-    chp <- plogis(logitchp)
-    
+
     xhat0 <- c(max(N - E0 - I0 - H0 - D0, 100), min(E0, N), min(I0, N), 0, 0, min(H0, N), min(D0, N), 0)
     names(xhat0) <- c("S", "E", "I", "C", "Hnew", "H", "D", "Drep")
     

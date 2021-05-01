@@ -139,6 +139,7 @@ wfixed <- c(
   γ_h = 365.25 / (case_to_death_lag / 2),
   γ_d = 365.25 / (case_to_death_lag / 2),
   p_h = 0.03,
+  τ_h = 10, # wfixed p_h and τ_h values only are used if there are no hospitalization data, otherwise they are estimated
   η = 365.25 / 4
 )
 
@@ -241,7 +242,8 @@ h1 <- calc_kf_hess(
   w = fit1$par,
   x = x,
   y = y,
-  betasd = bsd,
+  β_0sd = β_0sd,
+  τ_csd = τ_csd,
   wfixed = wfixed
 )
 tictoc::toc()
