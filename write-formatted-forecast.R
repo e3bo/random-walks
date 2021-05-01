@@ -5,15 +5,22 @@ tictoc::tic()
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-make_rt_plot <- function(ft, x) {
+make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   par(mfrow = c(1, 1))
-  intercept <- ft$par[-c(1:7)][x$bvecmap]
-  X <- cbind(x$prophomeiqr)
-  effects <- ft$par[6]
+  nβ_0 <- tail(cov$β_0map, 1)
+  np <- length(ft$par)
+  inds <- seq(np - nβ_0 + 1, np)
+  intercept <- ft$par[inds][cov$β_0map]
+  X <- cbind(cov$prophomeiqr)
+  if (no_hosps){
+    effects <- ft$par[4]
+  } else {
+    effects <- ft$par[6]
+  }
   num_all <- exp(intercept + X %*% effects)
   plot(
-    x$time,
-    num_all / wfixed["gamma"],
+    cov$time,
+    num_all / wfixed["γ"],
     type = 'l',
     xlab = "Time",
     ylab = expression(R[t])
@@ -33,13 +40,13 @@ make_rt_plot <- function(ft, x) {
     effects_no_dose <- effects_no_mob <- effects
     effects_no_mob[2] <- 0
     num_nomob <- exp(intercept + X %*% effects_no_mob)
-    lines(x$time,
-          num_nomob / wfixed["gamma"],
+    lines(cov$time,
+          num_nomob / wfixed["γ"],
           col = "orange")
     effects_no_dose[1] <- 0
     num_nodose <- exp(intercept + X %*% effects_no_dose)
-    lines(x$time,
-          num_nodose / wfixed["gamma"],
+    lines(cov$time,
+          num_nodose / wfixed["γ"],
           col = "blue")
   } else {
     legend(
@@ -55,12 +62,12 @@ make_rt_plot <- function(ft, x) {
     effects_no_mob <- effects
     effects_no_mob[1] <- 0
     num_nomob <- exp(intercept + X %*% effects_no_mob)
-    lines(x$time,
-          num_nomob / wfixed["gamma"],
+    lines(cov$time,
+          num_nomob / wfixed["γ"],
           col = "orange")
   }
-  lines(x$time,
-        exp(intercept) / wfixed["gamma"],
+  lines(cov$time,
+        exp(intercept) / wfixed["γ"],
         col = "grey")
 }
 
@@ -140,23 +147,31 @@ create_forecast_df <- function(means,
 }
 
 write_forecasts <-
-  function(fit, x, y, winit, wfixed, hess, fet, betasd, fdt, forecast_loc) {
+  function(fit, cov, z, winit, wfixed, hess, fets, β_0sd, τ_csd, fdt, forecast_loc) {
+    
     dets <-
-      kf_nll_details(fit$par,
-                     x,
-                     y,
-                     wfixed,
-                     betasd = betasd,
-                     fet = fet)
+      calc_kf_nll_r(
+        w = fit$par,
+        cov = cov,
+        z = z,
+        β_0sd = β_0sd,
+        τ_csd = τ_csd,
+        wfixed = wfixed,
+        just_nll = FALSE,
+        fets = fets
+      )
+    
     make_fit_plots(
       dets,
-      x = x,
+      cov = cov,
       winit = winit, 
       h = hess,
-      betasd = betasd,
+      β_0sd = β_0sd,
+      τ_csd = τ_csd,      
       fdt = fdt,
       forecast_loc = forecast_loc,
-      fit = fit
+      fit = fit,
+      wfixed = wfixed
     )
     case_inds <- which(fet$target_wday == 7)
     if (lubridate::wday(fdt) > 2) {
@@ -200,7 +215,7 @@ write_forecasts <-
       )
     fcst <- bind_rows(case_fcst, hosp_fcst, death_fcst)
     
-    lambda <- 1 / betasd
+    lambda <- 1 / β_0sd
     fcst_dir <-
       file.path("forecasts",
                 paste0(forecast_date,
@@ -217,14 +232,14 @@ write_forecasts <-
     write_csv(x = fcst, path = fcst_path)
   }
 
-make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
+make_fit_plots <- function(dets, cov, winit, h, β_0sd, τ_csd, fdt, forecast_loc, fit, wfixed) {
   plot_dir <-
     file.path("plots",
               paste0(forecast_date,
                      "-fips",
                      forecast_loc),
               paste0("lambda",
-                     sprintf("%06.2f", 1 / betasd)))
+                     sprintf("%06.2f", 1 / β_0sd)))
   
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
@@ -363,7 +378,7 @@ make_fit_plots <- function(dets, x, winit, h, betasd, fdt, forecast_loc, fit) {
     units = "in",
     res = 90
   )
-  make_rt_plot(fit, x)
+  make_rt_plot(fit, cov, no_hosps, wfixed)
   dev.off()
   
   plot_path7 <- file.path(plot_dir, "params-tab-1.png")  
@@ -419,17 +434,18 @@ tf <- lubridate::ymd(forecast_date) + lubridate::ddays(28 + extra)
 target_end_dates <- seq(from = ti, to = tf, by = "day")
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
-fet <- tibble(target_end_times, target_wday, target_end_dates)
+fets <- tibble(target_end_times, target_wday, target_end_dates)
 
 write_forecasts(
   fit = fit1,
-  x = x,
-  y = y,
+  cov = x,
+  z = z,
   winit = winit,
   wfixed = wfixed,
   hess = h1,
-  betasd = bsd,
-  fet = fet,
+  β_0sd = β_0sd, 
+  τ_csd = τ_csd,
+  fets = fets,
   fdt = forecast_date,
   forecast_loc = forecast_loc
 )

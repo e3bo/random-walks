@@ -60,16 +60,20 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
         zloc[!, "hospitalizations"] .= missing
     end
     
+    
     L0 = exp(w2[1])
     H0 = exp(w2[2])
     τ_d = exp(w2[3])
     prophomeeffect = w2[4]
     p_d = 1 / (1 + exp(-w2[5]))
     γ_d12 = exp(w2[6])
-    γ_d34 = exp(w[7])
+    γ_d34 = exp(w2[7])
+    
+    γ_z17 = exp(w2[8])
+    
     nτ_c = cov.τ_cmap[end]
-    τ_c = [exp(p) for p in w2[8:(8 + nτ_c - 1)]]
-    β_0 = w2[(8 + nτ_c):end]
+    τ_c = [exp(p) for p in w2[9:(9 + nτ_c - 1)]]
+    β_0 = w2[(9 + nτ_c):end]
 
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
@@ -128,10 +132,15 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
             plast[:,zv] .= 0
         end
         par = [β, N, η, γ, γ_d, γ_z, γ_h, p_h, p_d, cov.ρ[i]]
-        if cov.wday[i] == 1 || cov.wday[i] == 2
+        if cov.wday[i] == 1
+           par[5] = γ_d12
+           par[6] = γ_z17
+        elseif cov.wday[i] == 2
            par[5] = γ_d12
         elseif cov.wday[i] == 3 || cov.wday[i] == 4
            par[5] = γ_d34
+        elseif cov.wday[i] == 7
+           par[6] = γ_z17
         end
         xplast = hcat(xlast, plast)
         prob = ODEProblem(vectorfield, xplast, (0.0, dt), par)

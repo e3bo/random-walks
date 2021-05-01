@@ -516,10 +516,11 @@ calc_kf_nll_r <-
     τ_d <- exp(w2[3])
     prophomeeffect <- w2[4]
     p_d <- plogis(w2[5])
-    γ_d12 = exp(w2[6])
-    γ_d34 = exp(w2[7])
-    τ_c <- exp(w2[seq(8, 8 + nτ_c - 1)])
-    β_0 <- w2[seq(8 +  nτ_c, length(w2))]
+    γ_d12 <- exp(w2[6])
+    γ_d34 <- exp(w2[7])
+    γ_z17 <- exp(w2[8])
+    τ_c <- exp(w2[seq(9, 9 + nτ_c - 1)])
+    β_0 <- w2[seq(9 +  nτ_c, length(w2))]
     
     zloc <-
       data.matrix(z[, c("cases", "hospitalizations", "deaths")])
@@ -591,10 +592,15 @@ calc_kf_nll_r <-
         exp(β_0[cov$β_0map[i]] + prophomeeffect * cov$prophomeiqr[i])
       
       par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h, p_d, cov$ρ[i])
-      if (cov$wday[i] %in% c(1, 2)) {
+      if (cov$wday[i] == 1) {
+        par[5] <-  γ_d12
+        par[6] <- γ_z17
+      } else if (cov$wday[i] == 2){
         par[5] <-  γ_d12
       } else if (cov$wday[i] %in% c(3, 4)) {
         par[5] <-  γ_d34
+      } else if (cov$wday[i] == 7){
+        par[6] <- γ_z17
       }
       JuliaCall::julia_assign("u0", u0)
       JuliaCall::julia_assign("tspan", c(0, 0.00273224))
