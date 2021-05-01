@@ -11,7 +11,7 @@ using OrdinaryDiffEq
 export hess
 export obj
 export grad
-export vectorfield
+export genvectorfield
 
 function genvectorfield()
 
