@@ -333,13 +333,13 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
     filter((nchar(location)) <= 2 | str_detect(target, "inc case$")) ## only case forecasts accepted for counties
 }
 
-julia_assign2 <- function(w, wfixed, β_0sd,  τ_csd){
+julia_assign2 <- function(w, cov, z, wfixed, β_0sd,  τ_csd){
   JuliaCall::julia_assign("w", w)
   JuliaCall::julia_assign("η", wfixed["η"])
   JuliaCall::julia_assign("N", wfixed["N"])
   JuliaCall::julia_assign("γ", wfixed["γ"])
-  JuliaCall::julia_assign("cov", x)
-  JuliaCall::julia_assign("z", y)
+  JuliaCall::julia_assign("cov", cov)
+  JuliaCall::julia_assign("z", z)
   JuliaCall::julia_assign("p_h", wfixed["p_h"])
   JuliaCall::julia_assign("τ_h", wfixed["τ_h"])
   JuliaCall::julia_assign("β_0sd", β_0sd)
@@ -348,13 +348,13 @@ julia_assign2 <- function(w, wfixed, β_0sd,  τ_csd){
   JuliaCall::julia_assign("γ_h", wfixed["γ_h"])
 }
 
-julia_assign3 <- function(w, wfixed, β_0sd, τ_csd){
+julia_assign3 <- function(w, cov, z, wfixed, β_0sd, τ_csd){
   JuliaCall::julia_assign("w", w)
   JuliaCall::julia_assign("η", wfixed["η"])
   JuliaCall::julia_assign("N", wfixed["N"])
   JuliaCall::julia_assign("γ", wfixed["γ"])
-  JuliaCall::julia_assign("cov", x)
-  JuliaCall::julia_assign("z", y)
+  JuliaCall::julia_assign("cov", cov)
+  JuliaCall::julia_assign("z", z)
   JuliaCall::julia_assign("β_0sd", β_0sd)
   JuliaCall::julia_assign("τ_csd", τ_csd)
   JuliaCall::julia_assign("γ_d", wfixed["γ_d"])
@@ -362,17 +362,17 @@ julia_assign3 <- function(w, wfixed, β_0sd, τ_csd){
   
 }
 
-calc_kf_nll <- function(w, x, y,  β_0sd,  τ_csd, wfixed) {
-  if (ncol(y) == 3) {
-    julia_assign3(w, wfixed,  β_0sd,  τ_csd)
+calc_kf_nll <- function(w, cov, z,  β_0sd,  τ_csd, wfixed) {
+  if (ncol(z) == 3) {
+    julia_assign3(w, cov, z, wfixed,  β_0sd,  τ_csd)
     nll <- JuliaCall::julia_eval(
       paste0(
         "InfectionKalman.obj",
         "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
       )
     )
-  } else if (ncol(y) == 2 && !"hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed,  β_0sd,  τ_csd)
+  } else if (ncol(z) == 2 && !"hospitalizations" %in% names(y)) {
+    julia_assign2(w, cov, z, wfixed,  β_0sd,  τ_csd)
     nll <- JuliaCall::julia_eval(
       paste0(
         "InfectionKalman.obj",
@@ -383,15 +383,15 @@ calc_kf_nll <- function(w, x, y,  β_0sd,  τ_csd, wfixed) {
   nll
 }
 
-calc_kf_grad <- function(w, x, y, β_0sd,  τ_csd, wfixed) {
-  if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, β_0sd,  τ_csd)
+calc_kf_grad <- function(w, cov, z, β_0sd,  τ_csd, wfixed) {
+  if (ncol(z) == 3) {
+    julia_assign3(w, cov, z, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
       "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
-  } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, β_0sd,  τ_csd)
+  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(y)) {
+    julia_assign2(w, cov, z, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.grad",
       "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
@@ -400,15 +400,15 @@ calc_kf_grad <- function(w, x, y, β_0sd,  τ_csd, wfixed) {
   g
 }
 
-calc_kf_hess <- function(w, x, y, β_0sd,  τ_csd, wfixed) {
-  if (ncol(y) == 3) {
-    julia_assign3(w, wfixed, β_0sd,  τ_csd)
+calc_kf_hess <- function(w, cov, z, β_0sd,  τ_csd, wfixed) {
+  if (ncol(z) == 3) {
+    julia_assign3(w, cov, z, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
       "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
     ))
-  } else if(ncol(y) == 2 && ! "hospitalizations" %in% names(y)) {
-    julia_assign2(w, wfixed, β_0sd,  τ_csd)
+  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(y)) {
+    julia_assign2(w, cov, z, wfixed, β_0sd,  τ_csd)
     g <- JuliaCall::julia_eval(paste0(
       "InfectionKalman.hess",
       "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
@@ -418,7 +418,7 @@ calc_kf_hess <- function(w, x, y, β_0sd,  τ_csd, wfixed) {
 }
 
 initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
-  τ_c_init <- max(var(y$cases, na.rm = TRUE), 1)
+  τ_c_init <- max(var(y$cases, na.rm = TRUE) / mean(y$cases, na.rm = TRUE), 1)
   nτ_c = tail(x$τ_cmap, n = 1)
   
   τ_d_init <- max(var(y$deaths, na.rm = TRUE), 1) #/ mean(y$deaths)
@@ -481,56 +481,6 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   winit
 }
 
-kf_nll_details <- function(w, x, y, β_0sd, τ_csd, wfixed, fet) {
-  η <- unname(wfixed["η"])
-  γ <- unname(wfixed["γ"])
-  N <- unname(wfixed["N"]) 
-  logγ_hd <- unname(log(wfixed["γ_h"]))
-  nτ_c <- tail(x$τ_cmap, 1)
-  if (ncol(y) == 2){
-    logτ_h <- log(10)
-    p_h <- wfixed["p_h"]
-    w2 <- w
-  } else {
-    logτ_h <- w[3]
-    p_h <- plogis(w[5])
-    w2 <- w[-c(3, 5)]
-  }
-  logL0 <- w2[1]
-  logH0 <- w2[2]
-  logτ_d <- w2[3]
-  prophomeeffect <- w2[4]
-  p_d <- plogis(w2[5])
-  loggammad12 = w2[6]
-  loggammad34 = w2[7]
-  logtauc <- w2[seq(8, 8 + ntaucvec - 1)]
-  bvec <- w2[seq(8 + ntaucvec, length(w2))]
-  nll <- kfnll(
-    bvec = bvec,
-    logE0 = w[1],
-    logH0 = w[2],
-    logtauc = logtauc,
-    logtauh = logtauh,
-    logtaud = logtaud,
-    logitchp = logitchp,
-    loghfpvec = loghfpvec,
-    loggammahd = loggammahd,
-    loggammad12 = loggammad12,
-    loggammad34 = loggammad34,
-    prophomeeffect = prophomeeffect,
-    eta = eta,
-    gamma = gamma,
-    N = N,
-    z = y,
-    cov = x,
-    fet = fet,
-    just_nll = FALSE,
-    fet_zero_cases_deaths = "weekly",
-    betasd = betasd,
-    tcsd = tcsd)
-  nll
-}
-
 calc_kf_nll_r <-
   function(w,
            cov,
@@ -538,7 +488,7 @@ calc_kf_nll_r <-
            β_0sd,
            τ_csd,
            wfixed,
-           fet = NULL,
+           fets = NULL,
            fet_zero_cases_deaths = "daily",
            just_nll = TRUE) {
     diffeqr::diffeq_setup("/opt/julia-1.5.3/bin")
@@ -782,8 +732,6 @@ calc_kf_nll_r <-
         S = S,
         sim_means = sim_means,
         sim_cov = sim_cov,
-        bvec = bvec,
-        gamma = gamma,
         rdiagadj = rdiagadj
       )
     } else {

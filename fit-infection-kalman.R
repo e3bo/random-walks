@@ -145,9 +145,9 @@ wfixed <- c(
 )
 
 if (forecast_date > "2020-11-15") {
-  y <- wind %>% select(cases, hospitalizations, deaths)
+  z <- wind %>% select(cases, hospitalizations, deaths)
 } else {
-  y <- wind %>% select(cases, deaths)
+  z <- wind %>% select(cases, deaths)
 }
 
 x0 <- wind %>% select(target_end_date, time, wday, prophome)
@@ -169,7 +169,7 @@ set.seed(1)
 # estimate the probability that a case is reported assuming that all deaths are reported
 cvd <-
   data.frame(time = x0$time,
-             r = y$cases / lead(y$deaths, case_to_death_lag)) %>%
+             r = z$cases / lead(z$deaths, case_to_death_lag)) %>%
   mutate(logr = log(r)) %>% filter(is.finite(logr)) %>% filter(time < 2020.47)
 mars <- earth::earth(logr ~ time, data = cvd)
 #plot(logr ~ time, data = cvd)
@@ -218,7 +218,7 @@ if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
 
 
 ## fitting
-iter1 <- 100
+iter1 <- 1500
 β_0sd <- 0.01
 τ_csd <- 0.1
 
@@ -226,12 +226,12 @@ tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
-  x = x,
+  cov = x,
   β_0sd = β_0sd,
   τ_csd = τ_csd, 
   epsilon = 1e-3,
   max_iterations = iter1,
-  y = y,
+  z = z,
   winit,
   wfixed = wfixed,
   invisible = 0
@@ -267,14 +267,14 @@ save(x, y, winit, wfixed, fit1, h1, bsd, file = the_file)
 ## Save metrics
 
 dets1 <-
-  kf_nll_details(
+  calc_kf_nll_r(
     w = fit1$par,
-    x = x,
-    y = y,
-    betasd = bsd,
-    tcsd = tcsd,
-    fixed = wfixed,
-    fet = NULL
+    cov = x,
+    z = y,
+    β_0sd = β_0sd,
+    τ_csd = τ_csd,
+    wfixed = wfixed,
+    just_nll = FALSE
   )
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(y, 2, diff)), na.rm = TRUE)
@@ -294,7 +294,8 @@ g1 <-
     w = fit1$par,
     x = x,
     y = y,
-    betasd = bsd,
+    β_0sd = β_0sd,
+    τ_csd = τ_csd,
     wfixed = wfixed
   )
 
