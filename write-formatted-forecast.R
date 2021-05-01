@@ -173,7 +173,7 @@ write_forecasts <-
       fit = fit,
       wfixed = wfixed
     )
-    case_inds <- which(fet$target_wday == 7)
+    case_inds <- which(fets$target_wday == 7)
     if (lubridate::wday(fdt) > 2) {
       case_inds <-
         case_inds[-1] # drop first epiweek, which has been observed too much 
@@ -186,10 +186,10 @@ write_forecasts <-
         fdt = fdt
       )
     stopifnot(setequal(
-      fet$target_end_dates[case_inds],
+      fets$target_end_dates[case_inds],
       case_fcst$target_end_date %>% unique()
     ))
-    hosp_inds <- fet$target_end_dates %in%
+    hosp_inds <- fets$target_end_dates %in%
       (lubridate::ymd(forecast_date) + 1:28)
     hosp_fcst <-
       create_forecast_df(
@@ -200,7 +200,7 @@ write_forecasts <-
         fdt = fdt
       )
     stopifnot(setequal(
-      fet$target_end_dates[hosp_inds],
+      fets$target_end_dates[hosp_inds],
       hosp_fcst$target_end_date %>% unique()
     ))
     
@@ -310,7 +310,7 @@ make_fit_plots <- function(dets, cov, winit, h, β_0sd, τ_csd, fdt, forecast_lo
   dev.off()
   
   plot_path3 <- file.path(plot_dir, "case-forecasts.png")
-  case_inds <- which(fet$target_wday == 7)
+  case_inds <- which(fets$target_wday == 7)
   case_fcst <-
     create_forecast_df(
       means = dets$sim_means[1, case_inds],
@@ -329,7 +329,7 @@ make_fit_plots <- function(dets, cov, winit, h, β_0sd, τ_csd, fdt, forecast_lo
   
   plot_path4 <- file.path(plot_dir, "hosp-forecasts.png")
   hosp_inds <-
-    fet$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
+    fets$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
   stopifnot(sum(hosp_inds) == 28)
   
   hosp_fcst <-

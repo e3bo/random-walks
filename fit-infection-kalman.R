@@ -202,16 +202,24 @@ if (forecast_date_start == forecast_date){
   winit <- get("fit1", pos = 2)$par
   detach(pos = 2)
   datediff <- (lubridate::ymd(forecast_date) - lubridate::ymd(forecast_date_start)) / lubridate::ddays(1)
-  sizediff <- x$bvecmap[wsize] - x$bvecmap[wsize - datediff]
+  nβ_0 <- x$β_0map[wsize]
+  sizediff <- nβ_0 - x$β_0map[wsize - datediff]
   if (sizediff > 0){
-    winit <- c(winit, rep(winit[length(winit)], sizediff)) # extend the bvec by repeating last value
+    winit <- c(winit, rep(winit[length(winit)], sizediff)) # extend β_0 by repeating last value
+  }
+  sizediff2 <- x$τ_cmap[wsize] - x$τ_cmap[wsize - datediff]
+  if (sizediff2 > 0){
+    #extend τ_c by repeating last value
+    nw <- length(winit)
+    last_val <- winit[nw - nβ_0]
+    winit <- c(winit[1:(nw - nβ_0)], rep(last_val, times = sizediff2), winit[(nw - nβ_0 + 1):nw])
   }
 }
 
 if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
-  tauh_init <- var(na.omit(diff(y$hospitalizations)))
-  is_NA_hosps <- is.na(y$hospitalizations)
-  chp_init <- sum(y$hospitalizations[!is_NA_hosps]) / sum(y$cases[!is_NA_hosps])
+  tauh_init <- var(na.omit(diff(z$hospitalizations)))
+  is_NA_hosps <- is.na(z$hospitalizations)
+  chp_init <- sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
   winit0 <- winit
   winit <- c(winit0[1:3], log(tauh_init), winit0[4], qlogis(chp_init), winit0[5:length(winit0)])
 }
@@ -232,7 +240,7 @@ if (forecast_date == "2020-06-29" && forecast_loc == "06"){
 ## fitting
 iter1 <- 10
 β_0sd <- 0.01
-τ_csd <- 0.1
+τ_csd <- 0.5
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(

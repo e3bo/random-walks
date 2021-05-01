@@ -1,6 +1,6 @@
 stages:
   fit-2020-06-29-06:
-    cmd: fdt=2020-06-29 loc=06 Rscript fit-infection-kalman.R
+    cmd: fdtstart=2020-06-29 fdt=2020-06-29 loc=06 Rscript fit-infection-kalman.R
     wdir: ../..
     deps:
     - covidcast-safegraph-home-prop/2020-06-29

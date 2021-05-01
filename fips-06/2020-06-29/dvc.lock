@@ -1,47 +1,47 @@
 schema: '2.0'
 stages:
   fit-2020-06-29-06:
-    cmd: fdt=2020-06-29 loc=06 Rscript fit-infection-kalman.R
+    cmd: fdtstart=2020-06-29 fdt=2020-06-29 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidcast-safegraph-home-prop/2020-06-29
       md5: 1c4f3cca26587dfd86df6d0493bacdb1.dir
       size: 3008141
       nfiles: 1
     - path: covidhub-common.R
-      md5: 89cca14856e3484f57a0d2c212b2e196
-      size: 26270
+      md5: d2f10acda3940b7478beea2ea1f0c462
+      size: 22734
     - path: fit-infection-kalman.R
-      md5: 43a0708679277a22a2263131fed66d53
-      size: 9147
+      md5: b83bc872786a78ac7a44be71833ec352
+      size: 10382
     - path: hopkins/2020-06-29
       md5: 0778252e585b9da630aa43f1f2af7262.dir
       size: 3510852
       nfiles: 8
     outs:
     - path: fits/2020-06-29-fips06/fit-metrics.json
-      md5: 75d677e980265ce26a7a6831c1f1d5d9
-      size: 362
+      md5: 3eaafe467e4e27b5498b2909686ab8eb
+      size: 363
     - path: fits/2020-06-29-fips06/fit.RData
-      md5: 20444db5613dc5af03023ea65af9415a
-      size: 8565
+      md5: c2dabe64f9bfe214f74e77976fc9759c
+      size: 10370
   forecast-2020-06-29-06:
     cmd: fdt=2020-06-29 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 648be2719015543ca6cf1d44b4dde5a2
-      size: 25867
+      md5: d2f10acda3940b7478beea2ea1f0c462
+      size: 22734
     - path: fits/2020-06-29-fips06/fit.RData
-      md5: a32c85b8bb55d737fb61ab4956126ce2
-      size: 8157
+      md5: c2dabe64f9bfe214f74e77976fc9759c
+      size: 10370
     - path: write-formatted-forecast.R
-      md5: 3e260abb84a9dcab310eb841a324abeb
-      size: 11999
+      md5: 1ea1f2d0f3d50558989af1c03a480c5c
+      size: 12297
     outs:
     - path: forecasts/2020-06-29-fips06
-      md5: 78cfe71592b35fa5e97943f34d0f288e.dir
-      size: 52882
+      md5: 61fd43a819d9c77b05993e3809243dad.dir
+      size: 52946
       nfiles: 1
     - path: plots/2020-06-29-fips06
-      md5: 523199b9758b7f800532f65aec490762.dir
-      size: 1715541
+      md5: cf85febf42908ac893102e7a8f7fda67.dir
+      size: 1424449
       nfiles: 8

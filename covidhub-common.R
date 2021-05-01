@@ -475,6 +475,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
     logitp_d = qlogis(p_d_init),
     logγ_d12 = log(365.25 / 10),
     logγ_d34 = log(365.25 / 10),
+    logγ_z17 = log(365.25 / 1),
     logτ_c = rep(log(τ_c_init), times = nτ_c),
     β_0
   )
