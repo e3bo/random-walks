@@ -241,8 +241,8 @@ tt1 <- tictoc::toc()
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(
   w = fit1$par,
-  x = x,
-  y = y,
+  cov = x,
+  z = z,
   β_0sd = β_0sd,
   τ_csd = τ_csd,
   wfixed = wfixed
