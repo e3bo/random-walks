@@ -219,9 +219,9 @@ if (forecast_date_start == forecast_date){
 if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
   tauh_init <- var(na.omit(diff(z$hospitalizations)))
   is_NA_hosps <- is.na(z$hospitalizations)
-  chp_init <- sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
+  p_hinit <- sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
   winit0 <- winit
-  winit <- c(winit0[1:3], log(tauh_init), winit0[4], qlogis(chp_init), winit0[5:length(winit0)])
+  winit <- c(winit0[1:2], log(tauh_init), winit0[3], qlogis(p_hinit), winit0[4:length(winit0)])
 }
 
 if (forecast_date == "2020-06-29" && forecast_loc == "06"){
