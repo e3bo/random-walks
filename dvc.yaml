@@ -3736,3 +3736,9 @@ stages:
     - pull-healthdata-ts-from-date.R
     outs:
     - healthdata/2020-12-28/56
+  safegraph-hp-2021-03-29:
+    cmd: fdt=2021-03-29 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-03-29

@@ -4,22 +4,22 @@ stages:
     cmd: fdt=2020-07-20 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 648be2719015543ca6cf1d44b4dde5a2
-      size: 25867
+      md5: d2f10acda3940b7478beea2ea1f0c462
+      size: 22734
     - path: fits/2020-07-20-fips06/fit.RData
-      md5: 1e921f23221946269cad20bce440f915
-      size: 9953
+      md5: 7c4530ca1f16d7f43a7e8e4399483494
+      size: 12291
     - path: write-formatted-forecast.R
-      md5: 3e260abb84a9dcab310eb841a324abeb
-      size: 11999
+      md5: 1ea1f2d0f3d50558989af1c03a480c5c
+      size: 12297
     outs:
     - path: forecasts/2020-07-20-fips06
-      md5: 51a2fb22ec3b0a96369d9fca85a5c595.dir
-      size: 53682
+      md5: f2988600c3c3f34b71f8a2387ea7ed1e.dir
+      size: 53650
       nfiles: 1
     - path: plots/2020-07-20-fips06
-      md5: 1e726129cd66189d936809833a7a4e8f.dir
-      size: 1691557
+      md5: 2d12dde739c2d53330277656e8e88616.dir
+      size: 1505688
       nfiles: 8
   fit-2020-07-20-06:
     cmd: fdtstart=2020-07-13 fdt=2020-07-20 loc=06 Rscript fit-infection-kalman.R
@@ -29,22 +29,22 @@ stages:
       size: 3134650
       nfiles: 1
     - path: covidhub-common.R
-      md5: 89cca14856e3484f57a0d2c212b2e196
-      size: 26270
+      md5: d2f10acda3940b7478beea2ea1f0c462
+      size: 22734
     - path: fit-infection-kalman.R
-      md5: 43a0708679277a22a2263131fed66d53
-      size: 9147
+      md5: 45b22e709e3dcd8c3ccb4b008fe5b07b
+      size: 10681
     - path: fits/2020-07-13-fips06/fit.RData
-      md5: 35488114a2f09b650439657b714d9257
-      size: 9745
+      md5: af940a71ea942f00dda03eab37c28cd9
+      size: 11685
     - path: hopkins/2020-07-20
       md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
       size: 4049279
       nfiles: 8
     outs:
     - path: fits/2020-07-20-fips06/fit-metrics.json
-      md5: 5e735f992a164958067349ed8a25cc8a
-      size: 359
+      md5: b89f105136bb27fad73514c62871c1d6
+      size: 361
     - path: fits/2020-07-20-fips06/fit.RData
-      md5: c6bd1481da4510681906b3ad5a369df8
-      size: 10219
+      md5: 7c4530ca1f16d7f43a7e8e4399483494
+      size: 12291
