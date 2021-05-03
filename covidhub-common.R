@@ -452,7 +452,7 @@ calc_kf_nll_r <-
     L0 <- exp(w2[1])
     H0 <- exp(w2[2])
     τ_d <- exp(w2[3])
-    prophomeeffect <- w2[4]
+    prophomeeffect <- -exp(w2[4])
     p_d <- plogis(w2[5])
     γ_d12 <- exp(w2[6])
     γ_d34 <- exp(w2[7])

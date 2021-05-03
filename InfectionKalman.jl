@@ -64,7 +64,7 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     L0 = exp(w2[1])
     H0 = exp(w2[2])
     τ_d = exp(w2[3])
-    prophomeeffect = w2[4]
+    prophomeeffect = -exp(w2[4])
     p_d = 1 / (1 + exp(-w2[5]))
     γ_d12 = exp(w2[6])
     γ_d34 = exp(w2[7])
