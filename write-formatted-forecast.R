@@ -290,7 +290,7 @@ make_fit_plots <- function(dets, cov, winit, h, β_0sd, τ_csd, fdt, forecast_lo
     plot.new()
   } else {
     plot(x$time,
-         y$hospitalizations,
+         z$hospitalizations,
          xlab = "Time",
          ylab = "Hospitalizations")
     pred_hosps <- dets$xhat_kkmo["A", ]
