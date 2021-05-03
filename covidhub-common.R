@@ -157,69 +157,6 @@ load_hopkins <- function(loc, weekly = TRUE) {
   bind_rows(ddat, cdat)
 }
 
-load_covidtracking <- function(loc) {
-  sn <- state_abb_fips$state_name
-  names(sn) <- state_abb_fips$state
-  
-  tfile <-
-    dir(loc, pattern = "^covid19us-.*\\.csv$", full.names = TRUE) %>%
-    tail(1)
-  
-  tdf <- read_csv(
-    tfile,
-    col_types = cols_only(
-      date = col_date(),
-      state = col_character(),
-      hospitalized_increase = col_integer()
-    )
-  ) %>% 
-    mutate(Province_State = sn[state]) %>%
-    select(-state)
-  
-  fips <- state_abb_fips$state_code
-  names(fips) <- state_abb_fips$state_name 
-  
-  tdf2 <-
-    tdf %>%
-    add_column(target_type = "day ahead inc hosp") %>%
-    rename(target_end_date = date,
-            value = hospitalized_increase) %>%
-    mutate(location = fips[Province_State])
-  
-  tdf3 <- 
-    tdf2 %>% group_by(target_end_date) %>%
-    summarise(value = sum(value)) %>%
-    mutate(Province_State = "All", 
-           location = "US") %>%
-    add_column(target_type = "day ahead inc hosp")
-  
-  tdf4 <- bind_rows(tdf2, tdf3)
-  tdf4 %>% filter(Province_State %in% covidhub_locations)
-}
-
-pull_data <- function(compid, dir){
-  tstamp <- format(Sys.time(), "%Y-%m-%d--%H-%M-%S")
-  if (compid == "state"){
-    idt <- cdcfluview::ilinet(region = c("state"))
-    stem <- "state-ILInet"
-  } else if (compid == "national") {
-    idt_nat <- cdcfluview::ilinet(region = c("national")) %>% 
-      mutate(region = as.character(region))
-    idt_reg <- cdcfluview::ilinet(region = c("hhs")) %>% 
-      mutate(region = as.character(region))
-    idt <- bind_rows(idt_nat, idt_reg)
-    stem <- "national-regional-ILInet"
-  } else if (compid == "hosp") {
-    idt <- covid19us::get_states_daily(state = "GA")
-    stem <- "covid19us"
-  }
-  file <- paste0(stem, "-", tstamp, ".csv")
-  path <- file.path(dir, file)
-  if(!dir.exists(dir)) dir.create(dir)
-  write_csv(idt, path) %>% tail()
-}
-
-
 read_forecast <- function(file) {
   read_csv(
     file,
