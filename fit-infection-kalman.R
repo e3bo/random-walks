@@ -155,6 +155,7 @@ x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
+x0$p_hmap <- ifelse(x0$time < 2020.8, 1, 2) %>% as.integer()
 
 ## removal of untrusted data points
 
@@ -237,8 +238,11 @@ if (forecast_date == "2020-06-29" && forecast_loc == "06"){
 
 ## fitting
 iter1 <- 20
-β_0sd <- 0.01
-τ_csd <- 0.5
+β_0sd <- 0.1
+τ_csd <- 0.05
+
+
+wnew <- c(winit[1:4], winit[6:(11 + 11 -1)], rep(winit[5], 2), winit[(11 + 11):(length(winit))])
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
@@ -250,7 +254,7 @@ fit1 <- lbfgs::lbfgs(
   epsilon = 1e-3,
   max_iterations = iter1,
   z = z,
-  winit,
+  wnew, #winit,
   wfixed = wfixed,
   invisible = 0
 )
@@ -266,7 +270,6 @@ h1 <- calc_kf_hess(
   wfixed = wfixed
 )
 tictoc::toc()
-
 
 ## Save outputs
 

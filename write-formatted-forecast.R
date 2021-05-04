@@ -13,9 +13,9 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   intercept <- ft$par[inds][cov$β_0map]
   X <- cbind(cov$prophomeiqr)
   if (no_hosps){
-    effects <- ft$par[4]
+    effects <- -exp(ft$par[4])
   } else {
-    effects <- ft$par[6]
+    effects <- -exp(ft$par[6])
   }
   num_all <- exp(intercept + X %*% effects)
   plot(

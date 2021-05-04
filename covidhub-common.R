@@ -439,15 +439,18 @@ calc_kf_nll_r <-
     γ_d <- unname(wfixed["γ_d"])
     γ_z <- unname(wfixed["γ_z"])
     nτ_c <- tail(cov$τ_cmap, 1)
+    np_h <- tail(cov$p_hmap, 1)
     if (ncol(z) == 2 && !("hospitalizations" %in% names(z))) {
       τ_h <- wfixed["τ_h"]
       p_h <- wfixed["p_h"]
+      np_h <- 0
       z$hospitalizations <- NA
       w2 <- w
     } else {
       τ_h <- exp(w[3])
       p_h <- plogis(w[5])
-      w2 <- w[-c(3, 5)]
+      w2 <- w[-c(3)]
+      p_h <- plogis(w2[(9 + nτ_c):(9 + nτ_c + np_h - 1)])
     }
     L0 <- exp(w2[1])
     H0 <- exp(w2[2])
@@ -458,7 +461,7 @@ calc_kf_nll_r <-
     γ_d34 <- exp(w2[7])
     γ_z17 <- exp(w2[8])
     τ_c <- exp(w2[seq(9, 9 + nτ_c - 1)])
-    β_0 <- w2[seq(9 +  nτ_c, length(w2))]
+    β_0 <- w2[seq(9 +  nτ_c + np_h, length(w2))]
     
     zloc <-
       data.matrix(z[, c("cases", "hospitalizations", "deaths")])
@@ -473,7 +476,7 @@ calc_kf_nll_r <-
       #Y
       min(L0, N),
       #L
-      min(cov$ρ[1] * Y0 *  γ  * (1 - p_h) /  γ_z, N),
+      min(cov$ρ[1] * Y0 *  γ  * (1 - p_h[cov$p_hmap[1]]) /  γ_z, N),
       #Z
       0,
       #Z_r
@@ -529,7 +532,7 @@ calc_kf_nll_r <-
       β  <-
         exp(β_0[cov$β_0map[i]] + prophomeeffect * cov$prophomeiqr[i])
       
-      par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h, p_d, cov$ρ[i])
+      par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[i]], p_d, cov$ρ[i])
       if (cov$wday[i] == 1) {
         par[5] <-  γ_d12
         par[6] <- γ_z17

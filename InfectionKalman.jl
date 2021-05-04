@@ -51,15 +51,19 @@ end
 function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
 
     zloc = deepcopy(z)
+    
+    nτ_c = cov.τ_cmap[end]
+    np_h = cov.p_hmap[end]
+    
     if size(z, 2) == 3
         τ_h = exp(w[3])
-        p_h = 1 / (1 + exp(-w[5]))
-        w2 = vcat(w[1:2], w[4], w[6:end])
+        w2 = vcat(w[1:2], w[4:end])
+        p_h = [1 / (1 + exp(-p)) for p in w2[(9 + nτ_c):(9 + nτ_c + np_h - 1)]]
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
+        np_h = 0
         w2 = w
         zloc[!, "hospitalizations"] .= missing
     end
-    
     
     L0 = exp(w2[1])
     H0 = exp(w2[2])
@@ -68,12 +72,10 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     p_d = 1 / (1 + exp(-w2[5]))
     γ_d12 = exp(w2[6])
     γ_d34 = exp(w2[7])
-    
     γ_z17 = exp(w2[8])
     
-    nτ_c = cov.τ_cmap[end]
     τ_c = [exp(p) for p in w2[9:(9 + nτ_c - 1)]]
-    β_0 = w2[(9 + nτ_c):end]
+    β_0 = w2[(9 + nτ_c + np_h):end]
 
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
@@ -82,7 +84,7 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     x0 = [         max(N - L0 - Y0 - H0 - D0, N * 0.1) #X
                                             min(Y0, N) #Y
                                             min(L0, N) #L
-           min(cov.ρ[1] * Y0 * γ * (1 - p_h) / γ_z, N) #Z
+           min(cov.ρ[1] * Y0 * γ * (1 - p_h[cov.p_hmap[1]]) / γ_z, N) #Z
                                                     0  #Z_r
                                             min(H0, N) #H
                                                     0  #A
@@ -131,7 +133,7 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
             plast[zv,:] .= 0
             plast[:,zv] .= 0
         end
-        par = [β, N, η, γ, γ_d, γ_z, γ_h, p_h, p_d, cov.ρ[i]]
+        par = [β, N, η, γ, γ_d, γ_z, γ_h, p_h[cov.p_hmap[i]], p_d, cov.ρ[i]]
         if cov.wday[i] == 1
            par[5] = γ_d12
            par[6] = γ_z17
