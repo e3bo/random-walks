@@ -48,7 +48,7 @@ function genvectorfield()
   end
 end
 
-function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
+function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.00273224, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, p_hsd::Float64 = 0.5, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
 
     zloc = deepcopy(z)
     
@@ -198,6 +198,12 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     for i in 1:(length(τ_c) - 1)
         τ_cstep =  log(τ_c[i + 1]) - log(τ_c[i])
         rwlik += logpdf(τ_cstepdensity, τ_cstep)
+    end
+    
+    p_hstepdensity = Normal(0, p_hsd)
+    for i in 1:(length(p_h) - 1)
+        p_hstep =  log(p_h[i + 1]) - log(1 - p_h[i + 1]) - (log(p_h[i]) - log(1 - p_h[i]))
+        rwlik += logpdf(p_hstepdensity, p_hstep)
     end
     
     kflik = 0

@@ -155,7 +155,7 @@ x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
-x0$p_hmap <- ifelse(x0$time < 2020.8, 1, 2) %>% as.integer()
+x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
 ## removal of untrusted data points
 
@@ -204,16 +204,29 @@ if (forecast_date_start == forecast_date){
   detach(pos = 2)
   datediff <- (lubridate::ymd(forecast_date) - lubridate::ymd(forecast_date_start)) / lubridate::ddays(1)
   nβ_0 <- x$β_0map[wsize]
+
   sizediff <- nβ_0 - x$β_0map[wsize - datediff]
   if (sizediff > 0){
     winit <- c(winit, rep(winit[length(winit)], sizediff)) # extend β_0 by repeating last value
   }
-  sizediff2 <- x$τ_cmap[wsize] - x$τ_cmap[wsize - datediff]
-  if (sizediff2 > 0){
-    #extend τ_c by repeating last value
+  
+  np_h <- x$p_hmap[wsize]
+  sizediff_p_h <- np_h - x$p_hmap[wsize - datediff]
+  if (sizediff_p_h > 0){
+    #extend p_h
     nw <- length(winit)
     last_val <- winit[nw - nβ_0]
-    winit <- c(winit[1:(nw - nβ_0)], rep(last_val, times = sizediff2), winit[(nw - nβ_0 + 1):nw])
+    winit <- c(winit[1:(nw - nβ_0)], rep(last_val, times = sizediff_p_h), winit[(nw - nβ_0 + 1):nw])
+  }
+  
+  nτ_c <- x$τ_cmap[wsize]
+  
+  sizediff_τ_c <- nτ_c - x$τ_cmap[wsize - datediff]
+  if (sizediff_τ_c > 0){
+    #extend τ_c by repeating last value
+    nw <- length(winit)
+    last_val <- winit[nw - nβ_0 - np_h]
+    winit <- c(winit[1:(nw - nβ_0 - np_h)], rep(last_val, times = sizediff2), winit[(nw - nβ_0 - np_h + 1):nw])
   }
 }
 
@@ -240,15 +253,16 @@ if (forecast_date == "2020-06-29" && forecast_loc == "06"){
 iter1 <- 20
 β_0sd <- 0.1
 τ_csd <- 0.05
+p_hsd <- 0.5
 
-
-wnew <- c(winit[1:4], winit[6:(11 + 11 -1)], rep(winit[5], 2), winit[(11 + 11):(length(winit))])
+wnew <- c(winit[1:4], winit[6:(11 + 11 -1)], rep(winit[5], 11), winit[(11 + 11):(length(winit))])
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
   calc_kf_nll,
   calc_kf_grad,
   cov = x,
+  p_hsd = p_hsd,
   β_0sd = β_0sd,
   τ_csd = τ_csd, 
   epsilon = 1e-3,
@@ -259,6 +273,24 @@ fit1 <- lbfgs::lbfgs(
   invisible = 0
 )
 tt1 <- tictoc::toc()
+
+tictoc::tic("fit 2")
+fit2 <- lbfgs::lbfgs(
+  calc_kf_nll,
+  calc_kf_grad,
+  cov = x,
+  β_0sd = β_0sd,
+  τ_csd = τ_csd, 
+  epsilon = 1e-3,
+  max_iterations = iter1,
+  z = z,
+  fit1$par,
+  wfixed = wfixed,
+  invisible = 0
+)
+tt2 <- tictoc::toc()
+
+
 
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(

@@ -608,6 +608,15 @@ calc_kf_nll_r <-
                         log = TRUE)
     }
     
+    for (i in 1:(length(p_h) - 1)) {
+      p_hstep <- qlogis(p_h[i + 1]) - qlogis(p_h[i])
+      rwlik <-
+        rwlik + dnorm(p_hstep,
+                        mean = 0,
+                        sd =  p_hsd,
+                        log = TRUE)
+    }
+    
     nll <- 0
     for (i in seq(1, nobs)) {
       sel <- !zmiss[i,]
