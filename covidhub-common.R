@@ -270,7 +270,7 @@ paths_to_forecast <- function(out, loc = "13", wks_ahead = 1:6, hop, fdt) {
     filter((nchar(location)) <= 2 | str_detect(target, "inc case$")) ## only case forecasts accepted for counties
 }
 
-julia_assign2 <- function(w, cov, z, wfixed, β_0sd,  τ_csd){
+julia_assign2 <- function(w, cov, z, wfixed, p_hsd, β_0sd,  τ_csd){
   JuliaCall::julia_assign("w", w)
   JuliaCall::julia_assign("η", wfixed["η"])
   JuliaCall::julia_assign("N", wfixed["N"])
@@ -279,19 +279,21 @@ julia_assign2 <- function(w, cov, z, wfixed, β_0sd,  τ_csd){
   JuliaCall::julia_assign("z", z)
   JuliaCall::julia_assign("p_h", wfixed["p_h"])
   JuliaCall::julia_assign("τ_h", wfixed["τ_h"])
+  JuliaCall::julia_assign("p_hsd", p_hsd)
   JuliaCall::julia_assign("β_0sd", β_0sd)
   JuliaCall::julia_assign("τ_csd", τ_csd)  
   JuliaCall::julia_assign("γ_d", wfixed["γ_d"])
   JuliaCall::julia_assign("γ_h", wfixed["γ_h"])
 }
 
-julia_assign3 <- function(w, cov, z, wfixed, β_0sd, τ_csd){
+julia_assign3 <- function(w, cov, z, wfixed, p_hsd, β_0sd, τ_csd){
   JuliaCall::julia_assign("w", w)
   JuliaCall::julia_assign("η", wfixed["η"])
   JuliaCall::julia_assign("N", wfixed["N"])
   JuliaCall::julia_assign("γ", wfixed["γ"])
   JuliaCall::julia_assign("cov", cov)
   JuliaCall::julia_assign("z", z)
+  JuliaCall::julia_assign("p_hsd", p_hsd)
   JuliaCall::julia_assign("β_0sd", β_0sd)
   JuliaCall::julia_assign("τ_csd", τ_csd)
   JuliaCall::julia_assign("γ_d", wfixed["γ_d"])
@@ -299,64 +301,47 @@ julia_assign3 <- function(w, cov, z, wfixed, β_0sd, τ_csd){
   
 }
 
-calc_kf_nll <- function(w, cov, z,  β_0sd,  τ_csd, wfixed) {
+ncol2tuple <- "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d,  p_hsd = p_hsd, β_0sd = β_0sd, τ_csd = τ_csd, just_nll = true)"
+ncol3tuple <- "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, p_hsd = p_hsd, β_0sd = β_0sd, τ_csd = τ_csd, just_nll = true)"
+
+calc_kf_nll <- function(w, cov, z,  p_hsd,  β_0sd,   τ_csd, wfixed) {
   if (ncol(z) == 3) {
-    julia_assign3(w, cov, z, wfixed,  β_0sd,  τ_csd)
-    nll <- JuliaCall::julia_eval(
-      paste0(
-        "InfectionKalman.obj",
-        "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
-      )
-    )
+    julia_assign3(w, cov, z, wfixed,  p_hsd,  β_0sd,   τ_csd)
+    nll <-
+      JuliaCall::julia_eval(paste0("InfectionKalman.obj", ncol3tuple))
   } else if (ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
-    julia_assign2(w, cov, z, wfixed,  β_0sd,  τ_csd)
-    nll <- JuliaCall::julia_eval(
-      paste0(
-        "InfectionKalman.obj",
-        "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
-      )
-    )
+    julia_assign2(w, cov, z, wfixed,  p_hsd,  β_0sd,   τ_csd)
+    nll <- JuliaCall::julia_eval(paste0("InfectionKalman.obj", ncol2tuple))
   }
   nll
 }
 
-calc_kf_grad <- function(w, cov, z, β_0sd,  τ_csd, wfixed) {
+calc_kf_grad <- function(w, cov, z, p_hsd,  β_0sd,   τ_csd, wfixed) {
   if (ncol(z) == 3) {
-    julia_assign3(w, cov, z, wfixed, β_0sd,  τ_csd)
-    g <- JuliaCall::julia_eval(paste0(
-      "InfectionKalman.grad",
-      "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
-    ))
-  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(z)) {
-    julia_assign2(w, cov, z, wfixed, β_0sd,  τ_csd)
-    g <- JuliaCall::julia_eval(paste0(
-      "InfectionKalman.grad",
-      "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
-    ))
+    julia_assign3(w, cov, z, wfixed, p_hsd,  β_0sd,   τ_csd)
+    g <- JuliaCall::julia_eval(paste0("InfectionKalman.grad", ncol3tuple))
+  } else if (ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
+    julia_assign2(w, cov, z, wfixed, p_hsd,  β_0sd,   τ_csd)
+    g <- JuliaCall::julia_eval(paste0("InfectionKalman.grad", ncol2tuple))
   }
   g
 }
 
-calc_kf_hess <- function(w, cov, z, β_0sd,  τ_csd, wfixed) {
+calc_kf_hess <- function(w, cov, z, p_hsd,  β_0sd,   τ_csd, wfixed) {
   if (ncol(z) == 3) {
-    julia_assign3(w, cov, z, wfixed, β_0sd,  τ_csd)
-    g <- JuliaCall::julia_eval(paste0(
-      "InfectionKalman.hess",
-      "(w, cov, z; N = N, η = η, γ = γ, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
-    ))
-  } else if(ncol(z) == 2 && ! "hospitalizations" %in% names(z)) {
-    julia_assign2(w, cov, z, wfixed, β_0sd,  τ_csd)
-    g <- JuliaCall::julia_eval(paste0(
-      "InfectionKalman.hess",
-      "(w, cov, z; N = N, η = η, γ = γ, p_h = p_h, γ_h = γ_h, γ_d = γ_d, β_0sd, τ_csd, just_nll = true)"
-    ))
+    julia_assign3(w, cov, z, wfixed, p_hsd,  β_0sd,   τ_csd)
+    g <- JuliaCall::julia_eval(paste0("InfectionKalman.hess", ncol3tuple))
+  } else if (ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
+    julia_assign2(w, cov, z, wfixed, p_hsd,  β_0sd,   τ_csd)
+    g <- JuliaCall::julia_eval(paste0("InfectionKalman.hess", ncol2tuple))
   }
   g
 }
 
 initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   τ_c_init <- max(var(y$cases, na.rm = TRUE) / mean(y$cases, na.rm = TRUE), 1)
-  nτ_c = tail(x$τ_cmap, n = 1)
+  nτ_c <- tail(x$τ_cmap, n = 1)
+  np_h <- tail(x$p_hmap, n = 1)
   
   τ_d_init <- max(var(y$deaths, na.rm = TRUE), 1) #/ mean(y$deaths)
   wsize <- nrow(y)
@@ -423,6 +408,7 @@ calc_kf_nll_r <-
   function(w,
            cov,
            z,
+           p_hsd,
            β_0sd,
            τ_csd,
            wfixed,

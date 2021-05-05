@@ -155,7 +155,12 @@ x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
-x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
+
+if (ncol(z) == 3){
+  x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
+} else {
+  x0$p_hmap <- 1L
+}
 
 ## removal of untrusted data points
 
@@ -255,7 +260,7 @@ iter1 <- 20
 τ_csd <- 0.05
 p_hsd <- 0.5
 
-wnew <- c(winit[1:4], winit[6:(11 + 11 -1)], rep(winit[5], 11), winit[(11 + 11):(length(winit))])
+#wnew <- c(winit[1:4], winit[6:(11 + 11 -1)], rep(winit[5], 11), winit[(11 + 11):(length(winit))])
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
@@ -268,35 +273,18 @@ fit1 <- lbfgs::lbfgs(
   epsilon = 1e-3,
   max_iterations = iter1,
   z = z,
-  wnew, #winit,
+  winit,
   wfixed = wfixed,
   invisible = 0
 )
 tt1 <- tictoc::toc()
-
-tictoc::tic("fit 2")
-fit2 <- lbfgs::lbfgs(
-  calc_kf_nll,
-  calc_kf_grad,
-  cov = x,
-  β_0sd = β_0sd,
-  τ_csd = τ_csd, 
-  epsilon = 1e-3,
-  max_iterations = iter1,
-  z = z,
-  fit1$par,
-  wfixed = wfixed,
-  invisible = 0
-)
-tt2 <- tictoc::toc()
-
-
 
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(
   w = fit1$par,
   cov = x,
   z = z,
+  p_hsd = p_hsd,
   β_0sd = β_0sd,
   τ_csd = τ_csd,
   wfixed = wfixed
@@ -315,7 +303,7 @@ if (!dir.exists(fit_dir))
   dir.create(fit_dir, recursive = TRUE)
 
 the_file <- file.path(fit_dir, "fit.RData")
-save(x, z, winit, wfixed, fit1, h1, β_0sd, τ_csd, file = the_file)
+save(x, z, winit, wfixed, fit1, h1, p_hsd, β_0sd, τ_csd, file = the_file)
 
 ## Save metrics
 
@@ -324,6 +312,7 @@ dets1 <-
     w = fit1$par,
     cov = x,
     z = z,
+    p_hsd = p_hsd,
     β_0sd = β_0sd,
     τ_csd = τ_csd,
     wfixed = wfixed,
@@ -347,6 +336,7 @@ g1 <-
     w = fit1$par,
     cov = x,
     z = z,
+    p_hsd = p_hsd,
     β_0sd = β_0sd,
     τ_csd = τ_csd,
     wfixed = wfixed

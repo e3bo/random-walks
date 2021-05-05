@@ -147,13 +147,14 @@ create_forecast_df <- function(means,
 }
 
 write_forecasts <-
-  function(fit, cov, z, winit, wfixed, hess, fets, β_0sd, τ_csd, fdt, forecast_loc) {
+  function(fit, cov, z, winit, wfixed, hess, fets, p_hsd, β_0sd, τ_csd, fdt, forecast_loc) {
     
     dets <-
       calc_kf_nll_r(
         w = fit$par,
         cov = cov,
         z = z,
+        p_hsd = p_hsd,
         β_0sd = β_0sd,
         τ_csd = τ_csd,
         wfixed = wfixed,
@@ -166,6 +167,7 @@ write_forecasts <-
       cov = cov,
       winit = winit, 
       h = hess,
+      p_hsd = p_hsd,
       β_0sd = β_0sd,
       τ_csd = τ_csd,      
       fdt = fdt,
@@ -232,7 +234,7 @@ write_forecasts <-
     write_csv(x = fcst, path = fcst_path)
   }
 
-make_fit_plots <- function(dets, cov, winit, h, β_0sd, τ_csd, fdt, forecast_loc, fit, wfixed) {
+make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, forecast_loc, fit, wfixed) {
   plot_dir <-
     file.path("plots",
               paste0(forecast_date,
@@ -443,6 +445,7 @@ write_forecasts(
   winit = winit,
   wfixed = wfixed,
   hess = h1,
+  p_hsd = p_hsd,
   β_0sd = β_0sd, 
   τ_csd = τ_csd,
   fets = fets,

@@ -3742,3 +3742,15 @@ stages:
     - pull-safegraph-ts-from-date.R
     outs:
     - covidcast-safegraph-home-prop/2021-03-29
+  safegraph-hp-2020-06-28:
+    cmd: fdt=2020-06-28 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2020-06-28
+  hopkins-2020-06-28:
+    cmd: fdt=2020-06-28 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2020-06-28
