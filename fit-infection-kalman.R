@@ -194,7 +194,7 @@ stopifnot(all(x$ρ >= 0))
 #pdf <- data.frame(date = wind$target_end_date, p = x$rhot)
 #ggplot(pdf, aes(x = date, y = p)) + geom_point() + ylab("Pr (case is reported)")
 
-if (forecast_date_start == forecast_date){
+if (forecast_date_start == forecast_date) {
   stopifnot(forecast_date < "2020-11-16") # initializer not implemented for data with hospitalizations
   winit <- initialize_estimates(x = x, y = z, wfixed = wfixed)
 } else {
@@ -207,51 +207,52 @@ if (forecast_date_start == forecast_date){
   attach(fp, pos = 2)
   winit <- get("fit1", pos = 2)$par
   detach(pos = 2)
-  datediff <- (lubridate::ymd(forecast_date) - lubridate::ymd(forecast_date_start)) / lubridate::ddays(1)
+  datediff <-
+    (lubridate::ymd(forecast_date) - lubridate::ymd(forecast_date_start)) / lubridate::ddays(1)
   nβ_0 <- x$β_0map[wsize]
-
+  
   sizediff <- nβ_0 - x$β_0map[wsize - datediff]
-  if (sizediff > 0){
-    winit <- c(winit, rep(winit[length(winit)], sizediff)) # extend β_0 by repeating last value
+  if (sizediff > 0) {
+    winit <-
+      c(winit, rep(winit[length(winit)], sizediff)) # extend β_0 by repeating last value
   }
   
-  np_h <- x$p_hmap[wsize]
-  sizediff_p_h <- np_h - x$p_hmap[wsize - datediff]
-  if (sizediff_p_h > 0){
-    #extend p_h
-    nw <- length(winit)
-    last_val <- winit[nw - nβ_0]
-    winit <- c(winit[1:(nw - nβ_0)], rep(last_val, times = sizediff_p_h), winit[(nw - nβ_0 + 1):nw])
+  if (forecast_date >= "2020-11-16" &&
+      forecast_date_start < "2020-11-16") {
+    # initialize hospitalization parameters
+    τ_hinit <- var(na.omit(diff(z$hospitalizations)))
+    is_NA_hosps <- is.na(z$hospitalizations)
+    p_hinit <-
+      sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
+    winit0 <- winit
+    nw0 <- length(winit0)
+    winit <- c(winit0[1:2],
+               log(τ_hinit),
+               winit0[3:(nw0 - nβ_0)],
+               rep(qlogis(p_hinit), times = np_h),
+               winit0[(nw0 - nβ_0 + 1):nw0])
+  } else {
+    np_h <- x$p_hmap[wsize]
+    sizediff_p_h <- np_h - x$p_hmap[wsize - datediff]
+    if (sizediff_p_h > 0) {
+      #extend p_h
+      nw <- length(winit)
+      last_val <- winit[nw - nβ_0]
+      winit <-
+        c(winit[1:(nw - nβ_0)], rep(last_val, times = sizediff_p_h), winit[(nw - nβ_0 + 1):nw])
+      
+    }
   }
   
   nτ_c <- x$τ_cmap[wsize]
-  
   sizediff_τ_c <- nτ_c - x$τ_cmap[wsize - datediff]
-  if (sizediff_τ_c > 0){
+  if (sizediff_τ_c > 0) {
     #extend τ_c by repeating last value
     nw <- length(winit)
     last_val <- winit[nw - nβ_0 - np_h]
-    winit <- c(winit[1:(nw - nβ_0 - np_h)], rep(last_val, times = sizediff2), winit[(nw - nβ_0 - np_h + 1):nw])
+    winit <-
+      c(winit[1:(nw - nβ_0 - np_h)], rep(last_val, times = sizediff_τ_c), winit[(nw - nβ_0 - np_h + 1):nw])
   }
-}
-
-if (forecast_date >= "2020-11-16" && forecast_date_start < "2020-11-16"){
-  tauh_init <- var(na.omit(diff(z$hospitalizations)))
-  is_NA_hosps <- is.na(z$hospitalizations)
-  p_hinit <- sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
-  winit0 <- winit
-  winit <- c(winit0[1:2], log(tauh_init), winit0[3], qlogis(p_hinit), winit0[4:length(winit0)])
-}
-
-if (forecast_date == "2020-06-29" && forecast_loc == "06"){
-  winit <- c(8.73551482570107, -1.44655860017101, 5.57595889093378, -0.221044510595228, 
-    -0.531507660497996, 2.84820370348666, 3.64550140739146, 5.73614471617339, 
-    1.86866223951627, 1.99412025269162, 2.13103285797259, 2.22786584083027, 
-    2.28919006144454, 4.70010883278172, 4.69947305619056, 4.69670268108412, 
-    4.69063770875268, 4.68056495035462, 4.667098283165, 4.65128405672293, 
-    4.6339691442808, 4.61749817880801, 4.60314690825888, 4.59241830600342, 
-    4.58566799892232, 4.58289610177725, 4.58440814947788, 4.5887502342946, 
-    4.59216344748098, 4.59228955659557)
 }
 
 ## fitting
