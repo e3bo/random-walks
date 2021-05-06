@@ -217,6 +217,7 @@ if (forecast_date_start == forecast_date) {
       c(winit, rep(winit[length(winit)], sizediff)) # extend β_0 by repeating last value
   }
   
+  np_h <- x$p_hmap[wsize]
   if (forecast_date >= "2020-11-16" &&
       forecast_date_start < "2020-11-16") {
     # initialize hospitalization parameters
@@ -232,7 +233,6 @@ if (forecast_date_start == forecast_date) {
                rep(qlogis(p_hinit), times = np_h),
                winit0[(nw0 - nβ_0 + 1):nw0])
   } else {
-    np_h <- x$p_hmap[wsize]
     sizediff_p_h <- np_h - x$p_hmap[wsize - datediff]
     if (sizediff_p_h > 0) {
       #extend p_h
