@@ -146,21 +146,33 @@ process_hopkins <- function(path, weekly = TRUE){
   hpd3 
 }
 
-load_google_mobility <- function(issue_date){
-  if (issue_date > "2021-12-31"){
+load_google_mobility <- function(issue_date, rootdir = ".") {
+  if (issue_date > "2021-12-31") {
     stop("reading of reports issued after 2021 is not implemented")
   }
-  path <- file.path("google-mobility-reports", issue_date, 
-                    c("2020_US_Region_Mobility_Report.csv", "2021_US_Region_Mobility_Report.csv"))
+  path <- file.path(
+    rootdir, 
+    "google-mobility-reports",
+    issue_date,
+    c(
+      "2020_US_Region_Mobility_Report.csv",
+      "2021_US_Region_Mobility_Report.csv"
+    )
+  )
   rcsv <- function(p) {
-    read_csv(p, col_types = cols_only(country_region = col_character(),
-                                      sub_region_1 = col_character(),
-                                       sub_region_2 = col_character(),
-                                      iso_3166_2_code = col_character(),
-                                       date = col_date(format = "%Y-%m-%d"),
-                                       residential_percent_change_from_baseline = col_double()))
+    read_csv(
+      p,
+      col_types = cols_only(
+        country_region = col_character(),
+        sub_region_1 = col_character(),
+        sub_region_2 = col_character(),
+        iso_3166_2_code = col_character(),
+        date = col_date(format = "%Y-%m-%d"),
+        residential_percent_change_from_baseline = col_double()
+      )
+    )
   }
-  purrr::map(path, rcsv) %>% bind_rows() %>% filter(is.na(sub_region_2)) %>% 
+  purrr::map(path, rcsv) %>% bind_rows() %>% filter(is.na(sub_region_2)) %>%
     select(-sub_region_2)
 }
 

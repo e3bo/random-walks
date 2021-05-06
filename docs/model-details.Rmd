@@ -24,153 +24,11 @@ To better understand the potential range of epidemic outcomes in the U.S.A., we 
 #### Incident Case Data & Death Reports
 
 Fitted data on incident case and death reports for each state in the U.S.A. were collated by the <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University"</a>.
-Fitted data on hospital admissions were provided by the U.S. Department of Health & Human Services (HHS), which we accessed via the Delphi Epidata API [^4]. 
+Fitted data on hospital admissions were provided by the U.S. Department of Health & Human Services (HHS), which we accessed via the Delphi Epidata API [^1]. 
 We show a subset of the state-level data here for Georgia, New York, Washington, and Wyoming.
 
-```{r collate-data}
-all_files <- list.files(path = here::here("output/current/"), pattern = ".csv")
-param_files <- list.files(path = here::here("output/current/"), pattern = "params-natural.rds")
-state_summaries <- tibble()
-state_parameters <- tibble()
-state_logliks <- tibble()
-statedf <-readRDS(here::here("output/current", "statedf.rds"))
-for(i in 1:length(all_files)) {
-  do_file <- all_files[i]
-  location <- sub(".csv", "", do_file)
-  state_metadata <- statedf %>% filter(state_full == sub(".csv", "", do_file))
-  state_pop <- state_metadata %>% pull(total_pop)
-  state_initR0 <- state_metadata %>% pull(initR0)
-  state_beta_s <- (state_initR0*.1)
-  
-  tmpfile <- here::here("output/current", do_file)
-  tmp <- read.csv(tmpfile) %>%
-    filter(sim_type == "status_quo" | is.na(sim_type),
-           variable %in% c("daily_cases", "daily_deaths",
-                           "actual_daily_cases", "actual_daily_deaths",
-                           "mobility_trend", "latent_trend")) %>%
-    mutate(date = as.Date(date)) %>%
-    dplyr::select(location, sim_type, period, date, variable, mean_value) %>% 
-    pivot_wider(names_from = variable, values_from = mean_value) %>%
-    mutate(beta_s = state_beta_s) %>% 
-    mutate(omega = mobility_trend * latent_trend * beta_s) %>% 
-    pivot_longer(cols = !c(location, sim_type, period, date), 
-                 names_to = "variable", 
-                 values_to = "mean_value",
-                 values_drop_na = TRUE)
-  state_summaries <- bind_rows(state_summaries, tmp) # ? was this missing?
-  tmpparamfile <- here::here("output/current", param_files[i])
-  tmpparams <- readRDS(tmpparamfile)
-  tmp_loglik <- data.frame(location = unique(tmp$location),
-                        log_lik = tmpparams["LogLik", 2])
-  rnms <- row.names(tmpparams)
-  tmpparams <- tmpparams %>%
-    mutate(parameter = rnms) %>%
-    filter(is_fitted == "yes") %>%
-    dplyr::select(-is_fitted) %>%
-    gather("key", "value", -parameter) %>%
-    filter(key == "X1") %>%
-    dplyr::select(-key) %>%
-    mutate(location = unique(tmp$location)) %>%
-    dplyr::select(location, value, parameter)
-  
-  state_parameters <- bind_rows(state_parameters, tmpparams)
-  state_logliks <- bind_rows(state_logliks, tmp_loglik)
-}
-# Fixed parameters table
-betas_names <- rnms[grep("b[0-9]+", rnms)] # find parameters starting with b followed by any number
-spline_coefficients <- paste("Spline coefficient", gsub("b","", betas_names))
-names(spline_coefficients) <- betas_names
-params_vec <- c(MIF_ID = "MIF id", 
-                LogLik = "Log Likelihood", 
-                LogLik_SE = "SE of Log Likelihood", 
-                beta_s = "Transmission rate",
-                # Relative Transmissibility
-                frac_trans_e = "Relative transmissibility of latent infections",
-                frac_trans_a = "Relative transmissibility of asymptomatic individuals",
-                frac_trans_c = "Relative transmissibility of detected symptomatic individuals post-reporting",
-                frac_trans_h = "Relative transmissibility of hospitalized individuals",
-                # Time in compartments
-                time_e = "Time spent in latent compartments (days)",
-                time_a = "Time spent in asymptomatic compartments (days)",
-                time_su = "Time spent in symptomatic, undetected compartments (days)",
-                time_sd = "Time spent in symptomatic, detected compartments (days)",
-                time_c = "Time spent in diagnosed cases compartments (days)",
-                time_h = "Time spent in hospitalized compartments (days)",
-                # Detection time
-                max_diag_factor = "Maximum for factor by which movement through Isd happens faster (quicker diagnosis)",
-                diag_rampup = "Rate at which faster diagnosis ramps up to max",
-                t_half_diag = "Time at which diagnosis is at 50% of max (in days since t = 1)",
-                # Detection fraction
-                max_detect_frac = "Maximum fraction of cases that are detected",
-                detect_rampup = "Speed at which fraction detected ramps up",
-                t_half_detect = "Time at which infection detection fraction is at 50% of max (in days since t = 1)",
-                base_detect_frac = "Minimum fraction detected at t = 1",
-                # Fraction asymptomatic
-                frac_asym = "Fraction of latent infections that move to asymptomatic",
-                # Fraction hosptilized
-                frac_hosp = "Fraction of detected cases that are hospitalized",
-                # Fraction of hospitalizations that result in death
-                min_frac_dead = "Maximum fraction of hospitalizations that result in death",
-                max_frac_dead = "Maximum fraction of hospitalizations that result in death",
-                log_half_dead = "Time at which death fraction is at 50% of max (in days since t = 1)",
-                # Dispersion parameters
-                theta_cases = "Dispersion parameter for case reporting observation process",
-                theta_hosps = "Dispersion parameter for hospitalization reporting observation process",
-                theta_deaths = "Dispersion parameter for death reporting obsercation process",
-                sigma_dw = "Variance of the stochastics process noise",
-                # Spline coefficients
-                spline_coefficients,
-                # Initial conditions
-                S_0 = "Initial number of susceptible individuals on t = 1",
-                E1_0 = "Initial number of latent infectious individuals on t = 1",
-                Ia1_0 = "Initial number of asymptomatic individuals on t = 1",
-                Isu1_0 = "Initial number of symptomatic, undetected individuals on t = 1",
-                Isd1_0 = "Initial number of symptomatic, detected individuals on t = 1",
-                C1_0 = "Initial number of diagnosed cases on t = 1",
-                H1_0 = "Initial number of hospitalized cases on t = 1",
-                R_0 = "Initial number of recovered individuals on t = 1",
-                D_0 = "Initial number of deaths after hospitalization on t = 1",
-                trend_start = "Trend")
-tmpparams <- readRDS(tmpparamfile)
-rnms <- row.names(tmpparams)
-params_map <- tibble(Parameter = names(params_vec),
-                     Description = params_vec)
-fixed_parameters <- tmpparams %>%
-  mutate(Parameter = rnms) %>%
-  filter(is_fitted == "no") %>%
-  dplyr::select(-is_fitted) %>%
-  gather("key", "value", -Parameter) %>%
-  filter(key == "X1") %>%
-  left_join(params_map, by = "Parameter") %>%
-  filter(!Parameter %in% c("MIF_ID", "LogLik", "LogLik_SE", "trend_start", "theta_hosps", "S_0")) %>%
-  dplyr::select(Parameter, Description, value) %>%
-  mutate(Parameter = ifelse(Parameter == "E1_0", "L1_0", Parameter))
-```
-
-<!-- ```{r read-data, fig.height = 10, fig.width = 8} -->
-<!-- states <- c("Georgia", "New York", "Washington", "Wyoming") -->
-
-<!-- all_data <- state_summaries %>% -->
-<!--   filter(location %in% states) %>% -->
-<!--   filter(is.na(sim_type)) %>% -->
-<!--   mutate(variable = ifelse(variable == "actual_daily_cases",  -->
-<!--                            "Daily case reports",  -->
-<!--                            "Daily death reports")) -->
-
-<!-- ggplot(all_data, aes(x = date, y = median_value, color = location)) + -->
-<!--   geom_col(width = 0.3) + -->
-<!--   ylab("Number of persons") + -->
-<!--   facet_wrap(location~variable, scales = "free", ncol = 2) + -->
-<!--   theme_minimal(base_size = 14, base_line_size = 0.5) + -->
-<!--   # scale_color_brewer(type = "qual") + -->
-<!--   guides(color = FALSE) #+  -->
-<!--   #theme_dark() -->
-<!-- ``` -->
-
-![](data-legend.png){ width=280px }
 
 ```{r read-data, fig.width=7}
-
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-11-16")
 forecast_locs <- c("13", "36", "53", "56") 
@@ -244,31 +102,26 @@ wind %>% ggplot(aes(x=target_end_date,  y = value)) + geom_col() +
 
 #### Social distancing / mobility data
 
-To date, the primary intervention in all states has been the adoption of social distancing behaviors and improved hygiene.
-We measure social distancing using aggregated, anonymized locations recorded by location-based mobile phone apps, collected by <a href="https://www.unacast.com/covid19/social-distancing-scoreboard" target="_blank">Unacast</a>.
-We summarize the effectiveness of social distancing behaviors as the average deviation from baseline, a statistic ranging from 0% (complete cessation of movements) to 100% (no difference from baseline).
+To date, the primary interventions in all states have been vaccination and the adoption of social distancing behaviors and improved hygiene.
+To quantify social distancing, we use indicators of aggregate behavior available from Google [^2].
 
-The trajectories of human mobility in all 50 states is shown below.
+
+These indicators are expressed as change from a baseline. A value of 0% indicates no change relative to the median value of the indicator from January 3 through February 6, 2020.
+
+The indicator of the duration of time spend in residential areas in our 4 focal states is shown below.
 
 ```{r covariate, fig.height=3, fig.width=7, eval = TRUE}
-all_phi <- state_summaries %>%
-  filter(variable == "mobility_trend") %>%
-  dplyr::select(location, date, mean_value) %>%
-  filter(date <= Sys.Date())
-g <- ggplot(all_phi, aes(x = date, y = mean_value, color = location)) +
-  geom_line(size = 0.5) +
-  # ylab("Human movement\n(% of normal)") +
-  scale_y_continuous(limits = c(0,1), labels = scales::percent) +
-  scale_color_viridis_d(option = "D", direction = -1, alpha = .6, end = .75) +
-  # theme_dark(base_line_size = 0.5) +
-  theme_minimal() +
-  guides(color = FALSE)
-p <- g %>% plotly::ggplotly() %>% 
-  plotly::layout(showlegend = FALSE,
-                 # margin = list(l = 150),
-                 yaxis = list(title = "Human movement\n(% of normal)\n&nbsp;")
-                 )
-p
+
+sel_states <- forecast_locs %>% paste0("000") %>% covidcast::fips_to_name()
+
+mob <- load_google_mobility("2021-05-06", rootdir = "..") %>%
+  filter(sub_region_1 %in% sel_states)
+
+mob %>% 
+  ggplot(aes(x = date, y = residential_percent_change_from_baseline)) + 
+  geom_line() + facet_wrap(~sub_region_1) + 
+  labs(y = "Time spent in residential areas", x = "Date")
+
 ```
 
 ### Scenarios
@@ -353,10 +206,18 @@ Accordingly, these results are preliminary, provisional, and subject to change.
 These results have not been peer-reviewed, but have been prepared to a professional standard with the intention of providing useful interpretation of a rapidly developing event.</small>
 
 
-[^1]:[Rong et al. 2020](https://wwwnc.cdc.gov/eid/article/26/5/20-0198_article?deliveryName=DM20712), [Du et al. 2020](https://www.medrxiv.org/content/10.1101/2020.02.19.20025452v3)
 
-[^2]:[Hurtado & Kirosingh 2019](https://link.springer.com/article/10.1007/s00285-019-01412-w)
+[^1]:[Delphi Epidata API](David C. Farrow, Logan C. Brooks, Aaron Rumack, Ryan J. Tibshirani, Roni Rosenfeld (2015). Delphi Epidata API. https://github.com/cmu-delphi/delphi-epidata)
 
-[^3]:[Ionides et al. 2006](https://www.pnas.org/content/103/49/18438)
+[^2]: [Google COVID-19 Community Mobility Reports]. (Google LLC https://www.google.com/covid19/mobility/ Accessed: 2021-05-06.)
 
-[^4]:[Delphi Epidata API](David C. Farrow, Logan C. Brooks, Aaron Rumack, Ryan J. Tibshirani, Roni Rosenfeld (2015). Delphi Epidata API. https://github.com/cmu-delphi/delphi-epidata)
+
+
+[^3]:[Rong et al. 2020](https://wwwnc.cdc.gov/eid/article/26/5/20-0198_article?deliveryName=DM20712), [Du et al. 2020](https://www.medrxiv.org/content/10.1101/2020.02.19.20025452v3)
+
+[^4]:[Hurtado & Kirosingh 2019](https://link.springer.com/article/10.1007/s00285-019-01412-w)
+
+[^5]:[Ionides et al. 2006](https://www.pnas.org/content/103/49/18438)
+
+
+
