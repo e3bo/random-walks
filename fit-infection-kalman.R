@@ -145,7 +145,7 @@ if (forecast_date > "2020-11-15") {
 
 if("doses" %in% names(wind)) {
   x0 <- wind %>% select(target_end_date, time, wday, prophome, doses) %>%
-    mutate(doses = zoo::na.approx(doses))
+    mutate(doses = zoo::na.approx(doses, rule = 2))
   sel <- x0$doses > 0 
   x0$dosesiqr <-
     (x0$doses - mean(x0$doses)) / diff(quantile(x0$doses[sel], c(.25, .75)))
