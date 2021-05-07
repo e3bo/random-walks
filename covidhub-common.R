@@ -456,17 +456,21 @@ calc_kf_nll_r <-
     γ_z <- unname(wfixed["γ_z"])
     nτ_c <- tail(cov$τ_cmap, 1)
     np_h <- tail(cov$p_hmap, 1)
-    if (ncol(z) == 2 && !("hospitalizations" %in% names(z))) {
+    if (ncol(z) == 3) {
+      τ_h <- exp(w[3])
+      if ("dosesiqr" %in% names(cov)){
+        doseeffect <- -exp(w[6])
+        w2 <- c(w[1:2], w[4:5], w[7:length(w)])
+      } else{
+        w2 <- c(w[1:2], w[4:length(w)])
+      }
+      p_h <- plogis(w2[(9 + nτ_c):(9 + nτ_c + np_h - 1)])
+    } else if(ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
       τ_h <- wfixed["τ_h"]
       p_h <- wfixed["p_h"]
       np_h <- 0
       z$hospitalizations <- NA
       w2 <- w
-    } else {
-      τ_h <- exp(w[3])
-      p_h <- plogis(w[5])
-      w2 <- w[-c(3)]
-      p_h <- plogis(w2[(9 + nτ_c):(9 + nτ_c + np_h - 1)])
     }
     L0 <- exp(w2[1])
     H0 <- exp(w2[2])
@@ -545,8 +549,13 @@ calc_kf_nll_r <-
       }
       
       u0 <- cbind(xhat_init, PNinit)
-      β  <-
-        exp(β_0[cov$β_0map[i]] + prophomeeffect * cov$prophomeiqr[i])
+      if ("dosesiqr" %in% names(cov)) {
+        β   <-
+          exp(β_0[cov$β_0map[i]] + prophomeeffect * cov$prophomeiqr[i] + doseeffect * cov$dosesiqr[i])
+      } else {
+        β   <-
+          exp(β_0[cov$β_0map[i]] + prophomeeffect * cov$prophomeiqr[i])
+      }
       
       par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[i]], p_d, cov$ρ[i])
       if (cov$wday[i] == 1) {
