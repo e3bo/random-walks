@@ -161,7 +161,7 @@ x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% a
 if (ncol(z) == 3){
  # hwsize <- wsize - sum(is.na(z$hospitalizations))
 #  x0$p_hmap <- c(rep(1L, wsize - hwsize), rep(seq_len(ceiling(hwsize / 28)), each = 28)) %>% head(wsize) %>% as.integer()
-    x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer() 
+  x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer() 
 } else {
   x0$p_hmap <- 1L
 }
@@ -248,8 +248,8 @@ if (forecast_date_start == forecast_date) {
     }
   }
   
-  if (forecast_date >= "2021-02-08" &&
-      forecast_date_start < "2021-02-08"){
+  if (forecast_date > "2021-02-08" &&
+      forecast_date_start <= "2021-02-08"){
     # add parameter for doseeffect
     winit <- c(winit[1:5], -1, winit[6:length(winit)])
   }
@@ -290,6 +290,7 @@ fit1 <- lbfgs::lbfgs(
 )
 tt1 <- tictoc::toc()
 
+if(FALSE){
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(
   w = fit1$par,
@@ -301,7 +302,9 @@ h1 <- calc_kf_hess(
   wfixed = wfixed
 )
 tictoc::toc()
-
+} else{
+  h1 <- diag(nrow = length(winit))
+}
 ## Save outputs
 
 fit_dir <-
