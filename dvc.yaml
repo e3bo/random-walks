@@ -3754,3 +3754,99 @@ stages:
     - pull-hopkins-ts-from-date.R
     outs:
     - hopkins/2020-06-28
+  safegraph-hp-2021-01-04:
+    cmd: fdt=2021-01-04 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-01-04
+  healthdata-2021-01-04-06:
+    cmd: fdt=2021-01-04 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-01-04/06
+  safegraph-hp-2021-01-11:
+    cmd: fdt=2021-01-11 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-01-11
+  healthdata-2021-01-11-06:
+    cmd: fdt=2021-01-11 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-01-11/06
+  safegraph-hp-2021-01-18:
+    cmd: fdt=2021-01-18 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-01-18
+  healthdata-2021-01-18-06:
+    cmd: fdt=2021-01-18 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-01-18/06
+  safegraph-hp-2021-01-25:
+    cmd: fdt=2021-01-25 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-01-25
+  healthdata-2021-01-25-06:
+    cmd: fdt=2021-01-25 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-01-25/06
+  safegraph-hp-2021-02-01:
+    cmd: fdt=2021-02-01 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-02-01
+  safegraph-hp-2021-02-08:
+    cmd: fdt=2021-02-08 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-02-08
+  hopkins-2021-02-08:
+    cmd: fdt=2021-02-08 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-02-08
+  healthdata-2021-02-08-06:
+    cmd: fdt=2021-02-08 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-02-08/06
+  safegraph-hp-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-02-15
+  hopkins-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-02-15
+  healthdata-2021-02-15-06:
+    cmd: fdt=2021-02-15 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-02-15/06
+  hopkins-vaccine-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-02-15

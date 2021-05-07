@@ -127,8 +127,8 @@ mob %>%
 ### Scenarios
 
 We explore a range of scenarios for transmission.
-Simulations in each state start on the data on which at least 1 case was first reported.
-The model is fit to data on reported cases and deaths to `r format(Sys.time(), '%B %d, %Y')` and propagated six weeks into the future.
+Simulations in each state start on March 2, 2020.
+The model is fit to data on reported cases, hospitalizations, and deaths available up to `r format(Sys.time(), '%B %d, %Y')` and propagated six weeks into the future.
 
 *Possible futures scenarios*
 

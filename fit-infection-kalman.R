@@ -77,53 +77,46 @@ if (forecast_date > "2020-11-15") {
       target_end_date = date - lubridate::ddays(1)
     ) %>%
     select(target_end_date, hospitalizations)
-  obs_data <-
+  
+  obs_data0 <-
     left_join(jhu_data, mob_ts, by = "target_end_date") %>%
     mutate(prophome = zoo::na.fill(prophome, "extend")) %>%
     left_join(tdat3, by = "target_end_date")
+  
+  vacc_path <- file.path("hopkins-vaccine",
+                         forecast_date,
+                         "vaccine_data_us_timeline.csv")
+  if (file.exists(vacc_path)) {
+    vacc_ts <- read_csv(
+      vacc_path,
+      col_types = cols_only(
+        FIPS = col_double(),
+        Vaccine_Type = col_character(),
+        Doses_admin = col_double(),
+        Date = col_date()
+      )
+    ) %>%
+      mutate(FIPS = sprintf("%02d", FIPS)) %>%
+      filter(FIPS == forecast_loc & Vaccine_Type == "All") %>%
+      select(Date, Doses_admin) %>%
+      rename(target_end_date = Date, doses = Doses_admin)
+    
+    i <- 1 #replace leading NAs with 0
+    while (is.na(vacc_ts$doses[i])) {
+      vacc_ts$doses[i] <- 0
+      i <- i + 1
+    }
+    obs_data <-
+      left_join(obs_data0, vacc_ts, by = "target_end_date")
+    obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <-
+      0
+  } else {
+    obs_data <- obs_data0
+  }
 } else {
   obs_data <- left_join(jhu_data, mob_ts, by = "target_end_date") %>%
     mutate(prophome = zoo::na.fill(prophome, "extend"))
 }
-
-vacc_path <- file.path("hopkins-vaccine",
-                       forecast_date,
-                       "vaccine_data_us_timeline.csv")
-if (file.exists(vacc_path)) {
-  stop("Fitting not fully implemented for dates with vaccine data")
-  
-  vacc_ts <- read_csv(
-    vacc_path,
-    col_types = cols_only(
-      FIPS = col_double(),
-      Vaccine_Type = col_character(),
-      Doses_admin = col_double(),
-      Date = col_date()
-    )
-  ) %>%
-    mutate(FIPS = sprintf("%02d", FIPS)) %>%
-    filter(FIPS == forecast_loc & Vaccine_Type == "All") %>%
-    select(Date, Doses_admin) %>%
-    rename(target_end_date = Date, doses = Doses_admin)
-  
-  i <- 1 #replace leading NAs with 0
-  while (is.na(vacc_ts$doses[i])) {
-    vacc_ts$doses[i] <- 0
-    i <- i + 1
-  }
-  obs_data <-
-    left_join(jhu_data, tdat3, by = "target_end_date") %>%
-    left_join(vacc_ts, by = "target_end_date") %>%
-    left_join(mob_ts, by = "target_end_date") %>%
-    mutate(
-      prophome = lead(prophome, 3),
-      prophome = zoo::na.fill(prophome, "extend")
-    )
-  obs_data$doses[lubridate::year(obs_data$target_end_date) == 2020] <-
-    0
-}
-
-#wind <- obs_data %>% slice(match(1, obs_data$cases > 0):n())
 
 wind <- obs_data %>% filter(target_end_date >= "2020-03-02")
 wsize <- nrow(wind)
@@ -150,14 +143,25 @@ if (forecast_date > "2020-11-15") {
   z <- wind %>% select(cases, deaths)
 }
 
-x0 <- wind %>% select(target_end_date, time, wday, prophome)
+if("doses" %in% names(wind)) {
+  x0 <- wind %>% select(target_end_date, time, wday, prophome, doses) %>%
+    mutate(doses = zoo::na.approx(doses))
+  sel <- x0$doses > 0 
+  x0$dosesiqr <-
+    (x0$doses - mean(x0$doses)) / diff(quantile(x0$doses[sel], c(.25, .75)))
+} else {
+  x0 <- wind %>% select(target_end_date, time, wday, prophome)
+}
+
 x0$prophomeiqr <-
   (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
 if (ncol(z) == 3){
-  x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
+ # hwsize <- wsize - sum(is.na(z$hospitalizations))
+#  x0$p_hmap <- c(rep(1L, wsize - hwsize), rep(seq_len(ceiling(hwsize / 28)), each = 28)) %>% head(wsize) %>% as.integer()
+    x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer() 
 } else {
   x0$p_hmap <- 1L
 }
@@ -239,9 +243,15 @@ if (forecast_date_start == forecast_date) {
       nw <- length(winit)
       last_val <- winit[nw - nβ_0]
       winit <-
-        c(winit[1:(nw - nβ_0)], rep(last_val, times = sizediff_p_h), winit[(nw - nβ_0 + 1):nw])
-      
+        c(winit[1:(nw - nβ_0)], rep(last_val, times = sizediff_p_h), 
+          winit[(nw - nβ_0 + 1):nw])
     }
+  }
+  
+  if (forecast_date >= "2021-02-08" &&
+      forecast_date_start < "2021-02-08"){
+    # add parameter for doseeffect
+    winit <- c(winit[1:5], -1, winit[6:length(winit)])
   }
   
   nτ_c <- x$τ_cmap[wsize]

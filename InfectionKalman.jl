@@ -57,7 +57,12 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     
     if size(z, 2) == 3
         τ_h = exp(w[3])
-        w2 = vcat(w[1:2], w[4:end])
+        if "dosesiqr" in names(cov)
+            doseeffect = - exp(w[6])
+            w2 = vcat(w[1:2], w[4:5], w[7:end])
+        else 
+            w2 = vcat(w[1:2], w[4:end])
+        end
         p_h = [1 / (1 + exp(-p)) for p in w2[(9 + nτ_c):(9 + nτ_c + np_h - 1)]]
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
         np_h = 0
@@ -127,7 +132,12 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
             xlast = xkk[:,i - 1]
             plast = pkk[:,:,i-1]
         end
-        β = exp(β_0[cov.β_0map[i]] + cov.prophomeiqr[i] * prophomeeffect)
+        
+        if "dosesiqr" in names(cov)
+            β = exp(β_0[cov.β_0map[i]] + cov.prophomeiqr[i] * prophomeeffect + cov.dosesiqr[i] * doseeffect)
+        else
+            β = exp(β_0[cov.β_0map[i]] + cov.prophomeiqr[i] * prophomeeffect)            
+        end
         for zv in zerovars
             xlast[zv] = 0
             plast[zv,:] .= 0

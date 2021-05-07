@@ -1210,3 +1210,278 @@ stages:
       md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
       size: 4049279
       nfiles: 8
+  safegraph-hp-2020-12-28:
+    cmd: fdt=2020-12-28 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2020-12-28
+      md5: 690c34cfde8c894584d93f2f666b9df0.dir
+      size: 4010248
+      nfiles: 1
+  hopkins-2020-12-28:
+    cmd: fdt=2020-12-28 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2020-12-28
+      md5: 41293815be64e72a622d73dc5e7e41a5.dir
+      size: 8265932
+      nfiles: 8
+  healthdata-2020-12-28-06:
+    cmd: fdt=2020-12-28 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2020-12-28/06
+      md5: c9d5ef73042ef01a7c0a69bcd483566d.dir
+      size: 92875
+      nfiles: 1
+  safegraph-hp-2021-01-04:
+    cmd: fdt=2021-01-04 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-01-04
+      md5: 7fb43eeb9781a0ba372dbcb54c05885c.dir
+      size: 4260221
+      nfiles: 1
+  hopkins-2021-01-04:
+    cmd: fdt=2021-01-04 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-01-04
+      md5: 50d6b954330a4125cccc93e6afaf8abf.dir
+      size: 8474141
+      nfiles: 8
+  healthdata-2021-01-04-06:
+    cmd: fdt=2021-01-04 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-01-04/06
+      md5: cf89a88106dae6a273b6b45d4429efef.dir
+      size: 97801
+      nfiles: 1
+  safegraph-hp-2021-01-11:
+    cmd: fdt=2021-01-11 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-01-11
+      md5: 0d69b0e6a67d4d4b2ceeb2e1bef29e10.dir
+      size: 4298347
+      nfiles: 1
+  hopkins-2021-01-11:
+    cmd: fdt=2021-01-11 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-01-11
+      md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
+      size: 8678408
+      nfiles: 8
+  healthdata-2021-01-11-06:
+    cmd: fdt=2021-01-11 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-01-11/06
+      md5: 51fa0edbf8643d6d28c0744845c772ae.dir
+      size: 100269
+      nfiles: 1
+  safegraph-hp-2021-01-18:
+    cmd: fdt=2021-01-18 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-01-18
+      md5: 2025db9697984ed8f262d8c0cddbf091.dir
+      size: 4331093
+      nfiles: 1
+  hopkins-2021-01-18:
+    cmd: fdt=2021-01-18 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-01-18
+      md5: 9b0db7fb22655f62fd124fc58a3d8e6f.dir
+      size: 8910503
+      nfiles: 8
+  healthdata-2021-01-18-06:
+    cmd: fdt=2021-01-18 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-01-18/06
+      md5: bba1f1fab0afce313a95bb153f5b92a1.dir
+      size: 79949
+      nfiles: 1
+  safegraph-hp-2021-01-25:
+    cmd: fdt=2021-01-25 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-01-25
+      md5: b82f3f7e7242576e08d41bd0fe66f710.dir
+      size: 4384622
+      nfiles: 1
+  hopkins-2021-01-25:
+    cmd: fdt=2021-01-25 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-01-25
+      md5: c1a1887563595ac0c0dea6347ab8ff29.dir
+      size: 9130826
+      nfiles: 8
+  healthdata-2021-01-25-06:
+    cmd: fdt=2021-01-25 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-01-25/06
+      md5: d9a749a152af4c689ee99553cb56c685.dir
+      size: 105318
+      nfiles: 1
+  safegraph-hp-2021-02-01:
+    cmd: fdt=2021-02-01 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-02-01
+      md5: 6b36b80a14c24e591235ad5107b803c5.dir
+      size: 4424704
+      nfiles: 1
+  hopkins-2021-02-01:
+    cmd: fdt=2021-02-01 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-02-01
+      md5: 8b07b96124b82ce52a7569cec6858440.dir
+      size: 9346644
+      nfiles: 8
+  healthdata-2021-02-01-06:
+    cmd: fdt=2021-02-01 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-02-01/06
+      md5: 8d352e47dca961344eee2f07b4d77968.dir
+      size: 107807
+      nfiles: 1
+  safegraph-hp-2021-02-08:
+    cmd: fdt=2021-02-08 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-02-08
+      md5: e7646b5f6bea1944488ab1907eda9fae.dir
+      size: 4464306
+      nfiles: 1
+  hopkins-2021-02-08:
+    cmd: fdt=2021-02-08 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-02-08
+      md5: 5447b841ad019f834050d92fade1e957.dir
+      size: 9550690
+      nfiles: 8
+  healthdata-2021-02-08-06:
+    cmd: fdt=2021-02-08 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-02-08/06
+      md5: 50e9f25498dca3b8bedaaa6613a61928.dir
+      size: 110650
+      nfiles: 1
+  safegraph-hp-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-02-15
+      md5: cb6a2ae0a078871d53dd0c9c81a2f7a7.dir
+      size: 4456367
+      nfiles: 1
+  hopkins-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-02-15
+      md5: 8cb7ffbd88de0c766f9d6ca4d7451687.dir
+      size: 9762455
+      nfiles: 8
+  healthdata-2021-02-15-06:
+    cmd: fdt=2021-02-15 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-02-15/06
+      md5: 5f31b760c8b69546a8f2c7c9c9467cdd.dir
+      size: 112750
+      nfiles: 1
+  hopkins-vaccine-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - path: pull-hopkins-vaccine-ts-from-date.R
+      md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+      size: 1067
+    outs:
+    - path: hopkins-vaccine/2021-02-15
+      md5: 85223b250bd7d7fa68145ec98300d905.dir
+      size: 137704
+      nfiles: 1

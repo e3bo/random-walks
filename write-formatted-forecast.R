@@ -11,12 +11,19 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   np <- length(ft$par)
   inds <- seq(np - nβ_0 + 1, np)
   intercept <- ft$par[inds][cov$β_0map]
-  X <- cbind(cov$prophomeiqr)
-  if (no_hosps){
-    effects <- -exp(ft$par[4])
+  
+  if ("dosesiqr" %in% names(cov)){
+    X <- cbind(cov$prophomeiqr, cov$dosesiqr)
+    effects <- -exp(ft$par[c(5, 6)])
   } else {
-    effects <- -exp(ft$par[6])
+    X <- cbind(cov$prophomeiqr)
+    if (no_hosps){
+      effects <- -exp(ft$par[4])
+    } else {
+      effects <- -exp(ft$par[5])
+    }
   }
+
   num_all <- exp(intercept + X %*% effects)
   plot(
     cov$time,
@@ -38,12 +45,12 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
       )
     )
     effects_no_dose <- effects_no_mob <- effects
-    effects_no_mob[2] <- 0
+    effects_no_mob[1] <- 0
     num_nomob <- exp(intercept + X %*% effects_no_mob)
     lines(cov$time,
           num_nomob / wfixed["γ"],
           col = "orange")
-    effects_no_dose[1] <- 0
+    effects_no_dose[2] <- 0
     num_nodose <- exp(intercept + X %*% effects_no_dose)
     lines(cov$time,
           num_nodose / wfixed["γ"],
