@@ -410,10 +410,10 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   β[(lf - m + 1):lf] <- β[lf - m]
   β2 <- c(β, rep(β[lf - m], l))
   
-  df <- data.frame(logβ = log(β2), prophomeiqr = x$prophomeiqr)
-  mod <- lm(logβ ~ prophomeiqr, data = df)
+  df <- data.frame(logβ = log(β2), residential_iqr = x$residential_iqr)
+  mod <- lm(logβ ~ residential_iqr, data = df)
   print(summary(mod))
-  prophomeeffect_init <- coef(mod)["prophomeiqr"] %>% unname()
+  residentialeffect_init <- coef(mod)["residential_iqr"] %>% unname()
   intercept_init <- coef(mod)["(Intercept)"] + residuals(mod)
   intercept_split <- split(intercept_init, x$β_0map)
   β_0 <- sapply(intercept_split, mean)
@@ -423,7 +423,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
     logL0 = log(L0init + 1),
     logH0 = log(H0init + 1),
     logτ_d = log(τ_d_init),
-    prophomeeffect = log(abs(prophomeeffect_init)),
+    logresidentialeffect = log(abs(residentialeffect_init)),
     logitp_d = qlogis(p_d_init),
     logγ_d12 = log(365.25 / 10),
     logγ_d34 = log(365.25 / 10),
@@ -475,7 +475,7 @@ calc_kf_nll_r <-
     L0 <- exp(w2[1])
     H0 <- exp(w2[2])
     τ_d <- exp(w2[3])
-    prophomeeffect <- -exp(w2[4])
+    residentialeffect <- -exp(w2[4])
     p_d <- plogis(w2[5])
     γ_d12 <- exp(w2[6])
     γ_d34 <- exp(w2[7])
@@ -551,10 +551,10 @@ calc_kf_nll_r <-
       u0 <- cbind(xhat_init, PNinit)
       if ("dosesiqr" %in% names(cov)) {
         β   <-
-          exp(β_0[cov$β_0map[i]] + prophomeeffect * cov$prophomeiqr[i] + doseeffect * cov$dosesiqr[i])
+          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential_iqr[i] + doseeffect * cov$dosesiqr[i])
       } else {
         β   <-
-          exp(β_0[cov$β_0map[i]] + prophomeeffect * cov$prophomeiqr[i])
+          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential_iqr[i])
       }
       
       par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[i]], p_d, cov$ρ[i])
@@ -615,7 +615,7 @@ calc_kf_nll_r <-
     }
     
     rwlik <- 0
-    for (i in 1:(length(β_0) - 1)) {
+    for (i in seq_len(length(β_0) - 1)) {
       step <-  β_0[i + 1] -  β_0[i]
       rwlik <-
         rwlik + dnorm(step,
@@ -624,7 +624,7 @@ calc_kf_nll_r <-
                       log = TRUE)
     }
     
-    for (i in 1:(length(τ_c) - 1)) {
+    for (i in seq_len(length(τ_c) - 1)) {
       τ_cstep <- log(τ_c[i + 1]) - log(τ_c[i])
       rwlik <-
         rwlik + dnorm(τ_cstep,
@@ -633,7 +633,7 @@ calc_kf_nll_r <-
                         log = TRUE)
     }
     
-    for (i in 1:(length(p_h) - 1)) {
+    for (i in seq_len(length(p_h) - 1)) {
       p_hstep <- qlogis(p_h[i + 1]) - qlogis(p_h[i])
       rwlik <-
         rwlik + dnorm(p_hstep,
