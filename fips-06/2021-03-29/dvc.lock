@@ -1,55 +1,50 @@
 schema: '2.0'
 stages:
   fit-2021-03-29-06:
-    cmd: fdt=2021-03-29 loc=06 Rscript fit-infection-kalman.R
+    cmd: fdtstart=2021-03-22 fdt=2021-03-29 loc=06 Rscript fit-infection-kalman.R
     deps:
-    - path: covidcast-safegraph-home-prop-7dav/2021-03-29
-      md5: c01e963a96900841742b78f59cb15604.dir
-      size: 4478595
+    - path: covidcast-safegraph-home-prop/2021-03-29
+      md5: 632a258a7b90d992420c18874b8990cf.dir
+      size: 4446636
       nfiles: 1
     - path: covidhub-common.R
-      md5: d6d3f848f3d9b7cbc3ddacc4793a40ee
-      size: 26919
+      md5: a7de2e0446131fb03fd55692c5f09374
+      size: 22332
     - path: fit-infection-kalman.R
-      md5: bf20efa3697c8c25aecbee109d872acf
-      size: 8514
-    - path: healthdata/2021-03-29/06
-      md5: 294e387e1aef16637ad7eb10008b5962.dir
-      size: 123095
-      nfiles: 1
-    - path: hopkins-vaccine/2021-03-29
-      md5: 0d0e971d6873949b6a4dbbfc431b5328.dir
-      size: 1892034
-      nfiles: 1
+      md5: 37018da53798482398c483cfa0713bb1
+      size: 11415
+    - path: fits/2021-03-22-fips06/fit.RData
+      md5: 225fd002db39a6aee0543db9eec87a1b
+      size: 15896
     - path: hopkins/2021-03-29
       md5: 108e400c368365126ba4e8f9f256f30e.dir
       size: 12647684
       nfiles: 8
     outs:
     - path: fits/2021-03-29-fips06/fit-metrics.json
-      md5: 37d567cd82d2faa4e31dd68e6b2666d2
-      size: 597
+      md5: 18deb7c8300bb49b00c3c4f241ab4fe2
+      size: 367
     - path: fits/2021-03-29-fips06/fit.RData
-      md5: c7a175b7470cf60af0f2ede38e8b85c4
-      size: 21297
+      md5: 8a78b21846b7c3e9f02030e86ea9c640
+      size: 16255
   forecast-2021-03-29-06:
     cmd: fdt=2021-03-29 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: d6d3f848f3d9b7cbc3ddacc4793a40ee
-      size: 26919
+      md5: a7de2e0446131fb03fd55692c5f09374
+      size: 22332
     - path: fits/2021-03-29-fips06/fit.RData
-      md5: c7a175b7470cf60af0f2ede38e8b85c4
-      size: 21297
+      md5: 8a78b21846b7c3e9f02030e86ea9c640
+      size: 16255
     - path: write-formatted-forecast.R
-      md5: 12776c858af76dc59cddf7ace0717996
-      size: 11366
+      md5: 5ec0ed6e9af2df6dbc355a276611369b
+      size: 12533
     outs:
     - path: forecasts/2021-03-29-fips06
-      md5: 876ea4217f880fed63c13f6d554ef1cb.dir
-      size: 55186
+      md5: 6f7175113be40ff4eea499b594aca86e.dir
+      size: 53778
       nfiles: 1
     - path: plots/2021-03-29-fips06
-      md5: 96d794bc1a9358679ec50ce901ebe4d1.dir
-      size: 1135262
+      md5: b14895d58a95403e264349b73c965df5.dir
+      size: 1155287
       nfiles: 8
