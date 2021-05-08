@@ -3892,3 +3892,57 @@ stages:
     - pull-hopkins-vaccine-ts-from-date.R
     outs:
     - hopkins-vaccine/2021-03-01
+  safegraph-hp-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-03-08
+  healthdata-2021-03-08-06:
+    cmd: fdt=2021-03-08 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-08/06
+  hopkins-vaccine-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-08
+  safegraph-hp-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-03-15
+  healthdata-2021-03-15-06:
+    cmd: fdt=2021-03-15 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-15/06
+  hopkins-vaccine-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-15
+  safegraph-hp-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-safegraph-ts-from-date.R
+    deps:
+    - pull-safegraph-ts-from-date.R
+    outs:
+    - covidcast-safegraph-home-prop/2021-03-22
+  healthdata-2021-03-22-06:
+    cmd: fdt=2021-03-22 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-22/06
+  hopkins-vaccine-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-22

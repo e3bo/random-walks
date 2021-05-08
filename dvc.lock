@@ -1573,3 +1573,135 @@ stages:
       md5: 6c15ee8bfc89d299fc4c7c7491940198.dir
       size: 1333536
       nfiles: 1
+  safegraph-hp-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-03-08
+      md5: 4fc0f04003c38fdaa2f4380d5155e4e3.dir
+      size: 4554058
+      nfiles: 1
+  hopkins-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-03-08
+      md5: 99e7a89abcf79fbd3c62eb65a1d533de.dir
+      size: 10436566
+      nfiles: 8
+  healthdata-2021-03-08-06:
+    cmd: fdt=2021-03-08 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-03-08/06
+      md5: 0077cd08127e0baabcf5a10c98e07bbc.dir
+      size: 119715
+      nfiles: 1
+  hopkins-vaccine-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - path: pull-hopkins-vaccine-ts-from-date.R
+      md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+      size: 1067
+    outs:
+    - path: hopkins-vaccine/2021-03-08
+      md5: 26da2148e067069bd35bde52509e9c50.dir
+      size: 1427247
+      nfiles: 1
+  safegraph-hp-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-03-15
+      md5: fc147d5c045ac571209af79b79c43970.dir
+      size: 4586345
+      nfiles: 1
+  hopkins-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-03-15
+      md5: 281fdf9ecf693de50b5fab3cf39a3425.dir
+      size: 10652189
+      nfiles: 8
+  healthdata-2021-03-15-06:
+    cmd: fdt=2021-03-15 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-03-15/06
+      md5: 0077cd08127e0baabcf5a10c98e07bbc.dir
+      size: 119715
+      nfiles: 1
+  hopkins-vaccine-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - path: pull-hopkins-vaccine-ts-from-date.R
+      md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+      size: 1067
+    outs:
+    - path: hopkins-vaccine/2021-03-15
+      md5: 6b2821d6adda7d158881d90004e58e44.dir
+      size: 1494363
+      nfiles: 1
+  safegraph-hp-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-safegraph-ts-from-date.R
+    deps:
+    - path: pull-safegraph-ts-from-date.R
+      md5: 1cfcf039b3d354c515e9de8be7f5e580
+      size: 635
+    outs:
+    - path: covidcast-safegraph-home-prop/2021-03-22
+      md5: 8df4b1acf5b1155f80f258dd6b075068.dir
+      size: 4623071
+      nfiles: 1
+  hopkins-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-03-22
+      md5: 89b4e22ae3fddb846cc6dc1da44883d3.dir
+      size: 10868951
+      nfiles: 8
+  healthdata-2021-03-22-06:
+    cmd: fdt=2021-03-22 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-03-22/06
+      md5: 28846c909dee803f52ec9979689ac7b0.dir
+      size: 124528
+      nfiles: 1
+  hopkins-vaccine-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - path: pull-hopkins-vaccine-ts-from-date.R
+      md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+      size: 1067
+    outs:
+    - path: hopkins-vaccine/2021-03-22
+      md5: d882a1dfa926e74484a39d89a8565662.dir
+      size: 1676039
+      nfiles: 1
