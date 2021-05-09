@@ -12,8 +12,8 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   inds <- seq(np - nβ_0 + 1, np)
   intercept <- ft$par[inds][cov$β_0map]
   
-  if ("dosesiqr" %in% names(cov)){
-    X <- cbind(cov$residential, cov$dosesiqr)
+  if ("doses_scaled" %in% names(cov)){
+    X <- cbind(cov$residential, cov$doses_scaled)
     effects <- ft$par[c(5, 6)]
   } else {
     X <- cbind(cov$residential)
