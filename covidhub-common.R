@@ -423,7 +423,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
     logL0 = log(L0init + 1),
     logH0 = log(H0init + 1),
     logτ_d = log(τ_d_init),
-    logresidentialeffect = log(abs(residentialeffect_init)),
+    residentialeffect = residentialeffect_init,
     logitp_d = qlogis(p_d_init),
     logγ_d12 = log(365.25 / 10),
     logγ_d34 = log(365.25 / 10),
@@ -458,8 +458,8 @@ calc_kf_nll_r <-
     np_h <- tail(cov$p_hmap, 1)
     if (ncol(z) == 3) {
       τ_h <- exp(w[3])
-      if ("dosesiqr" %in% names(cov)){
-        doseeffect <- -exp(w[6])
+      if ("doses_scaled" %in% names(cov)){
+        doseeffect <- w[6]
         w2 <- c(w[1:2], w[4:5], w[7:length(w)])
       } else{
         w2 <- c(w[1:2], w[4:length(w)])
@@ -475,7 +475,7 @@ calc_kf_nll_r <-
     L0 <- exp(w2[1])
     H0 <- exp(w2[2])
     τ_d <- exp(w2[3])
-    residentialeffect <- -exp(w2[4])
+    residentialeffect <- w2[4]
     p_d <- plogis(w2[5])
     γ_d12 <- exp(w2[6])
     γ_d34 <- exp(w2[7])
@@ -549,9 +549,9 @@ calc_kf_nll_r <-
       }
       
       u0 <- cbind(xhat_init, PNinit)
-      if ("dosesiqr" %in% names(cov)) {
+      if ("doses_scaled" %in% names(cov)) {
         β   <-
-          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$dosesiqr[i])
+          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$doses_scaled[i])
       } else {
         β   <-
           exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i])
@@ -680,9 +680,9 @@ calc_kf_nll_r <-
           
           u0 <- cbind(xhat_init, PNinit)
           
-          if ("dosesiqr" %in% names(cov)) {
+          if ("doses_scaled" %in% names(cov)) {
             β   <-
-              exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$dosesiqr[i])
+              exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$doses_scaled[i])
           } else {
             β   <-
               exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i])

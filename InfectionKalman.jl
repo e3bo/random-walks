@@ -57,8 +57,8 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     
     if size(z, 2) == 3
         τ_h = exp(w[3])
-        if "dosesiqr" in names(cov)
-            doseeffect = - exp(w[6])
+        if "doses_scaled" in names(cov)
+            doseeffect = w[6]
             w2 = vcat(w[1:2], w[4:5], w[7:end])
         else 
             w2 = vcat(w[1:2], w[4:end])
@@ -73,7 +73,7 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     L0 = exp(w2[1])
     H0 = exp(w2[2])
     τ_d = exp(w2[3])
-    residentialeffect = -exp(w2[4])
+    residentialeffect = w2[4]
     p_d = 1 / (1 + exp(-w2[5]))
     γ_d12 = exp(w2[6])
     γ_d34 = exp(w2[7])
@@ -133,8 +133,8 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
             plast = pkk[:,:,i-1]
         end
         
-        if "dosesiqr" in names(cov)
-            β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect + cov.dosesiqr[i] * doseeffect)
+        if "doses_scaled" in names(cov)
+            β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect + cov.dose_scaled[i] * doseeffect)
         else
             β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect)
         end

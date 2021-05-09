@@ -13,14 +13,14 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   intercept <- ft$par[inds][cov$β_0map]
   
   if ("dosesiqr" %in% names(cov)){
-    X <- cbind(cov$prophomeiqr, cov$dosesiqr)
-    effects <- -exp(ft$par[c(5, 6)])
+    X <- cbind(cov$residential, cov$dosesiqr)
+    effects <- ft$par[c(5, 6)]
   } else {
-    X <- cbind(cov$prophomeiqr)
+    X <- cbind(cov$residential)
     if (no_hosps){
-      effects <- -exp(ft$par[4])
+      effects <- ft$par[4]
     } else {
-      effects <- -exp(ft$par[5])
+      effects <- ft$par[5]
     }
   }
 
@@ -32,6 +32,7 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
     xlab = "Time",
     ylab = expression(R[t])
   )
+  abline(h = 1000 / wfixed["γ"])
   if (length(effects) == 2) {
     legend(
       "top",

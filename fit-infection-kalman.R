@@ -29,23 +29,20 @@ jhu_data <- ltdat2 %>% ungroup() %>%
   rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
   select(target_end_date, time, wday, cases, deaths)
 
-mob_path <- file.path("covidcast-safegraph-home-prop",
-                      forecast_date,
-                      "epidata.csv")
-abbr <- covidcast::fips_to_abbr(paste0(forecast_loc, "000")) %>% tolower()
-mob_ts <- read_csv(
-  mob_path,
-  col_types = cols_only(
-    geo_value = col_character(),
-    time_value = col_date(),
-    value = col_double()
-  )
-) %>%
-  filter(geo_value == abbr) %>%
-  select(time_value, value) %>%
-  rename(target_end_date = time_value,
-         prophome = value)
+if (forecast_date <= "2021-05-06"){
+  mob1 <- load_google_mobility("2021-05-06") %>% 
+    filter(date < lubridate::ymd(forecast_date) - lubridate::ddays(4))
+} else {
+  stop("Loading mobility date not implemented for forecast dates beyond 2021-05-06")
+}
 
+
+statename <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
+mob_ts <- mob1 %>% filter(sub_region_1 == statename) %>%
+  select(date, residential_percent_change_from_baseline) %>%
+  rename(target_end_date = date,
+         residential_pcb = residential_percent_change_from_baseline)
+  
 if (forecast_date > "2020-11-15") {
   healthd <-
     file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
@@ -80,7 +77,7 @@ if (forecast_date > "2020-11-15") {
   
   obs_data0 <-
     left_join(jhu_data, mob_ts, by = "target_end_date") %>%
-    mutate(prophome = zoo::na.fill(prophome, "extend")) %>%
+    mutate(residential_pcb = zoo::na.fill(residential_pcb, "extend")) %>%
     left_join(tdat3, by = "target_end_date")
   
   vacc_path <- file.path("hopkins-vaccine",
@@ -115,7 +112,7 @@ if (forecast_date > "2020-11-15") {
   }
 } else {
   obs_data <- left_join(jhu_data, mob_ts, by = "target_end_date") %>%
-    mutate(prophome = zoo::na.fill(prophome, "extend"))
+    mutate(residential_pcb = zoo::na.fill(residential_pcb, "extend"))
 }
 
 wind <- obs_data %>% filter(target_end_date >= "2020-03-02")
@@ -144,24 +141,20 @@ if (forecast_date > "2020-11-15") {
 }
 
 if("doses" %in% names(wind)) {
-  x0 <- wind %>% select(target_end_date, time, wday, prophome, doses) %>%
+  x0 <- wind %>% select(target_end_date, time, wday, residential_pcb, doses) %>%
     mutate(doses = zoo::na.approx(doses, rule = 2))
-  sel <- x0$doses > 0 
-  x0$dosesiqr <-
-    (x0$doses - mean(x0$doses)) / diff(quantile(x0$doses[sel], c(.25, .75)))
+  x0$doses_scaled <- x0$doses / wfixed["N"]
 } else {
-  x0 <- wind %>% select(target_end_date, time, wday, prophome)
+  x0 <- wind %>% select(target_end_date, time, wday, residential_pcb)
 }
-
-x0$prophomeiqr <-
-  (x0$prophome - mean(x0$prophome)) / diff(quantile(x0$prophome, c(.25, .75)))
+x0$residential <- x0$residential_pcb / 100
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
 if (ncol(z) == 3){
- # hwsize <- wsize - sum(is.na(z$hospitalizations))
-#  x0$p_hmap <- c(rep(1L, wsize - hwsize), rep(seq_len(ceiling(hwsize / 28)), each = 28)) %>% head(wsize) %>% as.integer()
-  x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer() 
+  hwsize <- wsize - sum(is.na(z$hospitalizations))
+  x0$p_hmap <- c(rep(1L, wsize - hwsize), rep(seq_len(ceiling(hwsize / 28)), each = 28)) %>% head(wsize) %>% as.integer()
+  #x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer() 
 } else {
   x0$p_hmap <- 1L
 }
@@ -266,12 +259,14 @@ if (forecast_date_start == forecast_date) {
 }
 
 ## fitting
-iter1 <- 20
-β_0sd <- 0.1
+if (forecast_date == forecast_start_date){
+  iter1 <- 1000
+} else {
+  iter1 <- 60
+}
+β_0sd <- 0.05
 τ_csd <- 0.05
-p_hsd <- 0.5
-
-#wnew <- c(winit[1:4], winit[6:(11 + 11 -1)], rep(winit[5], 11), winit[(11 + 11):(length(winit))])
+p_hsd <- 0.1
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
@@ -281,7 +276,7 @@ fit1 <- lbfgs::lbfgs(
   p_hsd = p_hsd,
   β_0sd = β_0sd,
   τ_csd = τ_csd, 
-  epsilon = 1e-3,
+  epsilon = 1e-2,
   max_iterations = iter1,
   z = z,
   winit,
@@ -290,7 +285,6 @@ fit1 <- lbfgs::lbfgs(
 )
 tt1 <- tictoc::toc()
 
-if(FALSE){
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(
   w = fit1$par,
@@ -302,9 +296,7 @@ h1 <- calc_kf_hess(
   wfixed = wfixed
 )
 tictoc::toc()
-} else{
-  h1 <- diag(nrow = length(winit))
-}
+
 ## Save outputs
 
 fit_dir <-
@@ -332,6 +324,8 @@ dets1 <-
     wfixed = wfixed,
     just_nll = FALSE
   )
+stopifnot(isTRUE(all.equal(dets1$nll[1,1], fit1$value)))
+
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(z, 2, diff)), na.rm = TRUE)
 naive_error_weekly <- colMeans(abs(z[-c(1:7),] - z[-((nrow(z) - 6):nrow(z)),]), na.rm = TRUE)
