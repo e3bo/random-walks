@@ -134,9 +134,12 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
         end
         
         if "dosesiqr" in names(cov)
-            β = exp(β_0[cov.β_0map[i]] + cov.residential_iqr[i] * residentialeffect + cov.dosesiqr[i] * doseeffect)
+            β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect + cov.dosesiqr[i] * doseeffect)
         else
-            β = exp(β_0[cov.β_0map[i]] + cov.residential_iqr[i] * residentialeffect)            
+            β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect)
+        end
+        if β > 1000
+            β = 1000
         end
         for zv in zerovars
             xlast[zv] = 0

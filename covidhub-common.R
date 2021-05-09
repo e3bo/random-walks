@@ -410,10 +410,10 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   β[(lf - m + 1):lf] <- β[lf - m]
   β2 <- c(β, rep(β[lf - m], l))
   
-  df <- data.frame(logβ = log(β2), residential_iqr = x$residential_iqr)
-  mod <- lm(logβ ~ residential_iqr, data = df)
+  df <- data.frame(logβ = log(β2), residential = x$residential)
+  mod <- lm(logβ ~ residential, data = df)
   print(summary(mod))
-  residentialeffect_init <- coef(mod)["residential_iqr"] %>% unname()
+  residentialeffect_init <- coef(mod)["residential"] %>% unname()
   intercept_init <- coef(mod)["(Intercept)"] + residuals(mod)
   intercept_split <- split(intercept_init, x$β_0map)
   β_0 <- sapply(intercept_split, mean)
@@ -551,12 +551,14 @@ calc_kf_nll_r <-
       u0 <- cbind(xhat_init, PNinit)
       if ("dosesiqr" %in% names(cov)) {
         β   <-
-          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential_iqr[i] + doseeffect * cov$dosesiqr[i])
+          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$dosesiqr[i])
       } else {
         β   <-
-          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential_iqr[i])
+          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i])
       }
-      
+      if(β > 1000){
+        β <- 1000
+      }
       par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[i]], p_d, cov$ρ[i])
       if (cov$wday[i] == 1) {
         par[5] <-  γ_d12
@@ -678,9 +680,16 @@ calc_kf_nll_r <-
           
           u0 <- cbind(xhat_init, PNinit)
           
-          β  <-
-            exp(β_0[cov$β_0map[nobs]] + prophomeeffect * cov$prophomeiqr[nobs])
-          
+          if ("dosesiqr" %in% names(cov)) {
+            β   <-
+              exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$dosesiqr[i])
+          } else {
+            β   <-
+              exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i])
+          }
+          if(β > 1000){
+            β <- 1000
+          }
           par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h, p_d, cov$ρ[i])
           if (cov$wday[i] %in% c(1, 2)) {
             par[5] <-  γ_d12
