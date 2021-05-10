@@ -3,48 +3,48 @@ stages:
   fit-2020-10-12-06:
     cmd: fdtstart=2020-10-05 fdt=2020-10-12 loc=06 Rscript fit-infection-kalman.R
     deps:
-    - path: covidcast-safegraph-home-prop/2020-10-12
-      md5: 85275e5efc3a19878e769ef3c9d862ac.dir
-      size: 3610943
-      nfiles: 1
     - path: covidhub-common.R
-      md5: 1d638eae7602abea1a3ed576527b9641
-      size: 21163
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fit-infection-kalman.R
-      md5: 24a9a684bb28e442f00cef8f1dbf6909
-      size: 11355
+      md5: 21898bf11483f0ced66023c437ac89f8
+      size: 11358
     - path: fits/2020-10-05-fips06/fit.RData
-      md5: a5a46b7c24f55e0527e71073499ede33
-      size: 21426
+      md5: 70d75906b2708e7266dd84363bc2866a
+      size: 18837
+    - path: google-mobility-reports/2021-05-06
+      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
+      size: 114473434
+      nfiles: 2
     - path: hopkins/2020-10-12
       md5: 7461af20726cac0df8ae8c4de261608c.dir
       size: 6162886
       nfiles: 8
     outs:
     - path: fits/2020-10-12-fips06/fit-metrics.json
-      md5: 27822fc97755428c1f7c35af0d72c6d4
-      size: 362
+      md5: b23ea4673007b6822b85f031a84052c0
+      size: 359
     - path: fits/2020-10-12-fips06/fit.RData
-      md5: 2104c94807ef8ff56e0d464488caea3f
-      size: 22200
+      md5: f0374702012a15ddd366cab4d85972b2
+      size: 19444
   forecast-2020-10-12-06:
     cmd: fdt=2020-10-12 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 1d638eae7602abea1a3ed576527b9641
-      size: 21163
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fits/2020-10-12-fips06/fit.RData
-      md5: 2104c94807ef8ff56e0d464488caea3f
-      size: 22200
+      md5: f0374702012a15ddd366cab4d85972b2
+      size: 19444
     - path: write-formatted-forecast.R
-      md5: 0ecfad90df99ac142e75393cbd7f826c
-      size: 12384
+      md5: 1a09232ac08aa884835fa788a2c2281d
+      size: 12557
     outs:
     - path: forecasts/2020-10-12-fips06
-      md5: dd23cd08aa1ef5fc07ca837d74f72111.dir
-      size: 53042
+      md5: 701714ed87bf08e8d793e263822fd89b.dir
+      size: 53682
       nfiles: 1
     - path: plots/2020-10-12-fips06
-      md5: d7c87e19428fcb7465fa250a1d3b16b6.dir
-      size: 1261346
+      md5: fdff8d0d72ee3ee35b7f5668cee599f1.dir
+      size: 1319533
       nfiles: 8

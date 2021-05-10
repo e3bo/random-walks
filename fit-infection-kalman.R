@@ -259,7 +259,7 @@ if (forecast_date_start == forecast_date) {
 }
 
 ## fitting
-if (forecast_date == forecast_start_date){
+if (forecast_date == forecast_date_start){
   iter1 <- 1000
 } else {
   iter1 <- 60

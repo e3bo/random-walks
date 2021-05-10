@@ -4,47 +4,47 @@ stages:
     cmd: fdt=2020-07-20 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 6deb3e3b0884e55cbb23dbe6424c99bc
-      size: 21153
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fits/2020-07-20-fips06/fit.RData
-      md5: 879ea074e379d10af432b7095a36d129
-      size: 12304
+      md5: 4688b3205b3e8120c94ad5bd1e09ca57
+      size: 10516
     - path: write-formatted-forecast.R
-      md5: 0ecfad90df99ac142e75393cbd7f826c
-      size: 12384
+      md5: 1a09232ac08aa884835fa788a2c2281d
+      size: 12557
     outs:
     - path: forecasts/2020-07-20-fips06
-      md5: 678755d7f8f0bc249164693dae608710.dir
+      md5: d1b5ee33e0f40ecfbbc273ce8ff66f8c.dir
       size: 52882
       nfiles: 1
     - path: plots/2020-07-20-fips06
-      md5: 98b0e78f9c721d81f0e265c5c87c77cf.dir
-      size: 1325646
+      md5: 481d2c1a14b0a592bdc8d1da5dbf06db.dir
+      size: 1449887
       nfiles: 8
   fit-2020-07-20-06:
     cmd: fdtstart=2020-07-13 fdt=2020-07-20 loc=06 Rscript fit-infection-kalman.R
     deps:
-    - path: covidcast-safegraph-home-prop/2020-07-20
-      md5: e9c2dc6e132cc1d328b6c2f97f939917.dir
-      size: 3134650
-      nfiles: 1
     - path: covidhub-common.R
-      md5: 6deb3e3b0884e55cbb23dbe6424c99bc
-      size: 21153
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fit-infection-kalman.R
-      md5: 311b563582acebd951574a290ce42e7d
-      size: 11351
+      md5: 21898bf11483f0ced66023c437ac89f8
+      size: 11358
     - path: fits/2020-07-13-fips06/fit.RData
-      md5: 301f401228cbec3fa9412db07c7d4bea
-      size: 11699
+      md5: f4f286046bd71184545d3d0ac18e7d2a
+      size: 10318
+    - path: google-mobility-reports/2021-05-06
+      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
+      size: 114473434
+      nfiles: 2
     - path: hopkins/2020-07-20
       md5: 4ff83c91ad38609ebf9cc86fadaea528.dir
       size: 4049279
       nfiles: 8
     outs:
     - path: fits/2020-07-20-fips06/fit-metrics.json
-      md5: f442e37d9832d2b557d78ada3a8fa071
-      size: 362
+      md5: 2072f827732fca868aeb5aea1344fb18
+      size: 363
     - path: fits/2020-07-20-fips06/fit.RData
-      md5: 879ea074e379d10af432b7095a36d129
-      size: 12304
+      md5: 4688b3205b3e8120c94ad5bd1e09ca57
+      size: 10516

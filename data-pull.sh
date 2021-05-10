@@ -6,13 +6,6 @@ fdt="${fdt:-2021-03-29}"
 locs=("06")
 
 dvc run \
-    -d pull-safegraph-ts-from-date.R \
-    -o covidcast-safegraph-home-prop/$fdt \
-    -n safegraph-hp-$fdt \
-    --force \
-    fdt=$fdt ./pull-safegraph-ts-from-date.R
-
-dvc run \
     -d pull-hopkins-ts-from-date.R \
     -o hopkins/$fdt \
     -n hopkins-$fdt \

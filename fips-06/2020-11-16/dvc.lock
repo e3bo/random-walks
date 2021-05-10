@@ -4,47 +4,47 @@ stages:
     cmd: fdt=2020-11-16 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 1d638eae7602abea1a3ed576527b9641
-      size: 21163
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fits/2020-11-16-fips06/fit.RData
-      md5: 0dfd5acdf32ebe6ce3ce9bbcbbaabfd8
-      size: 36154
+      md5: e7b1c28f455638a836e45e8c581df117
+      size: 28165
     - path: write-formatted-forecast.R
-      md5: 0ecfad90df99ac142e75393cbd7f826c
-      size: 12384
+      md5: 1a09232ac08aa884835fa788a2c2281d
+      size: 12557
     outs:
     - path: forecasts/2020-11-16-fips06
-      md5: d0a7d14a936fb8ece4bd4facf2e3ec1d.dir
-      size: 52370
+      md5: cfa43594fbfab9d70c8de95ef25e64f0.dir
+      size: 53170
       nfiles: 1
     - path: plots/2020-11-16-fips06
-      md5: e011b7ae0abae07097c9bf86ac521966.dir
-      size: 1353110
+      md5: f9ce4a7259d85cb4cfcea04d32141fc2.dir
+      size: 1459096
       nfiles: 8
   fit-2020-11-16-06:
     cmd: fdtstart=2020-11-09 fdt=2020-11-16 loc=06 Rscript fit-infection-kalman.R
     deps:
-    - path: covidcast-safegraph-home-prop/2020-11-16
-      md5: 7607a181196cbf29cea5b11fe61b72e6.dir
-      size: 3792683
-      nfiles: 1
     - path: covidhub-common.R
-      md5: 1d638eae7602abea1a3ed576527b9641
-      size: 21163
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fit-infection-kalman.R
-      md5: 44a1067c4709d447d50fe3f52be59e0f
-      size: 10954
+      md5: 21898bf11483f0ced66023c437ac89f8
+      size: 11358
     - path: fits/2020-11-09-fips06/fit.RData
-      md5: 36e59fbcdf7c46e3011e78088e0f0db2
-      size: 26144
+      md5: ee797176f6a1f4a072d66504421f978d
+      size: 22981
+    - path: google-mobility-reports/2021-05-06
+      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
+      size: 114473434
+      nfiles: 2
     - path: hopkins/2020-11-16
       md5: 430a878537d60ab53d4c3a1a4d6cd23c.dir
       size: 7073622
       nfiles: 8
     outs:
     - path: fits/2020-11-16-fips06/fit-metrics.json
-      md5: 9d0eeab7b824e8aa962d4a0e262ccfe4
-      size: 369
+      md5: a60b66c0d3657e04e21831cdb224a149
+      size: 367
     - path: fits/2020-11-16-fips06/fit.RData
-      md5: 0dfd5acdf32ebe6ce3ce9bbcbbaabfd8
-      size: 36154
+      md5: e7b1c28f455638a836e45e8c581df117
+      size: 28165

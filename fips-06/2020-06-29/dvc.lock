@@ -3,45 +3,45 @@ stages:
   fit-2020-06-29-06:
     cmd: fdtstart=2020-06-29 fdt=2020-06-29 loc=06 Rscript fit-infection-kalman.R
     deps:
-    - path: covidcast-safegraph-home-prop/2020-06-29
-      md5: 1c4f3cca26587dfd86df6d0493bacdb1.dir
-      size: 3008141
-      nfiles: 1
     - path: covidhub-common.R
-      md5: 6deb3e3b0884e55cbb23dbe6424c99bc
-      size: 21153
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fit-infection-kalman.R
-      md5: 311b563582acebd951574a290ce42e7d
-      size: 11351
+      md5: 21898bf11483f0ced66023c437ac89f8
+      size: 11358
+    - path: google-mobility-reports/2021-05-06
+      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
+      size: 114473434
+      nfiles: 2
     - path: hopkins/2020-06-29
       md5: 0778252e585b9da630aa43f1f2af7262.dir
       size: 3510852
       nfiles: 8
     outs:
     - path: fits/2020-06-29-fips06/fit-metrics.json
-      md5: 96738a00624ca8ad1beaf525a00c16e7
-      size: 363
+      md5: d64facabc2c0d6216d39bed82cdb25f1
+      size: 359
     - path: fits/2020-06-29-fips06/fit.RData
-      md5: ea6bfd6c482ca3a8928f5fb33b77002e
-      size: 10385
+      md5: f609bb54e6dd0298d027b88e98c983df
+      size: 9050
   forecast-2020-06-29-06:
     cmd: fdt=2020-06-29 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 6deb3e3b0884e55cbb23dbe6424c99bc
-      size: 21153
+      md5: 34da1edc9c62acb19a2a1557fa6f403d
+      size: 22662
     - path: fits/2020-06-29-fips06/fit.RData
-      md5: ea6bfd6c482ca3a8928f5fb33b77002e
-      size: 10385
+      md5: f609bb54e6dd0298d027b88e98c983df
+      size: 9050
     - path: write-formatted-forecast.R
-      md5: 0ecfad90df99ac142e75393cbd7f826c
-      size: 12384
+      md5: 1a09232ac08aa884835fa788a2c2281d
+      size: 12557
     outs:
     - path: forecasts/2020-06-29-fips06
-      md5: 02d30d9658e3e5ea38cd3c8720dfa7d2.dir
-      size: 52978
+      md5: e8179c5d7fb392e329315da62db5faea.dir
+      size: 52946
       nfiles: 1
     - path: plots/2020-06-29-fips06
-      md5: 3e3dbffffe5361a41f71c49569a4f06b.dir
-      size: 1551872
+      md5: a22b58ddd4ea635e746be380b9edd880.dir
+      size: 1481785
       nfiles: 8

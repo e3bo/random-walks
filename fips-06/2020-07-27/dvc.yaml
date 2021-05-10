@@ -13,10 +13,10 @@ stages:
     cmd: fdtstart=2020-07-20 fdt=2020-07-27 loc=06 Rscript fit-infection-kalman.R
     wdir: ../..
     deps:
-    - covidcast-safegraph-home-prop/2020-07-27
     - covidhub-common.R
     - fit-infection-kalman.R
     - fits/2020-07-20-fips06/fit.RData
+    - google-mobility-reports/2021-05-06
     - hopkins/2020-07-27
     outs:
     - fits/2020-07-27-fips06/fit.RData

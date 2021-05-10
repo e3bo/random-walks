@@ -17,7 +17,7 @@ if [ ${fdtstart} == ${fdt} ]; then
       -d fit-infection-kalman.R \
       -d covidhub-common.R \
       -d hopkins/$fdt \
-      -d covidcast-safegraph-home-prop/${fdt} \
+      -d google-mobility-reports/2021-05-06 \
       -o fits/${fdt}-fips${loc}/fit.RData \
       -M fits/${fdt}-fips${loc}/fit-metrics.json \
       --force \
@@ -29,7 +29,7 @@ else
       -d fit-infection-kalman.R \
       -d covidhub-common.R \
       -d hopkins/$fdt \
-      -d covidcast-safegraph-home-prop/${fdt} \
+      -d google-mobility-reports/2021-05-06 \
       -d fits/${fdtstart}-fips${loc}/fit.RData \
       -o fits/${fdt}-fips${loc}/fit.RData \
       -M fits/${fdt}-fips${loc}/fit-metrics.json \
