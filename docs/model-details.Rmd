@@ -1,5 +1,6 @@
 ---
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 header-includes: \usepackage{amsmath}
@@ -108,17 +109,21 @@ To quantify social distancing, we use indicators of aggregate behavior available
 
 These indicators are expressed as change from a baseline. A value of 0% indicates no change relative to the median value of the indicator from January 3 through February 6, 2020.
 
-The indicator of the duration of time spend in residential areas in California is shown below.
+The rolling weekly average of the indicator of the duration of time spend in residential areas in California is shown below. 
+We apply a rolling average because we do not attempt to model day-of-the-week effects of mobility on the transmission rate, and the original values of the metric are lowest on weekends due to the baseline being higher on weekends. 
+
 
 ```{r covariate, fig.height=3, fig.width=7, eval = TRUE}
 
 sel_states <- forecast_locs %>% paste0("000") %>% covidcast::fips_to_name()
 
 mob <- load_google_mobility("2021-05-06", rootdir = "..") %>%
-  filter(sub_region_1 %in% sel_states)
+  filter(sub_region_1 %in% sel_states) %>% group_by(sub_region_1) %>%
+  mutate(rollmean = zoo::rollmean(residential_percent_change_from_baseline / 100, k = 7, fill = NA)) %>% 
+  mutate(residential = zoo::na.approx(rollmean, rule = 2))
 
 mob %>% 
-  ggplot(aes(x = date, y = residential_percent_change_from_baseline)) + 
+  ggplot(aes(x = date, y = residential)) + 
   geom_line() + facet_wrap(~sub_region_1) + 
   labs(y = "Percent increase in time spent\nin residential areas", x = "Date")
 
@@ -136,9 +141,13 @@ We consider three possible futures scenarios. Our scenarios are all driven by ch
 Our model includes a latent trend in transmission to account for all other factors that make transmission rate vary over time.
 When projecting into the future, we use the most recent value of the fitted latent trend and use the naive forecast that it will stay the same in the next 6 weeks.
 
-1. **Increasing social distancing.** Social distancing increases, reducing movements from the current observed level to 30% of normal, which is the reduction observed in New York City that enabled transmission to decline there. Social distancing has the impact of reducing transmission rate. Thus, it is possible that other measures -- such as wide-spread, consistent wearing of face masks -- could achieve the same or similar level of transmission reduction that we model as an affect of social distancing.
+1. **Increasing social distancing.** Social distancing increases, increasing the current observed percent change from baseline to 30%, which is roughly the value of the metric in New York City at the time when the first wave of infection began to dissipate. 
+Social distancing has the impact of reducing transmission rate. Thus, it is possible that other measures -- such as wide-spread, consistent wearing of face masks -- could achieve the same or similar level of transmission reduction that we model as an affect of social distancing.
 
-2. **Maintain social distancing.** Social distancing continues at the last observed level of human movement patterns and the epidemic trajectory continues to follow it's most recent path, which is also influenced by the latent trend. Our model captures current increases in case/death reports by allowing transmission rate to increase either due to mobility or the fitted latent trend. Thus, even if mobility remains constant, the most recent increase in transmission causes the trajectory to increase in many cases. As during the beginning of the epidemic, such exponential growth can, and likely will be, averted by increase vigilance through social distancing and other practices that reduce transmission.
+2. **Maintain social distancing.** Social distancing continues at the last observed level of human movement patterns and the epidemic trajectory continues to follow it's most recent path, which is also influenced by the latent trend. 
+Our model captures current increases in case/death reports by allowing transmission rate to increase either due to mobility or the fitted latent trend. 
+Thus, even if mobility remains constant, the most recent increase in transmission causes the trajectory to increase in many cases. 
+As during the beginning of the epidemic, such exponential growth can, and likely will be, averted by increase vigilance through social distancing and other practices that reduce transmission.
 
 4. **Return to normal.** Social distancing returns to a level of human movement equivalent to baseline. 
 
@@ -149,39 +158,43 @@ Key features of this model include:
 
 * Stochastic transmission process with a realistic level of **random variation**.
 * Realistic distributions of **presymptomatic and symptomatic periods**.
-* Different **transmission rates for asymptomatic, presymptomatic, and symptomatic individuals**.[^1]
-* Time varying **rates of case detection, isolation, and case notification**.  
-* Time varying **mortality**.  
+* Time varying **rates of case detection"
+* Day-of-the week effects on reporting of cases and deaths.  
+* Time varying **probability of a case being hospitalized**.  
 * Accounting for the effect on transmission of **human mobility** (i.e., **social distancing**), as measured by data.
 * A "latent" process that captures the effect of **environmental factors and other behaviors** that can reduce transmission but are difficult to quantify with data (e.g., hand washing or face masks).
-* Realistic intervention scenarios (e.g. improving case detection, faster testing).
 
-The model comprises susceptible, presymptomatic, asymptomatic, symptomatic, diagnosed, hospitalized, deceased, and recovered persons. 
+The model comprises susceptible, presymptomatic, infectious, diagnosed, hospitalized and deceased persons. 
 The following compartments are included:  
 
-* $\boldsymbol{S}$ - Uninfected and *susceptible* individuals. Susceptible individuals can become infected by individuals in the $L$, $I_a$, $I_{su}$, $I_{sd}$, $C$, and $H$ stages. Rates of transmission from these stages can be adjusted individually.
-* $\boldsymbol{L}$ - Individuals with *latent* infections who do not yet show symptoms. Those individuals can be infectious. At the end of the $L$ stage, a fraction moves into the $I_a$ stage, another fraction moves into the $I_{su}$ stage, and the remainder into the $I_{sd}$ stage.
-* $\boldsymbol{I_a}$ - Individuals who are *infected* and *asymptomatic*. Those individuals are likely infectious, but the model allows to adjust this.
-* $\boldsymbol{I_{su}}$ - Individuals who are *infected* and *symptomatic*, but are *undetected*. Those individuals are likely infectious. Individuals in this compartment never get diagnosed, and are assumed to recover.
-* $\boldsymbol{I_{sd}}$ - Individuals who are *infected* and *symptomatic*, and are *detected*. Those individuals are likely infectious. Individuals in this compartment will be diagnosed and move to $C$.
-* $\boldsymbol{C}$ - Individuals who have been diagnosed as *cases*. Those individuals are likely isolated and not infectious, but the model allows to adjust this. A fraction of individuals in the $C$ stage will naturally recover, without the need for hospitalization. The remainder moves into the $H$ stage.
-* $\boldsymbol{H}$ - Individuals who have been *hospitalized*. Those individuals are likely isolated and not infectious, but the model allows to adjust this. A fraction of individuals in the $H$ stage will recover, the remainder will die.
-* $\boldsymbol{R}$ - *Recovered/removed* individuals. Those individuals have recovered and are immune. 
-* $\boldsymbol{D}$ - Individuals who *died* from the infection. 
+* $\boldsymbol{X}$ - Uninfected and *susceptible* individuals. Susceptible individuals can become infected by individuals in the $Y$ compartment.
+* $\boldsymbol{L}$ - Individuals with *latent* infections who are not yet infectious. At the end of the $L$ stage, these individual progress to the $Y$ stage.
+* $\boldsymbol{Y}$ - Individuals who are *infectious*. This compartment includes both symptomatic and asymptomatic individuals. 
+* $\boldsymbol{Z}$ - Individuals who have been diagnosed and will be reported as *cases*, but have not yet been reported. Those individuals are likely isolated and so are not infectious in our model. This compartment includes a count for the fraction of infectious individuals who recover without hospitalization, and it includes all infectious individuals who enter the hospitalized class.
+* $\boldsymbol{Z_r}$ - This compartment keeps track of the number of cases reported each day, which we can compare with official reports.
+* $\boldsymbol{H}$ - Individuals who have been *hospitalized*. Those individuals are modeled as not infectious due to isolation. A fraction of individuals in the $H$ stage will recover, the remainder will die.
+* $\boldsymbol{A}$ - *Admissions*. This compartment keeps track of the number of new hospitalized individuals each day, which we can compare with reported hospital admissions.
+* $\boldsymbol{D}$ - Individuals who have *died* from the infection, but whose death has not yet been reported.
+* $\boldsymbol{D_r}$ - The number of newly reported deaths each day.
 
-To allow more realistic distributions of movement through compartments, several of these compartments are internally split into multiple stages using the *linear chain trick*.[^2]
 
-* $\boldsymbol{L}$ - 4 compartments
-* $\boldsymbol{I_a}$ - 4 compartments 
-* $\boldsymbol{I_{su}}$ - 4 compartments
-* $\boldsymbol{I_{sd}}$ - 4 compartments
-* $\boldsymbol{C}$ - 4 compartments
-* $\boldsymbol{H}$ - 4 compartments
+The system of ordinary differential equations for the expected value of state variables in this model shown is:
+\begin{align*}
+\frac{dX(t)}{dt} =&  - \frac{\beta X\left( t \right) Y\left( t \right)}{N} \\
+\frac{dY(t)}{dt} =& \eta L\left( t \right) - p_{h} \gamma Y\left( t \right) - \gamma \rho Y\left( t \right) \left( 1 - p_{h} \right) - \gamma Y\left( t \right) \left( 1 - p_{h} \right) \left( 1 - \rho \right) \\
+\frac{dL(t)}{dt} =&  - \eta L\left( t \right) + \frac{\beta X\left( t \right) Y\left( t \right)}{N} \\
+\frac{dZ(t)}{dt} =& p_{h} \gamma Y\left( t \right) - \gamma_{z} Z\left( t \right) + \gamma \rho Y\left( t \right) \left( 1 - p_{h} \right) \\
+\frac{dZ_{r(t)}}{dt} =& \gamma_{z} Z\left( t \right) \\
+\frac{dH(t)}{dt} =& p_{h} \gamma Y\left( t \right) - p_{d} \gamma_{h} H\left( t \right) - \gamma_{h} H\left( t \right) \left( 1 - p_{d} \right) \\
+\frac{dA(t)}{dt} =& p_{h} \gamma Y\left( t \right) \\
+\frac{dD(t)}{dt} =& p_{d} \gamma_{h} H\left( t \right) - \gamma_{d} D\left( t \right) \\
+\frac{dD_{r(t)}}{dt} =& \gamma_{d} D\left( t \right)
+\end{align*}
 
-The flow diagram for this model shown below.
 
+A diagram of the individual level reactions of our model is:
 ```{r pomp-model}
-knitr::include_graphics(here::here("docs",'pomp-model.png'))
+knitr::include_graphics(here::here("docs",'model2.png'))
 ```
 
 #### Interventions
@@ -206,17 +219,7 @@ These results have not been peer-reviewed, but have been prepared to a professio
 
 
 
-[^1]:[Delphi Epidata API](David C. Farrow, Logan C. Brooks, Aaron Rumack, Ryan J. Tibshirani, Roni Rosenfeld (2015). Delphi Epidata API. https://github.com/cmu-delphi/delphi-epidata)
+[^1]:[Delphi Epidata API David C. Farrow, Logan C. Brooks, Aaron Rumack, Ryan J. Tibshirani, Roni Rosenfeld (2015). Delphi Epidata API.](https://github.com/cmu-delphi/delphi-epidata)
 
-[^2]: [Google COVID-19 Community Mobility Reports]. (Google LLC https://www.google.com/covid19/mobility/ Accessed: 2021-05-06.)
-
-
-
-[^3]:[Rong et al. 2020](https://wwwnc.cdc.gov/eid/article/26/5/20-0198_article?deliveryName=DM20712), [Du et al. 2020](https://www.medrxiv.org/content/10.1101/2020.02.19.20025452v3)
-
-[^4]:[Hurtado & Kirosingh 2019](https://link.springer.com/article/10.1007/s00285-019-01412-w)
-
-[^5]:[Ionides et al. 2006](https://www.pnas.org/content/103/49/18438)
-
-
+[^2]:[Google COVID-19 Community Mobility Reports.  Google LLC. Accessed: 2021-05-06.](https://www.google.com/covid19/mobility/ )
 
