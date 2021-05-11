@@ -25,13 +25,13 @@ To better understand the potential range of epidemic outcomes in the U.S.A., we 
 
 Fitted data on incident case and death reports for each state in the U.S.A. were collated by the <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University"</a>.
 Fitted data on hospital admissions were provided by the U.S. Department of Health & Human Services (HHS), which we accessed via the Delphi Epidata API [^1]. 
-We show a subset of the state-level data here for Georgia, New York, Washington, and Wyoming.
+We show the state-level data here for California.
 
 
 ```{r read-data, fig.width=7}
 
-forecast_date <- Sys.getenv("fdt", unset = "2020-11-16")
-forecast_locs <- c("13", "36", "53", "56") 
+forecast_date <- Sys.getenv("fdt", unset = "2021-04-12")
+forecast_locs <- c("06") 
 
 hopdir <- file.path("../hopkins", forecast_date)
 tdat <- load_hopkins(hopdir, weekly = FALSE)
@@ -108,7 +108,7 @@ To quantify social distancing, we use indicators of aggregate behavior available
 
 These indicators are expressed as change from a baseline. A value of 0% indicates no change relative to the median value of the indicator from January 3 through February 6, 2020.
 
-The indicator of the duration of time spend in residential areas in our 4 focal states is shown below.
+The indicator of the duration of time spend in residential areas in California is shown below.
 
 ```{r covariate, fig.height=3, fig.width=7, eval = TRUE}
 
@@ -120,7 +120,7 @@ mob <- load_google_mobility("2021-05-06", rootdir = "..") %>%
 mob %>% 
   ggplot(aes(x = date, y = residential_percent_change_from_baseline)) + 
   geom_line() + facet_wrap(~sub_region_1) + 
-  labs(y = "Time spent in residential areas", x = "Date")
+  labs(y = "Percent increase in time spent\nin residential areas", x = "Date")
 
 ```
 
@@ -134,8 +134,7 @@ The model is fit to data on reported cases, hospitalizations, and deaths availab
 
 We consider three possible futures scenarios. Our scenarios are all driven by changes in human mobility: increasing human mobility increases transmission rate, while decreasing mobility decreases transmission rate.
 Our model includes a latent trend in transmission to account for all other factors that make transmission rate vary over time.
-When projecting into the future, we extract the fitted latent trend effect over the last 30 days and then take the mean over the first 20 days of that 30 day period.
-We ignore the last 10 days to avoid undue influence of the latent trend as it adapts to fit the most recent data.
+When projecting into the future, we use the most recent value of the fitted latent trend and use the naive forecast that it will stay the same in the next 6 weeks.
 
 1. **Increasing social distancing.** Social distancing increases, reducing movements from the current observed level to 30% of normal, which is the reduction observed in New York City that enabled transmission to decline there. Social distancing has the impact of reducing transmission rate. Thus, it is possible that other measures -- such as wide-spread, consistent wearing of face masks -- could achieve the same or similar level of transmission reduction that we model as an affect of social distancing.
 

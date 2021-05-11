@@ -56,14 +56,14 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     np_h = cov.p_hmap[end]
     
     if size(z, 2) == 3
-        τ_h = exp(w[3])
+        τ_h = exp(w[2])
         if "doses_scaled" in names(cov)
-            doseeffect = w[6]
-            w2 = vcat(w[1:2], w[4:5], w[7:end])
+            doseeffect = w[5]
+            w2 = vcat(w[1], w[3:4], w[6:end])
         else 
-            w2 = vcat(w[1:2], w[4:end])
+            w2 = vcat(w[1], w[3:end])
         end
-        p_h = [1 / (1 + exp(-p)) for p in w2[(9 + nτ_c):(9 + nτ_c + np_h - 1)]]
+        p_h = [1 / (1 + exp(-p)) for p in w2[(8 + nτ_c):(8 + nτ_c + np_h - 1)]]
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
         np_h = 0
         w2 = w
@@ -71,21 +71,22 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     end
     
     L0 = exp(w2[1])
-    H0 = exp(w2[2])
-    τ_d = exp(w2[3])
-    residentialeffect = w2[4]
-    p_d = 1 / (1 + exp(-w2[5]))
-    γ_d12 = exp(w2[6])
-    γ_d34 = exp(w2[7])
-    γ_z17 = exp(w2[8])
+    τ_d = exp(w2[2])
+    residentialeffect = w2[3]
+    p_d = 1 / (1 + exp(-w2[4]))
+    γ_d12 = exp(w2[5])
+    γ_d34 = exp(w2[6])
+    γ_z17 = exp(w2[7])
     
-    τ_c = [exp(p) for p in w2[9:(9 + nτ_c - 1)]]
-    β_0 = w2[(9 + nτ_c + np_h):end]
+    τ_c = [exp(p) for p in w2[8:(8 + nτ_c - 1)]]
+    β_0 = w2[(8 + nτ_c + np_h):end]
 
     zloc = Matrix(select(zloc, :cases, :hospitalizations, :deaths)) # ensure assumed column order
     
-    D0 = H0 * γ_h / γ_d * p_d
     Y0 = L0 * η / γ
+    H0 = p_h[1] * γ * Y0 / γ_h
+    D0 = H0 * γ_h / γ_d * p_d
+
     x0 = [         max(N - L0 - Y0 - H0 - D0, N * 0.1) #X
                                             min(Y0, N) #Y
                                             min(L0, N) #L

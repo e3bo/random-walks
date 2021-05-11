@@ -147,7 +147,9 @@ if("doses" %in% names(wind)) {
 } else {
   x0 <- wind %>% select(target_end_date, time, wday, residential_pcb)
 }
-x0$residential <- x0$residential_pcb / 100
+x0$residential <- zoo::rollmean(x0$residential_pcb / 100, k = 7, fill = NA) %>% 
+  zoo::na.approx(rule = 2)
+  
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
@@ -224,9 +226,9 @@ if (forecast_date_start == forecast_date) {
       sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
     winit0 <- winit
     nw0 <- length(winit0)
-    winit <- c(winit0[1:2],
+    winit <- c(winit0[1],
                log(τ_hinit),
-               winit0[3:(nw0 - nβ_0)],
+               winit0[2:(nw0 - nβ_0)],
                rep(qlogis(p_hinit), times = np_h),
                winit0[(nw0 - nβ_0 + 1):nw0])
   } else {
@@ -244,7 +246,7 @@ if (forecast_date_start == forecast_date) {
   if (forecast_date > "2021-02-08" &&
       forecast_date_start <= "2021-02-08"){
     # add parameter for doseeffect
-    winit <- c(winit[1:5], -1, winit[6:length(winit)])
+    winit <- c(winit[1:4], -1, winit[5:length(winit)])
   }
   
   nτ_c <- x$τ_cmap[wsize]
@@ -259,7 +261,9 @@ if (forecast_date_start == forecast_date) {
 }
 
 ## fitting
-if (forecast_date == forecast_date_start){
+if (forecast_date == forecast_date_start || 
+    (forecast_date >= "2020-11-16" &&
+    forecast_date_start < "2020-11-16")){ # if starting cold or adding hospitalization data
   iter1 <- 1000
 } else {
   iter1 <- 60
@@ -267,6 +271,7 @@ if (forecast_date == forecast_date_start){
 β_0sd <- 0.05
 τ_csd <- 0.05
 p_hsd <- 0.1
+nrestarts <- 1 # restarts can help if line search is failing due to hessian approximation
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
@@ -284,6 +289,27 @@ fit1 <- lbfgs::lbfgs(
   invisible = 0
 )
 tt1 <- tictoc::toc()
+
+while(nrestarts > 0  && fit1$convergence == -1001L){
+  fit0 <- fit1
+  tictoc::tic("fit 1 restarted")
+  fit1 <- lbfgs::lbfgs(
+    calc_kf_nll,
+    calc_kf_grad,
+    cov = x,
+    p_hsd = p_hsd,
+    β_0sd = β_0sd,
+    τ_csd = τ_csd, 
+    epsilon = 1e-2,
+    max_iterations = iter1,
+    z = z,
+    fit0$par,
+    wfixed = wfixed,
+    invisible = 0
+  )
+  tt1 <- tictoc::toc()
+  nrestarts <- nrestarts - 1
+}
 
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(
@@ -324,7 +350,9 @@ dets1 <-
     wfixed = wfixed,
     just_nll = FALSE
   )
-stopifnot(isTRUE(all.equal(dets1$nll[1,1], fit1$value)))
+
+dets1$nll[1,1]
+stopifnot(isTRUE(all.equal(dets1$nll[1,1], fit1$value, tol = 1e-6)))
 
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(z, 2, diff)), na.rm = TRUE)

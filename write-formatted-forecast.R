@@ -14,13 +14,13 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   
   if ("doses_scaled" %in% names(cov)){
     X <- cbind(cov$residential, cov$doses_scaled)
-    effects <- ft$par[c(5, 6)]
+    effects <- ft$par[c(4, 5)]
   } else {
     X <- cbind(cov$residential)
     if (no_hosps){
-      effects <- ft$par[4]
+      effects <- ft$par[3]
     } else {
-      effects <- ft$par[5]
+      effects <- ft$par[4]
     }
   }
 
@@ -299,14 +299,16 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, fore
   if (no_hosps) {
     plot.new()
   } else {
-    plot(x$time,
-         z$hospitalizations,
-         xlab = "Time",
-         ylab = "Hospitalizations")
+
     pred_hosps <- dets$xhat_kkmo["A", ]
     se_hosps <- sqrt(dets$S[2, 2, ])
+    plot(x$time,
+         pred_hosps,
+         type = "l",
+         xlab = "Time",
+         ylab = "Hospitalizations")
     lines(x$time, se_hosps * 2 + pred_hosps, col = "grey")
-    lines(x$time, pred_hosps)
+    points(x$time, z$hospitalizations)
     lines(x$time,-se_hosps * 2 + pred_hosps, col = "grey")
   }
   

@@ -384,7 +384,6 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   
   Hest <- Yest  * wfixed["γ"] * wfixed["p_h"] / wfixed["γ_h"]
   
-  H0init <- mean(head(Hest, n = 7), na.rm = TRUE)
   p_d_init <-
     max(sum(y$deaths, na.rm = TRUE) / sum(Hest, na.rm = TRUE),
         0.01)
@@ -421,7 +420,6 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
 
   winit <- c(
     logL0 = log(L0init + 1),
-    logH0 = log(H0init + 1),
     logτ_d = log(τ_d_init),
     residentialeffect = residentialeffect_init,
     logitp_d = qlogis(p_d_init),
@@ -457,14 +455,14 @@ calc_kf_nll_r <-
     nτ_c <- tail(cov$τ_cmap, 1)
     np_h <- tail(cov$p_hmap, 1)
     if (ncol(z) == 3) {
-      τ_h <- exp(w[3])
+      τ_h <- exp(w[2])
       if ("doses_scaled" %in% names(cov)){
-        doseeffect <- w[6]
-        w2 <- c(w[1:2], w[4:5], w[7:length(w)])
+        doseeffect <- w[5]
+        w2 <- c(w[1], w[3:4], w[6:length(w)])
       } else{
-        w2 <- c(w[1:2], w[4:length(w)])
+        w2 <- c(w[1], w[3:length(w)])
       }
-      p_h <- plogis(w2[(9 + nτ_c):(9 + nτ_c + np_h - 1)])
+      p_h <- plogis(w2[(8 + nτ_c):(8 + nτ_c + np_h - 1)])
     } else if(ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
       τ_h <- wfixed["τ_h"]
       p_h <- wfixed["p_h"]
@@ -473,22 +471,23 @@ calc_kf_nll_r <-
       w2 <- w
     }
     L0 <- exp(w2[1])
-    H0 <- exp(w2[2])
-    τ_d <- exp(w2[3])
-    residentialeffect <- w2[4]
-    p_d <- plogis(w2[5])
-    γ_d12 <- exp(w2[6])
-    γ_d34 <- exp(w2[7])
-    γ_z17 <- exp(w2[8])
-    τ_c <- exp(w2[seq(9, 9 + nτ_c - 1)])
-    β_0 <- w2[seq(9 +  nτ_c + np_h, length(w2))]
+    τ_d <- exp(w2[2])
+    residentialeffect <- w2[3]
+    p_d <- plogis(w2[4])
+    γ_d12 <- exp(w2[5])
+    γ_d34 <- exp(w2[6])
+    γ_z17 <- exp(w2[7])
+    τ_c <- exp(w2[seq(8, 8 + nτ_c - 1)])
+    β_0 <- w2[seq(8 +  nτ_c + np_h, length(w2))]
     
     zloc <-
       data.matrix(z[, c("cases", "hospitalizations", "deaths")])
     zmiss <- is.na(zloc)
     
+    Y0 <- L0 * η / γ
+    H0 <- p_h[1] * γ * Y0 / γ_h
     D0 <- H0 *  γ_h /  γ_d * p_d
-    Y0 <- L0 *  η  /  γ
+
     x0 <- c(
       max(N - L0 - Y0 - H0 - D0, N * 0.1),
       #X
