@@ -1,8 +1,9 @@
 ---
 output:
-  pdf_document: default
   html_document:
     df_print: paged
+    title: Model Details
+  pdf_document: default
 header-includes: \usepackage{amsmath}
 ---
 
@@ -22,7 +23,7 @@ To better understand the potential range of epidemic outcomes in the U.S.A., we 
 
 ### Data
 
-#### Incident Case Data & Death Reports
+#### Cases, Hospital Admissions, & Death Reports
 
 Fitted data on incident case and death reports for each state in the U.S.A. were collated by the <a href="https://github.com/CSSEGISandData/COVID-19" target="_blank">COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University"</a>.
 Fitted data on hospital admissions were provided by the U.S. Department of Health & Human Services (HHS), which we accessed via the Delphi Epidata API [^1]. 
@@ -119,7 +120,7 @@ sel_states <- forecast_locs %>% paste0("000") %>% covidcast::fips_to_name()
 
 mob <- load_google_mobility("2021-05-06", rootdir = "..") %>%
   filter(sub_region_1 %in% sel_states) %>% group_by(sub_region_1) %>%
-  mutate(rollmean = zoo::rollmean(residential_percent_change_from_baseline / 100, k = 7, fill = NA)) %>% 
+  mutate(rollmean = zoo::rollmean(residential_percent_change_from_baseline, k = 7, fill = NA)) %>% 
   mutate(residential = zoo::na.approx(rollmean, rule = 2))
 
 mob %>% 
@@ -158,8 +159,8 @@ Key features of this model include:
 
 * Stochastic transmission process with a realistic level of **random variation**.
 * Realistic distributions of **presymptomatic and symptomatic periods**.
-* Time varying **rates of case detection"
-* Day-of-the week effects on reporting of cases and deaths.  
+* Time varying **rates of case detection**
+* **Day-of-the week effects on reporting** of cases and deaths.  
 * Time varying **probability of a case being hospitalized**.  
 * Accounting for the effect on transmission of **human mobility** (i.e., **social distancing**), as measured by data.
 * A "latent" process that captures the effect of **environmental factors and other behaviors** that can reduce transmission but are difficult to quantify with data (e.g., hand washing or face masks).
@@ -202,24 +203,17 @@ knitr::include_graphics(here::here("docs",'model2.png'))
 The following interventions are implemented:
 
 * Social distancing is assumed to reduce all transmission rates by some factor. This is provided as a covariate based on mobility data.
-* Decreasing time to diagnosis, which speeds up the transition from the detected class (I_sd) to the diagnosed cases class (C).
-* Improving detection, which is assumed to increase the fraction of symptomatic individuals that move into the $I_{sd}$ compartment and will eventually be diagnosed. It is assumed to increase sigmoidally up to a maximum value.
+* Improving detection, which is assumed to increase the fraction of individuals that move into the $Z$ compartment and will eventually be reported as cases. It is assume do increase with the relative increase of reported cases to deaths early in the epidemic.
 
 #### Parameterization
 
-This model was initially parameterized using clinical outcome reports from the epidemic in Hubei province, China and further calibrated with information about COVID-19 elsewhere in China and the United States.
-Transmissibility of the virus is assumed to be proportional to the level of human movement.
-
-Key parameters estimated using maximum likelihood by iterated filtering (MIF)[^3] include baseline transmissibility ($\beta_0$), maximum ascertainment (i.e. maximum fraction of cases detected), fraction of known cases that are hospitalized, fatality rate among hospitalized cases, and the initial size of the latent class. 
-Auxiliary parameters estimated using MIF include the intensity of the parameter random walk and dispersion parameters for observables.
+Key parameters estimated using maximum likelihood by the [extended Kalman filter](https://en.wikipedia.org/wiki/Extended_Kalman_filter) include baseline transmissibility ($\beta_0$), the probability of a case leading to hospitalization, the effect of changes in mobility on the transmission rate, the fatality rate among hospitalized cases, and the initial size of the latent class. 
+Auxiliary parameters estimated include the observation error of cases, deaths, and hospital admissions.
 
 <small>**Disclaimer:** The COVID-19 epidemic is changing rapidly, and information that was used in the construction of this model may be incomplete or contain errors.
 Accordingly, these results are preliminary, provisional, and subject to change.
 These results have not been peer-reviewed, but have been prepared to a professional standard with the intention of providing useful interpretation of a rapidly developing event.</small>
 
-
-
 [^1]:[Delphi Epidata API David C. Farrow, Logan C. Brooks, Aaron Rumack, Ryan J. Tibshirani, Roni Rosenfeld (2015). Delphi Epidata API.](https://github.com/cmu-delphi/delphi-epidata)
 
-[^2]:[Google COVID-19 Community Mobility Reports.  Google LLC. Accessed: 2021-05-06.](https://www.google.com/covid19/mobility/ )
-
+[^2]:[Google COVID-19 Community Mobility Reports.  Google LLC. Accessed: 2021-05-06.](https://www.google.com/covid19/mobility/)
