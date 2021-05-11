@@ -311,6 +311,7 @@ while(nrestarts > 0  && fit1$convergence == -1001L){
   nrestarts <- nrestarts - 1
 }
 
+if (FALSE) {
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(
   w = fit1$par,
@@ -322,7 +323,9 @@ h1 <- calc_kf_hess(
   wfixed = wfixed
 )
 tictoc::toc()
-
+} else {
+  h1 <- diag(nrow = length(winit))
+}
 ## Save outputs
 
 fit_dir <-
