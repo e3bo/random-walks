@@ -52,7 +52,7 @@ build_legend <- function(p_dat, scenario_var){
 # to ensure data gets refreshed on server, we need this
 get_data <- function()
 {
-  filename = file.path("..", "data",paste0("clean_data_",Sys.Date(),'.rds')) #if the data file for today is here, load then return from function
+  filename = file.path("data",paste0("clean_data_",Sys.Date(),'.rds')) #if the data file for today is here, load then return from function
   if (file.exists(filename)) 
   {
      all_data <- readRDS(file = filename)    
@@ -67,7 +67,7 @@ get_data <- function()
   #################################
   #message('starting data processing')
   
-  us_popsize <- readRDS(file.path("..", "data","us_popsize.rds")) %>% rename(state_abr = state, location = state_full, pop_size = total_pop)
+  us_popsize <- readRDS(file.path("data","us_popsize.rds")) %>% rename(state_abr = state, location = state_full, pop_size = total_pop)
   us_dat_raw <- readr::read_csv("https://raw.githubusercontent.com/CEIDatUGA/COVID-stochastic-fitting/master/output/us_current_results.csv")
   
   #Notes on current data format:
@@ -333,7 +333,7 @@ server <- function(input, output, session)
 #################################
 ui <- fluidPage(
   #tags$head(includeHTML(file.path("www","google-analytics.html"))), #this is for Google analytics tracking.
-  includeCSS(file.path("..", "www","appstyle.css")),
+  includeCSS("www/appstyle.css"),
   #main tabs
   sidebarLayout(
       sidebarPanel(

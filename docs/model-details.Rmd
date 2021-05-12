@@ -204,6 +204,7 @@ The following interventions are implemented:
 
 * Social distancing is assumed to reduce all transmission rates by some factor. This is provided as a covariate based on mobility data.
 * Improving detection, which is assumed to increase the fraction of individuals that move into the $Z$ compartment and will eventually be reported as cases. It is assume do increase with the relative increase of reported cases to deaths early in the epidemic.
+* Vaccination, which is assumed to reduce the average susceptibility of the population in proportion to the number of doses administered.
 
 #### Parameterization
 
