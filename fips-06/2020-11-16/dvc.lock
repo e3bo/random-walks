@@ -4,35 +4,35 @@ stages:
     cmd: fdt=2020-11-16 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 34da1edc9c62acb19a2a1557fa6f403d
-      size: 22662
+      md5: d70068236956f5f5edd497ee7f68f261
+      size: 22590
     - path: fits/2020-11-16-fips06/fit.RData
-      md5: e7b1c28f455638a836e45e8c581df117
-      size: 28165
+      md5: 64bd445b0a59abf6f21011793b6cbc64
+      size: 6927
     - path: write-formatted-forecast.R
-      md5: 1a09232ac08aa884835fa788a2c2281d
-      size: 12557
+      md5: 65d4215ac5c77ab539f672e70858f5f9
+      size: 12580
     outs:
     - path: forecasts/2020-11-16-fips06
-      md5: cfa43594fbfab9d70c8de95ef25e64f0.dir
-      size: 53170
+      md5: e862817655c8446382583b808ab6a65b.dir
+      size: 53138
       nfiles: 1
     - path: plots/2020-11-16-fips06
-      md5: f9ce4a7259d85cb4cfcea04d32141fc2.dir
-      size: 1459096
+      md5: 2d8347494e1939b636d0db99b073dd9a.dir
+      size: 1143569
       nfiles: 8
   fit-2020-11-16-06:
     cmd: fdtstart=2020-11-09 fdt=2020-11-16 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: 34da1edc9c62acb19a2a1557fa6f403d
-      size: 22662
+      md5: d70068236956f5f5edd497ee7f68f261
+      size: 22590
     - path: fit-infection-kalman.R
-      md5: 21898bf11483f0ced66023c437ac89f8
-      size: 11358
+      md5: 94a48036644e4f99e659aa02ed70b288
+      size: 12138
     - path: fits/2020-11-09-fips06/fit.RData
-      md5: ee797176f6a1f4a072d66504421f978d
-      size: 22981
+      md5: 1e85ab1218b6cee97cc00573276a0d91
+      size: 41541
     - path: google-mobility-reports/2021-05-06
       md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
       size: 114473434
@@ -43,8 +43,8 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-11-16-fips06/fit-metrics.json
-      md5: a60b66c0d3657e04e21831cdb224a149
-      size: 367
+      md5: a08f23d022d6fab6c7067b90d2a8406a
+      size: 364
     - path: fits/2020-11-16-fips06/fit.RData
-      md5: e7b1c28f455638a836e45e8c581df117
-      size: 28165
+      md5: 64bd445b0a59abf6f21011793b6cbc64
+      size: 6927

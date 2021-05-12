@@ -185,11 +185,11 @@ The system of ordinary differential equations for the expected value of state va
 \frac{dY(t)}{dt} =& \eta L\left( t \right) - p_{h} \gamma Y\left( t \right) - \gamma \rho Y\left( t \right) \left( 1 - p_{h} \right) - \gamma Y\left( t \right) \left( 1 - p_{h} \right) \left( 1 - \rho \right) \\
 \frac{dL(t)}{dt} =&  - \eta L\left( t \right) + \frac{\beta X\left( t \right) Y\left( t \right)}{N} \\
 \frac{dZ(t)}{dt} =& p_{h} \gamma Y\left( t \right) - \gamma_{z} Z\left( t \right) + \gamma \rho Y\left( t \right) \left( 1 - p_{h} \right) \\
-\frac{dZ_{r(t)}}{dt} =& \gamma_{z} Z\left( t \right) \\
+\frac{dZ_r(t)}{dt} =& \gamma_{z} Z\left( t \right) \\
 \frac{dH(t)}{dt} =& p_{h} \gamma Y\left( t \right) - p_{d} \gamma_{h} H\left( t \right) - \gamma_{h} H\left( t \right) \left( 1 - p_{d} \right) \\
 \frac{dA(t)}{dt} =& p_{h} \gamma Y\left( t \right) \\
 \frac{dD(t)}{dt} =& p_{d} \gamma_{h} H\left( t \right) - \gamma_{d} D\left( t \right) \\
-\frac{dD_{r(t)}}{dt} =& \gamma_{d} D\left( t \right)
+\frac{dD_r(t)}{dt} =& \gamma_{d} D\left( t \right)
 \end{align*}
 
 

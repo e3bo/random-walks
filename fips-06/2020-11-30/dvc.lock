@@ -4,35 +4,35 @@ stages:
     cmd: fdt=2020-11-30 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 34da1edc9c62acb19a2a1557fa6f403d
-      size: 22662
+      md5: d70068236956f5f5edd497ee7f68f261
+      size: 22590
     - path: fits/2020-11-30-fips06/fit.RData
-      md5: 15b717756237a654d686051522e038f2
-      size: 29978
+      md5: 8f13f71bac5f20a0b4b2a16d0073b103
+      size: 7198
     - path: write-formatted-forecast.R
-      md5: 1a09232ac08aa884835fa788a2c2281d
-      size: 12557
+      md5: 65d4215ac5c77ab539f672e70858f5f9
+      size: 12580
     outs:
     - path: forecasts/2020-11-30-fips06
-      md5: 6ff659685dde9d638ca8bc774fcfcf6a.dir
-      size: 52498
+      md5: ab1886fba744080f462d6e4556d35952.dir
+      size: 52370
       nfiles: 1
     - path: plots/2020-11-30-fips06
-      md5: d09484f9a52c5a1f1647bb8df146131b.dir
-      size: 1222338
+      md5: 07667fee6add6763a8223eb414ba2df8.dir
+      size: 1122660
       nfiles: 8
   fit-2020-11-30-06:
     cmd: fdtstart=2020-11-23 fdt=2020-11-30 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: 34da1edc9c62acb19a2a1557fa6f403d
-      size: 22662
+      md5: d70068236956f5f5edd497ee7f68f261
+      size: 22590
     - path: fit-infection-kalman.R
-      md5: 21898bf11483f0ced66023c437ac89f8
-      size: 11358
+      md5: 94a48036644e4f99e659aa02ed70b288
+      size: 12138
     - path: fits/2020-11-23-fips06/fit.RData
-      md5: a054e58b1cc3f6a36cabc65113bae1f0
-      size: 28992
+      md5: f2a5d36d21a48d7081ab6b458cf49313
+      size: 7084
     - path: google-mobility-reports/2021-05-06
       md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
       size: 114473434
@@ -43,8 +43,8 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-11-30-fips06/fit-metrics.json
-      md5: e5fd1390f4e1bd204d8f67b7a4d7e769
-      size: 368
+      md5: 4d4c12cdadfe03ad968008741332570f
+      size: 367
     - path: fits/2020-11-30-fips06/fit.RData
-      md5: 15b717756237a654d686051522e038f2
-      size: 29978
+      md5: 8f13f71bac5f20a0b4b2a16d0073b103
+      size: 7198
