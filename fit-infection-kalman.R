@@ -154,9 +154,7 @@ x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
 if (ncol(z) == 3){
-  hwsize <- wsize - sum(is.na(z$hospitalizations))
-  x0$p_hmap <- c(rep(1L, wsize - hwsize), rep(seq_len(ceiling(hwsize / 28)), each = 28)) %>% head(wsize) %>% as.integer()
-  #x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer() 
+  x0$p_hmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer() 
 } else {
   x0$p_hmap <- 1L
 }
@@ -270,7 +268,7 @@ if (forecast_date == forecast_date_start ||
 }
 β_0sd <- 0.05
 τ_csd <- 0.05
-p_hsd <- 0.1
+p_hsd <- 0.5
 nrestarts <- 1 # restarts can help if line search is failing due to hessian approximation
 
 tictoc::tic("fit 1")
