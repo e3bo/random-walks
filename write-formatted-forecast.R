@@ -154,6 +154,41 @@ create_forecast_df <- function(means,
                                       value)
 }
 
+
+make_dashboard_input <- function(dets, x, z, forecat_loc){
+  abb <- covidcast::fips_to_abbr(paste0(forecast_loc, "000"))
+  snm <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
+  pop <- covidHubUtils::hub_locations %>% 
+    filter(abbreviation == abb & geo_type == "state") %>% pull("population")
+  
+  ret <- bind_cols(
+    location = snm,
+    scenario = NA,
+    period = "Past",
+    date = x$target_end_date,
+    populationsize = pop,
+    state_abr = abb,
+    z
+  ) %>%
+    mutate(cumulative_cases = cumsum(cases),
+           cumulative_deaths = cumsum(deaths)) %>%
+    rename(
+      actual_daily_cases = cases,
+      actual_daily_deaths = deaths,
+      actual_cumulative_cases = cumulative_cases,
+      actual_cumulative_deaths = cumulative_deaths
+    ) %>%
+    pivot_longer(
+      actual_daily_cases:actual_cumulative_deaths,
+      names_to = "variable",
+      values_to = "mean_value"
+    ) %>%
+    mutate(median_value = mean_value)
+    
+  
+}
+
+
 write_forecasts <-
   function(fit, cov, z, winit, wfixed, hess, fets, p_hsd, β_0sd, τ_csd, fdt, forecast_loc) {
     
@@ -169,6 +204,10 @@ write_forecasts <-
         just_nll = FALSE,
         fets = fets
       )
+    
+    
+    
+    
     
     make_fit_plots(
       dets,
