@@ -240,9 +240,9 @@ make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
                     vname = "daily_all_infections") %>% add_scenarios()
   
   ret[[3]] <- gendf(
-    mean = cumsum(dets$xhat_kk["Y",]),
+    mean = wfixed["N"] - dets$xhat_kk["X",],
     median = NA,
-    sd = NA,
+    sd = sqrt(dets$P_kk[1, 1, ]),
     vname = "cumulative_all_infections"
   ) %>% add_scenarios()
   
