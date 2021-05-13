@@ -229,7 +229,6 @@ server <- function(input, output, session)
                           layout(xaxis = list(title = "Date")) %>%
                           layout(yaxis = list(title=ylabel, type = yscale, size = 18)) %>%
                           layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
-      
       maxy = max(p_dat$mean_value, na.rm = TRUE)
       
       #Adds prediction interval ribbons and/or current date bar
@@ -240,7 +239,7 @@ server <- function(input, output, session)
                                  name = "80% Prediction Interval", 
                                  color = ~scenario, showlegend = FALSE, opacity = 0.5) 
         maxy = max(p_dat$upper_80, na.rm = TRUE)
-        
+
       }
       
       #add actual data on top of model data
@@ -281,18 +280,33 @@ server <- function(input, output, session)
         layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
       
       maxy = max(p_dat$mean_value, na.rm = TRUE)
-      
     }
 
     #add date marker
-    pl <- pl %>% plotly::add_segments(x = rundate, xend = rundate, 
-                                      y = 0, yend = maxy, name = rundate,
-                                      color = I("black"), alpha = 0.75,
-                                      showlegend = FALSE)  %>%
-            layout(annotations = list(x = rundate, y = maxy, text = paste0("Last model run: ", rundate),
-                                      xref = "x", yref = "y",
-                                      showarrow = TRUE, arrowhead = 3,
-                                      ax = 20, ay = -40))
+    pl <- pl %>% plotly::add_segments(
+      x = rundate,
+      xend = rundate,
+      y = 0,
+      yend = maxy,
+      name = rundate,
+      color = I("black"),
+      alpha = 0.75,
+      showlegend = FALSE
+    ) %>%
+      layout(
+        annotations = list(
+          x = rundate,
+          y = ifelse(yscale == "lin", maxy, log10(maxy)),
+          text = paste0("Last model run: ", rundate),
+          xref = "x",
+          yref = "y",
+          showarrow = TRUE,
+          arrowhead = 3,
+          ax = 20,
+          ay = -40
+        )
+      )
+
     
     
     return(pl)
