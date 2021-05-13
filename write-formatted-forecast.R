@@ -181,6 +181,9 @@ make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
     filter(abbreviation == abb &
              geo_type == "state") %>% pull("population")
   
+  if (ncol(z) == 2){
+    z$hospitalizations <- NA
+  }
   ret <- list()
   ret[[1]] <- bind_cols(
     location = snm,
@@ -192,11 +195,14 @@ make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
     z
   ) %>%
     mutate(cumulative_cases = cumsum(cases),
+           cumulative_hosps = cumsum(hospitalizations),
            cumulative_deaths = cumsum(deaths)) %>%
     rename(
       actual_daily_cases = cases,
+      actual_daily_hosps = hospitalizations,
       actual_daily_deaths = deaths,
       actual_cumulative_cases = cumulative_cases,
+      actual_cumulative_hosps = cumulative_hosps,
       actual_cumulative_deaths = cumulative_deaths
     ) %>%
     pivot_longer(
