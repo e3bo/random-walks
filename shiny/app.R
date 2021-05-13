@@ -139,7 +139,7 @@ server <- function(input, output, session)
   #past to future. Might not be same as today's date
   #done a bit clunky, could likely be done better (and tidy)
   #assigned to a global variable
-  x <- us_dat %>% filter(location == "Alabama", variable == "actual_daily_cases")
+  x <- us_dat %>% filter(location == "California", variable == "actual_daily_cases")
   rundate <<- x$date[max(which(x$period == "Past"))]
   maxdate <<- as.Date(rundate,"%Y-%m-%d") + 42 #this works but is dependant on modeldate working and assumes the data always uses a 42 day prediction
   

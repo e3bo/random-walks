@@ -5,6 +5,26 @@ tictoc::tic()
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
+calc_rt <- function(ft, cov, no_hosps, wfixed) {
+  nβ_0 <- tail(cov$β_0map, 1)
+  np <- length(ft$par)
+  inds <- seq(np - nβ_0 + 1, np)
+  intercept <- ft$par[inds][cov$β_0map]
+  
+  if ("doses_scaled" %in% names(cov)){
+    X <- cbind(cov$residential, cov$doses_scaled)
+    effects <- ft$par[c(4, 5)]
+  } else {
+    X <- cbind(cov$residential)
+    if (no_hosps){
+      effects <- ft$par[3]
+    } else {
+      effects <- ft$par[4]
+    }
+  }
+  (exp(intercept + X %*% effects) / wfixed["γ"]) %>% as.numeric()
+}
+
 make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   par(mfrow = c(1, 1))
   nβ_0 <- tail(cov$β_0map, 1)
@@ -154,14 +174,15 @@ create_forecast_df <- function(means,
                                       value)
 }
 
-
-make_dashboard_input <- function(dets, x, z, forecat_loc){
+make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
   abb <- covidcast::fips_to_abbr(paste0(forecast_loc, "000"))
   snm <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
-  pop <- covidHubUtils::hub_locations %>% 
-    filter(abbreviation == abb & geo_type == "state") %>% pull("population")
+  pop <- covidHubUtils::hub_locations %>%
+    filter(abbreviation == abb &
+             geo_type == "state") %>% pull("population")
   
-  ret <- bind_cols(
+  ret <- list()
+  ret[[1]] <- bind_cols(
     location = snm,
     scenario = NA,
     period = "Past",
@@ -184,8 +205,105 @@ make_dashboard_input <- function(dets, x, z, forecat_loc){
       values_to = "mean_value"
     ) %>%
     mutate(median_value = mean_value)
-    
   
+  gendf <- function(mean, median = mean, sd, vname) {
+    df <- bind_cols(
+      location = snm,
+      scenario = NA,
+      period = "Past",
+      date = x$target_end_date,
+      populationsize = pop,
+      state_abr = abb,
+      variable = vname,
+      mean_value = mean,
+      median_value = median,
+      lower_80 = qnorm(p = 0.1,
+                       mean = mean,
+                       sd = sd),
+      upper_80 = qnorm(p = 0.9,
+                       mean = mean,
+                       sd = sd)
+    ) %>% mutate(lower_80 = ifelse(lower_80 < 0, 0, lower_80))
+  }
+  
+  add_scenarios <- function(df) {
+    scens <- c("linear_increase_sd", "return_normal", "status_quo")
+    tmpf <- function(s) {
+      df$scenario <- s
+      df
+    }
+    purrr::map(scens, tmpf) %>% bind_rows()
+  }
+  
+  ret[[2]] <- gendf(mean = dets$xhat_kk["Y",],
+                    sd = sqrt(dets$P_kk[2, 2,]),
+                    vname = "daily_all_infections") %>% add_scenarios()
+  
+  ret[[3]] <- gendf(
+    mean = cumsum(dets$xhat_kk["Y",]),
+    median = NA,
+    sd = NA,
+    vname = "cumulative_all_infections"
+  ) %>% add_scenarios()
+  
+  ret[[4]] <- gendf(mean = dets$xhat_kkmo["Z_r",],
+                    sd = sqrt(dets$S[1, 1,]),
+                    vname = "daily_cases") %>% add_scenarios()
+  
+  ret[[5]] <- gendf(
+    mean = cumsum(dets$xhat_kkmo["Z_r",]),
+    median = NA,
+    sd = NA,
+    vname = "cumulative_cases"
+  ) %>% add_scenarios()
+  
+  ret[[6]] <- gendf(mean = dets$xhat_kkmo["A",],
+                    sd = sqrt(dets$S[2, 2,]),
+                    vname = "daily_hosps") %>% add_scenarios()
+  
+  ret[[7]] <- gendf(
+    mean = cumsum(dets$xhat_kkmo["A",]),
+    median = NA,
+    sd = NA,
+    vname = "cumulative_hosps"
+  ) %>% add_scenarios()
+  
+  ret[[8]] <- gendf(mean = dets$xhat_kkmo["D_r",],
+                    sd = sqrt(dets$S[3, 3,]),
+                    vname = "daily_deaths") %>% add_scenarios()
+  
+  ret[[9]] <- gendf(
+    mean = cumsum(dets$xhat_kkmo["D_r",]),
+    median = NA,
+    sd = NA,
+    vname = "cumulative_deaths"
+  ) %>% add_scenarios()
+  
+  no_hosps <- all(is.na(dets$ytilde_k[2, ]))
+  rt <- calc_rt(fit, x, no_hosps, wfixed)
+  
+  ret[[10]] <- gendf(
+    mean = rt,
+    median = NA,
+    sd = NA,
+    vname = "combined_trend"
+  ) %>% add_scenarios()
+  
+  retall <-
+    bind_rows(ret) %>% select(
+      location,
+      scenario,
+      period,
+      date,
+      variable,
+      lower_80,
+      mean_value,
+      median_value,
+      upper_80,
+      populationsize,
+      state_abr
+    )
+  retall
 }
 
 
