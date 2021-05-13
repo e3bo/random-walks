@@ -283,29 +283,32 @@ server <- function(input, output, session)
     }
 
     #add date marker
-    pl <- pl %>% plotly::add_segments(
-      x = rundate,
-      xend = rundate,
-      y = 0,
-      yend = maxy,
-      name = rundate,
-      color = I("black"),
-      alpha = 0.75,
-      showlegend = FALSE
-    ) %>%
-      layout(
-        annotations = list(
-          x = rundate,
-          y = ifelse(yscale == "lin", maxy, log10(maxy)),
-          text = paste0("Last model run: ", rundate),
-          xref = "x",
-          yref = "y",
-          showarrow = TRUE,
-          arrowhead = 3,
-          ax = 20,
-          ay = -40
+    
+    if (input$x_limit[2] >= rundate) {
+      pl <- pl %>% plotly::add_segments(
+        x = rundate,
+        xend = rundate,
+        y = 0,
+        yend = maxy,
+        name = rundate,
+        color = I("black"),
+        alpha = 0.75,
+        showlegend = FALSE
+      ) %>%
+        layout(
+          annotations = list(
+            x = rundate,
+            y = ifelse(yscale == "lin", maxy, log10(maxy)),
+            text = paste0("Last model run: ", rundate),
+            xref = "x",
+            yref = "y",
+            showarrow = TRUE,
+            arrowhead = 3,
+            ax = 20,
+            ay = -40
+          )
         )
-      )
+    }
 
     
     
