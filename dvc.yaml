@@ -281,3 +281,39 @@ stages:
     - pull-healthdata-ts-from-date.R
     outs:
     - healthdata/2021-02-08/06
+  hopkins-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-02-15
+  healthdata-2021-02-15-06:
+    cmd: fdt=2021-02-15 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-02-15/06
+  hopkins-vaccine-2021-02-15:
+    cmd: fdt=2021-02-15 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-02-15
+  hopkins-2021-02-22:
+    cmd: fdt=2021-02-22 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-02-22
+  healthdata-2021-02-22-06:
+    cmd: fdt=2021-02-22 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-02-22/06
+  hopkins-vaccine-2021-02-22:
+    cmd: fdt=2021-02-22 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-02-22

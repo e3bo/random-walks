@@ -17,8 +17,8 @@ library(httr) #for reading from github
 #################################
 
 #starting date for date slider and default starting date to show
-mindate = as.Date("2020-02-01","%Y-%m-%d")
-defaultdate = as.Date("2020-03-01","%Y-%m-%d")
+mindate = as.Date("2020-03-02","%Y-%m-%d")
+defaultdate = as.Date("2020-03-02","%Y-%m-%d")
 #needs to follow order of scenarios
 scenarionames = c("Increase social distancing", "Return to normal", "Maintain social distancing")
 
@@ -174,13 +174,14 @@ server <- function(input, output, session)
     if (outtype == 'combined_trend') {outcome = outtype}
     
     #create y-axis names
-    y_tag = c(" Cases"," Deaths"," All Infected")
+    y_tag = c(" Cases"," Deaths"," All Infected", " Hospitalizations")
     ylabel = paste0(daily_tot,y_tag,sep=" ")
     ylabel = capitalize_first(ylabel)
     #apply names to plots by outtype
     if (outtype == 'cases') {ylabel = ylabel[1]}
     if (outtype == 'deaths') {ylabel = ylabel[2]}
     if (outtype == 'all_infections') {ylabel = ylabel[3]}
+    if (outtype == 'hosps') {ylabel = ylabel[4]}
     
     #filter data based on user selections
     #keep all outcomes/variables for now so we can do x-axis adjustment
@@ -327,6 +328,10 @@ server <- function(input, output, session)
     #create case plot
     p2 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, input$daily_tot,
                       input$xscale, input$yscale, input$absolute_scaled, input$x_limit, input$conf_int, ylabel = 1, outtype = "cases")
+    
+    p2.5 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, input$daily_tot,
+                      input$xscale, input$yscale, input$absolute_scaled, input$x_limit, input$conf_int, ylabel = 1, outtype = "hosps")
+    
     #death plot
     p3 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, input$daily_tot,
                       input$xscale, input$yscale, input$absolute_scaled, input$x_limit, input$conf_int, ylabel = 1, outtype = "deaths")
@@ -335,8 +340,8 @@ server <- function(input, output, session)
     p4 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, input$daily_tot,
                       input$xscale, input$yscale, input$absolute_scaled, input$x_limit, input$conf_int, ylabel = 1, outtype = "all_infections")
   
-  all_plots <-  plotly::subplot(p1, p2, p3, p4, 
-                    nrows = 4, heights = c(.25,.25,.25,.25), 
+  all_plots <-  plotly::subplot(p1, p2, p2.5, p3, p4, 
+                    nrows = 5, heights = c(.2,.2,.2,.2,.2), 
                     shareX = TRUE, titleY = TRUE
     )
   }
