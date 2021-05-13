@@ -135,7 +135,7 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
         end
         
         if "doses_scaled" in names(cov)
-            β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect + cov.dose_scaled[i] * doseeffect)
+            β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect + cov.doses_scaled[i] * doseeffect)
         else
             β = exp(β_0[cov.β_0map[i]] + cov.residential[i] * residentialeffect)
         end
