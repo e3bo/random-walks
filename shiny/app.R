@@ -194,7 +194,8 @@ server <- function(input, output, session)
     # don't apply to the transmissionstrength since it's an input
     if ((absolute_scaled == 'scaled') && (outtype != "combined_trend"))
     {
-      plot_dat <- plot_dat %>% mutate(median_value = median_value / populationsize * 100000) %>%
+      plot_dat <- plot_dat %>% mutate(median_value = median_value / populationsize * 100000,
+                                      mean_value = mean_value / populationsize * 100000) %>%
                                mutate(lower_80 = lower_80 / populationsize * 100000) %>%
                                mutate(upper_80 = upper_80 / populationsize * 100000) 
     } #end scaling function
@@ -229,10 +230,10 @@ server <- function(input, output, session)
                           layout(yaxis = list(title=ylabel, type = yscale, size = 18)) %>%
                           layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
       
-      maxy = max(p_dat$median_value, na.rm = TRUE)
+      maxy = max(p_dat$mean_value, na.rm = TRUE)
       
       #Adds prediction interval ribbons and/or current date bar
-      if(conf_int == "Yes")
+      if(conf_int == "Yes" && !all(is.na(p_dat$upper_80)))
       {
         #add prediction interval ranges
         pl <- pl %>% add_ribbons(x = ~date, ymin = ~lower_80, ymax = ~upper_80, 
