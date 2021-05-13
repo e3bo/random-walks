@@ -218,7 +218,7 @@ server <- function(input, output, session)
 
       pl <- p_dat %>%
           plotly::plot_ly() %>% 
-          plotly::add_trace(x = ~date, y = ~median_value, type = 'scatter',
+          plotly::add_trace(x = ~date, y = ~mean_value, type = 'scatter',
                                  mode = 'lines', 
                                  linetype = ~location, 
                                  line = list(width = linesize), 
