@@ -174,7 +174,7 @@ create_forecast_df <- function(means,
                                       value)
 }
 
-make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
+make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed){
   abb <- covidcast::fips_to_abbr(paste0(forecast_loc, "000"))
   snm <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
   pop <- covidHubUtils::hub_locations %>%
@@ -189,7 +189,7 @@ make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
     location = snm,
     scenario = NA,
     period = "Past",
-    date = x$target_end_date,
+    date = cov$target_end_date,
     populationsize = pop,
     state_abr = abb,
     z
@@ -217,7 +217,7 @@ make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
       location = snm,
       scenario = NA,
       period = "Past",
-      date = x$target_end_date,
+      date = cov$target_end_date,
       populationsize = pop,
       state_abr = abb,
       variable = vname,
@@ -286,7 +286,7 @@ make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
   ) %>% add_scenarios()
   
   no_hosps <- all(is.na(dets$ytilde_k[2, ]))
-  rt <- calc_rt(fit, x, no_hosps, wfixed)
+  rt <- calc_rt(fit, cov, no_hosps, wfixed)
   
   ret[[10]] <- gendf(
     mean = rt,
@@ -312,6 +312,51 @@ make_dashboard_input <- function(dets, x, z, forecat_loc, fit, wfixed){
   retall
 }
 
+write_scenarios <- function(fit,
+                            cov,
+                            z,
+                            wfixed,
+                            fets,
+                            p_hsd,
+                            β_0sd,
+                            τ_csd,
+                            forecast_loc,
+                            forecast_date) {
+  dets <-
+    calc_kf_nll_r(
+      w = fit$par,
+      cov = cov,
+      z = z,
+      p_hsd = p_hsd,
+      β_0sd =  β_0sd,
+      τ_csd =  τ_csd,
+      wfixed = wfixed,
+      just_nll = FALSE,
+      fets = fets
+    )
+  usd <-
+    make_dashboard_input(
+      dets = dets,
+      cov = cov,
+      z = z,
+      forecast_loc = forecast_loc,
+      fit = fit,
+      wfixed = wfixed
+    )
+  
+  fcst_dir <-
+    file.path("forecasts",
+              paste0(forecast_date,
+                     "-fips",
+                     forecast_loc))
+  
+  fname <- paste0("dashboard.rds")
+  
+  path <- file.path(fcst_dir, fname)
+  if (!dir.exists(fcst_dir))
+    dir.create(fcst_dir, recursive = TRUE)
+  write_rds(list(us_dat = usd), path = path)
+}
 
 write_forecasts <-
   function(fit, cov, z, winit, wfixed, hess, fets, p_hsd, β_0sd, τ_csd, fdt, forecast_loc) {
@@ -624,4 +669,23 @@ write_forecasts(
   fets = fets,
   fdt = forecast_date,
   forecast_loc = forecast_loc
+)
+
+tf2 <- ti + lubridate::ddays(41)
+target_end_dates2 <- seq(from = ti, to = tf2, by = "day")
+target_end_times2 <- lubridate::decimal_date(target_end_dates2)
+target_wday2 <- lubridate::wday(target_end_dates2)
+fets_scenarios <- tibble(target_end_times2, target_wday2, target_end_dates2)
+
+write_scenarios(
+  fit = fit1,
+  cov = x,
+  z = z,
+  wfixed = wfixed,
+  fets = fets_scenarios,
+  p_hsd = p_hsd,
+  β_0sd = β_0sd, 
+  τ_csd = τ_csd,  
+  forecast_loc = forecast_loc,
+  forecast_date = forecast_date
 )

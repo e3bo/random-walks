@@ -16,11 +16,14 @@ library(httr) #for reading from github
 #define some variables 
 #################################
 
+
 #starting date for date slider and default starting date to show
-mindate = as.Date("2020-03-02","%Y-%m-%d")
-defaultdate = as.Date("2020-03-02","%Y-%m-%d")
+mindate = as.Date("2020-03-02", "%Y-%m-%d")
+defaultdate = as.Date("2020-03-02", "%Y-%m-%d")
 #needs to follow order of scenarios
-scenarionames = c("Increase social distancing", "Return to normal", "Maintain social distancing")
+scenarionames = c("Increase social distancing",
+                  "Return to normal",
+                  "Maintain social distancing")
 
 #################################
 # functions
@@ -277,7 +280,7 @@ server <- function(input, output, session)
                           showlegend = FALSE, 
                           color = ~scenario, colors = colorset) %>%
         layout(xaxis = list(title = "Date")) %>%
-        layout(yaxis = list(title="Relative Transmission Strength", type = yscale, size = 18)) %>%
+        layout(yaxis = list(title="Reproduction number", type = yscale, size = 18)) %>%
         layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
       
       maxy = max(p_dat$mean_value, na.rm = TRUE)
