@@ -317,3 +317,201 @@ stages:
     - pull-hopkins-vaccine-ts-from-date.R
     outs:
     - hopkins-vaccine/2021-02-22
+  hopkins-2021-03-01:
+    cmd: fdt=2021-03-01 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-01
+  healthdata-2021-03-01-06:
+    cmd: fdt=2021-03-01 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-01/06
+  hopkins-vaccine-2021-03-01:
+    cmd: fdt=2021-03-01 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-01
+  hopkins-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-08
+  healthdata-2021-03-08-06:
+    cmd: fdt=2021-03-08 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-08/06
+  hopkins-vaccine-2021-03-08:
+    cmd: fdt=2021-03-08 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-08
+  hopkins-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-15
+  healthdata-2021-03-15-06:
+    cmd: fdt=2021-03-15 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-15/06
+  hopkins-vaccine-2021-03-15:
+    cmd: fdt=2021-03-15 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-15
+  hopkins-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-22
+  healthdata-2021-03-22-06:
+    cmd: fdt=2021-03-22 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-22/06
+  hopkins-vaccine-2021-03-22:
+    cmd: fdt=2021-03-22 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-22
+  hopkins-2021-03-29:
+    cmd: fdt=2021-03-29 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-03-29
+  healthdata-2021-03-29-06:
+    cmd: fdt=2021-03-29 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-03-29/06
+  hopkins-vaccine-2021-03-29:
+    cmd: fdt=2021-03-29 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-03-29
+  hopkins-2021-04-05:
+    cmd: fdt=2021-04-05 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-04-05
+  healthdata-2021-04-05-06:
+    cmd: fdt=2021-04-05 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-04-05/06
+  hopkins-vaccine-2021-04-05:
+    cmd: fdt=2021-04-05 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-04-05
+  hopkins-2021-04-12:
+    cmd: fdt=2021-04-12 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-04-12
+  healthdata-2021-04-12-06:
+    cmd: fdt=2021-04-12 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-04-12/06
+  hopkins-vaccine-2021-04-12:
+    cmd: fdt=2021-04-12 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-04-12
+  hopkins-2021-04-19:
+    cmd: fdt=2021-04-19 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-04-19
+  healthdata-2021-04-19-06:
+    cmd: fdt=2021-04-19 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-04-19/06
+  hopkins-vaccine-2021-04-19:
+    cmd: fdt=2021-04-19 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-04-19
+  hopkins-2021-04-26:
+    cmd: fdt=2021-04-26 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-04-26
+  healthdata-2021-04-26-06:
+    cmd: fdt=2021-04-26 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-04-26/06
+  hopkins-vaccine-2021-04-26:
+    cmd: fdt=2021-04-26 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-04-26
+  hopkins-2021-05-03:
+    cmd: fdt=2021-05-03 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-05-03
+  healthdata-2021-05-03-06:
+    cmd: fdt=2021-05-03 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-05-03/06
+  hopkins-vaccine-2021-05-03:
+    cmd: fdt=2021-05-03 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-05-03
+  hopkins-2021-05-10:
+    cmd: fdt=2021-05-10 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-05-10
+  healthdata-2021-05-10-06:
+    cmd: fdt=2021-05-10 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-05-10/06
+  hopkins-vaccine-2021-05-10:
+    cmd: fdt=2021-05-10 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-05-10

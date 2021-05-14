@@ -1,0 +1,50 @@
+schema: '2.0'
+stages:
+  fit-2021-04-19-06:
+    cmd: fdtstart=2021-04-12 fdt=2021-04-19 loc=06 Rscript fit-infection-kalman.R
+    deps:
+    - path: covidhub-common.R
+      md5: d70068236956f5f5edd497ee7f68f261
+      size: 22590
+    - path: fit-infection-kalman.R
+      md5: 1d43898c171a4ae8deca52f91f97e7f2
+      size: 11964
+    - path: fits/2021-04-12-fips06/fit.RData
+      md5: 39cada51331176302dba15851919285e
+      size: 11802
+    - path: google-mobility-reports/2021-05-06
+      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
+      size: 114473434
+      nfiles: 2
+    - path: hopkins/2021-04-19
+      md5: 16b754993d2309ff0bddb1f71d220b4a.dir
+      size: 13627410
+      nfiles: 8
+    outs:
+    - path: fits/2021-04-19-fips06/fit-metrics.json
+      md5: cb9a964f1c0bccc27c0dec5ef886258c
+      size: 368
+    - path: fits/2021-04-19-fips06/fit.RData
+      md5: 35ca105491fb41337559f2cd3570658b
+      size: 12045
+  forecast-2021-04-19-06:
+    cmd: fdt=2021-04-19 loc=06 Rscript write-formatted-forecast.R
+    deps:
+    - path: covidhub-common.R
+      md5: d70068236956f5f5edd497ee7f68f261
+      size: 22590
+    - path: fits/2021-04-19-fips06/fit.RData
+      md5: 35ca105491fb41337559f2cd3570658b
+      size: 12045
+    - path: write-formatted-forecast.R
+      md5: b2a1de05e1b41d3f163a454237a62f13
+      size: 18451
+    outs:
+    - path: forecasts/2021-04-19-fips06
+      md5: 97a5f90e3be551561713676cf3b61edc.dir
+      size: 2206070
+      nfiles: 2
+    - path: plots/2021-04-19-fips06
+      md5: a5224d043eeb2ec2b537fcd2165a6644.dir
+      size: 1299481
+      nfiles: 8
