@@ -400,6 +400,7 @@ initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
   Rtfilt[(lf - m + 1):lf] <- NA
   Rtfilt[Rtfilt < 0] <- 0.1
   
+  H0init <- wfixed["p_h"] * wfixed["γ"] * Y0init / wfixed["γ_h"]
   D0 <- H0init * wfixed["γ_h"] / wfixed["γ_d"] * p_d_init
   X0init <- wfixed["N"] - L0init - Y0init - H0init - D0
   Xdecrement <- cumsum(lead(y$cases / x$ρ, n = l))
@@ -658,6 +659,11 @@ calc_kf_nll_r <-
         sim_means <- array(NA_real_, dim = c(dobs, nsimdays))
         sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays))
         
+        x_sim <- array(NA_real_, dim = c(dstate, nsimdays))
+        rownames(x_sim) <- names(x0)
+        P_sim <- array(NA_real_, dim = c(dstate, dstate, nsimdays))
+        
+        
         for (j in seq_len(nsimdays)) {
           if (j == 1) {
             xhat_init <- xhat_kk[, nobs]
@@ -707,6 +713,10 @@ calc_kf_nll_r <-
           
           sim_means[, j] <- hmat %*% XP[, 1]
           sim_cov[, , j] <- hmat %*% XP[, -1] %*% t(hmat) + r
+          
+          x_sim[, j] <- XP[, 1]
+          P_sim[, , j] <- XP[,-1]
+          
         }
       } else {
         sim_means <- sim_cov <- NULL
@@ -721,6 +731,8 @@ calc_kf_nll_r <-
         S = S,
         sim_means = sim_means,
         sim_cov = sim_cov,
+        x_sim = x_sim,
+        P_sim = P_sim,
         rdiagadj = rdiagadj
       )
     } else {

@@ -1,7 +1,5 @@
 #!/usr/bin/env R
 
-tictoc::tic()
-
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
@@ -373,11 +371,6 @@ write_forecasts <-
         just_nll = FALSE,
         fets = fets
       )
-    
-    
-    
-    
-    
     make_fit_plots(
       dets,
       cov = cov,
