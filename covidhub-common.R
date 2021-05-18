@@ -662,7 +662,6 @@ calc_kf_nll_r <-
         rownames(x_sim) <- names(x0)
         P_sim <- array(NA_real_, dim = c(dstate, dstate, nsimdays))
         
-        
         for (j in seq_len(nsimdays)) {
           if (j == 1) {
             xhat_init <- xhat_kk[, nobs]
@@ -695,9 +694,9 @@ calc_kf_nll_r <-
             β <- 1000
           }
           par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[nobs]], p_d, cov$ρ[nobs])
-          if (cov$wday[i] %in% c(1, 2)) {
+          if (cov_sim$wday[j] %in% c(1, 2)) {
             par[5] <-  γ_d12
-          } else if (cov$wday[i] %in% c(3, 4)) {
+          } else if (cov_sim$wday[j] %in% c(3, 4)) {
             par[5] <-  γ_d34
           }
           JuliaCall::julia_assign("u0", u0)
