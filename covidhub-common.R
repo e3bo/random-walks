@@ -585,7 +585,7 @@ calc_kf_nll_r <-
           P_kkmo[, j, i] <- 0
         }
       }
-      r <- diag(c(τ_c[cov$τ_cmap[i]] * xhat_init[3],  τ_h,   τ_d))
+      r <- diag(c(τ_c[cov$τ_cmap[i]] * xhat_init[2],  τ_h,   τ_d))
       ytilde_k[, i] <-
         matrix(zloc[i,], ncol = 1) - hmat %*% xhat_kkmo[, i, drop = FALSE]
       S[, , i] <- hmat %*% P_kkmo[, , i] %*% t(hmat) + r
@@ -652,7 +652,6 @@ calc_kf_nll_r <-
         log(det(S[, , i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
     }
     nll <- 0.5 * nll - rwlik
-    
     if (!just_nll) {
       if (!is.null(cov_sim)) {
         nsimdays <- nrow(cov_sim)
@@ -709,7 +708,7 @@ calc_kf_nll_r <-
             JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
           
           r <-
-            diag(c(τ_c[cov$τ_cmap[nobs]] * xhat_init[3],  τ_h,   τ_d))
+            diag(c(τ_c[cov$τ_cmap[nobs]] * xhat_init[2],  τ_h,   τ_d))
           
           sim_means[, j] <- hmat %*% XP[, 1]
           sim_cov[, , j] <- hmat %*% XP[, -1] %*% t(hmat) + r

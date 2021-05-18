@@ -252,8 +252,9 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
     vname = "cumulative_all_infections"
   ) %>% add_scenarios()
   
+  browser()
   ret[[4]] <- gendf(mean = c(dets$xhat_kkmo["Z_r",], dets$sim_means[1, ]),
-                    sd = sqrt(c(dets$S[1, 1,], dets$sim_var[1,1,])),
+                    sd = sqrt(c(dets$S[1, 1,], dets$sim_cov[1,1,])),
                     vname = "daily_cases") %>% add_scenarios()
   
   ret[[5]] <- gendf(
@@ -264,7 +265,7 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
   ) %>% add_scenarios()
   
   ret[[6]] <- gendf(mean = c(dets$xhat_kkmo["A",], dets$sim_means[2,]),
-                    sd = sqrt(c(dets$S[2, 2,], dets$sim_var[2,2,])),
+                    sd = sqrt(c(dets$S[2, 2,], dets$sim_cov[2,2,])),
                     vname = "daily_hosps") %>% add_scenarios()
   
   ret[[7]] <- gendf(
@@ -275,7 +276,7 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
   ) %>% add_scenarios()
   
   ret[[8]] <- gendf(mean = c(dets$xhat_kkmo["D_r",], dets$sim_means[3,]),
-                    sd = sqrt(c(dets$S[3, 3,], dets$sim_var[3,3,])),
+                    sd = sqrt(c(dets$S[3, 3,], dets$sim_cov[3,3,])),
                     vname = "daily_deaths") %>% add_scenarios()
   
   ret[[9]] <- gendf(

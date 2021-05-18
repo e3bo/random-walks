@@ -176,7 +176,7 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
             end
         end
         pkkmo[:,:,i] .= pnext
-        r = Diagonal([τ_c[cov.τ_cmap[i]] * xlast[3], τ_h, τ_d]) 
+        r = Diagonal([τ_c[cov.τ_cmap[i]] * xlast[2], τ_h, τ_d]) 
         
         Σ[:,:,i] = hmat * pkkmo[:,:,i] * hmat' + r
 
