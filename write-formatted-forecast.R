@@ -172,7 +172,7 @@ create_forecast_df <- function(means,
                                       value)
 }
 
-make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed){
+make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_sim){
   abb <- covidcast::fips_to_abbr(paste0(forecast_loc, "000"))
   snm <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
   pop <- covidHubUtils::hub_locations %>%
@@ -210,12 +210,14 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed){
     ) %>%
     mutate(median_value = mean_value)
   
+  cov_all <- rbind(cov[, names(cov_status_quo)], cov_status_quo)
+  
   gendf <- function(mean, median = mean, sd, vname) {
     df <- bind_cols(
       location = snm,
       scenario = NA,
       period = "Past",
-      date = cov$target_end_date,
+      date = cov_all$target_end_date,
       populationsize = pop,
       state_abr = abb,
       variable = vname,
@@ -239,52 +241,53 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed){
     purrr::map(scens, tmpf) %>% bind_rows()
   }
   
-  ret[[2]] <- gendf(mean = dets$xhat_kk["Y",],
-                    sd = sqrt(dets$P_kk[2, 2,]),
+  ret[[2]] <- gendf(mean = c(dets$xhat_kk["Y",], dets$x_sim[2,]),
+                    sd = sqrt(c(dets$P_kk[2, 2,], dets$P_sim[2,2,])),
                     vname = "daily_all_infections") %>% add_scenarios()
   
   ret[[3]] <- gendf(
-    mean = wfixed["N"] - dets$xhat_kk["X",],
+    mean = wfixed["N"] - c(dets$xhat_kk["X",], dets$x_sim[1,]),
     median = NA,
-    sd = sqrt(dets$P_kk[1, 1, ]),
+    sd = sqrt(c(dets$P_kk[1, 1, ], dets$P_sim[1, 1, ]  )),
     vname = "cumulative_all_infections"
   ) %>% add_scenarios()
   
-  ret[[4]] <- gendf(mean = dets$xhat_kkmo["Z_r",],
-                    sd = sqrt(dets$S[1, 1,]),
+  ret[[4]] <- gendf(mean = c(dets$xhat_kkmo["Z_r",], dets$sim_means[1, ]),
+                    sd = sqrt(c(dets$S[1, 1,], dets$sim_var[1,1,])),
                     vname = "daily_cases") %>% add_scenarios()
   
   ret[[5]] <- gendf(
-    mean = cumsum(dets$xhat_kkmo["Z_r",]),
+    mean = cumsum(c(dets$xhat_kkmo["Z_r",], dets$sim_means[1, ])),
     median = NA,
     sd = NA,
     vname = "cumulative_cases"
   ) %>% add_scenarios()
   
-  ret[[6]] <- gendf(mean = dets$xhat_kkmo["A",],
-                    sd = sqrt(dets$S[2, 2,]),
+  ret[[6]] <- gendf(mean = c(dets$xhat_kkmo["A",], dets$sim_means[2,]),
+                    sd = sqrt(c(dets$S[2, 2,], dets$sim_var[2,2,])),
                     vname = "daily_hosps") %>% add_scenarios()
   
   ret[[7]] <- gendf(
-    mean = cumsum(dets$xhat_kkmo["A",]),
+    mean = cumsum( c(dets$xhat_kkmo["A",], dets$sim_means[2,] )   )  ,
     median = NA,
     sd = NA,
     vname = "cumulative_hosps"
   ) %>% add_scenarios()
   
-  ret[[8]] <- gendf(mean = dets$xhat_kkmo["D_r",],
-                    sd = sqrt(dets$S[3, 3,]),
+  ret[[8]] <- gendf(mean = c(dets$xhat_kkmo["D_r",], dets$sim_means[3,]),
+                    sd = sqrt(c(dets$S[3, 3,], dets$sim_var[3,3,])),
                     vname = "daily_deaths") %>% add_scenarios()
   
   ret[[9]] <- gendf(
-    mean = cumsum(dets$xhat_kkmo["D_r",]),
+    mean = cumsum(c(dets$xhat_kkmo["D_r",], dets$sim_means[3,])),
     median = NA,
     sd = NA,
     vname = "cumulative_deaths"
   ) %>% add_scenarios()
+
   
   no_hosps <- all(is.na(dets$ytilde_k[2, ]))
-  rt <- calc_rt(fit, cov, no_hosps, wfixed)
+  rt <- calc_rt(fit, cov_all, no_hosps, wfixed)
   
   ret[[10]] <- gendf(
     mean = rt,
@@ -314,7 +317,7 @@ write_scenarios <- function(fit,
                             cov,
                             z,
                             wfixed,
-                            fets,
+                            cov_sim,
                             p_hsd,
                             β_0sd,
                             τ_csd,
@@ -330,7 +333,7 @@ write_scenarios <- function(fit,
       τ_csd =  τ_csd,
       wfixed = wfixed,
       just_nll = FALSE,
-      fets = fets
+      cov_sim = cov_sim
     )
   usd <-
     make_dashboard_input(
@@ -339,7 +342,8 @@ write_scenarios <- function(fit,
       z = z,
       forecast_loc = forecast_loc,
       fit = fit,
-      wfixed = wfixed
+      wfixed = wfixed,
+      cov_sim = cov_sim
     )
   
   fcst_dir <-
@@ -664,18 +668,32 @@ write_forecasts(
   forecast_loc = forecast_loc
 )
 
-tf2 <- ti + lubridate::ddays(41)
+
+sim_days <- 42
+tf2 <- ti + lubridate::ddays(sim_days - 1)
 target_end_dates2 <- seq(from = ti, to = tf2, by = "day")
 target_end_times2 <- lubridate::decimal_date(target_end_dates2)
 target_wday2 <- lubridate::wday(target_end_dates2)
-fets_scenarios <- tibble(target_end_times2, target_wday2, target_end_dates2)
+
+doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
+sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(sim_days) * doses_slope
+
+cov_status_quo <-
+  tibble(
+    time = target_end_times2,
+    wday = target_wday2,
+    target_end_date = target_end_dates2,
+    doses_scaled = sim_doses,
+    residential = tail(x$residential, n = 1),
+    β_0map = tail(x$β_0map, 1)
+  )
 
 write_scenarios(
   fit = fit1,
   cov = x,
   z = z,
   wfixed = wfixed,
-  fets = fets_scenarios,
+  cov_sim = cov_status_quo,
   p_hsd = p_hsd,
   β_0sd = β_0sd, 
   τ_csd = τ_csd,  

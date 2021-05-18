@@ -312,7 +312,6 @@ while(nrestarts > 0  && fit1$convergence == -1001L){
   nrestarts <- nrestarts - 1
 }
 
-if (FALSE) {
 tictoc::tic("hessian 1")
 h1 <- calc_kf_hess(
   w = fit1$par,
@@ -324,9 +323,7 @@ h1 <- calc_kf_hess(
   wfixed = wfixed
 )
 tictoc::toc()
-} else {
-  h1 <- diag(nrow = length(winit))
-}
+
 ## Save outputs
 
 fit_dir <-
@@ -360,7 +357,8 @@ stopifnot(isTRUE(all.equal(dets1$nll[1,1], fit1$value, tol = 1e-6)))
 
 mae1 <- rowMeans(abs(dets1$ytilde_k), na.rm = TRUE)
 naive_error <- colMeans(abs(apply(z, 2, diff)), na.rm = TRUE)
-naive_error_weekly <- colMeans(abs(z[-c(1:7),] - z[-((nrow(z) - 6):nrow(z)),]), na.rm = TRUE)
+naive_error_weekly <-
+  colMeans(abs(z[-c(1:7), ] - z[-((nrow(z) - 6):nrow(z)), ]), na.rm = TRUE)
 
 if (ncol(z) == 2) {
   mase1 <- mae1 / c(naive_error["cases"], NA, naive_error["deaths"])

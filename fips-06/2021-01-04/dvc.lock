@@ -4,14 +4,14 @@ stages:
     cmd: fdtstart=2020-12-28 fdt=2021-01-04 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: d70068236956f5f5edd497ee7f68f261
-      size: 22590
+      md5: 26d4eddd5c4f13f3ca20860ea1b8452d
+      size: 22657
     - path: fit-infection-kalman.R
-      md5: 1d43898c171a4ae8deca52f91f97e7f2
-      size: 11964
+      md5: 0e90d45e7c85aa17674deb4eaa20da15
+      size: 12074
     - path: fits/2020-12-28-fips06/fit.RData
-      md5: 024f5b8ab487009c555edd7c64d9c28c
-      size: 8031
+      md5: 8138bdea1744804cb1108b3e01c66f15
+      size: 40268
     - path: google-mobility-reports/2021-05-06
       md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
       size: 114473434
@@ -22,11 +22,11 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2021-01-04-fips06/fit-metrics.json
-      md5: dd8cf0a9b3b0b83a46e432d960a45563
-      size: 369
+      md5: 7c78dafbb938c162a0c27bc44e0622c8
+      size: 364
     - path: fits/2021-01-04-fips06/fit.RData
-      md5: f519ee43f027227ccc0abd43c041d8df
-      size: 8164
+      md5: dc7f76b3bdfda49f64407b634fa9fb8e
+      size: 41441
   forecast-2021-01-04-06:
     cmd: fdt=2021-01-04 loc=06 Rscript write-formatted-forecast.R
     deps:

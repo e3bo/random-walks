@@ -441,7 +441,7 @@ calc_kf_nll_r <-
            β_0sd,
            τ_csd,
            wfixed,
-           fets = NULL,
+           cov_sim = NULL,
            fet_zero_cases_deaths = "daily",
            just_nll = TRUE) {
     diffeqr::diffeq_setup("/opt/julia-1.5.3/bin")
@@ -654,8 +654,8 @@ calc_kf_nll_r <-
     nll <- 0.5 * nll - rwlik
     
     if (!just_nll) {
-      if (!is.null(fets)) {
-        nsimdays <- nrow(fets)
+      if (!is.null(cov_sim)) {
+        nsimdays <- nrow(cov_sim)
         sim_means <- array(NA_real_, dim = c(dobs, nsimdays))
         sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays))
         
@@ -674,7 +674,7 @@ calc_kf_nll_r <-
           }
           
           if (fet_zero_cases_deaths == "daily" ||
-              fets$target_wday[j] == 1) {
+              cov_sim$target_wday[j] == 1) {
             xhat_init[5] <- 0
             PNinit[, 5] <- PNinit[5,] <- 0
             xhat_init[9] <- 0
@@ -687,15 +687,15 @@ calc_kf_nll_r <-
           
           if ("doses_scaled" %in% names(cov)) {
             β   <-
-              exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$doses_scaled[i])
+              exp(β_0[cov$β_0map[nobs]] + residentialeffect * cov_sim$residential[j] + doseeffect * cov_sim$doses_scaled[j])
           } else {
             β   <-
-              exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i])
+              exp(β_0[cov$β_0map[nobs]] + residentialeffect * cov_sim$residential[j])
           }
           if(β > 1000){
             β <- 1000
           }
-          par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h, p_d, cov$ρ[i])
+          par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[nobs]], p_d, cov$ρ[nobs])
           if (cov$wday[i] %in% c(1, 2)) {
             par[5] <-  γ_d12
           } else if (cov$wday[i] %in% c(3, 4)) {
