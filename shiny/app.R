@@ -117,6 +117,7 @@ server <- function(input, output, session)
   ###########################################
   # function that re-reads the data every so often
   ###########################################
+  if (FALSE) {
   all_data <- reactivePoll(intervalMillis = 1000*60*60*3, # pull new data every N hours
                            session = NULL,
                            checkFunc = function() {Sys.time()}, #this will always return a different value, which means at intervals specified by intervalMillis the new data will be pulled
@@ -127,9 +128,12 @@ server <- function(input, output, session)
                                             get_data()
                                           } ) #end with-progress wrapper
                              }) #end reactive poll
+  } else {
+    all_dat <- readRDS(file = file.path("data", "dashboard.rds")) 
+  }
   
   #read data is reactive, doesn't work for rest below 
-  all_dat = isolate(all_data())
+  #all_dat = isolate(all_data())
   # pull data out of list 
   us_dat = all_dat$us_dat 
   #define variables for location and scenario selectors
@@ -286,6 +290,7 @@ server <- function(input, output, session)
       maxy = max(p_dat$mean_value, na.rm = TRUE)
     }
     
+    miny <- 0
     if(outtype == "vaccine_effect")
     {
       p_dat <- plot_dat %>% 
@@ -310,6 +315,7 @@ server <- function(input, output, session)
         layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
       
       maxy = max(p_dat$mean_value, na.rm = TRUE)
+      miny = min(p_dat$mean_value, na.rm = TRUE)
     }
 
     #add date marker
@@ -318,7 +324,7 @@ server <- function(input, output, session)
       pl <- pl %>% plotly::add_segments(
         x = rundate,
         xend = rundate,
-        y = 0,
+        y = miny,
         yend = maxy,
         name = rundate,
         color = I("black"),
