@@ -284,7 +284,7 @@ server <- function(input, output, session)
                           showlegend = FALSE, 
                           color = ~scenario, colors = colorset) %>%
         layout(xaxis = list(title = "Date")) %>%
-        layout(yaxis = list(title="Reproduction Number", type = yscale, size = 18)) %>%
+        layout(yaxis = list(title="Reproduction\nNumber R", type = yscale, size = 18)) %>%
         layout(legend = list(orientation = "h", x = 0.2, y = -0.3)) %>%
         plotly::layout(shapes = list(
           type = "line", 
