@@ -285,6 +285,22 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
     vname = "combined_trend"
   )
   
+  if ("doses_scaled" %in% names(cov)){
+    ret[[11]] <- gendf(
+      mean = fit$par[5] * cov_all$doses_scaled,
+      median = NA,
+      sd = NA,
+      vname = "vaccine_effect"
+    )
+  } else {
+    ret[[11]] <- gendf(
+      mean = 0,
+      median = NA,
+      sd = NA,
+      vname = "vaccine_effect"
+    )
+  }
+  
   retall <-
     bind_rows(ret) %>% select(
       location,
@@ -341,8 +357,8 @@ write_scenarios <- function(fit,
   ## remove duplicated real data time series
   usd2 <- usd %>% 
     filter(!(scenario %in% c("linear_increase_sd", "return_normal") & 
-               str_detect(variable, "^actual")))
-  test <- str_detect(usd2$variable, "^actual")
+               str_detect(variable, "^actual|^vaccine")))
+  test <- str_detect(usd2$variable, "^actual|^vaccine")
   usd2$scenario[test] <- NA
   fcst_dir <-
     file.path("forecasts",

@@ -210,7 +210,7 @@ server <- function(input, output, session)
     colorset = c('linear_increase_sd'='#5798d1','return_normal'='#a11c3e','status_quo'='#319045')
     
     # make plot
-    if(outtype != "combined_trend")
+    if(!outtype %in% c("combined_trend", "vaccine_effect"))
     {
       p_dat <- plot_dat %>% 
         filter(variable == outcome) %>%
@@ -285,6 +285,32 @@ server <- function(input, output, session)
       
       maxy = max(p_dat$mean_value, na.rm = TRUE)
     }
+    
+    if(outtype == "vaccine_effect")
+    {
+      p_dat <- plot_dat %>% 
+        filter(variable == "vaccine_effect") %>%
+        group_by(location) %>%
+        arrange(date)
+      
+      #make reactive legend names based on picker inputs
+      #legend_name <- build_legend(p_dat)
+      
+      pl <- p_dat %>%
+        plotly::plot_ly() %>% 
+        plotly::add_trace(x = ~date, y = ~mean_value, type = 'scatter', 
+                          mode = 'lines', 
+                          linetype = ~location, 
+                          line = list(width = linesize), 
+                          name = "all scenarios", #~legend_name,
+                          showlegend = FALSE
+                          ) %>%
+        layout(xaxis = list(title = "Date")) %>%
+        layout(yaxis = list(title="Effect of Vaccination\non Reproduction Number", type = yscale, size = 18)) %>%
+        layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
+      
+      maxy = max(p_dat$mean_value, na.rm = TRUE)
+    }
 
     #add date marker
     
@@ -328,6 +354,9 @@ server <- function(input, output, session)
     #transmission strength plot
     p1 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, "Daily",
                       input$xscale, input$yscale, "absolute", input$x_limit,  input$conf_int, ylabel = 1, outtype = "combined_trend")
+    
+    p1.5 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, "Daily",
+                        input$xscale, input$yscale, "absolute", input$x_limit,  input$conf_int, ylabel = 1, outtype = "vaccine_effect")
     #create case plot
     p2 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, input$daily_tot,
                       input$xscale, input$yscale, input$absolute_scaled, input$x_limit, input$conf_int, ylabel = 1, outtype = "cases")
@@ -343,8 +372,8 @@ server <- function(input, output, session)
     p4 <- make_plotly(us_dat, input$state_selector, input$scenario_selector, input$daily_tot,
                       input$xscale, input$yscale, input$absolute_scaled, input$x_limit, input$conf_int, ylabel = 1, outtype = "all_infections")
   
-  all_plots <-  plotly::subplot(p1, p2, p2.5, p3, p4, 
-                    nrows = 5, heights = c(.2,.2,.2,.2,.2), 
+  all_plots <-  plotly::subplot(p1, p1.5, p2, p2.5, p3, p4, 
+                    nrows = 6, heights = rep(1, 6)  / 6, 
                     shareX = TRUE, titleY = TRUE
     )
   }
