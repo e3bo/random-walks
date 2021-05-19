@@ -717,7 +717,7 @@ calc_kf_nll_r <-
           
         }
       } else {
-        sim_means <- sim_cov <- NULL
+        sim_means <- sim_cov <- x_sim <- P_sim <- NULL
       }
       list(
         nll = nll,
