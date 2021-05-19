@@ -338,7 +338,12 @@ write_scenarios <- function(fit,
     )
   }
   usd <- map2(dets, cov_sim, tmpf) %>% bind_rows(.id = "scenario")
-  browser()
+  ## remove duplicated real data time series
+  usd2 <- usd %>% 
+    filter(!(scenario %in% c("linear_increase_sd", "return_normal") & 
+               str_detect(variable, "^actual")))
+  test <- str_detect(usd2$variable, "^actual")
+  usd2$scenario[test] <- NA
   fcst_dir <-
     file.path("forecasts",
               paste0(forecast_date,
@@ -350,7 +355,7 @@ write_scenarios <- function(fit,
   path <- file.path(fcst_dir, fname)
   if (!dir.exists(fcst_dir))
     dir.create(fcst_dir, recursive = TRUE)
-  write_rds(list(us_dat = usd), path = path)
+  write_rds(list(us_dat = usd2), path = path)
 }
 
 write_forecasts <-
@@ -379,9 +384,10 @@ write_forecasts <-
       fdt = fdt,
       forecast_loc = forecast_loc,
       fit = fit,
-      wfixed = wfixed
+      wfixed = wfixed,
+      cov_sim = cov_sim
     )
-    case_inds <- which(fets$target_wday == 7)
+    case_inds <- which(cov_sim$target_wday == 7)
     if (lubridate::wday(fdt) > 2) {
       case_inds <-
         case_inds[-1] # drop first epiweek, which has been observed too much 
@@ -394,10 +400,10 @@ write_forecasts <-
         fdt = fdt
       )
     stopifnot(setequal(
-      fets$target_end_dates[case_inds],
+      cov_sim$target_end_dates[case_inds],
       case_fcst$target_end_date %>% unique()
     ))
-    hosp_inds <- fets$target_end_dates %in%
+    hosp_inds <- cov_sim$target_end_dates %in%
       (lubridate::ymd(forecast_date) + 1:28)
     hosp_fcst <-
       create_forecast_df(
@@ -408,7 +414,7 @@ write_forecasts <-
         fdt = fdt
       )
     stopifnot(setequal(
-      fets$target_end_dates[hosp_inds],
+      cov_sim$target_end_dates[hosp_inds],
       hosp_fcst$target_end_date %>% unique()
     ))
     
@@ -440,7 +446,7 @@ write_forecasts <-
     write_csv(x = fcst, path = fcst_path)
   }
 
-make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, forecast_loc, fit, wfixed) {
+make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, forecast_loc, fit, wfixed, cov_sim) {
   plot_dir <-
     file.path("plots",
               paste0(forecast_date,
@@ -520,7 +526,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, fore
   dev.off()
   
   plot_path3 <- file.path(plot_dir, "case-forecasts.png")
-  case_inds <- which(fets$target_wday == 7)
+  case_inds <- which(cov_sim$target_wday == 7)
   case_fcst <-
     create_forecast_df(
       means = dets$sim_means[1, case_inds],
@@ -539,7 +545,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, fore
   
   plot_path4 <- file.path(plot_dir, "hosp-forecasts.png")
   hosp_inds <-
-    fets$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
+    cov_sim$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
   stopifnot(sum(hosp_inds) == 28)
   
   hosp_fcst <-
