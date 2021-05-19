@@ -354,7 +354,7 @@ write_scenarios <- function(fit,
 }
 
 write_forecasts <-
-  function(fit, cov, z, winit, wfixed, hess, fets, p_hsd, β_0sd, τ_csd, fdt, forecast_loc) {
+  function(fit, cov, z, winit, wfixed, hess, cov_sim, p_hsd, β_0sd, τ_csd, fdt, forecast_loc) {
     
     dets <-
       calc_kf_nll_r(
@@ -366,7 +366,7 @@ write_forecasts <-
         τ_csd = τ_csd,
         wfixed = wfixed,
         just_nll = FALSE,
-        fets = fets
+        cov_sim = cov_sim
       )
     make_fit_plots(
       dets,
@@ -640,11 +640,23 @@ if (fdtw > 2) {
 } else {
   extra <- 0
 }
-tf <- lubridate::ymd(forecast_date) + lubridate::ddays(28 + extra)
+sim_weekly_days <- 28 + extra
+tf <- lubridate::ymd(forecast_date) + lubridate::ddays(sim_weekly_days)
 target_end_dates <- seq(from = ti, to = tf, by = "day")
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
-fets <- tibble(target_end_times, target_wday, target_end_dates)
+
+doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
+weekly_sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(1 + sim_weekly_days) * doses_slope
+
+cov_weekly_fcst <- tibble(
+  time = target_end_times,
+  wday = target_wday,
+  target_end_dates,
+  doses_scaled = weekly_sim_doses,
+  residential = tail(x$residential, n = 1),
+  β_0map = tail(x$β_0map, 1)
+)
 
 write_forecasts(
   fit = fit1,
@@ -656,7 +668,7 @@ write_forecasts(
   p_hsd = p_hsd,
   β_0sd = β_0sd, 
   τ_csd = τ_csd,
-  fets = fets,
+  cov_sim = cov_weekly_fcst,
   fdt = forecast_date,
   forecast_loc = forecast_loc
 )
@@ -669,16 +681,6 @@ target_wday2 <- lubridate::wday(target_end_dates2)
 
 doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
 sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(sim_days) * doses_slope
-
-cov_status_quo <-
-  tibble(
-    time = target_end_times2,
-    wday = target_wday2,
-    target_end_date = target_end_dates2,
-    doses_scaled = sim_doses,
-    residential = tail(x$residential, n = 1),
-    β_0map = tail(x$β_0map, 1)
-  )
 
 cov_status_quo <-
   tibble(
