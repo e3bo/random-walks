@@ -285,7 +285,16 @@ server <- function(input, output, session)
                           color = ~scenario, colors = colorset) %>%
         layout(xaxis = list(title = "Date")) %>%
         layout(yaxis = list(title="Reproduction Number", type = yscale, size = 18)) %>%
-        layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
+        layout(legend = list(orientation = "h", x = 0.2, y = -0.3)) %>%
+        plotly::layout(shapes = list(
+          type = "line", 
+          x0 = 0, 
+          x1 = 1, 
+          xref = "paper",
+          y0 = 1, 
+          y1 = 1, 
+          line = list(dash = 'dash')
+        ))
       
       maxy = max(p_dat$mean_value, na.rm = TRUE)
     }
@@ -312,7 +321,7 @@ server <- function(input, output, session)
                           showlegend = FALSE
                           ) %>%
         layout(xaxis = list(title = "Date")) %>%
-        layout(yaxis = list(title="Effect of Vaccination\non Reproduction Number", type = yscale, size = 18)) %>%
+        layout(yaxis = list(title="Effect of Vaccination on R", type = yscale, size = 18)) %>%
         layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
       
       maxy = max(p_dat$mean_value, na.rm = TRUE)
