@@ -270,7 +270,7 @@ server <- function(input, output, session)
         filter(scenario %in% scenario_selector) %>%
         group_by(scenario,location) %>%
         arrange(date)
-      
+      yscale <- "lin"
       #make reactive legend names based on picker inputs
       legend_name <- build_legend(p_dat, scenario_var)
 
@@ -297,6 +297,7 @@ server <- function(input, output, session)
         filter(variable == "vaccine_effect") %>%
         group_by(location) %>%
         arrange(date)
+      yscale <- "lin"
       
       #make reactive legend names based on picker inputs
       #legend_name <- build_legend(p_dat)
