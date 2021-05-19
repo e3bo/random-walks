@@ -181,8 +181,8 @@ server <- function(input, output, session)
     if (outtype == 'combined_trend') {outcome = outtype}
     
     #create y-axis names
-    y_tag = c(" Cases"," Deaths"," All Infected", " Hospitalizations")
-    ylabel = paste0(daily_tot,y_tag,sep=" ")
+    y_tag = c("Cases","Deaths","All Infected", "Hospitalizations")
+    ylabel = paste(daily_tot,y_tag,sep="\n")
     ylabel = capitalize_first(ylabel)
     #apply names to plots by outtype
     if (outtype == 'cases') {ylabel = ylabel[1]}
@@ -321,7 +321,7 @@ server <- function(input, output, session)
                           showlegend = FALSE
                           ) %>%
         layout(xaxis = list(title = "Date")) %>%
-        layout(yaxis = list(title="Effect of Vaccination on R", type = yscale, size = 18)) %>%
+        layout(yaxis = list(title="Effect of \nVaccination on R", type = yscale, size = 18)) %>%
         layout(legend = list(orientation = "h", x = 0.2, y = -0.3))
       
       maxy = max(p_dat$mean_value, na.rm = TRUE)
