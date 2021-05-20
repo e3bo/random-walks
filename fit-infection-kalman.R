@@ -35,8 +35,11 @@ if (forecast_date <= "2021-05-06"){
 } else if (forecast_date <= "2021-05-14"){
   mob1 <- load_google_mobility("2021-05-14") %>% 
     filter(date < lubridate::ymd(forecast_date) - lubridate::ddays(4))
-} else {
-  stop("Loading mobility date not implemented for forecast dates beyond 2021-05-06")
+} else if (forecast_date <= "2021-05-19"){
+  mob1 <- load_google_mobility("2021-05-19") %>% 
+    filter(date < lubridate::ymd(forecast_date) - lubridate::ddays(4)) 
+  } else {
+  stop("Loading mobility date not implemented for forecast dates beyond 2021-05-19")
 }
 
 

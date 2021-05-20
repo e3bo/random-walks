@@ -74,7 +74,7 @@ RUN wget https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.3-linux-
 RUN tar zxvf julia-1.5.3-linux-x86_64.tar.gz
 ENV PATH="${PATH}:/opt/julia-1.5.3/bin"
 USER rstudio
-RUN /opt/julia-1.5.3/bin/julia -e 'using Pkg; Pkg.add(name = "MbedTLS", version = "0.7.0"); Pkg.add.(["CSVFiles", "DataFrames", "DiffEqSensitivity", "Distributions", "ForwardDiff", "LinearAlgebra", "Optim", "OrdinaryDiffEq"])'
+RUN /opt/julia-1.5.3/bin/julia -e 'using Pkg; Pkg.add(name = "MbedTLS", version = "0.7.0"); Pkg.add.(["Catalyst", "CSVFiles", "DataFrames", "DiffEqSensitivity", "Distributions", "ForwardDiff", "LinearAlgebra", "Optim", "OrdinaryDiffEq"])'
 USER root
 WORKDIR ${RUNNER_PATH}
 
