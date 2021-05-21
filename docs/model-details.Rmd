@@ -9,7 +9,6 @@ header-includes: \usepackage{amsmath}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
-library(here)
 library(tidyverse)
 source("../covidhub-common.R")
 #source(here::here("code/plotting/plotoverview.R"))
@@ -32,7 +31,7 @@ We show the state-level data here for California.
 
 ```{r read-data, fig.width=7}
 
-forecast_date <- Sys.getenv("fdt", unset = "2021-04-12")
+forecast_date <- Sys.getenv("fdt", unset = "2021-05-17")
 forecast_locs <- c("06") 
 
 hopdir <- file.path("../hopkins", forecast_date)
@@ -104,7 +103,7 @@ wind %>% ggplot(aes(x=target_end_date,  y = value)) + geom_col() +
 
 #### Social distancing / mobility data
 
-To date, the primary interventions in all states have been vaccination and the adoption of social distancing behaviors and improved hygiene.
+Prior to the availability of vaccination, the primary interventions in all states was the adoption of social distancing behaviors and improved hygiene.
 To quantify social distancing, we use indicators of aggregate behavior available from Google [^2].
 
 
@@ -118,7 +117,7 @@ We apply a rolling average because we do not attempt to model day-of-the-week ef
 
 sel_states <- forecast_locs %>% paste0("000") %>% covidcast::fips_to_name()
 
-mob <- load_google_mobility("2021-05-06", rootdir = "..") %>%
+mob <- load_google_mobility("2021-05-19", rootdir = "..") %>%
   filter(sub_region_1 %in% sel_states) %>% group_by(sub_region_1) %>%
   mutate(rollmean = zoo::rollmean(residential_percent_change_from_baseline, k = 7, fill = NA)) %>% 
   mutate(residential = zoo::na.approx(rollmean, rule = 2))
@@ -130,27 +129,46 @@ mob %>%
 
 ```
 
-### Scenarios
 
-We explore a range of scenarios for transmission.
-Simulations in each state start on March 2, 2020.
-The model is fit to data on reported cases, hospitalizations, and deaths available up to `r format(Sys.time(), '%B %d, %Y')` and propagated six weeks into the future.
+##### Vaccination data
 
-*Possible futures scenarios*
+Vaccination is now available and has proven critical to the control of the pandemic. 
+We use vaccination time series in [this repository](https://www.github.com/govex/COVID-19) created by Johns Hopkins University which was obtained from state and CDC dashboards.
 
-We consider three possible futures scenarios. Our scenarios are all driven by changes in human mobility: increasing human mobility increases transmission rate, while decreasing mobility decreases transmission rate.
-Our model includes a latent trend in transmission to account for all other factors that make transmission rate vary over time.
-When projecting into the future, we use the most recent value of the fitted latent trend and use the naive forecast that it will stay the same in the next 6 weeks.
+```{r vaccination, eval = TRUE, fig.height=3}
 
-1. **Increasing social distancing.** Social distancing increases, increasing the current observed percent change from baseline to 30%, which is roughly the value of the metric in New York City at the time when the first wave of infection began to dissipate. 
-Social distancing has the impact of reducing transmission rate. Thus, it is possible that other measures -- such as wide-spread, consistent wearing of face masks -- could achieve the same or similar level of transmission reduction that we model as an affect of social distancing.
+vacc_path <- file.path("..",
+                       "hopkins-vaccine",
+                       forecast_date,
+                       "vaccine_data_us_timeline.csv")
 
-2. **Maintain social distancing.** Social distancing continues at the last observed level of human movement patterns and the epidemic trajectory continues to follow it's most recent path, which is also influenced by the latent trend. 
-Our model captures current increases in case/death reports by allowing transmission rate to increase either due to mobility or the fitted latent trend. 
-Thus, even if mobility remains constant, the most recent increase in transmission causes the trajectory to increase in many cases. 
-As during the beginning of the epidemic, such exponential growth can, and likely will be, averted by increase vigilance through social distancing and other practices that reduce transmission.
+vacc_ts <- read_csv(
+  vacc_path,
+  col_types = cols_only(
+    FIPS = col_double(),
+    Vaccine_Type = col_character(),
+    Doses_admin = col_double(),
+    Date = col_date()
+  )
+) %>%
+  mutate(FIPS = sprintf("%02d", FIPS)) %>%
+  filter(FIPS %in% forecast_locs & Vaccine_Type == "All") %>%
+  select(Date, Doses_admin) %>%
+  rename(target_end_date = Date, doses = Doses_admin)
 
-4. **Return to normal.** Social distancing returns to a level of human movement equivalent to baseline. 
+i <- 1 #replace leading NAs with 0
+while (is.na(vacc_ts$doses[i])) {
+  vacc_ts$doses[i] <- 0
+  i <- i + 1
+}
+vacc_ts2 <- vacc_ts %>% mutate(doses = zoo::na.approx(doses, rule = 2))
+vacc_ts2 %>%
+  ggplot(aes(x = target_end_date, y = doses)) +
+  geom_line() +
+  labs(y = "Doses adminsistered", x = "Date")
+
+    
+```
 
 
 ### Model details
@@ -192,11 +210,12 @@ The system of ordinary differential equations for the expected value of state va
 \frac{dD_r(t)}{dt} =& \gamma_{d} D\left( t \right)
 \end{align*}
 
+This diagram provides a visualization of these equations:
 
-A diagram of the individual level reactions of our model is:
-```{r pomp-model}
-knitr::include_graphics(here::here("docs",'model2.png'))
+```{r ode-diagram}
+knitr::include_graphics("ode-diagram.png")
 ```
+The three compartments at the right side of the diagram enclosed by a grey background correspond to our observable variables: case notifications, hospital admissions, and death notifications.
 
 #### Interventions
 
