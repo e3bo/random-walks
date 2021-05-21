@@ -2,9 +2,9 @@
 output:
   html_document:
     df_print: paged
-    title: Model Details
   pdf_document: default
 header-includes: \usepackage{amsmath}
+title: Model of COVID-19 transmission in the U.S.A. by state
 ---
 
 ```{r setup, include=FALSE}
@@ -13,9 +13,6 @@ library(tidyverse)
 source("../covidhub-common.R")
 #source(here::here("code/plotting/plotoverview.R"))
 ```
-
-## Model of COVID-19 transmission in the U.S.A. by state
-Updated `r format(Sys.time(), '%B %d, %Y')`
 
 The epidemiology of COVID-19 is poorly understood.
 To better understand the potential range of epidemic outcomes in the U.S.A., we developed a model based on the accumulation of knowledge from various locations and fit it to state-level observations of the number of reported cases, hospital admissions, and deaths.
