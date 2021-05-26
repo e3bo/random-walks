@@ -488,6 +488,7 @@ calc_kf_nll_r <-
     Y0 <- L0 * η / γ
     H0 <- p_h[1] * γ * Y0 / γ_h
     D0 <- H0 *  γ_h /  γ_d * p_d
+    Z0 <- (p_h[cov$p_hmap[1]] + cov$ρ[1] * (1 - p_h[cov$p_hmap[1]])) * Y0 *  γ / γ_z
 
     x0 <- c(
       max(N - L0 - Y0 - H0 - D0, N * 0.1),
@@ -496,7 +497,7 @@ calc_kf_nll_r <-
       #Y
       min(L0, N),
       #L
-      min(cov$ρ[1] * Y0 *  γ  * (1 - p_h[cov$p_hmap[1]]) /  γ_z, N),
+      min(Z0, N),
       #Z
       0,
       #Z_r
