@@ -650,7 +650,7 @@ calc_kf_nll_r <-
       sel <- !zmiss[i,]
       nll <- nll +
         t(ytilde_k[sel, i]) %*% solve(S[sel, sel, i]) %*% ytilde_k[sel, i] +
-        log(det(S[, , i][sel, sel, drop = FALSE])) + dobs * log(2 * pi)
+        log(det(S[, , i][sel, sel, drop = FALSE])) + sum(sel) * log(2 * pi)
     }
     nll <- 0.5 * nll - rwlik
     if (!just_nll) {

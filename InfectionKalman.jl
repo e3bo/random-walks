@@ -224,7 +224,7 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 0.002732
     kflik = 0
     for i in 1:nobs
          sel = [!x for x in zmiss[i,:]]
-         kflik -= 0.5 * (ytkkmo[sel,i]' / Σ[sel, sel, i] * ytkkmo[sel,i] + log(det(Σ[sel, sel, i]))  + dobs * log(2 * pi))
+         kflik -= 0.5 * (ytkkmo[sel,i]' / Σ[sel, sel, i] * ytkkmo[sel,i] + log(det(Σ[sel, sel, i]))  + sum(sel) * log(2 * pi))
     end
     nll = -kflik - rwlik
     
