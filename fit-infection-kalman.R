@@ -224,7 +224,7 @@ if (forecast_date_start == forecast_date) {
   if (forecast_date >= "2020-11-16" &&
       forecast_date_start < "2020-11-16") {
     # initialize hospitalization parameters
-    τ_hinit <- var(na.omit(diff(z$hospitalizations)))
+    τ_hinit <- var(na.omit((z$hospitalizations)))
     is_NA_hosps <- is.na(z$hospitalizations)
     p_hinit <-
       sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
@@ -238,7 +238,7 @@ if (forecast_date_start == forecast_date) {
   } else {
     sizediff_p_h <- np_h - x$p_hmap[wsize - datediff]
     if (sizediff_p_h > 0) {
-      #extend p_h
+      #extend p_h 
       nw <- length(winit)
       last_val <- winit[nw - nβ_0]
       winit <-
