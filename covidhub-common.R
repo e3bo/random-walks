@@ -368,7 +368,7 @@ calc_kf_hess <- function(w, cov, z, p_hsd,  β_0sd,   τ_csd, wfixed) {
   g
 }
 
-initialize_estimates <- function(x, y, wfixed, dt = 0.00273224) {
+initialize_estimates <- function(x, y, wfixed, dt = 1 /365.25) {
   τ_c_init <- max(var(y$cases, na.rm = TRUE) / mean(y$cases, na.rm = TRUE), 1)
   nτ_c <- tail(x$τ_cmap, n = 1)
   np_h <- tail(x$p_hmap, n = 1)
@@ -657,7 +657,7 @@ calc_kf_nll_r <-
       if (!is.null(cov_sim)) {
         nsimdays <- nrow(cov_sim)
         sim_means <- array(NA_real_, dim = c(dobs, nsimdays))
-        sim_cov <- array(NA_real_, dim = c(dobs, dobs, nsimdays))
+        sim_Sigma <- sim_P <- sim_R <- array(NA_real_, dim = c(dobs, dobs, nsimdays))
         
         x_sim <- array(NA_real_, dim = c(dstate, nsimdays))
         rownames(x_sim) <- names(x0)
@@ -701,7 +701,7 @@ calc_kf_nll_r <-
             par[5] <-  γ_d34
           }
           JuliaCall::julia_assign("u0", u0)
-          JuliaCall::julia_assign("tspan", c(0, 0.00273224))
+          JuliaCall::julia_assign("tspan", c(0, 1 / 365.25))
           JuliaCall::julia_assign("par", par)
           JuliaCall::julia_eval("prob = ODEProblem(vectorfield,u0,tspan,par)")
           XP <-
@@ -711,14 +711,15 @@ calc_kf_nll_r <-
             diag(c(τ_c[cov$τ_cmap[nobs]] * xhat_init[2],  τ_h,   τ_d))
           
           sim_means[, j] <- hmat %*% XP[, 1]
-          sim_cov[, , j] <- hmat %*% XP[, -1] %*% t(hmat) + r
+          sim_P[, ,j] <- hmat %*% XP[, -1] %*% t(hmat)
+          sim_R[, ,j] <- r
+          sim_Sigma[, , j] <- hmat %*% XP[, -1] %*% t(hmat) + r
           
           x_sim[, j] <- XP[, 1]
           P_sim[, , j] <- XP[,-1]
-          
         }
       } else {
-        sim_means <- sim_cov <- x_sim <- P_sim <- NULL
+        sim_means <- sim_Sigma <- sim_R <- sim_P <- x_sim <- P_sim <- NULL
       }
       list(
         nll = nll,
@@ -729,7 +730,9 @@ calc_kf_nll_r <-
         ytilde_k = ytilde_k,
         S = S,
         sim_means = sim_means,
-        sim_cov = sim_cov,
+        sim_P = sim_P,
+        sim_R = sim_R,
+        sim_Sigma = sim_Sigma,
         x_sim = x_sim,
         P_sim = P_sim,
         rdiagadj = rdiagadj

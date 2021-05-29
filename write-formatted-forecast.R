@@ -389,6 +389,7 @@ write_forecasts <-
         just_nll = FALSE,
         cov_sim = cov_sim
       )
+    browser()
     make_fit_plots(
       dets,
       cov = cov,
