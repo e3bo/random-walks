@@ -663,6 +663,10 @@ calc_kf_nll_r <-
         rownames(x_sim) <- names(x0)
         P_sim <- array(NA_real_, dim = c(dstate, dstate, nsimdays))
         
+        if (fet_zero_cases_deaths != "daily" && cov_sim$wday[1] > 2){
+          warning("first weekly forecast is for incomplete week")
+        }
+        
         for (j in seq_len(nsimdays)) {
           if (j == 1) {
             xhat_init <- xhat_kk[, nobs]
@@ -673,7 +677,7 @@ calc_kf_nll_r <-
           }
           
           if (fet_zero_cases_deaths == "daily" ||
-              cov_sim$target_wday[j] == 1) {
+              cov_sim$wday[j] == 1) {
             xhat_init[5] <- 0
             PNinit[, 5] <- PNinit[5,] <- 0
             xhat_init[9] <- 0

@@ -387,32 +387,31 @@ write_forecasts <-
         τ_csd = τ_csd,
         wfixed = wfixed,
         just_nll = FALSE,
+        fet_zero_cases_deaths = "weekly",
         cov_sim = cov_sim
       )
-    browser()
-    make_fit_plots(
-      dets,
-      cov = cov,
-      winit = winit, 
-      h = hess,
-      p_hsd = p_hsd,
-      β_0sd = β_0sd,
-      τ_csd = τ_csd,      
-      fdt = fdt,
-      forecast_loc = forecast_loc,
-      fit = fit,
-      wfixed = wfixed,
-      cov_sim = cov_sim
-    )
-    case_inds <- which(cov_sim$target_wday == 7)
+
+    case_inds <- which(cov_sim$wday == 7)
+    
     if (lubridate::wday(fdt) > 2) {
       case_inds <-
         case_inds[-1] # drop first epiweek, which has been observed too much 
     }
+    
+    week_start_inds <- case_inds - 6
+    
+    sum_seq <- function(x, y, varno){
+      inds <- seq(from = x, to = y)
+      sum(dets$sim_R[varno, varno, inds])
+    }
+    case_obs_vars <- purrr::map2_dbl(week_start_inds, case_inds, sum_seq, varno = 1)
+    case_proc_vars <- dets$sim_P[1,1, case_inds]
+    case_Sigma <- case_obs_vars + case_proc_vars
+    
     case_fcst <-
       create_forecast_df(
         means = dets$sim_means[1, case_inds],
-        vars = dets$sim_cov[1, 1, case_inds],
+        vars = case_Sigma,
         location = forecast_loc,
         fdt = fdt
       )
@@ -420,12 +419,13 @@ write_forecasts <-
       cov_sim$target_end_dates[case_inds],
       case_fcst$target_end_date %>% unique()
     ))
+    
     hosp_inds <- cov_sim$target_end_dates %in%
       (lubridate::ymd(forecast_date) + 1:28)
     hosp_fcst <-
       create_forecast_df(
         means = dets$sim_means[2, hosp_inds],
-        vars = dets$sim_cov[2, 2, hosp_inds],
+        vars = dets$sim_Sigma[2, 2, hosp_inds],
         target_type = "hospitalizations",
         location = forecast_loc,
         fdt = fdt
@@ -436,10 +436,16 @@ write_forecasts <-
     ))
     
     death_inds <- case_inds
+    week_start_inds2 <- death_inds - 6
+    
+    death_obs_vars <- purrr::map2_dbl(week_start_inds2, death_inds, sum_seq, varno = 3)
+    death_proc_vars <- dets$sim_P[3,3, death_inds]
+    death_Sigma <- death_obs_vars + death_proc_vars
+
     death_fcst <-
       create_forecast_df(
         means = dets$sim_means[3, death_inds],
-        vars = dets$sim_cov[3, 3, death_inds],
+        vars = death_Sigma,
         target_type = "inc deaths",
         location = forecast_loc,
         fdt = fdt
@@ -461,12 +467,27 @@ write_forecasts <-
     if (!dir.exists(fcst_dir))
       dir.create(fcst_dir, recursive = TRUE)
     write_csv(x = fcst, path = fcst_path)
-  }
+    
+    make_fit_plots(
+      dets,
+      cov = cov,
+      winit = winit, 
+      h = hess,
+      p_hsd = p_hsd,
+      β_0sd = β_0sd,
+      τ_csd = τ_csd,      
+      fdt = fdt,
+      forecast_loc = forecast_loc,
+      fit = fit,
+      wfixed = wfixed,
+      cov_sim = cov_sim
+    )
+}
 
 make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, forecast_loc, fit, wfixed, cov_sim) {
   plot_dir <-
     file.path("plots",
-              paste0(forecast_date,
+              paste0(fdt,
                      "-fips",
                      forecast_loc),
               paste0("lambda",
@@ -543,15 +564,34 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, fore
   dev.off()
   
   plot_path3 <- file.path(plot_dir, "case-forecasts.png")
-  case_inds <- which(cov_sim$target_wday == 7)
-  case_fcst <-
-    create_forecast_df(
-      means = dets$sim_means[1, case_inds],
-      vars = dets$sim_cov[1, 1, case_inds],
-      location = forecast_loc,
-      fdt = fdt
+  
+  lambda <- 1 / β_0sd
+  fcst_dir <-
+    file.path("forecasts",
+              paste0(fdt,
+                     "-fips",
+                     forecast_loc))
+  
+  fcst_name <- paste0("lambda",
+                      sprintf("%06.2f", lambda),
+                      "-status-quo",
+                      "-CEID-InfectionKalman.csv")
+  
+  fcst <- read_csv(
+    file.path(fcst_dir, fcst_name),
+    col_types = cols(
+      forecast_date = col_date(format = ""),
+      target = col_character(),
+      target_end_date = col_date(format = ""),
+      location = col_character(),
+      type = col_character(),
+      quantile = col_character(),
+      value = col_double()
     )
-  p3 <- case_fcst %>%
+  )
+  
+  p3 <- fcst %>% 
+    filter(str_detect(target, "wk ahead inc case$")) %>%
     ggplot(aes(
       x = target_end_date,
       y = as.numeric(value),
@@ -561,20 +601,9 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, fore
   ggsave(plot_path3, p3)
   
   plot_path4 <- file.path(plot_dir, "hosp-forecasts.png")
-  hosp_inds <-
-    cov_sim$target_end_dates %in% (lubridate::ymd(forecast_date) + 1:28)
-  stopifnot(sum(hosp_inds) == 28)
-  
-  hosp_fcst <-
-    create_forecast_df(
-      means = dets$sim_means[2, hosp_inds],
-      vars = dets$sim_cov[2, 2, hosp_inds],
-      target_type = "hospitalizations",
-      location = forecast_loc,
-      fdt = fdt
-    )
-  
-  p4 <- hosp_fcst %>%
+
+  p4 <- fcst %>%
+    filter(str_detect(target, "day ahead inc hosp$")) %>%
     ggplot(aes(
       x = target_end_date,
       y = as.numeric(value),
@@ -584,16 +613,9 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, fore
   ggsave(plot_path4, p4)
   
   plot_path5 <- file.path(plot_dir, "death-forecasts.png")
-  death_fcst <-
-    create_forecast_df(
-      means = dets$sim_means[3, case_inds],
-      vars = dets$sim_cov[3, 3, case_inds],
-      target_type = "inc deaths",
-      location = forecast_loc,
-      fdt = fdt
-    )
-  
-  p5 <- death_fcst %>%
+
+  p5 <- fcst %>% 
+    filter(str_detect(target, "wk ahead inc death$")) %>%
     ggplot(aes(
       x = target_end_date,
       y = as.numeric(value),
