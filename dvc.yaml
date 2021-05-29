@@ -533,3 +533,21 @@ stages:
     - pull-hopkins-vaccine-ts-from-date.R
     outs:
     - hopkins-vaccine/2021-05-17
+  hopkins-2021-05-24:
+    cmd: fdt=2021-05-24 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-05-24
+  healthdata-2021-05-24-06:
+    cmd: fdt=2021-05-24 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-05-24/06
+  hopkins-vaccine-2021-05-24:
+    cmd: fdt=2021-05-24 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-05-24

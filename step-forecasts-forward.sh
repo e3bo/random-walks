@@ -2,7 +2,7 @@
 
 set -e
 
-fdtstart=2021-05-10; 
+fdtstart=2021-05-17; 
 for fdt in $(cat remaining-fdts); 
   do fdt=$fdt ./data-pull.sh && loc=06 fdt=$fdt fdtstart=$fdtstart ./forecast.sh; 
   fdtstart=$fdt; 

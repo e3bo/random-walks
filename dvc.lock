@@ -2002,3 +2002,36 @@ stages:
       md5: 437a6aef2e080a264dedfe7e83f6a241.dir
       size: 4670192
       nfiles: 3
+  hopkins-2021-05-24:
+    cmd: fdt=2021-05-24 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-05-24
+      md5: 22e77fbf467024c3764cbadee9f14a35.dir
+      size: 14856131
+      nfiles: 8
+  healthdata-2021-05-24-06:
+    cmd: fdt=2021-05-24 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-05-24/06
+      md5: 621d85f74dda9b743bad956a78e2f38b.dir
+      size: 143091
+      nfiles: 1
+  hopkins-vaccine-2021-05-24:
+    cmd: fdt=2021-05-24 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - path: pull-hopkins-vaccine-ts-from-date.R
+      md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+      size: 1067
+    outs:
+    - path: hopkins-vaccine/2021-05-24
+      md5: 959554abd953d21671635e60777a2c80.dir
+      size: 4941084
+      nfiles: 3
