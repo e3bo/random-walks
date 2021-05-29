@@ -572,7 +572,7 @@ calc_kf_nll_r <-
         par[6] <- γ_z17
       }
       JuliaCall::julia_assign("u0", u0)
-      JuliaCall::julia_assign("tspan", c(0, 0.00273224))
+      JuliaCall::julia_assign("tspan", c(0, 1 / 365.25))
       JuliaCall::julia_assign("par", par)
       JuliaCall::julia_eval("prob = ODEProblem(vectorfield,u0,tspan,par)")
       XP <-
