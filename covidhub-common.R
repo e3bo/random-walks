@@ -514,14 +514,6 @@ calc_kf_nll_r <-
     JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
     
     f <- as.list(wfixed)
-    
-    #η  <- unname(wfixed["η"])
-    #γ  <- unname(wfixed["γ"])
-    #N <- unname(wfixed["N"])
-    #γ_h <- unname(wfixed["γ_h"])
-    #γ_d <- unname(wfixed["γ_d"])
-    #γ_z <- unname(wfixed["γ_z"])
-    
     npout <- name_params(w, z, cov, f)
     p <- npout[[1]]
     zloc <- npout[[2]]
@@ -695,8 +687,8 @@ calc_kf_nll_r <-
             xhat_init <- xhat_kk[, nobs]
             PNinit <- P_kk[, , nobs]
           } else {
-            xhat_init <- XP[, 1]
-            PNinit <- XP[,-1]
+            xhat_init <- XPL$xhat_kkmo
+            PNinit <- XPL$P_kkmo
           }
           
           if (fet_zero_cases_deaths == "daily" ||

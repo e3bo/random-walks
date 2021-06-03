@@ -3,9 +3,19 @@
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-make_params_tab <- function(ests, sd, cov){
+make_params_tab <- function(w, h, cov, z, f, dir){
+  ests <- name_params(w, z, cov, f)[[1]]
+  sevec <- sqrt(diag(solve(h)))
+  sd <- name_params(sevec, z, cov, f)[[1]]
   
-  
+  pnames <- c("doseeffect", "residentialeffect")
+  pnames_pretty <- c("$\\beta_{\\textrm{dose}}$", "$\\beta_{\\textrm{res}}$")
+  tibble(
+    parameter = pnames_pretty,
+    estimate = unlist(ests[pnames]),
+    "standard error" = unlist(sd[pnames]),
+  ) %>% knitr::kable(digits = 2, format = "latex", escape = FALSE) %>%
+    cat(file = file.path(dir, "param_table.tex"))
 }
 
 calc_rt <- function(ft, cov, no_hosps, susceptibles, wfixed) {
@@ -487,12 +497,13 @@ write_forecasts <-
       forecast_loc = forecast_loc,
       fit = fit,
       wfixed = wfixed,
-      cov_sim = cov_sim
+      cov_sim = cov_sim,
+      z
     )
 }
 
 make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, 
-                           forecast_loc, fit, wfixed, cov_sim) {
+                           forecast_loc, fit, wfixed, cov_sim, z) {
   plot_dir <-
     file.path("plots",
               paste0(fdt,
@@ -503,6 +514,8 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
+  
+  make_params_tab(fit$par, h, cov, z, unlist(wfixed), plot_dir)
   
   no_hosps <- all(is.na(dets$ytilde_k[2,]))
   
