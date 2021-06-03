@@ -433,19 +433,28 @@ initialize_estimates <- function(x, y, wfixed, dt = 1 /365.25) {
   winit
 }
 
-name_params <- function(w, z, cov, f){
+name_params <- function(w, z, cov, f, trans = TRUE){
   p <- list()
   p$nτ_c <- tail(cov$τ_cmap, 1)
   p$np_h <- tail(cov$p_hmap, 1)
+  
+  if (trans){
+    tfun <- plogis
+    tfun2 <- exp
+  } else{
+    tfun <- tfun2 <- identity
+  }
+  
   if (ncol(z) == 3) {
-    p$τ_h <- exp(w[2])
+    p$τ_h <- tfun2(w[2])
     if ("doses_scaled" %in% names(cov)){
       p$doseeffect <- w[5]
       w2 <- c(w[1], w[3:4], w[6:length(w)])
     } else{
       w2 <- c(w[1], w[3:length(w)])
     }
-    p$p_h <- plogis(w2[(8 + p$nτ_c):(8 + p$nτ_c + p$np_h - 1)])
+
+    p$p_h <- tfun(w2[(8 + p$nτ_c):(8 + p$nτ_c + p$np_h - 1)])
   } else if(ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
     p$τ_h <- f$τ_h
     p$p_h <- f$p_h
@@ -453,14 +462,15 @@ name_params <- function(w, z, cov, f){
     z$hospitalizations <- NA
     w2 <- w
   }
-  p$L0 <- exp(w2[1])
-  p$τ_d <- exp(w2[2])
+
+  p$L0 <- tfun2(w2[1])
+  p$τ_d <- tfun2(w2[2])
   p$residentialeffect <- w2[3]
-  p$p_d <- plogis(w2[4])
-  p$γ_d12 <- exp(w2[5])
-  p$γ_d34 <- exp(w2[6])
-  p$γ_z17 <- exp(w2[7])
-  p$τ_c <- exp(w2[seq(8, 8 + p$nτ_c - 1)])
+  p$p_d <- tfun(w2[4])
+  p$γ_d12 <- tfun2(w2[5])
+  p$γ_d34 <- tfun2(w2[6])
+  p$γ_z17 <- tfun2(w2[7])
+  p$τ_c <- tfun2(w2[seq(8, 8 + p$nτ_c - 1)])
   p$β_0 <- w2[seq(8 +  p$nτ_c + p$np_h, length(w2))]
   zloc <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
   list(p, zloc)

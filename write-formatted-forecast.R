@@ -8,8 +8,32 @@ make_params_tab <- function(w, h, cov, z, f, dir){
   sevec <- sqrt(diag(solve(h)))
   sd <- name_params(sevec, z, cov, f)[[1]]
   
-  pnames <- c("doseeffect", "residentialeffect")
-  pnames_pretty <- c("$\\beta_{\\textrm{dose}}$", "$\\beta_{\\textrm{res}}$")
+  pnames <-
+    c(
+      "doseeffect",
+      "residentialeffect",
+      "L0",
+      "p_d",
+      "γ_d12",
+      "γ_d34",
+      "γ_z17",
+      "τ_h",
+      "τ_d"
+    )
+  
+  pnames_pretty <-
+    c(
+      "$\\beta_{\\textrm{dose}}$",
+      "$\\beta_{\\textrm{res}}$",
+      "$L_0$",
+      "$\\operatorname{logit} p_d$",
+      "$\\log \\gamma_{d,1} = \\log \\gamma_{d,2}$",
+      "$\\log \\gamma_{d,3} = \\log \\gamma_{d,4}$",
+      "$\\log \\gamma_{z,1} = \\log \\gamma_{z,7}$",
+      "$\\log \\tau_h$",
+      "$\\log \\tau_d$"
+    )
+  
   tibble(
     parameter = pnames_pretty,
     estimate = unlist(ests[pnames]),
