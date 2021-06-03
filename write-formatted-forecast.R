@@ -4,9 +4,9 @@ suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
 make_params_tab <- function(w, h, cov, z, f, dir){
-  ests <- name_params(w, z, cov, f)[[1]]
+  ests <- name_params(w, z, cov, f, trans = FALSE)[[1]]
   sevec <- sqrt(diag(solve(h)))
-  sd <- name_params(sevec, z, cov, f)[[1]]
+  sd <- name_params(sevec, z, cov, f, trans = FALSE)[[1]]
   
   pnames <-
     c(
@@ -40,6 +40,17 @@ make_params_tab <- function(w, h, cov, z, f, dir){
     "standard error" = unlist(sd[pnames]),
   ) %>% knitr::kable(digits = 2, format = "latex", escape = FALSE) %>%
     cat(file = file.path(dir, "param_table.tex"))
+  
+  z <- qnorm(1 - 0.05 / 2)
+  dph <- tibble(x = seq_along(ests$p_h), y = ests$p_h, 
+                lower = ests$p_h - sd$p_h * z,
+                upper = ests$p_h + sd$p_h * z)
+  p <- ggplot(dph, aes(x, y)) + 
+    geom_pointrange(aes(ymin = lower, ymax = upper)) + 
+    labs(x = "4 week period", y = expression(paste("logit ", p[h])))
+  
+  ggsave(filename = file.path(dir, "p_h-plot.png"), plot = p)
+  
 }
 
 calc_rt <- function(ft, cov, no_hosps, susceptibles, wfixed) {
