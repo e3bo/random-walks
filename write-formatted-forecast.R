@@ -41,15 +41,35 @@ make_params_tab <- function(w, h, cov, z, f, dir){
   ) %>% knitr::kable(digits = 2, format = "latex", escape = FALSE) %>%
     cat(file = file.path(dir, "param_table.tex"))
   
-  z <- qnorm(1 - 0.05 / 2)
-  dph <- tibble(x = seq_along(ests$p_h), y = ests$p_h, 
-                lower = ests$p_h - sd$p_h * z,
-                upper = ests$p_h + sd$p_h * z)
+  q <- qnorm(1 - 0.05 / 2)
+  start <- x %>% group_by(p_hmap) %>% slice(1) %>% pull(target_end_date)
+  dph <- tibble(x = start, y = ests$p_h, 
+                lower = ests$p_h - sd$p_h * q,
+                upper = ests$p_h + sd$p_h * q)
   p <- ggplot(dph, aes(x, y)) + 
     geom_pointrange(aes(ymin = lower, ymax = upper)) + 
-    labs(x = "4 week period", y = expression(paste("logit ", p[h])))
+    labs(x = "Start of 4 week period", y = expression(paste("logit ", p[h])))
   
   ggsave(filename = file.path(dir, "p_h-plot.png"), plot = p)
+
+  start2 <- x %>% group_by(τ_cmap) %>% slice(1) %>% pull(target_end_date)
+  dtc <- tibble(x = start2, y = ests$τ_c, 
+                lower = ests$τ_c - sd$τ_c * q,
+                upper = ests$τ_c + sd$τ_c * q)
+  ptc <- ggplot(dtc, aes(x, y)) + 
+    geom_pointrange(aes(ymin = lower, ymax = upper)) + 
+    labs(x = "Start of 4 week period", y = expression(paste("log ", tau[c])))
+  ggsave(filename = file.path(dir, "tauc-plot.png"), plot = ptc)
+  
+  start3 <- x %>% group_by(β_0map) %>% slice(1) %>% pull(target_end_date)
+  db0 <- tibble(x = start3, y = ests$β_0, 
+                lower = ests$β_0 - sd$β_0 * q,
+                upper = ests$β_0 + sd$β_0 * q)
+  pb0 <- ggplot(db0, aes(x, y)) + 
+    geom_pointrange(aes(ymin = lower, ymax = upper)) + 
+    labs(x = "Start of 1 week period", y = expression(paste("log ", beta[0])))
+  ggsave(filename = file.path(dir, "b0-plot.png"), plot = pb0)
+  
   
 }
 
