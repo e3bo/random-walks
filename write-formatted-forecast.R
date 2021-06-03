@@ -3,7 +3,12 @@
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-calc_rt <- function(ft, cov, no_hosps, wfixed) {
+make_params_tab <- function(ests, sd, cov){
+  
+  
+}
+
+calc_rt <- function(ft, cov, no_hosps, susceptibles, wfixed) {
   nβ_0 <- tail(cov$β_0map, 1)
   np <- length(ft$par)
   inds <- seq(np - nβ_0 + 1, np)
@@ -20,10 +25,10 @@ calc_rt <- function(ft, cov, no_hosps, wfixed) {
       effects <- ft$par[4]
     }
   }
-  (exp(intercept + X %*% effects) / wfixed["γ"]) %>% as.numeric()
+  (exp(intercept + X %*% effects) / wfixed["γ"] * susceptibles / wfixed["N"]) %>% as.numeric()
 }
 
-make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
+make_rt_plot <- function(ft, cov, no_hosps, susceptibles, wfixed) {
   par(mfrow = c(1, 1))
   nβ_0 <- tail(cov$β_0map, 1)
   np <- length(ft$par)
@@ -43,12 +48,13 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
   }
 
   num_all <- exp(intercept + X %*% effects)
+  factor <- 1 / wfixed["γ"] * susceptibles / wfixed["N"]
   plot(
     cov$time,
-    num_all / wfixed["γ"],
+    num_all * factor,
     type = 'l',
     xlab = "Time",
-    ylab = expression(R[t])
+    ylab = expression(paste("Effective reproduction number ", R[e]))
   )
   abline(h = 1000 / wfixed["γ"])
   if (length(effects) == 2) {
@@ -67,7 +73,7 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
     effects_no_mob[1] <- 0
     num_nomob <- exp(intercept + X %*% effects_no_mob)
     lines(cov$time,
-          num_nomob / wfixed["γ"],
+          num_nomob * factor,
           col = "orange")
     effects_no_dose[2] <- 0
     num_nodose <- exp(intercept + X %*% effects_no_dose)
@@ -89,11 +95,11 @@ make_rt_plot <- function(ft, cov, no_hosps, wfixed) {
     effects_no_mob[1] <- 0
     num_nomob <- exp(intercept + X %*% effects_no_mob)
     lines(cov$time,
-          num_nomob / wfixed["γ"],
+          num_nomob * factor,
           col = "orange")
   }
   lines(cov$time,
-        exp(intercept) / wfixed["γ"],
+        exp(intercept) * factor,
         col = "grey")
 }
 
@@ -276,7 +282,7 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
 
   
   no_hosps <- all(is.na(dets$ytilde_k[2, ]))
-  rt <- calc_rt(fit, cov_all, no_hosps, wfixed)
+  rt <- calc_rt(fit, cov_all, no_hosps, susceptibles = dets$xhat_kk[1,], wfixed)
   
   ret[[10]] <- gendf(
     mean = rt,
@@ -375,7 +381,8 @@ write_scenarios <- function(fit,
 }
 
 write_forecasts <-
-  function(fit, cov, z, winit, wfixed, hess, cov_sim, p_hsd, β_0sd, τ_csd, fdt, forecast_loc) {
+  function(fit, cov, z, winit, wfixed, hess, cov_sim, p_hsd, β_0sd, τ_csd, fdt, 
+           forecast_loc) {
     
     dets <-
       calc_kf_nll_r(
@@ -484,7 +491,8 @@ write_forecasts <-
     )
 }
 
-make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, forecast_loc, fit, wfixed, cov_sim) {
+make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, 
+                           forecast_loc, fit, wfixed, cov_sim) {
   plot_dir <-
     file.path("plots",
               paste0(fdt,
@@ -633,7 +641,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, fore
     units = "in",
     res = 90
   )
-  make_rt_plot(fit, cov, no_hosps, wfixed)
+  make_rt_plot(fit, cov, no_hosps, susceptibles = dets$xhat_kk[1, ], wfixed)
   dev.off()
   
   plot_path7 <- file.path(plot_dir, "params-tab-1.png")  

@@ -23,9 +23,9 @@ m2 <- mets %>%
                           var2 == "death" ~ "Deaths", 
                           var2 == "hosps" ~ "Hospital admissions"))
 
-ggplot(filter(m2, !is.na(value)), 
+p <- ggplot(filter(m2, !is.na(value)), 
        aes(x = lubridate::ymd(date), y = value, shape = Weekly)) + 
   geom_point() + ylim(c(0, 1)) + facet_wrap(~var3) + 
   labs(x = "Forecast date", y = "MASE")
 
-ggsave()
+ggsave("california-mase.png", p, width = 7, units = "in")

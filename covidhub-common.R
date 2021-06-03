@@ -433,6 +433,72 @@ initialize_estimates <- function(x, y, wfixed, dt = 1 /365.25) {
   winit
 }
 
+name_params <- function(w, z, cov, f){
+  p <- list()
+  p$nτ_c <- tail(cov$τ_cmap, 1)
+  p$np_h <- tail(cov$p_hmap, 1)
+  if (ncol(z) == 3) {
+    p$τ_h <- exp(w[2])
+    if ("doses_scaled" %in% names(cov)){
+      p$doseeffect <- w[5]
+      w2 <- c(w[1], w[3:4], w[6:length(w)])
+    } else{
+      w2 <- c(w[1], w[3:length(w)])
+    }
+    p$p_h <- plogis(w2[(8 + p$nτ_c):(8 + p$nτ_c + p$np_h - 1)])
+  } else if(ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
+    p$τ_h <- f$τ_h
+    p$p_h <- f$p_h
+    p$np_h <- 0
+    z$hospitalizations <- NA
+    w2 <- w
+  }
+  p$L0 <- exp(w2[1])
+  p$τ_d <- exp(w2[2])
+  p$residentialeffect <- w2[3]
+  p$p_d <- plogis(w2[4])
+  p$γ_d12 <- exp(w2[5])
+  p$γ_d34 <- exp(w2[6])
+  p$γ_z17 <- exp(w2[7])
+  p$τ_c <- exp(w2[seq(8, 8 + p$nτ_c - 1)])
+  p$β_0 <- w2[seq(8 +  p$nτ_c + p$np_h, length(w2))]
+  zloc <- data.matrix(z[, c("cases", "hospitalizations", "deaths")])
+  list(p, zloc)
+}
+
+advance_proc <- function(p, f, cov, xhat_init, PNinit, t){
+  
+  u0 <- cbind(xhat_init, PNinit)
+  if ("doses_scaled" %in% names(cov)) {
+    β   <-
+      exp(p$β_0[cov$β_0map[t]] + p$residentialeffect * cov$residential[t] + p$doseeffect * cov$doses_scaled[t])
+  } else {
+    β   <-
+      exp(p$β_0[cov$β_0map[t]] + p$residentialeffect * cov$residential[t])
+  }
+  if(β > 1000){
+    β <- 1000
+  }
+  par <- c(β, f$N,  f$η,  f$γ,  f$γ_d,  f$γ_z, f$γ_h, p$p_h[cov$p_hmap[t]], p$p_d, cov$ρ[t])
+  if (cov$wday[t] == 1) {
+    par[5] <- p$γ_d12
+    par[6] <- p$γ_z17
+  } else if (cov$wday[t] == 2){
+    par[5] <- p$γ_d12
+  } else if (cov$wday[t] %in% c(3, 4)) {
+    par[5] <- p$γ_d34
+  } else if (cov$wday[t] == 7){
+    par[6] <- p$γ_z17
+  }
+  JuliaCall::julia_assign("u0", u0)
+  JuliaCall::julia_assign("tspan", c(0, 1 / 365.25))
+  JuliaCall::julia_assign("par", par)
+  JuliaCall::julia_eval("prob = ODEProblem(vectorfield,u0,tspan,par)")
+  XP <-
+    JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
+  list(xhat_kkmo = XP[, 1], P_kkmo = XP[,-1])
+}
+
 calc_kf_nll_r <-
   function(w,
            cov,
@@ -447,65 +513,41 @@ calc_kf_nll_r <-
     diffeqr::diffeq_setup("/opt/julia-1.5.3/bin")
     JuliaCall::julia_eval("include(\"InfectionKalman.jl\")")
     
-    η  <- unname(wfixed["η"])
-    γ  <- unname(wfixed["γ"])
-    N <- unname(wfixed["N"])
-    γ_h <- unname(wfixed["γ_h"])
-    γ_d <- unname(wfixed["γ_d"])
-    γ_z <- unname(wfixed["γ_z"])
-    nτ_c <- tail(cov$τ_cmap, 1)
-    np_h <- tail(cov$p_hmap, 1)
-    if (ncol(z) == 3) {
-      τ_h <- exp(w[2])
-      if ("doses_scaled" %in% names(cov)){
-        doseeffect <- w[5]
-        w2 <- c(w[1], w[3:4], w[6:length(w)])
-      } else{
-        w2 <- c(w[1], w[3:length(w)])
-      }
-      p_h <- plogis(w2[(8 + nτ_c):(8 + nτ_c + np_h - 1)])
-    } else if(ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
-      τ_h <- wfixed["τ_h"]
-      p_h <- wfixed["p_h"]
-      np_h <- 0
-      z$hospitalizations <- NA
-      w2 <- w
-    }
-    L0 <- exp(w2[1])
-    τ_d <- exp(w2[2])
-    residentialeffect <- w2[3]
-    p_d <- plogis(w2[4])
-    γ_d12 <- exp(w2[5])
-    γ_d34 <- exp(w2[6])
-    γ_z17 <- exp(w2[7])
-    τ_c <- exp(w2[seq(8, 8 + nτ_c - 1)])
-    β_0 <- w2[seq(8 +  nτ_c + np_h, length(w2))]
+    f <- as.list(wfixed)
     
-    zloc <-
-      data.matrix(z[, c("cases", "hospitalizations", "deaths")])
+    #η  <- unname(wfixed["η"])
+    #γ  <- unname(wfixed["γ"])
+    #N <- unname(wfixed["N"])
+    #γ_h <- unname(wfixed["γ_h"])
+    #γ_d <- unname(wfixed["γ_d"])
+    #γ_z <- unname(wfixed["γ_z"])
+    
+    npout <- name_params(w, z, cov, f)
+    p <- npout[[1]]
+    zloc <- npout[[2]]
     zmiss <- is.na(zloc)
     
-    Y0 <- L0 * η / γ
-    H0 <- p_h[1] * γ * Y0 / γ_h
-    D0 <- H0 *  γ_h /  γ_d * p_d
-    Z0 <- (p_h[cov$p_hmap[1]] + cov$ρ[1] * (1 - p_h[cov$p_hmap[1]])) * Y0 *  γ / γ_z
+    Y0 <- p$L0 * f$η / f$γ
+    H0 <- p$p_h[1] * f$γ * Y0 / f$γ_h
+    D0 <- H0 *  f$γ_h /  f$γ_d * p$p_d
+    Z0 <- (p$p_h[cov$p_hmap[1]] + cov$ρ[1] * (1 - p$p_h[cov$p_hmap[1]])) * Y0 *  f$γ / f$γ_z
 
     x0 <- c(
-      max(N - L0 - Y0 - H0 - D0, N * 0.1),
+      max(f$N - p$L0 - Y0 - H0 - D0, f$N * 0.1),
       #X
-      min(Y0, N),
+      min(Y0, f$N),
       #Y
-      min(L0, N),
+      min(p$L0, f$N),
       #L
-      min(Z0, N),
+      min(Z0, f$N),
       #Z
       0,
       #Z_r
-      min(H0, N),
+      min(H0, f$N),
       #H
       0,
       #A
-      min(D0, N),
+      min(D0, f$N),
       #D
       0
     ) #D_r
@@ -549,36 +591,17 @@ calc_kf_nll_r <-
         PNinit[, zv] <- PNinit[zv,] <- 0
       }
       
-      u0 <- cbind(xhat_init, PNinit)
-      if ("doses_scaled" %in% names(cov)) {
-        β   <-
-          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i] + doseeffect * cov$doses_scaled[i])
-      } else {
-        β   <-
-          exp(β_0[cov$β_0map[i]] + residentialeffect * cov$residential[i])
-      }
-      if(β > 1000){
-        β <- 1000
-      }
-      par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[i]], p_d, cov$ρ[i])
-      if (cov$wday[i] == 1) {
-        par[5] <-  γ_d12
-        par[6] <- γ_z17
-      } else if (cov$wday[i] == 2){
-        par[5] <-  γ_d12
-      } else if (cov$wday[i] %in% c(3, 4)) {
-        par[5] <-  γ_d34
-      } else if (cov$wday[i] == 7){
-        par[6] <- γ_z17
-      }
-      JuliaCall::julia_assign("u0", u0)
-      JuliaCall::julia_assign("tspan", c(0, 1 / 365.25))
-      JuliaCall::julia_assign("par", par)
-      JuliaCall::julia_eval("prob = ODEProblem(vectorfield,u0,tspan,par)")
-      XP <-
-        JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
-      xhat_kkmo[, i] <- XP[, 1]
-      P_kkmo[, , i] <- XP[,-1]
+      XPL <-
+        advance_proc(
+          p = p,
+          f = f,
+          cov = cov,
+          xhat_init = xhat_init,
+          PNinit = PNinit,
+          t = i
+        )
+      xhat_kkmo[, i] <- XPL$xhat_kkmo
+      P_kkmo[,, i] <- XPL$P_kkmo
       
       for (j in 1:dstate) {
         if (P_kkmo[j, j, i] < 0) {
@@ -586,7 +609,7 @@ calc_kf_nll_r <-
           P_kkmo[, j, i] <- 0
         }
       }
-      r <- diag(c(τ_c[cov$τ_cmap[i]] * xhat_init[2],  τ_h,   τ_d))
+      r <- diag(c(p$τ_c[cov$τ_cmap[i]] * xhat_init[2],  p$τ_h,  p$τ_d))
       ytilde_k[, i] <-
         matrix(zloc[i,], ncol = 1) - hmat %*% xhat_kkmo[, i, drop = FALSE]
       S[, , i] <- hmat %*% P_kkmo[, , i] %*% t(hmat) + r
@@ -618,8 +641,8 @@ calc_kf_nll_r <-
     }
     
     rwlik <- 0
-    for (i in seq_len(length(β_0) - 1)) {
-      step <-  β_0[i + 1] -  β_0[i]
+    for (i in seq_len(length(p$β_0) - 1)) {
+      step <-  p$β_0[i + 1] -  p$β_0[i]
       rwlik <-
         rwlik + dnorm(step,
                       mean = 0,
@@ -627,8 +650,8 @@ calc_kf_nll_r <-
                       log = TRUE)
     }
     
-    for (i in seq_len(length(τ_c) - 1)) {
-      τ_cstep <- log(τ_c[i + 1]) - log(τ_c[i])
+    for (i in seq_len(length(p$τ_c) - 1)) {
+      τ_cstep <- log(p$τ_c[i + 1]) - log(p$τ_c[i])
       rwlik <-
         rwlik + dnorm(τ_cstep,
                         mean = 0,
@@ -636,8 +659,8 @@ calc_kf_nll_r <-
                         log = TRUE)
     }
     
-    for (i in seq_len(length(p_h) - 1)) {
-      p_hstep <- qlogis(p_h[i + 1]) - qlogis(p_h[i])
+    for (i in seq_len(length(p$p_h) - 1)) {
+      p_hstep <- qlogis(p$p_h[i + 1]) - qlogis(p$p_h[i])
       rwlik <-
         rwlik + dnorm(p_hstep,
                         mean = 0,
@@ -686,41 +709,26 @@ calc_kf_nll_r <-
           xhat_init[7] <- 0
           PNinit[, 7] <- PNinit[7,] <- 0
           
-          u0 <- cbind(xhat_init, PNinit)
-          
-          if ("doses_scaled" %in% names(cov)) {
-            β   <-
-              exp(β_0[cov$β_0map[nobs]] + residentialeffect * cov_sim$residential[j] + doseeffect * cov_sim$doses_scaled[j])
-          } else {
-            β   <-
-              exp(β_0[cov$β_0map[nobs]] + residentialeffect * cov_sim$residential[j])
-          }
-          if(β > 1000){
-            β <- 1000
-          }
-          par <- c(β, N,  η,  γ,  γ_d,  γ_z,  γ_h, p_h[cov$p_hmap[nobs]], p_d, cov$ρ[nobs])
-          if (cov_sim$wday[j] %in% c(1, 2)) {
-            par[5] <-  γ_d12
-          } else if (cov_sim$wday[j] %in% c(3, 4)) {
-            par[5] <-  γ_d34
-          }
-          JuliaCall::julia_assign("u0", u0)
-          JuliaCall::julia_assign("tspan", c(0, 1 / 365.25))
-          JuliaCall::julia_assign("par", par)
-          JuliaCall::julia_eval("prob = ODEProblem(vectorfield,u0,tspan,par)")
-          XP <-
-            JuliaCall::julia_eval("solve(prob, Tsit5(), saveat = tspan[2]).u[2]")
-          
+          XPL <-
+            advance_proc(
+              p = p,
+              f = f,
+              cov = cov,
+              xhat_init = xhat_init,
+              PNinit = PNinit,
+              t = i
+            )
+
           r <-
-            diag(c(τ_c[cov$τ_cmap[nobs]] * xhat_init[2],  τ_h,   τ_d))
+            diag(c(p$τ_c[cov$τ_cmap[nobs]] * xhat_init[2],  p$τ_h,   p$τ_d))
           
-          sim_means[, j] <- hmat %*% XP[, 1]
-          sim_P[, ,j] <- hmat %*% XP[, -1] %*% t(hmat)
+          x_sim[, j] <- XPL$xhat_kkmo
+          P_sim[, , j] <- XPL$P_kkmo
+          
+          sim_means[, j] <- hmat %*% x_sim[, j]
+          sim_P[, ,j] <- hmat %*% P_sim[,, j] %*% t(hmat)
           sim_R[, ,j] <- r
-          sim_Sigma[, , j] <- hmat %*% XP[, -1] %*% t(hmat) + r
-          
-          x_sim[, j] <- XP[, 1]
-          P_sim[, , j] <- XP[,-1]
+          sim_Sigma[, , j] <- hmat %*% P_sim[,, j] %*% t(hmat) + r
         }
       } else {
         sim_means <- sim_Sigma <- sim_R <- sim_P <- x_sim <- P_sim <- NULL
