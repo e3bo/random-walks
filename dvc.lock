@@ -2035,3 +2035,13 @@ stages:
       md5: 959554abd953d21671635e60777a2c80.dir
       size: 4941084
       nfiles: 3
+  pull-archived-forecasts:
+    cmd: ./pull-other-forecasts.R
+    deps:
+    - path: pull-other-forecasts.R
+      md5: 8d5a32902d89c103be6c0cc455ed96d0
+      size: 669
+    outs:
+    - path: other-model-forecasts.rds
+      md5: 999ed7c69726ecbd182b1484e55fd4c7
+      size: 2066

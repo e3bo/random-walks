@@ -551,3 +551,9 @@ stages:
     - pull-hopkins-vaccine-ts-from-date.R
     outs:
     - hopkins-vaccine/2021-05-24
+  pull-archived-forecasts:
+    cmd: ./pull-other-forecasts.R
+    deps:
+    - pull-other-forecasts.R
+    outs:
+    - other-model-forecasts.rds
