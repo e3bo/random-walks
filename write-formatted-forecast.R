@@ -809,6 +809,7 @@ write_forecasts(
   forecast_loc = forecast_loc
 )
 
+q("no")
 sim_days <- 42
 tf2 <- ti + lubridate::ddays(sim_days - 1)
 target_end_dates2 <- seq(from = ti, to = tf2, by = "day")
