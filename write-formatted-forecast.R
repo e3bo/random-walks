@@ -33,6 +33,10 @@ make_params_tab <- function(w, h, cov, z, f, dir){
       "$\\log \\tau_h$",
       "$\\log \\tau_d$"
     )
+  if (!"doses_scaled" %in% names(cov)){
+    pnames <- pnames[-1]
+    pnames_pretty <- pnames_pretty[-1]
+  }
   
   tibble(
     parameter = pnames_pretty,
@@ -570,7 +574,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
   
-  make_params_tab(fit$par, h, cov, z, unlist(wfixed), plot_dir)
+  make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir)
   
   no_hosps <- all(is.na(dets$ytilde_k[2,]))
   
@@ -767,17 +771,28 @@ target_end_dates <- seq(from = ti, to = tf, by = "day")
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
 
-doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
-weekly_sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(1 + sim_weekly_days) * doses_slope
-
-cov_weekly_fcst <- tibble(
-  time = target_end_times,
-  wday = target_wday,
-  target_end_dates,
-  doses_scaled = weekly_sim_doses,
-  residential = tail(x$residential, n = 1),
-  β_0map = tail(x$β_0map, 1)
-)
+if ("doses_scaled" %in% names(x)){
+  doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
+  weekly_sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(1 + sim_weekly_days) * doses_slope
+  
+  cov_weekly_fcst <- tibble(
+    time = target_end_times,
+    wday = target_wday,
+    target_end_dates,
+    doses_scaled = weekly_sim_doses,
+    residential = tail(x$residential, n = 1),
+    β_0map = tail(x$β_0map, 1)
+  )
+} else {
+  
+  cov_weekly_fcst <- tibble(
+    time = target_end_times,
+    wday = target_wday,
+    target_end_dates,
+    residential = tail(x$residential, n = 1),
+    β_0map = tail(x$β_0map, 1)
+  )
+}
 
 write_forecasts(
   fit = fit1,
