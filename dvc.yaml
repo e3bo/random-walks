@@ -557,3 +557,11 @@ stages:
     - pull-other-forecasts.R
     outs:
     - other-model-forecasts.rds
+  combine:
+    cmd: ./combine-location-forecasts.R
+    deps:
+    - combine-location-forecasts.R
+    - covidhub-common.R
+    - forecasts
+    outs:
+    - lambda020.00-status-quo-CEID-InfectionKalman

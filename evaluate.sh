@@ -16,26 +16,7 @@ dvc run \
     -d covidhub-common.R \
     -d combine-location-forecasts.R \
     -n combine \
-    -o lambda1000.00-a0.94-CEID-InfectionKalman \
-    -o lambda083.33-a0.94-CEID-InfectionKalman \
-    -o lambda043.48-a0.94-CEID-InfectionKalman \
-    -o lambda029.41-a0.94-CEID-InfectionKalman \
-    -o lambda022.22-a0.94-CEID-InfectionKalman \
-    -o lambda017.86-a0.94-CEID-InfectionKalman \
-    -o lambda014.93-a0.94-CEID-InfectionKalman \
-    -o lambda012.82-a0.94-CEID-InfectionKalman \
-    -o lambda011.24-a0.94-CEID-InfectionKalman \
-    -o lambda010.00-a0.94-CEID-InfectionKalman \
-    -o lambda1000.00-a0.95-CEID-InfectionKalman \
-    -o lambda083.33-a0.95-CEID-InfectionKalman \
-    -o lambda043.48-a0.95-CEID-InfectionKalman \
-    -o lambda029.41-a0.95-CEID-InfectionKalman \
-    -o lambda022.22-a0.95-CEID-InfectionKalman \
-    -o lambda017.86-a0.95-CEID-InfectionKalman \
-    -o lambda014.93-a0.95-CEID-InfectionKalman \
-    -o lambda012.82-a0.95-CEID-InfectionKalman \
-    -o lambda011.24-a0.95-CEID-InfectionKalman \
-    -o lambda010.00-a0.95-CEID-InfectionKalman \
+    -o lambda020.00-status-quo-CEID-InfectionKalman \
     --force \
     ./combine-location-forecasts.R
 

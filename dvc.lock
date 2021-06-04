@@ -2045,3 +2045,21 @@ stages:
     - path: other-model-forecasts.rds
       md5: 999ed7c69726ecbd182b1484e55fd4c7
       size: 2066
+  combine:
+    cmd: ./combine-location-forecasts.R
+    deps:
+    - path: combine-location-forecasts.R
+      md5: de21c9867a3d62cedcc964d37900b0a7
+      size: 1027
+    - path: covidhub-common.R
+      md5: 9dddaf5e173b9a8927bf467353ded75c
+      size: 22928
+    - path: forecasts
+      md5: b285e2405d515d421bd348d3497ad606.dir
+      size: 301059192
+      nfiles: 11994
+    outs:
+    - path: lambda020.00-status-quo-CEID-InfectionKalman
+      md5: 8a5dafac33e225e3d5f87e9655c9a59e.dir
+      size: 2524498
+      nfiles: 48

@@ -11,14 +11,13 @@ combine <- function(date, fnames, chubname){
   write_csv(comb, dest)
 }
 
-lambda <- 1 / seq(0.001, 0.1, length.out = 10)
-agrid <- c(0.94, 0.95)
-par2name <- function(lambda, a){
+lambda <- 20
+par2name <- function(lambda){
   paste0("lambda", sprintf("%06.2f", lambda), 
-         "-a", sprintf("%02.2f", a),
+         "-status-quo",
          "-CEID-InfectionKalman")
 }
-covid_hub_forecaster_name <- outer(lambda, agrid, par2name)
+covid_hub_forecaster_name <- purrr::map(lambda, par2name)
 
 agg_fcsts <- function(chname) {
   pat <- sprintf("(20\\d{2}-\\d{2}-\\d{2})-fips\\d{2}/%s.csv", chname)
