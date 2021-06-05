@@ -565,3 +565,13 @@ stages:
     - forecasts
     outs:
     - lambda020.00-status-quo-CEID-InfectionKalman
+  make-trajectory-plots:
+    cmd: ./make-trajectory-plots.R
+    deps:
+    - healthdata/
+    - hopkins/
+    - lambda020.00-status-quo-CEID-InfectionKalman
+    - make-trajectory-plots.R
+    - other-model-forecasts.rds
+    outs:
+    - trajectories-all

@@ -121,8 +121,9 @@ process_hopkins <- function(path, weekly = TRUE){
   
   if(weekly){
   hpd2 <- 
-    hpd %>% mutate(week = lubridate::epiweek(target_end_date)) %>% 
-    group_by(location, week) %>% 
+    hpd %>% mutate(week = lubridate::epiweek(target_end_date),
+                   year = lubridate::epiyear(target_end_date)) %>% 
+    group_by(location, week, year) %>% 
     arrange(location, week, target_end_date) %>% 
     summarise(`wk ahead inc` = sum(`day ahead inc`),
               `wk ahead cum` = tail(`day ahead cum`, n = 1),

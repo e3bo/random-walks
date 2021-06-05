@@ -5,14 +5,13 @@ library(covidHubUtils)
 suppressPackageStartupMessages(library(tidyverse))
 
 ## load forecasts
-lambda <- 1 / seq(0.001, 0.1, length.out = 10)
-agrid <- c(0.94, 0.95)
-par2name <- function(lambda, a){
+lambda <- 20
+par2name <- function(lambda){
   paste0("lambda", sprintf("%06.2f", lambda), 
-         "-a", sprintf("%02.2f", a),
+         "-status-quo",
          "-CEID-InfectionKalman")
 }
-dirnames <- outer(lambda, agrid, par2name)
+dirnames <- purrr::map(lambda, par2name)
 
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
@@ -21,8 +20,6 @@ fdat2 <- map_dfr(dirnames, load_from_dir)
 
 fdat2$lambda <- fdat2$model %>% str_extract("^lambda\\d+.\\d{2}-") %>% 
   str_remove("^lambda") %>% str_remove("-$") %>% as.numeric()
-fdat2$a <- fdat2$model %>% str_extract("-a\\d{1}.\\d{2}-") %>% 
-  str_remove("^-a") %>% str_remove("-$") %>% as.numeric()
 
 ## split forecasts by location
 fdat3 <- fdat2 %>% filter(target_variable == "inc case")
@@ -31,13 +28,23 @@ splt_cases <- split(fdat3, fdat3$location)
 fdat4 <- fdat2 %>% filter(target_variable == "inc hosp")
 splt_hosp <- split(fdat4, fdat4$location)
 
+fdat5 <- fdat2 %>% filter(target_variable == "inc death")
+splt_death <- split(fdat5, fdat5$location)
+
+
+
 ## load JHU data
-data_date <- Sys.getenv("ddt", unset = "2021-02-01")
+data_date <- Sys.getenv("ddt", unset = "2021-05-24")
 hopdir <- file.path("hopkins", data_date)
 tdat <- load_hopkins(hopdir, weekly = TRUE)
 tdat2 <- tdat %>% rename(true_value=value) %>% 
   filter(target_type == "wk ahead inc case") %>% 
   select(location, target_end_date, true_value)
+
+tdat3 <- tdat %>% rename(true_value=value) %>% 
+  filter(target_type == "wk ahead inc death") %>% 
+  select(location, target_end_date, true_value)
+
 
 ## load hhs data
 healthdirs <-
@@ -76,6 +83,16 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
       paste(yr, wk, sep = '-')
     }
     truth <- tdat2
+  } else if (tv == "inc death") {
+    xname = "Year-Epiweek"
+    yname = "Incident deaths"
+    db = "2 weeks"
+    labf <- function(x) {
+      wk <- strftime(x, format = "%U") %>% as.integer() + 1
+      yr <- strftime(x, format = "%y")
+      paste(yr, wk, sep = '-')
+    }
+    truth <- tdat3
   } else {
     xname <- "Date"
     yname <- "Incident hospitalizations"
@@ -89,7 +106,7 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
   geom_line() + 
   geom_point() + 
   geom_line(aes(y = true_value), color = "red") + 
-  facet_grid(a~lambda) + 
+  facet_grid(~lambda) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   scale_x_date(
     name = xname,
@@ -102,13 +119,15 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
 
 plots_cases <- map(splt_cases, plot_forecast_grid)
 plots_hosp <- map(splt_hosp, plot_forecast_grid, tv = "inc hosp")
+plots_deaths <- map(splt_death, plot_forecast_grid, tv = "inc death")
 
 plot_writer <- function(p, loc, pref){
   plot_name <- paste0("trajectories-all/", pref, loc, ".png")
-  ggsave(plot_name, p, height = 7.5, width = 24)
+  ggsave(plot_name, p, width = 7.5)
 }
 if (!dir.exists("trajectories-all")){
   dir.create("trajectories-all")
 }
 map2(plots_cases, names(plots_cases), plot_writer, pref = "cases")
 map2(plots_hosp, names(plots_hosp), plot_writer, pref = "hosp")
+map2(plots_deaths, names(plots_deaths), plot_writer, pref = "death")

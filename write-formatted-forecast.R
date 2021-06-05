@@ -773,7 +773,7 @@ target_wday <- lubridate::wday(target_end_dates)
 
 if ("doses_scaled" %in% names(x)){
   doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
-  weekly_sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(1 + sim_weekly_days) * doses_slope
+  weekly_sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(length(target_end_dates)) * doses_slope
   
   cov_weekly_fcst <- tibble(
     time = target_end_times,
