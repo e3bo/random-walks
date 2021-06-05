@@ -2055,14 +2055,14 @@ stages:
       md5: c78cf501d27c1cb0012a2caa3aeb9861
       size: 22997
     - path: forecasts
-      md5: 1365d074b390d62cbc49aead1e55c6e8.dir
-      size: 299183202
-      nfiles: 11992
+      md5: 1a84c3b88ffe11c8cb410f83874bacc2.dir
+      size: 281524494
+      nfiles: 11985
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 76e8096f10bafbbe130f097b2d7590ec.dir
-      size: 2467640
-      nfiles: 47
+      md5: 0ee6d8fcf98236dedc1f1e631d8b8935.dir
+      size: 2532519
+      nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
     deps:
@@ -2075,17 +2075,17 @@ stages:
       size: 486099435
       nfiles: 521
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 76e8096f10bafbbe130f097b2d7590ec.dir
-      size: 2467640
-      nfiles: 47
+      md5: 0ee6d8fcf98236dedc1f1e631d8b8935.dir
+      size: 2532519
+      nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 23db0466cd51658be18163bae139d0dc
-      size: 4110
+      md5: fc14058fea5862823d673c6931937723
+      size: 4178
     - path: other-model-forecasts.rds
       md5: 999ed7c69726ecbd182b1484e55fd4c7
       size: 2066
     outs:
     - path: trajectories-all
-      md5: d127cb4ecb7077ca4f6dceb2e1d79a3c.dir
-      size: 643511
+      md5: 369ca0d6a193114b3eafa9c0f2a4ca4f.dir
+      size: 636957
       nfiles: 3

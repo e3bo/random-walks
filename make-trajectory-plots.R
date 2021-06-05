@@ -88,7 +88,7 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
     yname = "Incident deaths"
     db = "2 weeks"
     labf <- function(x) {
-      wk <- strftime(x, format = "%U") %>% as.integer() + 1
+      wk <- sprintf("%02d", strftime(x, format = "%U") %>% as.integer() + 1)
       yr <- strftime(x, format = "%y")
       paste(yr, wk, sep = '-')
     }
@@ -106,6 +106,7 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
   geom_line() + 
   geom_point() + 
   geom_line(aes(y = true_value), color = "red") + 
+  geom_point(aes(y = true_value), color = "red") +
   facet_grid(~lambda) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   scale_x_date(
