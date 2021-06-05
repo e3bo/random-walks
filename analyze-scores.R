@@ -5,29 +5,24 @@ suppressPackageStartupMessages(library(tidyverse))
 
 fdat0 <- readRDS("other-model-forecasts.rds")
 
-lambda <- 1 / seq(0.001, 0.1, length.out = 10)
-agrid <- c(0.94, 0.95)
-par2name <- function(lambda, a){
+lambda <- 20
+par2name <- function(lambda){
   paste0("lambda", sprintf("%06.2f", lambda), 
-         "-a", sprintf("%02.2f", a),
+         "-status-quo",
          "-CEID-InfectionKalman")
 }
-dirnames <- outer(lambda, agrid, par2name)
-dirnames2 <- paste0(dirnames, "Emp")
+dirnames <- purrr::map(lambda, par2name)
 
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }
 fdat1 <- map_dfr(dirnames, load_from_dir)
-fdat11 <- map_dfr(dirnames2, load_from_dir)
+fdat2 <- bind_rows(fdat0, fdat1)
 locations_to_exclude <- c("78", "72", "69", "66", "60")
-
-## train_data will be used to select hyperparameters for each location, and variable
-train_data <- fdat11 %>% filter(forecast_date <= "2020-11-30")
 
 truth_data1 <- load_truth(truth_source = "JHU",
                          target_variable = "inc case",
-                         locations = unique(train_data$location))
+                         locations = unique(fdat1$location))
 
 truth_data2 <- load_truth(truth_source = "HealthData",
                           target_variable = "inc hosp",
@@ -35,15 +30,25 @@ truth_data2 <- load_truth(truth_source = "HealthData",
 
 truth_data3 <- load_truth(truth_source = "JHU",
                           target_variable = "inc death",
-                          locations = unique(train_data$location))
+                          locations = unique(fdat1$location))
 
 truth_data <- bind_rows(truth_data1, truth_data2, truth_data3)
 
-train_scores <- 
-  score_forecasts(train_data, truth_data, return_format = "wide") %>%
+scores <- 
+  score_forecasts(fdat2, truth_data, return_format = "wide") %>%
   filter(!location %in% locations_to_exclude) %>%
-  select(model, horizon, location, target_variable, target_end_date, 
+  select(model, forecast_date, horizon, location, target_variable, target_end_date, 
          coverage_50, coverage_95, abs_error, wis)
+
+scores %>% filter(target_end_date == "2020-10-10" & horizon == "1") %>% arrange(wis)
+
+scores %>% filter(target_end_date == "2020-10-17" & horizon == "2") %>% arrange(wis)
+
+scores %>% filter(target_end_date == "2020-10-24" & horizon == "3") %>% arrange(wis)
+
+scores %>% filter(target_end_date == "2020-10-31" & horizon == "4") %>% arrange(wis)
+
+q('no')
 
 tscv <-train_scores %>% 
   group_by(location, model, target_variable) %>% 

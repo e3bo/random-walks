@@ -67,47 +67,8 @@ dvc run \
     ./calculate-empirical-errors.R
 
 dvc run \
+    -d lambda020.00-status-quo-CEID-InfectionKalman \
     -d other-model-forecasts.rds \
-    -d lambda1000.00-a0.94-CEID-InfectionKalman \
-    -d lambda083.33-a0.94-CEID-InfectionKalman \
-    -d lambda043.48-a0.94-CEID-InfectionKalman \
-    -d lambda029.41-a0.94-CEID-InfectionKalman \
-    -d lambda022.22-a0.94-CEID-InfectionKalman \
-    -d lambda017.86-a0.94-CEID-InfectionKalman \
-    -d lambda014.93-a0.94-CEID-InfectionKalman \
-    -d lambda012.82-a0.94-CEID-InfectionKalman \
-    -d lambda011.24-a0.94-CEID-InfectionKalman \
-    -d lambda010.00-a0.94-CEID-InfectionKalman \
-    -d lambda1000.00-a0.95-CEID-InfectionKalman \
-    -d lambda083.33-a0.95-CEID-InfectionKalman \
-    -d lambda043.48-a0.95-CEID-InfectionKalman \
-    -d lambda029.41-a0.95-CEID-InfectionKalman \
-    -d lambda022.22-a0.95-CEID-InfectionKalman \
-    -d lambda017.86-a0.95-CEID-InfectionKalman \
-    -d lambda014.93-a0.95-CEID-InfectionKalman \
-    -d lambda012.82-a0.95-CEID-InfectionKalman \
-    -d lambda011.24-a0.95-CEID-InfectionKalman \
-    -d lambda010.00-a0.95-CEID-InfectionKalman \
-    -d lambda1000.00-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda083.33-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda043.48-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda029.41-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda022.22-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda017.86-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda014.93-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda012.82-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda011.24-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda010.00-a0.94-CEID-InfectionKalmanEmp \
-    -d lambda1000.00-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda083.33-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda043.48-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda029.41-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda022.22-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda017.86-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda014.93-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda012.82-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda011.24-a0.95-CEID-InfectionKalmanEmp \
-    -d lambda010.00-a0.95-CEID-InfectionKalmanEmp \
     -d analyze-scores.R \
     -o analyze-scores.md \
     -o analyze-scores.html \
