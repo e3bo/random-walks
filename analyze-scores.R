@@ -42,7 +42,11 @@ scores <-
   mutate(facet_var = fct_recode(target_variable, 
                                 "Incident cases" = "inc case",
                                 "Incident deaths" = "inc death",
-                                "Hospital admissions" = "inc hosp"))
+                                "Hospital admissions" = "inc hosp")) %>%
+  filter(model != "CEID-Walk") %>% 
+  group_by(forecast_date, horizon, location, target_variable) %>%
+  mutate(nmodels = n()) %>%
+  filter(nmodels == 3 | (target_variable == "inc hosp" & nmodels == 2))
 
 add_theme_mods <- function(plt){
   plt +
@@ -51,7 +55,7 @@ add_theme_mods <- function(plt){
   theme(legend.position = "top")
 }
 
-(scores %>% 
+(scores %>%
     filter(target_variable %in% c("inc case", "inc death")) %>% 
     ggplot(aes(x = target_end_date, y = wis, color = model)) + 
     geom_point() + 
