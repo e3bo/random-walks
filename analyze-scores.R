@@ -40,9 +40,9 @@ scores <-
   select(model, forecast_date, horizon, location, target_variable, 
          target_end_date, coverage_50, coverage_95, abs_error, wis) %>%
   mutate(facet_var = fct_recode(target_variable, 
-                                "incident cases" = "inc case",
-                                "incident deaths" = "inc death",
-                                "hospital admissions" = "inc hosp"))
+                                "Incident cases" = "inc case",
+                                "Incident deaths" = "inc death",
+                                "Hospital admissions" = "inc hosp"))
 
 add_theme_mods <- function(plt){
   plt +
@@ -73,7 +73,7 @@ add_theme_mods <- function(plt){
 
 ssums <- scores %>%
   filter(facet_var %in% c("Incident cases", "Incident deaths")) %>% 
-  group_by(horizon, model, target_variable) %>% 
+  group_by(horizon, model, facet_var) %>% 
   summarize(meanw = mean(wis))
 
 ssumsh <- scores %>% 
