@@ -40,17 +40,6 @@ scores <-
   select(model, forecast_date, horizon, location, target_variable, 
          target_end_date, coverage_50, coverage_95, abs_error, wis)
 
-scores %>% filter(target_end_date >= "2020-10-10" & horizon == "1") %>% 
-  arrange(target_end_date, target_variable, wis)
-
-
-scores %>% filter(horizon == "1" & target_variable == "inc case") %>% 
-  ggplot(aes(x = target_end_date, y = wis, color = model)) + geom_point()
-
-scores %>% 
-  filter(target_variable == "inc case" & forecast_date > "2020-10-01") %>% 
-  group_by(horizon, model) %>% summarize(meanw = mean(wis))
-
 ssums <- scores %>% 
   filter(forecast_date > "2020-10-01") %>%
   filter(target_variable %in% c( "inc case", "inc death")) %>% 
@@ -58,13 +47,10 @@ ssums <- scores %>%
   summarize(meanw = mean(wis))
 
 ssumsh <- scores %>% 
-  filter(forecast_date > "2020-10-01") %>%
+  filter(forecast_date > "2020-12-07") %>%
   filter(target_variable == "inc hosp") %>% 
   group_by(horizon, model) %>% 
   summarize(meanw = mean(wis))
-
-ssums %>% ggplot(aes(x = model, y = meanw)) + geom_col() + 
-  facet_grid(horizon~target_variable, scales = "free_x") + coord_flip()
 
 ssums %>% ggplot(aes(x = as.integer(horizon), y = meanw, color = model)) + 
   geom_point() + geom_line() +

@@ -2039,12 +2039,12 @@ stages:
     cmd: ./pull-other-forecasts.R
     deps:
     - path: pull-other-forecasts.R
-      md5: df79373ba9e5c3378a91dfc9e65a426f
-      size: 680
+      md5: 2ef7426fb2d1bb28bf59ad30ee2564d1
+      size: 672
     outs:
     - path: other-model-forecasts.rds
-      md5: 66d11e18a23fde8a0e8fd859a02577ed
-      size: 46130
+      md5: 7a57d712ba0e2d0e4b4dc347386dd626
+      size: 84611
   combine:
     cmd: ./combine-location-forecasts.R
     deps:
