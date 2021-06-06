@@ -2089,3 +2089,23 @@ stages:
       md5: 985a29aa8db66d86f5e316164d5430fd.dir
       size: 677139
       nfiles: 3
+  analyze-scores:
+    cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
+    deps:
+    - path: analyze-scores.R
+      md5: 5eef74bbffe699477692a6cd5310dd59
+      size: 3614
+    - path: lambda020.00-status-quo-CEID-InfectionKalman
+      md5: e1c01ef5f766a3014682bd9e1e033f01.dir
+      size: 2530391
+      nfiles: 48
+    - path: other-model-forecasts.rds
+      md5: bb6012b15586c0843a28fed88c33a239
+      size: 141985
+    outs:
+    - path: analyze-scores.html
+      md5: 3bd70bbf0aa01083cd69a2df30882614
+      size: 338164
+    - path: analyze-scores.md
+      md5: 91adf15c197511a71a021ca3ca5b1790
+      size: 4721

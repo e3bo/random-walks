@@ -72,20 +72,9 @@ dvc run \
     -d analyze-scores.R \
     -o analyze-scores.md \
     -o analyze-scores.html \
-    --plots model.csv \
-    --plots location-model.csv \
-    --plots horizon-location-model-cases.csv \
-    --plots horizon-location-model-hosp.csv \
-    --plots horizon-location-model-death.csv \
     --force \
     -n analyze-scores \
     'Rscript -e "knitr::spin(\"analyze-scores.R\")"'
-
-dvc plots modify horizon-location-model-cases.csv --template horizon-location-model
-dvc plots modify horizon-location-model-hosp.csv --template horizon-location-model
-dvc plots modify horizon-location-model-death.csv --template horizon-location-model
-dvc plots modify location-model.csv --template location-model
-dvc plots modify model.csv --template model
 
 dvc run \
     -d other-model-forecasts.rds \
