@@ -2055,13 +2055,13 @@ stages:
       md5: c78cf501d27c1cb0012a2caa3aeb9861
       size: 22997
     - path: forecasts
-      md5: 1a84c3b88ffe11c8cb410f83874bacc2.dir
-      size: 281524494
+      md5: dd8dc09d3bc16dc53d80df635c22df30.dir
+      size: 281522030
       nfiles: 11985
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 0ee6d8fcf98236dedc1f1e631d8b8935.dir
-      size: 2532519
+      md5: e1c01ef5f766a3014682bd9e1e033f01.dir
+      size: 2530391
       nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
@@ -2075,8 +2075,8 @@ stages:
       size: 486099435
       nfiles: 521
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 0ee6d8fcf98236dedc1f1e631d8b8935.dir
-      size: 2532519
+      md5: e1c01ef5f766a3014682bd9e1e033f01.dir
+      size: 2530391
       nfiles: 48
     - path: make-trajectory-plots.R
       md5: fc14058fea5862823d673c6931937723
@@ -2086,6 +2086,6 @@ stages:
       size: 2066
     outs:
     - path: trajectories-all
-      md5: 369ca0d6a193114b3eafa9c0f2a4ca4f.dir
-      size: 636957
+      md5: 985a29aa8db66d86f5e316164d5430fd.dir
+      size: 677139
       nfiles: 3
