@@ -38,33 +38,60 @@ scores <-
   score_forecasts(fdat2, truth_data, return_format = "wide") %>%
   filter(!location %in% locations_to_exclude) %>%
   select(model, forecast_date, horizon, location, target_variable, 
-         target_end_date, coverage_50, coverage_95, abs_error, wis)
+         target_end_date, coverage_50, coverage_95, abs_error, wis) %>%
+  mutate(facet_var = fct_recode(target_variable, 
+                                "incident cases" = "inc case",
+                                "incident deaths" = "inc death",
+                                "hospital admissions" = "inc hosp"))
 
-ssums <- scores %>% 
-  filter(forecast_date > "2020-10-01") %>%
-  filter(target_variable %in% c( "inc case", "inc death")) %>% 
+add_theme_mods <- function(plt){
+  plt +
+  ggthemes::scale_colour_colorblind(name = "Model") +
+  theme_minimal() + 
+  theme(legend.position = "top")
+}
+
+(scores %>% 
+    filter(target_variable %in% c("inc case", "inc death")) %>% 
+    ggplot(aes(x = target_end_date, y = wis, color = model)) + 
+    geom_point() + 
+    scale_y_log10() + 
+    facet_grid(horizon ~ facet_var, scales = "free_y") + 
+    labs(x = "Observation date", y = "Weighted interval score")) %>% 
+  add_theme_mods()
+  
+(scores %>% 
+    filter(forecast_date > "2020-12-07") %>%
+    filter(target_end_date < "2021-05-01") %>%
+    filter(target_variable %in% c("inc hosp")) %>% 
+    ggplot(aes(x = target_end_date, y = wis, color = model)) + 
+    geom_point() + 
+    scale_y_log10() + 
+    facet_grid(as.integer(horizon) ~., scales = "free_y") + 
+    labs(x = "Observation date", y = "Weighted interval score")) %>% 
+  add_theme_mods()
+
+ssums <- scores %>%
+  filter(facet_var %in% c("Incident cases", "Incident deaths")) %>% 
   group_by(horizon, model, target_variable) %>% 
   summarize(meanw = mean(wis))
 
 ssumsh <- scores %>% 
   filter(forecast_date > "2020-12-07") %>%
+  filter(target_end_date < "2021-05-01") %>%
   filter(target_variable == "inc hosp") %>% 
   group_by(horizon, model) %>% 
   summarize(meanw = mean(wis))
 
-ssums %>% ggplot(aes(x = as.integer(horizon), y = meanw, color = model)) + 
+(ssums %>% ggplot(aes(x = as.integer(horizon), y = meanw, color = model)) + 
   geom_point() + geom_line() +
-  ggthemes::scale_colour_colorblind(name = "Model") +
-  facet_grid(target_variable~., scales = "free_y") +
-  labs(x = "Forecast horizon (weeks)", y = "Mean weighted interval score") +
-  theme_minimal() + 
-  theme(legend.position="top")
+  facet_grid(facet_var~., scales = "free_y") +
+  labs(x = "Forecast horizon (weeks)", y = "Mean weighted interval score")) %>%
+  add_theme_mods()
 
-ssumsh %>% 
+(ssumsh %>% 
   ggplot(aes(x = as.integer(horizon), y = meanw, color = model)) + 
   geom_point() + 
   geom_line() + 
-  labs(x = "Forecast horizon (days)", y = "Mean weighted interval score") +
-  theme_minimal() + 
-  theme(legend.position="top") + 
-  ggthemes::scale_colour_colorblind(name = "Model")
+  labs(x = "Forecast horizon (days)", y = "Mean weighted interval score")) %>%
+  add_theme_mods()
