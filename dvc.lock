@@ -2052,16 +2052,16 @@ stages:
       md5: de21c9867a3d62cedcc964d37900b0a7
       size: 1027
     - path: covidhub-common.R
-      md5: c78cf501d27c1cb0012a2caa3aeb9861
-      size: 22997
+      md5: 63394300f3193482326a2b0e7b7fd260
+      size: 23001
     - path: forecasts
-      md5: dd8dc09d3bc16dc53d80df635c22df30.dir
-      size: 281522030
-      nfiles: 11985
+      md5: 5aa029832c9685568b0c90a866709847.dir
+      size: 271428394
+      nfiles: 11981
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: e1c01ef5f766a3014682bd9e1e033f01.dir
-      size: 2530391
+      md5: 2eb1b3c3d8ec2ac646c4c1abb2470cb1.dir
+      size: 2551521
       nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
@@ -2075,19 +2075,19 @@ stages:
       size: 486099435
       nfiles: 521
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: e1c01ef5f766a3014682bd9e1e033f01.dir
-      size: 2530391
+      md5: 2eb1b3c3d8ec2ac646c4c1abb2470cb1.dir
+      size: 2551521
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 1df22fe847090ae6a36dbe6fb97f5328
-      size: 4362
+      md5: 3fc72c91806f5fda0244a51d79370f9b
+      size: 4452
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: trajectories-all
-      md5: 619c52365b3a9b0539c1971a065d90d9.dir
-      size: 919814
+      md5: 813292a7ed0b7dea8624d36131f8d633.dir
+      size: 945416
       nfiles: 3
   analyze-scores:
     cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
@@ -2096,16 +2096,16 @@ stages:
       md5: 5eef74bbffe699477692a6cd5310dd59
       size: 3614
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: e1c01ef5f766a3014682bd9e1e033f01.dir
-      size: 2530391
+      md5: 2eb1b3c3d8ec2ac646c4c1abb2470cb1.dir
+      size: 2551521
       nfiles: 48
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: analyze-scores.html
-      md5: 3bd70bbf0aa01083cd69a2df30882614
-      size: 338164
+      md5: 1bf7ab31b6765b28b53c68183d92e811
+      size: 337892
     - path: analyze-scores.md
       md5: 91adf15c197511a71a021ca3ca5b1790
       size: 4721

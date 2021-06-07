@@ -26,7 +26,9 @@ fdat2 <- map_dfr(dirnames, load_from_dir) %>%
 fdat3 <- fdat2 %>% filter(target_variable == "inc case")
 splt_cases <- split(fdat3, fdat3$location)
 
-fdat4 <- fdat2 %>% filter(target_variable == "inc hosp")
+fdat4 <- fdat2 %>% filter(target_variable == "inc hosp") %>%
+  filter(forecast_date >= "2020-12-07") %>%
+  filter(target_end_date <= "2021-05-01")
 splt_hosp <- split(fdat4, fdat4$location)
 
 fdat5 <- fdat2 %>% filter(target_variable == "inc death")

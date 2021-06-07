@@ -4,22 +4,22 @@ stages:
     cmd: fdt=2020-12-21 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: c78cf501d27c1cb0012a2caa3aeb9861
-      size: 22997
+      md5: 63394300f3193482326a2b0e7b7fd260
+      size: 23001
     - path: fits/2020-12-21-fips06/fit.RData
       md5: 59316ac5b6dc382cca580247e48e9a9c
       size: 39156
     - path: write-formatted-forecast.R
-      md5: 9829895103dbebb9d94af901b35687df
-      size: 24481
+      md5: e6862be3808a56bd01d248990c7a71fd
+      size: 24595
     outs:
     - path: forecasts/2020-12-21-fips06
-      md5: 94b72a2bb7e5cf778a784282a87329b0.dir
+      md5: 8281adb46e7a31faf4156950eabbcd2b.dir
       size: 52146
       nfiles: 1
     - path: plots/2020-12-21-fips06
-      md5: 61f26243f4b73397b7b6944f88dcf75c.dir
-      size: 1860658
+      md5: 44518c2dff0575d8d3fe9e00afc1401e.dir
+      size: 1885637
       nfiles: 12
   fit-2020-12-21-06:
     cmd: fdtstart=2020-12-14 fdt=2020-12-21 loc=06 Rscript fit-infection-kalman.R
