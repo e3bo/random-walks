@@ -19,7 +19,8 @@ load_from_dir <- function(dname){
 
 fdat2 <- map_dfr(dirnames, load_from_dir) %>% 
   bind_rows(readRDS("other-model-forecasts.rds")) %>%
-  filter(model != "CEID-Walk")
+  filter(model != "CEID-Walk") %>%
+  filter(model != "COVIDhub-baseline")
 
 ## split forecasts by location
 fdat3 <- fdat2 %>% filter(target_variable == "inc case")
@@ -30,8 +31,6 @@ splt_hosp <- split(fdat4, fdat4$location)
 
 fdat5 <- fdat2 %>% filter(target_variable == "inc death")
 splt_death <- split(fdat5, fdat5$location)
-
-
 
 ## load JHU data
 data_date <- Sys.getenv("ddt", unset = "2021-05-24")
@@ -103,8 +102,8 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
   locdata %>% left_join(truth, by = c("location", "target_end_date")) %>%
   filter(type == "point") %>%
   ggplot(aes(x = target_end_date, y = value, group = interaction(forecast_date, model), color = model)) + 
-  geom_line(aes(y = true_value), color = "grey", size = 3) + 
-  geom_point(aes(y = true_value), color = "grey") +
+  geom_line(aes(y = true_value), color = "grey", size = 2, alpha = 0.5) + 
+  geom_point(aes(y = true_value), color = "grey", size = 3, alpha = 0.5) +
   geom_line() + 
   geom_point() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
