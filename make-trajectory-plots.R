@@ -74,25 +74,18 @@ healthdata <-
 
 ## make the plots
 plot_forecast_grid <- function(locdata, tv = "inc case"){
+  xname <- "Year-Epiweek"
+  db <- "2 weeks"
+  labf <- function(x) {
+    wk <- sprintf("%02d", lubridate::epiweek(x))
+    yr <- lubridate::epiyear(x)
+    paste(yr, wk, sep = '-')
+  }
   if (tv == "inc case"){
-    xname = "Year-Epiweek"
-    yname = "Incident cases"
-    db = "2 weeks"
-    labf <- function(x) {
-      wk <- sprintf("%02d", strftime(x, format = "%U") %>% as.integer() + 1)
-      yr <- strftime(x, format = "%y")
-      paste(yr, wk, sep = '-')
-    }
+    yname <- "Incident cases"
     truth <- tdat2
   } else if (tv == "inc death") {
-    xname = "Year-Epiweek"
-    yname = "Incident deaths"
-    db = "2 weeks"
-    labf <- function(x) {
-      wk <- sprintf("%02d", strftime(x, format = "%U") %>% as.integer() + 1)
-      yr <- strftime(x, format = "%y")
-      paste(yr, wk, sep = '-')
-    }
+    yname <- "Incident deaths"
     truth <- tdat3
   } else {
     xname <- "Date"
@@ -102,7 +95,7 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
     truth <- healthdata
   }
   locdata %>% left_join(truth, by = c("location", "target_end_date")) %>%
-  filter(type == "point") %>%
+  filter(quantile %in% c(0.025, 0.5, 0.975)) %>%
   ggplot(aes(x = target_end_date, y = value, group = interaction(forecast_date, model), color = model)) + 
   geom_line(aes(y = true_value), color = "grey", size = 2, alpha = 0.5) + 
   geom_point(aes(y = true_value), color = "grey", size = 3, alpha = 0.5) +
@@ -115,9 +108,11 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
     expand = expansion()
   ) +
   labs(y = yname) + 
+  facet_grid(quantile~., scales = "free_y") + 
   ggthemes::scale_colour_colorblind(name = "Model") +
   theme_minimal() + 
   theme(legend.position = "top") + 
+  guides(colour = guide_legend(nrow = 2, byrow = TRUE)) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 }
 
@@ -127,7 +122,7 @@ plots_deaths <- map(splt_death, plot_forecast_grid, tv = "inc death")
 
 plot_writer <- function(p, loc, pref){
   plot_name <- paste0("trajectories-all/", pref, loc, ".png")
-  ggsave(plot_name, p, width = 7.5)
+  ggsave(plot_name, p, width = 4, height = 10)
 }
 if (!dir.exists("trajectories-all")){
   dir.create("trajectories-all")
