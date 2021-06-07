@@ -781,16 +781,19 @@ if ("doses_scaled" %in% names(x)){
     target_end_dates,
     doses_scaled = weekly_sim_doses,
     residential = tail(x$residential, n = 1),
-    β_0map = tail(x$β_0map, 1)
+    β_0map = tail(x$β_0map, 1),
+    p_hmap = tail(x$p_hmap, 1),
+    ρ = tail(x$ρ, 1)
   )
 } else {
-  
   cov_weekly_fcst <- tibble(
     time = target_end_times,
     wday = target_wday,
     target_end_dates,
     residential = tail(x$residential, n = 1),
-    β_0map = tail(x$β_0map, 1)
+    β_0map = tail(x$β_0map, 1),
+    p_hmap = tail(x$p_hmap, 1),
+    ρ = tail(x$ρ, 1)
   )
 }
 

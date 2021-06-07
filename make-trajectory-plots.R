@@ -106,7 +106,6 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
   geom_point(aes(y = true_value), color = "grey", size = 3, alpha = 0.5) +
   geom_line() + 
   geom_point() + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   scale_x_date(
     name = xname,
     date_breaks = db,
@@ -116,7 +115,8 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
   labs(y = yname) + 
   ggthemes::scale_colour_colorblind(name = "Model") +
   theme_minimal() + 
-  theme(legend.position = "top")
+  theme(legend.position = "top") + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 }
 
 plots_cases <- map(splt_cases, plot_forecast_grid)

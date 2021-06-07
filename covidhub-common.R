@@ -716,10 +716,10 @@ calc_kf_nll_r <-
             advance_proc(
               p = p,
               f = f,
-              cov = cov,
+              cov = cov_sim,
               xhat_init = xhat_init,
               PNinit = PNinit,
-              t = i
+              t = j
             )
 
           r <-
