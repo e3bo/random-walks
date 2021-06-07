@@ -16,10 +16,10 @@ dirnames <- purrr::map(lambda, par2name)
 load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }
-fdat2 <- map_dfr(dirnames, load_from_dir)
 
-fdat2$lambda <- fdat2$model %>% str_extract("^lambda\\d+.\\d{2}-") %>% 
-  str_remove("^lambda") %>% str_remove("-$") %>% as.numeric()
+fdat2 <- map_dfr(dirnames, load_from_dir) %>% 
+  bind_rows(readRDS("other-model-forecasts.rds")) %>%
+  filter(model != "CEID-Walk")
 
 ## split forecasts by location
 fdat3 <- fdat2 %>% filter(target_variable == "inc case")
@@ -78,7 +78,7 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
     yname = "Incident cases"
     db = "2 weeks"
     labf <- function(x) {
-      wk <- strftime(x, format = "%U") %>% as.integer() + 1
+      wk <- sprintf("%02d", strftime(x, format = "%U") %>% as.integer() + 1)
       yr <- strftime(x, format = "%y")
       paste(yr, wk, sep = '-')
     }
@@ -102,12 +102,11 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
   }
   locdata %>% left_join(truth, by = c("location", "target_end_date")) %>%
   filter(type == "point") %>%
-  ggplot(aes(x = target_end_date, y = value, group = forecast_date)) + 
+  ggplot(aes(x = target_end_date, y = value, group = interaction(forecast_date, model), color = model)) + 
+  geom_line(aes(y = true_value), color = "grey", size = 3) + 
+  geom_point(aes(y = true_value), color = "grey") +
   geom_line() + 
   geom_point() + 
-  geom_line(aes(y = true_value), color = "red") + 
-  geom_point(aes(y = true_value), color = "red") +
-  facet_grid(~lambda) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
   scale_x_date(
     name = xname,
@@ -115,7 +114,10 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
     labels = labf,
     expand = expansion()
   ) +
-  labs(y = yname)
+  labs(y = yname) + 
+  ggthemes::scale_colour_colorblind(name = "Model") +
+  theme_minimal() + 
+  theme(legend.position = "top")
 }
 
 plots_cases <- map(splt_cases, plot_forecast_grid)

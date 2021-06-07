@@ -2079,15 +2079,15 @@ stages:
       size: 2530391
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: fc14058fea5862823d673c6931937723
-      size: 4178
+      md5: 02cefabe0c719d9c4d3ff8c93c438819
+      size: 4284
     - path: other-model-forecasts.rds
-      md5: 999ed7c69726ecbd182b1484e55fd4c7
-      size: 2066
+      md5: bb6012b15586c0843a28fed88c33a239
+      size: 141985
     outs:
     - path: trajectories-all
-      md5: 985a29aa8db66d86f5e316164d5430fd.dir
-      size: 677139
+      md5: aae3f50bcb046b4485b40b3026f3b4c3.dir
+      size: 950343
       nfiles: 3
   analyze-scores:
     cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
