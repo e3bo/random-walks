@@ -2079,22 +2079,22 @@ stages:
       size: 2551521
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 3a61d195eb24b556ee974324be32634d
-      size: 4323
+      md5: 3d8695b2ced5f09e3cd7507452d8295c
+      size: 4450
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: trajectories-all
-      md5: 896017ce8c190b312911086766ba934f.dir
-      size: 1052379
+      md5: 83b95a3ca519d4c165bc96d952f6fb6c.dir
+      size: 1031258
       nfiles: 3
   analyze-scores:
     cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
     deps:
     - path: analyze-scores.R
-      md5: 5eef74bbffe699477692a6cd5310dd59
-      size: 3614
+      md5: a6c9a75370511e6a2bc960ea2ee5d81b
+      size: 3742
     - path: lambda020.00-status-quo-CEID-InfectionKalman
       md5: 2eb1b3c3d8ec2ac646c4c1abb2470cb1.dir
       size: 2551521
@@ -2104,8 +2104,8 @@ stages:
       size: 141985
     outs:
     - path: analyze-scores.html
-      md5: 1bf7ab31b6765b28b53c68183d92e811
-      size: 337892
+      md5: 8aa532783177e577bc2150574868f5a9
+      size: 333483
     - path: analyze-scores.md
-      md5: 91adf15c197511a71a021ca3ca5b1790
-      size: 4721
+      md5: 239926d5024752b51645af372335d05d
+      size: 4849

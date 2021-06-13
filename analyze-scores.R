@@ -17,7 +17,9 @@ load_from_dir <- function(dname){
   dir(dname, full.names = TRUE) %>% load_forecast_files_repo() 
 }
 fdat1 <- map_dfr(dirnames, load_from_dir)
-fdat2 <- bind_rows(fdat0, fdat1)
+fdat2 <- bind_rows(fdat0, fdat1) %>% 
+  mutate(model = ifelse(model == "lambda020.00-status-quo-CEID-InfectionKalman", 
+                        "GISST", model))
 locations_to_exclude <- c("78", "72", "69", "66", "60")
 
 truth_data1 <- load_truth(truth_source = "JHU",

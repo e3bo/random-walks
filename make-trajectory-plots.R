@@ -20,7 +20,9 @@ load_from_dir <- function(dname){
 fdat2 <- map_dfr(dirnames, load_from_dir) %>% 
   bind_rows(readRDS("other-model-forecasts.rds")) %>%
   filter(model != "CEID-Walk") %>%
-  filter(model != "COVIDhub-baseline")
+  filter(model != "COVIDhub-baseline") %>%
+  mutate(model = ifelse(model == "lambda020.00-status-quo-CEID-InfectionKalman", 
+                        "GISST", model))
 
 ## split forecasts by location
 fdat3 <- fdat2 %>% filter(target_variable == "inc case")
