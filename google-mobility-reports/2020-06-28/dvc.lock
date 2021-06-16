@@ -1,0 +1,15 @@
+schema: '2.0'
+stages:
+  wayback-download:
+    cmd: ./download-google-mob.R
+    deps:
+    - path: download-google-mob.R
+      md5: de933d23d855e501e4ffd8e826e97611
+      size: 289
+    - path: timestamp.txt
+      md5: 114bc27f83b8812a8d9a575c1c3b4a49
+      size: 15
+    outs:
+    - path: Global_Mobility_Report.csv
+      md5: 24c2879a80205c9d9878be094e9d154d
+      size: 40546804
