@@ -30,37 +30,28 @@ hopall <- bind_rows(hoploc, .id = "issue_date") %>%
   rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
   select(target_end_date, wday, cases, deaths, issue_date)
 
-hopsum <- hopall %>%
-  pivot_longer(cases:deaths, names_to = "variable") %>%
+hfd <- forecast_dates[forecast_dates > "2020-11-15"]
+
+hhs <- map(hfd, ~load_health_data(forecast_date = .x, forecast_loc = "06"))
+names(hhs) <- hfd
+
+all <- bind_rows(hhs, .id = "issue_date") %>% 
+  right_join(hopall, by = c("target_end_date", "issue_date"))
+
+allsum <- all %>%
+  pivot_longer(c(cases:deaths, hospitalizations), names_to = "variable") %>%
   group_by(target_end_date, variable) %>%
   arrange(issue_date) %>%
   summarise(min = min(value),
             max = max(value),
             last = value[n()])
 
-
-hopsum <- hopall %>%
-  arrange(issue_date) %>%
-  group_by(target_end_date) %>%
-  summarise(
-    mincases = min(cases),
-    maxcases = max(cases),
-    lastcases = cases[n()],
-    mindeaths = min(deaths),
-    maxdeaths = max(deaths),
-    lastdeaths = deaths[n()]
-  )
-
-hopsum %>% 
+allsum %>% 
   ggplot(aes(x = target_end_date, ymin = min, ymax = max, y = last)) + 
   geom_linerange() + geom_point() + facet_grid(variable~., scales = "free_y") +
   theme_minimal() + 
   labs(x = "Date", y = "Count")
 
-
 hopsum %>% 
   ggplot(aes(x = target_end_date, ymin = mindeaths, ymax = maxdeaths, y = lastdeaths)) + 
-  geom_linerange() + geom_point()  
-  
-  
-
+  geom_linerange() + geom_point()

@@ -756,3 +756,39 @@ calc_kf_nll_r <-
       nll
     }
   }
+
+load_health_data <-
+  function(forecast_date, forecast_loc, cov_thresh = 0.9) {
+    healthd <-
+      file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
+    tdat2 <- read_csv(
+      healthd,
+      col_types = cols_only(
+        date = col_date("%Y%m%d"),
+        previous_day_admission_adult_covid_confirmed = col_integer(),
+        previous_day_admission_pediatric_covid_confirmed = col_integer(),
+        previous_day_admission_adult_covid_confirmed_coverage = col_integer()
+      )
+    )
+    most_recent_coverage <- tdat2 %>% arrange(date) %>%
+      pull(previous_day_admission_adult_covid_confirmed_coverage) %>%
+      tail(n = 1)
+    min <- most_recent_coverage * cov_thresh
+    max <- most_recent_coverage / cov_thresh
+    tdat3 <- tdat2 %>%
+      filter(
+        previous_day_admission_adult_covid_confirmed_coverage >
+          min
+      ) %>%
+      filter(
+        previous_day_admission_adult_covid_confirmed_coverage <
+          max 
+      ) %>%
+      mutate(
+        hospitalizations = previous_day_admission_adult_covid_confirmed +
+          previous_day_admission_pediatric_covid_confirmed,
+        target_end_date = date - lubridate::ddays(1)
+      ) %>%
+      select(target_end_date, hospitalizations)
+    tdat3
+  }

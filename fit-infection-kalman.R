@@ -53,36 +53,7 @@ mob_ts <- mob1 %>% filter(sub_region_1 == statename) %>%
          residential_pcb = residential_percent_change_from_baseline)
   
 if (forecast_date > "2020-11-15") {
-  healthd <-
-    file.path("healthdata", forecast_date, forecast_loc, "epidata.csv")
-  cov_thresh <- .9
-  tdat2 <- read_csv(
-    healthd,
-    col_types = cols_only(
-      date = col_date("%Y%m%d"),
-      previous_day_admission_adult_covid_confirmed = col_integer(),
-      previous_day_admission_pediatric_covid_confirmed = col_integer(),
-      previous_day_admission_adult_covid_confirmed_coverage = col_integer()
-    )
-  )
-  most_recent_coverage <- tdat2 %>% arrange(date) %>%
-    pull(previous_day_admission_adult_covid_confirmed_coverage) %>%
-    tail(n = 1)
-  tdat3 <- tdat2 %>%
-    filter(
-      previous_day_admission_adult_covid_confirmed_coverage >
-        most_recent_coverage * cov_thresh
-    ) %>%
-    filter(
-      previous_day_admission_adult_covid_confirmed_coverage <
-        most_recent_coverage / cov_thresh
-    ) %>%
-    mutate(
-      hospitalizations = previous_day_admission_adult_covid_confirmed +
-        previous_day_admission_pediatric_covid_confirmed,
-      target_end_date = date - lubridate::ddays(1)
-    ) %>%
-    select(target_end_date, hospitalizations)
+  tdat3 <- load_health_data(forecast_date, forecast_loc)
   
   obs_data0 <-
     left_join(jhu_data, mob_ts, by = "target_end_date") %>%
