@@ -584,3 +584,9 @@ stages:
     outs:
     - analyze-scores.html
     - analyze-scores.md
+  wayback-download:
+    cmd: ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback

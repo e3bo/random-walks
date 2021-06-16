@@ -2109,3 +2109,14 @@ stages:
     - path: analyze-scores.md
       md5: 239926d5024752b51645af372335d05d
       size: 4849
+  wayback-download:
+    cmd: ./download-google-mob.R
+    deps:
+    - path: download-google-mob.R
+      md5: 5312f4a6d244bd34ec9d7a10be634e5c
+      size: 1730
+    outs:
+    - path: google-mobility-reports-wayback
+      md5: e74818493d08d066e7091ae0cc4a625c.dir
+      size: 1379237
+      nfiles: 6
