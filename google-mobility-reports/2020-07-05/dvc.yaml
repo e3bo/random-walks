@@ -1,0 +1,8 @@
+stages:
+  wayback-download:
+    cmd: ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    - timestamp.txt
+    outs:
+    - Global_Mobility_Report.csv
