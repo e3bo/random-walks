@@ -1,0 +1,1 @@
+for fcst in $(grep forecast- dvc.yaml |cut -d: -f1); do dvc remove $fcst; done
