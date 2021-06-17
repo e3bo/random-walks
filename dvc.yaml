@@ -1,10 +1,4 @@
 stages:
-  safegraph-hp-2020-06-29:
-    cmd: fdt=2020-06-29 ./pull-safegraph-ts-from-date.R
-    deps:
-    - pull-safegraph-ts-from-date.R
-    outs:
-    - covidcast-safegraph-home-prop/2020-06-29
   hopkins-2020-06-29:
     cmd: fdt=2020-06-29 ./pull-hopkins-ts-from-date.R
     deps:
