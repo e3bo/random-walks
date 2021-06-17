@@ -584,9 +584,324 @@ stages:
     outs:
     - analyze-scores.html
     - analyze-scores.md
-  wayback-download:
-    cmd: ./download-google-mob.R
+  lookup-wayback-urls:
+    cmd: ./lookup-wayback-urls.R
+    deps:
+    - lookup-wayback-urls.R
+    outs:
+    - wayback-urls.csv
+  wayback-download-2020-06-29:
+    cmd: dname=2020-06-29 uri=https://web.archive.org/web/20200628151643/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
     deps:
     - download-google-mob.R
     outs:
+    - google-mobility-reports-wayback/2020-06-29
+  wayback-download-2020-07-06:
+    cmd: dname=2020-07-06 uri=https://web.archive.org/web/20200705231303/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-07-06
+  wayback-download-2020-07-13:
+    cmd: dname=2020-07-13 uri=https://web.archive.org/web/20200712071445/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-07-13
+  wayback-download-2020-07-20:
+    cmd: dname=2020-07-20 uri=https://web.archive.org/web/20200719071423/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-07-20
+  wayback-download-2020-07-27:
+    cmd: dname=2020-07-27 uri=https://web.archive.org/web/20200726073853/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-07-27
+  wayback-download-2020-08-03:
+    cmd: dname=2020-08-03 uri=https://web.archive.org/web/20200801071524/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-08-03
+  wayback-download-2020-08-10:
+    cmd: dname=2020-08-10 uri=https://web.archive.org/web/20200809072958/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-08-10
+  wayback-download-2020-08-17:
+    cmd: dname=2020-08-17 uri=https://web.archive.org/web/20200816071507/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-08-17
+  wayback-download-2020-08-24:
+    cmd: dname=2020-08-24 uri=https://web.archive.org/web/20200823071446/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-08-24
+  wayback-download-2020-08-31:
+    cmd: dname=2020-08-31 uri=https://web.archive.org/web/20200830071357/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-08-31
+  wayback-download-2020-09-07:
+    cmd: dname=2020-09-07 uri=https://web.archive.org/web/20200906071805/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-09-07
+  wayback-download-2020-09-14:
+    cmd: dname=2020-09-14 uri=https://web.archive.org/web/20200913072633/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-09-14
+  wayback-download-2020-09-21:
+    cmd: dname=2020-09-21 uri=https://web.archive.org/web/20200920071411/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-09-21
+  wayback-download-2021-04-05:
+    cmd: dname=2021-04-05 uri=https://web.archive.org/web/20210404071732/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-04-05
+  wayback-download-2021-04-12:
+    cmd: dname=2021-04-12 uri=https://web.archive.org/web/20210411071438/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-04-12
+  wayback-download-2021-04-19:
+    cmd: dname=2021-04-19 uri=https://web.archive.org/web/20210418071413/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-04-19
+  wayback-download-2021-04-26:
+    cmd: dname=2021-04-26 uri=https://web.archive.org/web/20210425071554/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-04-26
+  wayback-download-2020-09-28:
+    cmd: dname=2020-09-28 uri=https://web.archive.org/web/20200927071521/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-09-28
+  wayback-download-2020-10-05:
+    cmd: dname=2020-10-05 uri=https://web.archive.org/web/20201004071606/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-10-05
+  wayback-download-2020-10-12:
+    cmd: dname=2020-10-12 uri=https://web.archive.org/web/20201011071509/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-10-12
+  wayback-download-2020-10-19:
+    cmd: dname=2020-10-19 uri=https://web.archive.org/web/20201018071458/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-10-19
+  wayback-download-2020-10-26:
+    cmd: dname=2020-10-26 uri=https://web.archive.org/web/20201025071429/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-10-26
+  wayback-download-2020-11-02:
+    cmd: dname=2020-11-02 uri=https://web.archive.org/web/20201101071443/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-11-02
+  wayback-download-2020-11-09:
+    cmd: dname=2020-11-09 uri=https://web.archive.org/web/20201108071440/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-11-09
+  wayback-download-2020-11-16:
+    cmd: dname=2020-11-16 uri=https://web.archive.org/web/20201115205234/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-11-16
+  wayback-download-2020-11-23:
+    cmd: dname=2020-11-23 uri=https://web.archive.org/web/20201122071442/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-11-23
+  wayback-download-2020-11-30:
+    cmd: dname=2020-11-30 uri=https://web.archive.org/web/20201129071443/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-11-30
+  wayback-download-2020-12-07:
+    cmd: dname=2020-12-07 uri=https://web.archive.org/web/20201206080806/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-12-07
+  wayback-download-2020-12-14:
+    cmd: dname=2020-12-14 uri=https://web.archive.org/web/20201213071539/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-12-14
+  wayback-download-2020-12-21:
+    cmd: dname=2020-12-21 uri=https://web.archive.org/web/20201220071739/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-12-21
+  wayback-download-2020-12-28:
+    cmd: dname=2020-12-28 uri=https://web.archive.org/web/20201227071550/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2020-12-28
+  wayback-download-2021-01-04:
+    cmd: dname=2021-01-04 uri=https://web.archive.org/web/20210103071445/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-01-04
+  wayback-download-2021-01-11:
+    cmd: dname=2021-01-11 uri=https://web.archive.org/web/20210110071514/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-01-11
+  wayback-download-2021-01-18:
+    cmd: dname=2021-01-18 uri=https://web.archive.org/web/20210117071415/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-01-18
+  wayback-download-2021-01-25:
+    cmd: dname=2021-01-25 uri=https://web.archive.org/web/20210124071537/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-01-25
+  wayback-download-2021-02-01:
+    cmd: dname=2021-02-01 uri=https://web.archive.org/web/20210131071415/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-02-01
+  wayback-download-2021-02-08:
+    cmd: dname=2021-02-08 uri=https://web.archive.org/web/20210207072251/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-02-08
+  wayback-download-2021-02-15:
+    cmd: dname=2021-02-15 uri=https://web.archive.org/web/20210214071640/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-02-15
+  wayback-download-2021-02-22:
+    cmd: dname=2021-02-22 uri=https://web.archive.org/web/20210221071520/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-02-22
+  wayback-download-2021-03-01:
+    cmd: dname=2021-03-01 uri=https://web.archive.org/web/20210228071458/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-03-01
+  wayback-download-2021-03-08:
+    cmd: dname=2021-03-08 uri=https://web.archive.org/web/20210307071447/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-03-08
+  wayback-download-2021-03-15:
+    cmd: dname=2021-03-15 uri=https://web.archive.org/web/20210314071530/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-03-15
+  wayback-download-2021-03-22:
+    cmd: dname=2021-03-22 uri=https://web.archive.org/web/20210321071619/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-03-22
+  wayback-download-2021-03-29:
+    cmd: dname=2021-03-29 uri=https://web.archive.org/web/20210328072531/https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv
+      ./download-google-mob.R
+    deps:
+    - download-google-mob.R
+    outs:
+    - google-mobility-reports-wayback/2021-03-29
+  make-mobility-plot:
+    cmd: ./analyze-google-mob-revisions.R
+    deps:
+    - analyze-google-mob-revisions.R
     - google-mobility-reports-wayback
+    outs:
+    - residential-mobility-plot.pdf

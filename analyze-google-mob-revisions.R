@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 library(tidyverse)
 
 read_us_mob_report <- function(path, locpat = "US-CA"){
@@ -16,6 +18,10 @@ read_us_mob_report <- function(path, locpat = "US-CA"){
     filter(str_detect(iso_3166_2_code, locpat))
 }
 
+
+dnames <- dir("google-mobility-reports-wayback") 
+paths <- file.path("google-mobility-reports-wayback", 
+                   dnames, "US-states-mobility.csv")
 
 dfs <- purrr::map(paths, read_us_mob_report)
 names(dfs) <- dnames
@@ -39,4 +45,4 @@ p <-
   ))  + geom_point() + theme_minimal() + 
   labs(x = "Date", y = "Percent increase in time spent in residential areas")
 
-ggsave(p, "residential-mobility-plot.pdf", width = 4, height = 3)
+ggsave(p,filename = "residential-mobility-plot.pdf", width = 4, height = 4)
