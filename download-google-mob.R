@@ -31,7 +31,8 @@ download_past_issue <- function(dname, csvuri) {
   dir.create(destdir, showWarnings = FALSE, recursive = TRUE)
   curdir <- setwd(destdir)
   on.exit(setwd(curdir))
-  download.file(url = csvuri, destfile = "Global_Mobility_Report.csv")
+  download.file(url = csvuri, destfile = "Global_Mobility_Report.csv",
+                extra = "--retry 3")
   system("head -n1 Global_Mobility_Report.csv > US-states-mobility.csv")
   system("grep \"US-[A-Z][A-Z]\" Global_Mobility_Report.csv >> US-states-mobility.csv")
   unlink("Global_Mobility_Report.csv")
