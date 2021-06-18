@@ -220,14 +220,17 @@ if (forecast_date_start == forecast_date) {
     nw <- length(winit)
     last_val <- winit[nw - nβ_0 - np_h]
     winit <-
-      c(winit[1:(nw - nβ_0 - np_h)], rep(last_val, times = sizediff_τ_c), winit[(nw - nβ_0 - np_h + 1):nw])
+      c(winit[1:(nw - nβ_0 - np_h)], 
+        rep(last_val, times = sizediff_τ_c), winit[(nw - nβ_0 - np_h + 1):nw])
   }
 }
 
 ## fitting
-if (forecast_date == forecast_date_start || 
+if (forecast_date == forecast_date_start || # starting cold 
     (forecast_date >= "2020-11-16" &&
-    forecast_date_start < "2020-11-16")){ # if starting cold or adding hospitalization data
+    forecast_date_start < "2020-11-16" )|| # or adding hosp data
+    (forecast_date >= "2020-02-15" &&
+     forecast_date_start < "2020-02-15")){ # or adding vaccine data
   iter1 <- 1000
 } else {
   iter1 <- 100
