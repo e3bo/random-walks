@@ -29,22 +29,8 @@ jhu_data <- ltdat2 %>% ungroup() %>%
   rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
   select(target_end_date, time, wday, cases, deaths)
 
-if (forecast_date <= "2021-05-06"){
-  mob1 <- load_google_mobility("2021-05-06") %>% 
-    filter(date < lubridate::ymd(forecast_date) - lubridate::ddays(4))
-} else if (forecast_date <= "2021-05-14"){
-  mob1 <- load_google_mobility("2021-05-14") %>% 
-    filter(date < lubridate::ymd(forecast_date) - lubridate::ddays(4))
-} else if (forecast_date <= "2021-05-19"){
-  mob1 <- load_google_mobility("2021-05-19") %>% 
-    filter(date < lubridate::ymd(forecast_date) - lubridate::ddays(4)) 
-} else if (forecast_date <= "2021-05-28") {
-  mob1 <- load_google_mobility("2021-05-28") %>% 
-    filter(date < lubridate::ymd(forecast_date) - lubridate::ddays(4)) 
-} else {
-  stop("Loading mobility date not implemented for forecast dates beyond 2021-05-28")
-}
-
+mobpath <- file.path("google-mobility-reports-wayback/", forecast_date)
+mob1 <- read_us_mob_report(mobpath)
 
 statename <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
 mob_ts <- mob1 %>% filter(sub_region_1 == statename) %>%
