@@ -29,7 +29,7 @@ jhu_data <- ltdat2 %>% ungroup() %>%
   rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
   select(target_end_date, time, wday, cases, deaths)
 
-mobpath <- file.path("google-mobility-reports-wayback/", forecast_date)
+mobpath <- file.path("google-mobility-reports-wayback/", forecast_date, "US-states-mobility.csv")
 mob1 <- read_us_mob_report(mobpath)
 
 statename <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
@@ -230,7 +230,7 @@ if (forecast_date == forecast_date_start ||
     forecast_date_start < "2020-11-16")){ # if starting cold or adding hospitalization data
   iter1 <- 1000
 } else {
-  iter1 <- 60
+  iter1 <- 100
 }
 β_0sd <- 0.05
 τ_csd <- 0.05
