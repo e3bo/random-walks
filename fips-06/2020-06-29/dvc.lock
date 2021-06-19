@@ -4,14 +4,14 @@ stages:
     cmd: fdtstart=2020-06-29 fdt=2020-06-29 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: 49555e6e2d733baa41116f01c5185bfe
-      size: 23037
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fit-infection-kalman.R
-      md5: 736cbd4039fee5c6a9f37de625b9c846
-      size: 12241
-    - path: google-mobility-reports/2021-05-06
-      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
-      size: 114473434
+      md5: 0eb208ee25b1a9ee3a5bf1df945074f5
+      size: 10865
+    - path: google-mobility-reports-wayback/2020-06-29
+      md5: 99f0500b63e66e016959e6a0f819e142.dir
+      size: 438581
       nfiles: 2
     - path: hopkins/2020-06-29
       md5: 0778252e585b9da630aa43f1f2af7262.dir
@@ -19,29 +19,29 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-06-29-fips06/fit-metrics.json
-      md5: 3712697a788bd09d54934649fce5fcf2
-      size: 366
+      md5: 4d9e19c37b6d1260e974219fec4437c8
+      size: 361
     - path: fits/2020-06-29-fips06/fit.RData
-      md5: fd79edae500407430adb758ee0df658c
+      md5: 97b9a95b8618941bbf15bd01765a1f07
       size: 9217
   forecast-2020-06-29-06:
     cmd: fdt=2020-06-29 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 63394300f3193482326a2b0e7b7fd260
-      size: 23001
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fits/2020-06-29-fips06/fit.RData
-      md5: fd79edae500407430adb758ee0df658c
+      md5: 97b9a95b8618941bbf15bd01765a1f07
       size: 9217
     - path: write-formatted-forecast.R
       md5: e6862be3808a56bd01d248990c7a71fd
       size: 24595
     outs:
     - path: forecasts/2020-06-29-fips06
-      md5: 8d027683eb97e36e339affe8b6cabdf3.dir
+      md5: 1d95d0dde233c0ca5b2a95e84b5c575f.dir
       size: 52882
       nfiles: 1
     - path: plots/2020-06-29-fips06
-      md5: 763941a59e7c414a40fdaff0ce8620a8.dir
-      size: 1488913
+      md5: ceef1fe209fc4b6094680b05a2f948a8.dir
+      size: 1498827
       nfiles: 12

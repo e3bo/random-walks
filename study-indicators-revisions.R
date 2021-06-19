@@ -58,26 +58,3 @@ p <- allsum %>%
   labs(x = "Date", y = "Count")
 
 ggsave("indicators-revisions-cal.png", plot = p, width = 6.5, height = 6)
-
-q('no')
-winsize <- 14
-outlier_limits <- all %>% 
-  filter(issue_date == eval_date ) %>% 
-  select(-issue_date, -wday) %>%
-  pivot_longer(c(cases, deaths, hospitalizations), names_to = "variable") %>%
-  group_by(target_end_date, variable) %>% 
-  arrange(target_end_date) %>%
-  group_by(variable) %>%
-  mutate(naive_res = value - lag(value), 
-         naive_res7 = value - lag(value, n = 7L)) %>%
-  summarize(rollsd_naive_res = slider::slide_dbl(naive_res, sd, .before = winsize - 1, .complete = TRUE),
-            rollsd_naive_res7 = slider::slide_dbl(naive_res7, sd, .before = winsize  - 1, .complete = TRUE),
-            window_end = target_end_date,
-            value = value,
-            .groups = "drop") %>%
-  mutate(lower = value - 2 * rollsd_naive_res,
-         upper = value + 2 * rollsd_naive_res)
-  
-df <- allsum %>% left_join(outlier_limits, by = c("target_end_date" = "window_end", "variable"))
-
-df %>% ggplot(aes(x = target_end_date, y = last)) + geom_point() + geom_line(aes(y = lower)) + geom_line(aes(y = upper)) + facet_grid(variable ~., scales = "free_y")

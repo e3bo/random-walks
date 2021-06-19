@@ -4,38 +4,38 @@ stages:
     cmd: fdt=2020-11-16 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 63394300f3193482326a2b0e7b7fd260
-      size: 23001
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fits/2020-11-16-fips06/fit.RData
-      md5: 541a5aae8ecfb4eada1f2dbe4b1f22f6
-      size: 32371
+      md5: 8889c290b847246a83127c0c2ac885b6
+      size: 32402
     - path: write-formatted-forecast.R
       md5: e6862be3808a56bd01d248990c7a71fd
       size: 24595
     outs:
     - path: forecasts/2020-11-16-fips06
-      md5: ce7780c5fc4e1bb415347bc407dcc520.dir
+      md5: 517aec33be54d89ce17d485f7c6ac6b8.dir
       size: 52882
       nfiles: 1
     - path: plots/2020-11-16-fips06
-      md5: 444647975319364d43c3814c38116d3e.dir
-      size: 1586391
+      md5: 34b9801c781cda8f24854fdbc99ece28.dir
+      size: 1708355
       nfiles: 12
   fit-2020-11-16-06:
     cmd: fdtstart=2020-11-09 fdt=2020-11-16 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: 49555e6e2d733baa41116f01c5185bfe
-      size: 23037
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fit-infection-kalman.R
-      md5: 736cbd4039fee5c6a9f37de625b9c846
-      size: 12241
+      md5: 0eb208ee25b1a9ee3a5bf1df945074f5
+      size: 10865
     - path: fits/2020-11-09-fips06/fit.RData
-      md5: e3bdbc56c0e6f22570212e5cd30eb681
-      size: 22513
-    - path: google-mobility-reports/2021-05-06
-      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
-      size: 114473434
+      md5: 387b53aa0cb3bc1e78e56fc46513fdae
+      size: 22625
+    - path: google-mobility-reports-wayback/2020-11-16
+      md5: 911885d7390dd8815d199fe917237670.dir
+      size: 923172
       nfiles: 2
     - path: hopkins/2020-11-16
       md5: 430a878537d60ab53d4c3a1a4d6cd23c.dir
@@ -43,8 +43,8 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-11-16-fips06/fit-metrics.json
-      md5: 66379f76da86e3f10fa15f166f6b284c
-      size: 365
+      md5: 0b79299e762f8bba7748e357b23d2790
+      size: 366
     - path: fits/2020-11-16-fips06/fit.RData
-      md5: 541a5aae8ecfb4eada1f2dbe4b1f22f6
-      size: 32371
+      md5: 8889c290b847246a83127c0c2ac885b6
+      size: 32402

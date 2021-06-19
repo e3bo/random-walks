@@ -4,17 +4,17 @@ stages:
     cmd: fdtstart=2020-11-16 fdt=2020-11-23 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: 49555e6e2d733baa41116f01c5185bfe
-      size: 23037
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fit-infection-kalman.R
-      md5: 736cbd4039fee5c6a9f37de625b9c846
-      size: 12241
+      md5: 0eb208ee25b1a9ee3a5bf1df945074f5
+      size: 10865
     - path: fits/2020-11-16-fips06/fit.RData
-      md5: 541a5aae8ecfb4eada1f2dbe4b1f22f6
-      size: 32371
-    - path: google-mobility-reports/2021-05-06
-      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
-      size: 114473434
+      md5: 8889c290b847246a83127c0c2ac885b6
+      size: 32402
+    - path: google-mobility-reports-wayback/2020-11-23
+      md5: a6ced62f139823d7207b7aa57a8b1e18.dir
+      size: 947530
       nfiles: 2
     - path: hopkins/2020-11-23
       md5: 8e28e8b35cf400b971d6153d7a5715ee.dir
@@ -22,29 +22,29 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-11-23-fips06/fit-metrics.json
-      md5: 653717156797cd2bae9435f6f6df9b13
-      size: 365
+      md5: 782de56ebb314b211843f238074cefb0
+      size: 368
     - path: fits/2020-11-23-fips06/fit.RData
-      md5: 5b8c7b7a311682c2c2f86aa8dc3b570e
-      size: 33327
+      md5: e111a9681731d55f134857b3793951b5
+      size: 33438
   forecast-2020-11-23-06:
     cmd: fdt=2020-11-23 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 63394300f3193482326a2b0e7b7fd260
-      size: 23001
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fits/2020-11-23-fips06/fit.RData
-      md5: 5b8c7b7a311682c2c2f86aa8dc3b570e
-      size: 33327
+      md5: e111a9681731d55f134857b3793951b5
+      size: 33438
     - path: write-formatted-forecast.R
       md5: e6862be3808a56bd01d248990c7a71fd
       size: 24595
     outs:
     - path: forecasts/2020-11-23-fips06
-      md5: a4a1192849f2d24a5c5387491e43ab71.dir
+      md5: 607526774cc150b6c811c7b874c33039.dir
       size: 53682
       nfiles: 1
     - path: plots/2020-11-23-fips06
-      md5: 51dceec09b324005646ae75de396688d.dir
-      size: 1761335
+      md5: 321f7258d8d3ba067f0ce35e9473f60e.dir
+      size: 1768018
       nfiles: 12
