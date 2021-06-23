@@ -4,17 +4,17 @@ stages:
     cmd: fdtstart=2021-01-04 fdt=2021-01-11 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: 49555e6e2d733baa41116f01c5185bfe
-      size: 23037
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fit-infection-kalman.R
-      md5: 736cbd4039fee5c6a9f37de625b9c846
-      size: 12241
+      md5: 0eb208ee25b1a9ee3a5bf1df945074f5
+      size: 10865
     - path: fits/2021-01-04-fips06/fit.RData
-      md5: 6bb5684cfb0db055de4e75c3a11d2020
-      size: 41284
-    - path: google-mobility-reports/2021-05-06
-      md5: 19b9ffc61d3ce1b0f0ca51d18d6b2d26.dir
-      size: 114473434
+      md5: 8dc1da82b983edafd93256d6cc35e07b
+      size: 41450
+    - path: google-mobility-reports-wayback/2021-01-11
+      md5: 34e3107d4e73a8039345e4d5a1d95040.dir
+      size: 1118017
       nfiles: 2
     - path: hopkins/2021-01-11
       md5: 543f8454b2aeddbcd5373b3daf45f8b1.dir
@@ -22,29 +22,29 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2021-01-11-fips06/fit-metrics.json
-      md5: eab3de5a6f28d4a9c94868ea0cc9b425
-      size: 368
+      md5: 497ec1dbe08aa64f7f8587f8a80ccd48
+      size: 369
     - path: fits/2021-01-11-fips06/fit.RData
-      md5: c69bde2bf33a598ff33fe10edc6f77a2
-      size: 44803
+      md5: cf9196be9b45c16a381610de94adbaec
+      size: 44762
   forecast-2021-01-11-06:
     cmd: fdt=2021-01-11 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: 63394300f3193482326a2b0e7b7fd260
-      size: 23001
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: fits/2021-01-11-fips06/fit.RData
-      md5: c69bde2bf33a598ff33fe10edc6f77a2
-      size: 44803
+      md5: cf9196be9b45c16a381610de94adbaec
+      size: 44762
     - path: write-formatted-forecast.R
       md5: e6862be3808a56bd01d248990c7a71fd
       size: 24595
     outs:
     - path: forecasts/2021-01-11-fips06
-      md5: f6130fcd3d3bb79087dca64f31888549.dir
+      md5: 750c8d784fd50bfa330eb22844d4c5c7.dir
       size: 52146
       nfiles: 1
     - path: plots/2021-01-11-fips06
-      md5: 75c4796c2eedffd5756e28530e469e9e.dir
-      size: 1747488
+      md5: d31bace7ca7046095644d9edb42d4816.dir
+      size: 1730153
       nfiles: 12
