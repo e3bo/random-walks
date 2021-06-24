@@ -2650,3 +2650,53 @@ stages:
     - path: residential-mobility-plot.pdf
       md5: 76b5d240cb17f6c66ed4bc3799dceda6
       size: 25927
+  make-revisions-plot:
+    cmd: ./study-indicators-revisions.R
+    deps:
+    - path: covidhub-common.R
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
+    - path: hopkins
+      md5: af80702171815794863dfe7aea7f4b65.dir
+      size: 414103429
+      nfiles: 392
+    - path: study-indicators-revisions.R
+      md5: 3e26727fed5f1f0f04d6a1aae6598009
+      size: 1874
+    outs:
+    - path: indicators-revisions-cal.png
+      md5: cdb8cfb06299993c9ac908ba49791de9
+      size: 86238
+  hopkins-2021-06-21:
+    cmd: fdt=2021-06-21 ./pull-hopkins-ts-from-date.R
+    deps:
+    - path: pull-hopkins-ts-from-date.R
+      md5: d350b3ca9b344dea811f07232d0ec8d8
+      size: 803
+    outs:
+    - path: hopkins/2021-06-21
+      md5: 2a2de7d4b6cb82727bac5fe53a784411.dir
+      size: 15886764
+      nfiles: 8
+  healthdata-2021-06-21-06:
+    cmd: fdt=2021-06-21 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - path: pull-healthdata-ts-from-date.R
+      md5: 42b46854846a4f774e8823ed95238800
+      size: 1130
+    outs:
+    - path: healthdata/2021-06-21/06
+      md5: 0652a1af3f3138a5f2fc505d912f8139.dir
+      size: 152428
+      nfiles: 1
+  hopkins-vaccine-2021-06-21:
+    cmd: fdt=2021-06-21 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - path: pull-hopkins-vaccine-ts-from-date.R
+      md5: 3bfff08b4e6bb8d0816f67e0e8553c8d
+      size: 1067
+    outs:
+    - path: hopkins-vaccine/2021-06-21
+      md5: 53621964cafc4bf7eff789d4b6c2f1c8.dir
+      size: 6040988
+      nfiles: 3

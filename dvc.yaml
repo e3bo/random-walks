@@ -899,3 +899,29 @@ stages:
     - google-mobility-reports-wayback
     outs:
     - residential-mobility-plot.pdf
+  make-revisions-plot:
+    cmd: ./study-indicators-revisions.R
+    deps:
+    - covidhub-common.R
+    - hopkins
+    - study-indicators-revisions.R
+    outs:
+    - indicators-revisions-cal.png
+  hopkins-2021-06-21:
+    cmd: fdt=2021-06-21 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-06-21
+  healthdata-2021-06-21-06:
+    cmd: fdt=2021-06-21 loc=06 ./pull-healthdata-ts-from-date.R
+    deps:
+    - pull-healthdata-ts-from-date.R
+    outs:
+    - healthdata/2021-06-21/06
+  hopkins-vaccine-2021-06-21:
+    cmd: fdt=2021-06-21 ./pull-hopkins-vaccine-ts-from-date.R
+    deps:
+    - pull-hopkins-vaccine-ts-from-date.R
+    outs:
+    - hopkins-vaccine/2021-06-21

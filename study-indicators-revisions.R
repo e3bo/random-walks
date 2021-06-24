@@ -3,7 +3,7 @@
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-eval_date <- "2021-05-24"
+eval_date <- "2021-06-21"
 forecast_loc <- "06"
 forecast_dates <- c(seq.Date(lubridate::ymd("2020-06-29"), 
                            lubridate::ymd("2021-04-26"),
@@ -57,4 +57,5 @@ p <- allsum %>%
   theme_minimal() +
   labs(x = "Date", y = "Count")
 
-ggsave("indicators-revisions-cal.png", plot = p, width = 6.5, height = 6)
+ggsave("indicators-revisions-cal.png", plot = p, width = 5.2, height = 6, 
+       dpi = 300)
