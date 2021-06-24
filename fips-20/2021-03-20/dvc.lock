@@ -15,24 +15,3 @@ fit-2021-03-20-20:
   - path: fits/2021-03-20-fips20/fit.RData
     md5: d1982354e767c5b565f1cf035c0c9992
     size: 59842
-forecast-2021-03-20-20:
-  cmd: fdt=2021-03-20 loc=20 Rscript write-formatted-forecast.R
-  deps:
-  - path: covidhub-common.R
-    md5: 04d21acd456a175c3042f7d5a68b4c2a
-    size: 10399
-  - path: fits/2021-03-20-fips20/fit.RData
-    md5: d1982354e767c5b565f1cf035c0c9992
-    size: 59842
-  - path: write-formatted-forecast.R
-    md5: fbf8b0fefa75dd2fca0a58ccda858ff2
-    size: 21474
-  outs:
-  - path: forecasts/2021-03-20-fips20
-    md5: 9c593a758ae8e8cb2a7f78279a733193.dir
-    size: 1100488
-    nfiles: 20
-  - path: plots/2021-03-20-fips20
-    md5: f4dc0ecc4dd9e516a4cba5e3c1eb0e95.dir
-    size: 18906912
-    nfiles: 120

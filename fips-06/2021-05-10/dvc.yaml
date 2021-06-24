@@ -13,13 +13,3 @@ stages:
     metrics:
     - fits/2021-05-10-fips06/fit-metrics.json:
         cache: false
-  forecast-2021-05-10-06:
-    cmd: fdt=2021-05-10 loc=06 Rscript write-formatted-forecast.R
-    wdir: ../..
-    deps:
-    - covidhub-common.R
-    - fits/2021-05-10-fips06/fit.RData
-    - write-formatted-forecast.R
-    outs:
-    - forecasts/2021-05-10-fips06
-    - plots/2021-05-10-fips06

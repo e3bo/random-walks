@@ -1,24 +1,3 @@
-forecast-2020-12-07-18:
-  cmd: fdt=2020-12-07 loc=18 Rscript write-formatted-forecast.R
-  deps:
-  - path: covidhub-common.R
-    md5: d1f53bbe17d2d1081e275885727ee3ad
-    size: 10346
-  - path: fits/2020-12-07-fips18/fit.RData
-    md5: 5556599118b5988a8a71934e7afc37cb
-    size: 44047
-  - path: write-formatted-forecast.R
-    md5: 6eff37a8d20f566571ec53cf50b52121
-    size: 20429
-  outs:
-  - path: forecasts/2020-12-07-fips18
-    md5: 596c6ddfaf0ddc34faa2c1c4180ac0a3.dir
-    size: 1081416
-    nfiles: 20
-  - path: plots/2020-12-07-fips18
-    md5: 54a72b47f4ce108c720c3705eb0a1432.dir
-    size: 25001932
-    nfiles: 100
 fit-2020-12-07-18:
   cmd: fdt=2020-12-07 loc=18 Rscript fit-infection-kalman.R
   deps:

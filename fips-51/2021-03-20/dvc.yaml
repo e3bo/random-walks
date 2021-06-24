@@ -8,13 +8,3 @@ stages:
     - hopkins/2021-03-20
     outs:
     - fits/2021-03-20-fips51/fit.RData
-  forecast-2021-03-20-51:
-    cmd: fdt=2021-03-20 loc=51 Rscript write-formatted-forecast.R
-    wdir: ../..
-    deps:
-    - covidhub-common.R
-    - fits/2021-03-20-fips51/fit.RData
-    - write-formatted-forecast.R
-    outs:
-    - forecasts/2021-03-20-fips51
-    - plots/2021-03-20-fips51

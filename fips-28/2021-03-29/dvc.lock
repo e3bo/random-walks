@@ -32,24 +32,3 @@ stages:
     - path: fits/2021-03-29-fips28/fit.RData
       md5: 7fafae621d5ebfe9338bd32a20e34777
       size: 20567
-  forecast-2021-03-29-28:
-    cmd: fdt=2021-03-29 loc=28 Rscript write-formatted-forecast.R
-    deps:
-    - path: covidhub-common.R
-      md5: d6d3f848f3d9b7cbc3ddacc4793a40ee
-      size: 26919
-    - path: fits/2021-03-29-fips28/fit.RData
-      md5: 7fafae621d5ebfe9338bd32a20e34777
-      size: 20567
-    - path: write-formatted-forecast.R
-      md5: 12776c858af76dc59cddf7ace0717996
-      size: 11366
-    outs:
-    - path: forecasts/2021-03-29-fips28
-      md5: c2a9d2d6eadc5462c7838e15c3461ee4.dir
-      size: 55058
-      nfiles: 1
-    - path: plots/2021-03-29-fips28
-      md5: 3af1b6a24d1f7ae0115941ba00502d93.dir
-      size: 1053288
-      nfiles: 8

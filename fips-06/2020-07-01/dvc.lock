@@ -27,24 +27,3 @@ stages:
     - path: fits/2020-07-01-fips06/fit.RData
       md5: 865462b84deaf1084588ba3dcd177428
       size: 8977
-  forecast-2020-07-01-06:
-    cmd: fdt=2020-07-01 loc=06 Rscript write-formatted-forecast.R
-    deps:
-    - path: covidhub-common.R
-      md5: 648be2719015543ca6cf1d44b4dde5a2
-      size: 25867
-    - path: fits/2020-07-01-fips06/fit.RData
-      md5: 15c808166c88839fec1bba68307d2f10
-      size: 8687
-    - path: write-formatted-forecast.R
-      md5: 3e260abb84a9dcab310eb841a324abeb
-      size: 11999
-    outs:
-    - path: forecasts/2020-07-01-fips06
-      md5: c8a8afb2245e83116959f6cffa0f336b.dir
-      size: 52978
-      nfiles: 1
-    - path: plots/2020-07-01-fips06
-      md5: 0cb9524a308d6efdb774960eab9d414d.dir
-      size: 1662707
-      nfiles: 8
