@@ -7,4 +7,5 @@ docker run \
 	-e USERID=1005 \
 	-e PASSWORD=foo \
 	--mount type=bind,src=$HOME/src/random-walks,dst=/home/rstudio/work \
-	eamon/sir-kf:2021-05-20 /init
+        --mount type=bind,src=$HOME/src/covid19-forecast-hub,dst=/home/rstudio/hub \
+	docker.io/eamon/sir-kf:2021-06-24 /init
