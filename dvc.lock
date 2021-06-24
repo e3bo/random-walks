@@ -2041,16 +2041,16 @@ stages:
       md5: de21c9867a3d62cedcc964d37900b0a7
       size: 1027
     - path: covidhub-common.R
-      md5: 63394300f3193482326a2b0e7b7fd260
-      size: 23001
+      md5: b70262ce34aa57caea5db6e7f128ce1d
+      size: 23929
     - path: forecasts
-      md5: 5aa029832c9685568b0c90a866709847.dir
-      size: 271428394
+      md5: c5ec893a3b840c78ff19b16ab495ffcd.dir
+      size: 271425866
       nfiles: 11981
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 2eb1b3c3d8ec2ac646c4c1abb2470cb1.dir
-      size: 2551521
+      md5: d417a54dfefe74a898e97ffa235d76ff.dir
+      size: 2550791
       nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
