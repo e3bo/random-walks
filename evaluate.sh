@@ -21,60 +21,16 @@ dvc run \
     ./combine-location-forecasts.R
 
 dvc run \
-    -d lambda1000.00-a0.94-CEID-InfectionKalman \
-    -d lambda083.33-a0.94-CEID-InfectionKalman \
-    -d lambda043.48-a0.94-CEID-InfectionKalman \
-    -d lambda029.41-a0.94-CEID-InfectionKalman \
-    -d lambda022.22-a0.94-CEID-InfectionKalman \
-    -d lambda017.86-a0.94-CEID-InfectionKalman \
-    -d lambda014.93-a0.94-CEID-InfectionKalman \
-    -d lambda012.82-a0.94-CEID-InfectionKalman \
-    -d lambda011.24-a0.94-CEID-InfectionKalman \
-    -d lambda010.00-a0.94-CEID-InfectionKalman \
-    -d lambda1000.00-a0.95-CEID-InfectionKalman \
-    -d lambda083.33-a0.95-CEID-InfectionKalman \
-    -d lambda043.48-a0.95-CEID-InfectionKalman \
-    -d lambda029.41-a0.95-CEID-InfectionKalman \
-    -d lambda022.22-a0.95-CEID-InfectionKalman \
-    -d lambda017.86-a0.95-CEID-InfectionKalman \
-    -d lambda014.93-a0.95-CEID-InfectionKalman \
-    -d lambda012.82-a0.95-CEID-InfectionKalman \
-    -d lambda011.24-a0.95-CEID-InfectionKalman \
-    -d lambda010.00-a0.95-CEID-InfectionKalman \
-    -d calculate-empirical-errors.R \
-     -o lambda1000.00-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda083.33-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda043.48-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda029.41-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda022.22-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda017.86-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda014.93-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda012.82-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda011.24-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda010.00-a0.94-CEID-InfectionKalmanEmp \
-    -o lambda1000.00-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda083.33-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda043.48-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda029.41-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda022.22-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda017.86-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda014.93-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda012.82-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda011.24-a0.95-CEID-InfectionKalmanEmp \
-    -o lambda010.00-a0.95-CEID-InfectionKalmanEmp \
-    --force \
-    -n make-empirical-pi-forecasts \
-    ./calculate-empirical-errors.R
-
-dvc run \
     -d lambda020.00-status-quo-CEID-InfectionKalman \
     -d other-model-forecasts.rds \
     -d analyze-scores.R \
-    -o analyze-scores.md \
-    -o analyze-scores.html \
+    -o hosp-wis-by-date.png \
+    -o cases-deaths-wis-by-date.png \
+    -o cases-deaths-wis.png \
+    -o hosp-wis.png \
     --force \
     -n analyze-scores \
-    'Rscript -e "knitr::spin(\"analyze-scores.R\")"'
+    ./analyze-scores.R
 
 dvc run \
     -d other-model-forecasts.rds \

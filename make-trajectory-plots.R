@@ -37,7 +37,7 @@ fdat5 <- fdat2 %>% filter(target_variable == "inc death")
 splt_death <- split(fdat5, fdat5$location)
 
 ## load JHU data
-data_date <- Sys.getenv("ddt", unset = "2021-05-24")
+data_date <- Sys.getenv("ddt", unset = "2021-06-21")
 hopdir <- file.path("hopkins", data_date)
 tdat <- load_hopkins(hopdir, weekly = TRUE)
 tdat2 <- tdat %>% rename(true_value=value) %>% 
@@ -124,7 +124,7 @@ plots_deaths <- map(splt_death, plot_forecast_grid, tv = "inc death")
 
 plot_writer <- function(p, loc, pref){
   plot_name <- paste0("trajectories-all/", pref, loc, ".png")
-  ggsave(plot_name, p, width = 4, height = 10)
+  ggsave(plot_name, p, width = 5.2, height = 8.75, dpi = 600)
 }
 if (!dir.exists("trajectories-all")){
   dir.create("trajectories-all")

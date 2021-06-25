@@ -562,22 +562,24 @@ stages:
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
     deps:
-    - healthdata/
-    - hopkins/
+    - healthdata/2021-02-01
+    - hopkins/2021-02-01
     - lambda020.00-status-quo-CEID-InfectionKalman
     - make-trajectory-plots.R
     - other-model-forecasts.rds
     outs:
     - trajectories-all
   analyze-scores:
-    cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
+    cmd: ./analyze-scores.R
     deps:
     - analyze-scores.R
     - lambda020.00-status-quo-CEID-InfectionKalman
     - other-model-forecasts.rds
     outs:
-    - analyze-scores.html
-    - analyze-scores.md
+    - cases-deaths-wis-by-date.png
+    - cases-deaths-wis.png
+    - hosp-wis-by-date.png
+    - hosp-wis.png
   lookup-wayback-urls:
     cmd: ./lookup-wayback-urls.R
     deps:

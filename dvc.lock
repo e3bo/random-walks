@@ -2055,49 +2055,55 @@ stages:
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
     deps:
-    - path: healthdata/
-      md5: e2be0ba68b375e912d3e99dd162a56d0.dir
-      size: 6730819
-      nfiles: 109
-    - path: hopkins/
-      md5: 9e5f19bded8f3fabea6ef7d6b17ee76a.dir
-      size: 486099435
-      nfiles: 521
+    - path: healthdata/2021-02-01
+      md5: 9b9d4656578e408d4eccd0b9e161be7f.dir
+      size: 108011
+      nfiles: 2
+    - path: hopkins/2021-02-01
+      md5: 8b07b96124b82ce52a7569cec6858440.dir
+      size: 9346644
+      nfiles: 8
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 2eb1b3c3d8ec2ac646c4c1abb2470cb1.dir
-      size: 2551521
+      md5: d417a54dfefe74a898e97ffa235d76ff.dir
+      size: 2550791
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 3d8695b2ced5f09e3cd7507452d8295c
-      size: 4450
+      md5: 3161e5821cf70b0c4f79ae344e1abd19
+      size: 4465
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: trajectories-all
-      md5: 83b95a3ca519d4c165bc96d952f6fb6c.dir
-      size: 1031258
+      md5: dab72c326cb3d53c39f862245cb79538.dir
+      size: 2651520
       nfiles: 3
   analyze-scores:
-    cmd: Rscript -e "knitr::spin(\"analyze-scores.R\")"
+    cmd: ./analyze-scores.R
     deps:
     - path: analyze-scores.R
-      md5: a6c9a75370511e6a2bc960ea2ee5d81b
-      size: 3742
+      md5: b33e7fbc85aaf065f987365e1645cd22
+      size: 4491
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 2eb1b3c3d8ec2ac646c4c1abb2470cb1.dir
-      size: 2551521
+      md5: d417a54dfefe74a898e97ffa235d76ff.dir
+      size: 2550791
       nfiles: 48
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
-    - path: analyze-scores.html
-      md5: 8aa532783177e577bc2150574868f5a9
-      size: 333483
-    - path: analyze-scores.md
-      md5: 239926d5024752b51645af372335d05d
-      size: 4849
+    - path: cases-deaths-wis-by-date.png
+      md5: 768e5b40847314a01db34fe48b138cc3
+      size: 1069251
+    - path: cases-deaths-wis.png
+      md5: 159c45e6fdc9ca182f6bb3e908a49cfa
+      size: 376635
+    - path: hosp-wis-by-date.png
+      md5: 90bfe30ce5e42c0ebbc6b21facee7577
+      size: 1176356
+    - path: hosp-wis.png
+      md5: 32149204f57fbcc41386d4e371b7774b
+      size: 322228
   lookup-wayback-urls:
     cmd: ./lookup-wayback-urls.R
     deps:
