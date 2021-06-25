@@ -24,16 +24,26 @@ fdat2 <- map_dfr(dirnames, load_from_dir) %>%
   mutate(model = ifelse(model == "lambda020.00-status-quo-CEID-InfectionKalman", 
                         "GISST", model))
 
+date_ranges <-
+  fdat2 %>% filter(model == "COVIDhub-ensemble") %>%
+  group_by(target_variable) %>%
+  summarise(start = min(forecast_date),
+            stop = max(forecast_date))
+
+fdat22 <- fdat2 %>% left_join(date_ranges, by = "target_variable")
 ## split forecasts by location
-fdat3 <- fdat2 %>% filter(target_variable == "inc case")
+
+fdat3 <- fdat22 %>% filter(target_variable == "inc case") %>%
+  filter(forecast_date >= start & forecast_date <= stop)
 splt_cases <- split(fdat3, fdat3$location)
 
-fdat4 <- fdat2 %>% filter(target_variable == "inc hosp") %>%
-  filter(forecast_date >= "2020-12-07") %>%
-  filter(target_end_date <= "2021-05-01")
+fdat4 <- fdat22 %>% filter(target_variable == "inc hosp") %>%
+  filter(forecast_date >= start & forecast_date <= stop)
+
 splt_hosp <- split(fdat4, fdat4$location)
 
-fdat5 <- fdat2 %>% filter(target_variable == "inc death")
+fdat5 <- fdat22 %>% filter(target_variable == "inc death") %>% 
+  filter(forecast_date >= start & forecast_date <= stop) 
 splt_death <- split(fdat5, fdat5$location)
 
 ## load JHU data
