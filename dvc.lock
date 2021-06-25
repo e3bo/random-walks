@@ -2044,13 +2044,13 @@ stages:
       md5: b70262ce34aa57caea5db6e7f128ce1d
       size: 23929
     - path: forecasts
-      md5: c5ec893a3b840c78ff19b16ab495ffcd.dir
-      size: 271425866
+      md5: c7c9e69725bfcab428cc18fdc7740cc9.dir
+      size: 271425258
       nfiles: 11981
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: d417a54dfefe74a898e97ffa235d76ff.dir
-      size: 2550791
+      md5: 6f23ff0022b2c997e386c860db8deabd.dir
+      size: 2550082
       nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
@@ -2064,19 +2064,19 @@ stages:
       size: 9346644
       nfiles: 8
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: d417a54dfefe74a898e97ffa235d76ff.dir
-      size: 2550791
+      md5: 6f23ff0022b2c997e386c860db8deabd.dir
+      size: 2550082
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 60e4c9fd10c1d7b3132496872f1b87b2
-      size: 4812
+      md5: 1e12cc99e81f43b752b731d1b002483d
+      size: 4930
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: trajectories-all
-      md5: 51143d6f1d64a036505ef70182b9661c.dir
-      size: 2673767
+      md5: 52c39941cda6c32138f2c9c78e7949a0.dir
+      size: 2649941
       nfiles: 3
   analyze-scores:
     cmd: ./analyze-scores.R
@@ -2085,19 +2085,19 @@ stages:
       md5: b33e7fbc85aaf065f987365e1645cd22
       size: 4491
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: d417a54dfefe74a898e97ffa235d76ff.dir
-      size: 2550791
+      md5: 6f23ff0022b2c997e386c860db8deabd.dir
+      size: 2550082
       nfiles: 48
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: cases-deaths-wis-by-date.png
-      md5: 768e5b40847314a01db34fe48b138cc3
-      size: 1069251
+      md5: 302bc85b8138e07d682cf3aa1ac1d02d
+      size: 1066929
     - path: cases-deaths-wis.png
-      md5: 159c45e6fdc9ca182f6bb3e908a49cfa
-      size: 376635
+      md5: 1c8c3d1fac55d9798e35e506c18cea74
+      size: 366625
     - path: hosp-wis-by-date.png
       md5: 90bfe30ce5e42c0ebbc6b21facee7577
       size: 1176356

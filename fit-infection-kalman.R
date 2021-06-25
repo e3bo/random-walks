@@ -29,7 +29,8 @@ jhu_data <- ltdat2 %>% ungroup() %>%
   rename(cases = `day ahead inc case`, deaths = `day ahead inc death`) %>%
   select(target_end_date, time, wday, cases, deaths)
 
-mobpath <- file.path("google-mobility-reports-wayback/", forecast_date, "US-states-mobility.csv")
+mobpath <- file.path("google-mobility-reports-wayback/", forecast_date, 
+                     "US-states-mobility.csv")
 mob1 <- read_us_mob_report(mobpath)
 
 statename <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
@@ -37,7 +38,15 @@ mob_ts <- mob1 %>% filter(sub_region_1 == statename) %>%
   select(date, residential_percent_change_from_baseline) %>%
   rename(target_end_date = date,
          residential_pcb = residential_percent_change_from_baseline)
-  
+
+last7 <- tail(mob_ts$residential_pcb, n = 7)
+mobgap <- (lubridate::ymd(forecast_date) - tail(mob_ts$target_end_date, n = 1)) / lubridate::ddays()
+mobimpute <- rep(last7, length.out = mobgap)
+mobgapdates <- seq.Date(tail(mob_ts$target_end_date, n = 1), lubridate::ymd(forecast_date), by = 1)[ -1]
+
+mob_ts2 <- bind_rows(mob_ts, 
+          tibble(target_end_date = mobgapdates, residential_pcb = mobimpute))
+
 if (forecast_date > "2020-11-15") {
   tdat3 <- load_health_data(forecast_date, forecast_loc)
   
@@ -77,8 +86,7 @@ if (forecast_date > "2020-11-15") {
     obs_data <- obs_data0
   }
 } else {
-  obs_data <- left_join(jhu_data, mob_ts, by = "target_end_date") %>%
-    mutate(residential_pcb = zoo::na.fill(residential_pcb, "extend"))
+  obs_data <- left_join(jhu_data, mob_ts2, by = "target_end_date")
 }
 
 wind <- obs_data %>% filter(target_end_date >= "2020-03-02")
@@ -274,7 +282,7 @@ while(nrestarts > 0  && fit1$convergence == -1001L){
     wfixed = wfixed,
     invisible = 0
   )
-  tt1 <- tictoc::toc()
+  tt11 <- tictoc::toc()
   nrestarts <- nrestarts - 1
 }
 

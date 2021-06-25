@@ -24,11 +24,12 @@ fdat2 <- map_dfr(dirnames, load_from_dir) %>%
   mutate(model = ifelse(model == "lambda020.00-status-quo-CEID-InfectionKalman", 
                         "GISST", model))
 
+GISSTstart <- fdat2 %>% filter(model == "GISST") %>% pull(forecast_date) %>% min()
 date_ranges <-
   fdat2 %>% filter(model == "COVIDhub-ensemble") %>%
   group_by(target_variable) %>%
-  summarise(start = min(forecast_date),
-            stop = max(forecast_date))
+  summarise(start = max(min(forecast_date), GISSTstart),
+            stop = max(forecast_date), .groups = "drop")
 
 fdat22 <- fdat2 %>% left_join(date_ranges, by = "target_variable")
 ## split forecasts by location
