@@ -2068,15 +2068,15 @@ stages:
       size: 2550791
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 3161e5821cf70b0c4f79ae344e1abd19
-      size: 4465
+      md5: 60e4c9fd10c1d7b3132496872f1b87b2
+      size: 4812
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: trajectories-all
-      md5: dab72c326cb3d53c39f862245cb79538.dir
-      size: 2651520
+      md5: 51143d6f1d64a036505ef70182b9661c.dir
+      size: 2673767
       nfiles: 3
   analyze-scores:
     cmd: ./analyze-scores.R
