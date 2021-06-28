@@ -2574,3 +2574,58 @@ stages:
         cache: false
     - visuals/fdt2021-06-21-ddt2021-06-21-inc-death-forecasts.png:
         cache: false
+  hopkins-2021-06-28:
+    cmd: fdt=2021-06-28 ./pull-hopkins-ts-from-date.R
+    deps:
+    - pull-hopkins-ts-from-date.R
+    outs:
+    - hopkins/2021-06-28
+  forecast-2021-06-28:
+    cmd: fdt=2021-06-28 Rscript forecast-package-covidhub-forecast.R
+    deps:
+    - covidhub-common.R
+    - forecast-package-covidhub-forecast.R
+    - hopkins/2021-06-28
+    - model.ini
+    outs:
+    - forecasts/2021-06-28-CEID-Walk.csv
+    metrics:
+    - metrics/2021-06-28-forecast-calc-time.json:
+        cache: false
+  score-2021-06-28:
+    cmd: ddt=2021-06-28 ./quantile-score.R
+    deps:
+    - covidhub-common.R
+    - forecasts
+    - hopkins/2021-06-28
+    - quantile-score.R
+    outs:
+    - metrics/2021-06-28-residuals.rds
+    plots:
+    - metrics/2021-06-28-score-by-loc-type-targ-type-forecast-date.csv:
+        cache: false
+        template: lqs-loctype-targtype-panels
+        x: forecast_date
+    - metrics/2021-06-28-score-by-loc-type-targ-type.csv:
+        cache: false
+        template: lqs-loctype-panel
+        x: target_type
+    - metrics/2021-06-28-score-by-loc-type.csv:
+        cache: false
+        template: lqs
+        x: loc_type
+        x_label: Location type
+  visualize-forecast-2021-06-28-and-data-2021-06-28:
+    cmd: ddt=2021-06-28 fdt=2021-06-28 ./forecast-vis.R
+    deps:
+    - covidhub-common.R
+    - forecast-vis.R
+    - forecasts/2021-06-28-CEID-Walk.csv
+    - hopkins/2021-06-28
+    outs:
+    - visuals/fdt2021-06-28-ddt2021-06-28-cum-death-forecasts.png:
+        cache: false
+    - visuals/fdt2021-06-28-ddt2021-06-28-inc-case-forecasts.pdf:
+        cache: false
+    - visuals/fdt2021-06-28-ddt2021-06-28-inc-death-forecasts.png:
+        cache: false
