@@ -132,7 +132,8 @@ x0 <- x00 %>%
     resnh = ifelse(is_holiday, NA, residential_pcb),
     sdav = zoo::rollmean(resnh, k = 7, fill = NA),
     sdavimp = zoo::na.approx(sdav, rule = 2),
-    residential = ifelse(is_holiday, residential_pcb, sdavimp) / 100
+    residential = ifelse(is_holiday & !is.na(residential_pcb), 
+                         residential_pcb, sdavimp) / 100
   )
 
 pmob <- x0 %>% ggplot(aes(x = target_end_date, y = residential_pcb)) + 
