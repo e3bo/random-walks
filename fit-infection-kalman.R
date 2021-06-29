@@ -39,20 +39,11 @@ mob_ts <- mob1 %>% filter(sub_region_1 == statename) %>%
   rename(target_end_date = date,
          residential_pcb = residential_percent_change_from_baseline)
 
-last7 <- tail(mob_ts$residential_pcb, n = 7)
-mobgap <- (lubridate::ymd(forecast_date) - tail(mob_ts$target_end_date, n = 1)) / lubridate::ddays()
-mobimpute <- rep(last7, length.out = mobgap)
-mobgapdates <- seq.Date(tail(mob_ts$target_end_date, n = 1), lubridate::ymd(forecast_date), by = 1)[ -1]
-
-mob_ts2 <- bind_rows(mob_ts, 
-          tibble(target_end_date = mobgapdates, residential_pcb = mobimpute))
-
 if (forecast_date > "2020-11-15") {
   tdat3 <- load_health_data(forecast_date, forecast_loc)
   
   obs_data0 <-
     left_join(jhu_data, mob_ts, by = "target_end_date") %>%
-    mutate(residential_pcb = zoo::na.fill(residential_pcb, "extend")) %>%
     left_join(tdat3, by = "target_end_date")
   
   vacc_path <- file.path("hopkins-vaccine",
@@ -86,7 +77,7 @@ if (forecast_date > "2020-11-15") {
     obs_data <- obs_data0
   }
 } else {
-  obs_data <- left_join(jhu_data, mob_ts2, by = "target_end_date")
+  obs_data <- left_join(jhu_data, mob_ts, by = "target_end_date")
 }
 
 wind <- obs_data %>% filter(target_end_date >= "2020-03-02")
@@ -115,15 +106,41 @@ if (forecast_date > "2020-11-15") {
 }
 
 if("doses" %in% names(wind)) {
-  x0 <- wind %>% select(target_end_date, time, wday, residential_pcb, doses) %>%
+  x00 <- wind %>% select(target_end_date, time, wday, residential_pcb, doses) %>%
     mutate(doses = zoo::na.approx(doses, rule = 2))
-  x0$doses_scaled <- x0$doses / wfixed["N"]
+  x00$doses_scaled <- x0$doses / wfixed["N"]
 } else {
-  x0 <- wind %>% select(target_end_date, time, wday, residential_pcb)
+  x00 <- wind %>% select(target_end_date, time, wday, residential_pcb)
 }
-x0$residential <- zoo::rollmean(x0$residential_pcb / 100, k = 7, fill = NA) %>% 
-  zoo::na.approx(rule = 2)
-  
+
+hol <- tribble(~date, ~holiday,
+               "2020-02-17", "Presidents",
+               "2021-02-15", "Presidents",
+               "2020-07-03", "IndependenceFri",
+               "2020-05-25", "Memorial",
+               "2020-09-07", "Labor",
+               "2020-11-26", "ThanskgivingThu",
+               "2020-11-27", "ThanskgivingFri",
+               "2020-12-25", "Christmas",
+               "2021-01-01", "NewYears") %>% 
+  mutate(date = lubridate::ymd(date))
+
+x0 <- x00 %>%
+  left_join(hol, by = c(target_end_date = "date")) %>%
+  mutate(is_holiday = !is.na(holiday)) %>%
+  mutate(
+    resnh = ifelse(is_holiday, NA, residential_pcb),
+    sdav = zoo::rollmean(resnh, k = 7, fill = NA),
+    sdavimp = zoo::na.approx(sdav, rule = 2),
+    residential = ifelse(is_holiday, residential_pcb, sdavimp) / 100
+  )
+
+pmob <- x0 %>% ggplot(aes(x = target_end_date, y = residential_pcb)) + 
+  geom_point(color = "grey") + 
+  geom_point(aes(y = residential * 100)) + 
+  theme_minimal() + 
+  labs(x = "Date", y = "Percent increase in time spent\nin residential areas")
+
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
@@ -246,7 +263,7 @@ if (forecast_date == forecast_date_start || # starting cold
 β_0sd <- 0.05
 τ_csd <- 0.05
 p_hsd <- 0.5
-nrestarts <- 1 # restarts can help if line search is failing due to hessian approximation
+nrestarts <- 0 # restarts can help if line search is failing due to hessian approximation
 
 tictoc::tic("fit 1")
 fit1 <- lbfgs::lbfgs(
@@ -311,6 +328,11 @@ if (!dir.exists(fit_dir))
 
 the_file <- file.path(fit_dir, "fit.RData")
 save(x, z, winit, wfixed, fit1, h1, p_hsd, β_0sd, τ_csd, file = the_file)
+
+## Save plots
+
+mob_plot_path <- file.path(fit_dir, "mobility.png")
+ggsave(mob_plot_path, plot = pmob, dpi = 600, width = 5.2)
 
 ## Save metrics
 
