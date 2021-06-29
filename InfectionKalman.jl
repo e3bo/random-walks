@@ -48,7 +48,7 @@ function genvectorfield()
   end
 end
 
-function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, p_hsd::Float64 = 0.5, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01)
+function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.25, η::Float64 = 365.25 / 4, N::Float64 = 7e6, β_0sd::Float64 = 1., τ_csd::Float64 = 0.1, p_hsd::Float64 = 0.5, just_nll::Bool = true, γ_d::Float64 = 365.25 / 1, γ_h::Float64 = 365.25 / 1, γ_z::Float64 = 365.25 / 1, H0::Float64 = 10., τ_h::Float64 = 10., τ_d::Float64 = 10., p_h::Float64 = 0.01, p_d::Float64 = 0.01, p_hweekend::Float64 = 0.9)
 
     zloc = deepcopy(z)
     
@@ -57,11 +57,12 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.
     
     if size(z, 2) == 3
         τ_h = exp(w[2])
+        p_hweekend = 1 / (1 + exp(-w[3]))
         if "doses_scaled" in names(cov)
-            doseeffect = w[5]
-            w2 = vcat(w[1], w[3:4], w[6:end])
+            doseeffect = w[6]
+            w2 = vcat(w[1], w[4:5], w[7:end])
         else 
-            w2 = vcat(w[1], w[3:end])
+            w2 = vcat(w[1], w[4:end])
         end
         p_h = [1 / (1 + exp(-p)) for p in w2[(8 + nτ_c):(8 + nτ_c + np_h - 1)]]
     elseif size(z, 2) == 2 && !("hospitalizations" in names(z))
@@ -152,12 +153,14 @@ function obj(w::Vector, cov, z; γ::Float64 = 365.25 / 9, dt::Float64 = 1 / 365.
         if cov.wday[i] == 1
            par[5] = γ_d12
            par[6] = γ_z17
+           par[8] *= p_hweekend
         elseif cov.wday[i] == 2
            par[5] = γ_d12
         elseif cov.wday[i] == 3 || cov.wday[i] == 4
            par[5] = γ_d34
         elseif cov.wday[i] == 7
            par[6] = γ_z17
+           par[8] *= p_hweekend
         end
         xplast = hcat(xlast, plast)
         prob = ODEProblem(vectorfield, xplast, (0.0, dt), par)

@@ -107,8 +107,8 @@ if (forecast_date > "2020-11-15") {
 
 if("doses" %in% names(wind)) {
   x00 <- wind %>% select(target_end_date, time, wday, residential_pcb, doses) %>%
-    mutate(doses = zoo::na.approx(doses, rule = 2))
-  x00$doses_scaled <- x0$doses / wfixed["N"]
+    mutate(doses = zoo::na.approx(doses, rule = 2),
+           doses_scaled = doses / wfixed["N"])
 } else {
   x00 <- wind %>% select(target_end_date, time, wday, residential_pcb)
 }
@@ -211,6 +211,7 @@ if (forecast_date_start == forecast_date) {
       forecast_date_start < "2020-11-16") {
     # initialize hospitalization parameters
     τ_hinit <- var(na.omit((z$hospitalizations)))
+    p_hweekend <- 0.9
     is_NA_hosps <- is.na(z$hospitalizations)
     p_hinit <-
       sum(z$hospitalizations[!is_NA_hosps]) / sum(z$cases[!is_NA_hosps])
@@ -218,6 +219,7 @@ if (forecast_date_start == forecast_date) {
     nw0 <- length(winit0)
     winit <- c(winit0[1],
                log(τ_hinit),
+               qlogis(p_hweekend),
                winit0[2:(nw0 - nβ_0)],
                rep(qlogis(p_hinit), times = np_h),
                winit0[(nw0 - nβ_0 + 1):nw0])

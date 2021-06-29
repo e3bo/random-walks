@@ -434,11 +434,12 @@ name_params <- function(w, z, cov, f, trans = TRUE){
   
   if (ncol(z) == 3) {
     p$τ_h <- tfun2(w[2])
+    p$p_hweekend <- tfun(w[3])
     if ("doses_scaled" %in% names(cov)){
-      p$doseeffect <- w[5]
-      w2 <- c(w[1], w[3:4], w[6:length(w)])
+      p$doseeffect <- w[6]
+      w2 <- c(w[1], w[4:5], w[7:length(w)])
     } else{
-      w2 <- c(w[1], w[3:length(w)])
+      w2 <- c(w[1], w[4:length(w)])
     }
 
     p$p_h <- tfun(w2[(8 + p$nτ_c):(8 + p$nτ_c + p$np_h - 1)])
@@ -480,12 +481,14 @@ advance_proc <- function(p, f, cov, xhat_init, PNinit, t){
   if (cov$wday[t] == 1) {
     par[5] <- p$γ_d12
     par[6] <- p$γ_z17
+    par[8] <- par[8] * p$p_hweekend
   } else if (cov$wday[t] == 2){
     par[5] <- p$γ_d12
   } else if (cov$wday[t] %in% c(3, 4)) {
     par[5] <- p$γ_d34
   } else if (cov$wday[t] == 7){
     par[6] <- p$γ_z17
+    par[8] <- par[8] * p$p_hweekend
   }
   JuliaCall::julia_assign("u0", u0)
   JuliaCall::julia_assign("tspan", c(0, 1 / 365.25))
