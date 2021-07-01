@@ -7,11 +7,11 @@ stages:
       md5: b70262ce34aa57caea5db6e7f128ce1d
       size: 23929
     - path: fit-infection-kalman.R
-      md5: 0eb208ee25b1a9ee3a5bf1df945074f5
-      size: 10865
+      md5: b223cd270a97fe798bab1c390a60d9a3
+      size: 11220
     - path: fits/2020-10-12-fips06/fit.RData
-      md5: 683d943b7f7d5bb5095228cb7061b99e
-      size: 19214
+      md5: 4d60434dd78e04feadd557f7ab55dd54
+      size: 19245
     - path: google-mobility-reports-wayback/2020-10-19
       md5: 0735667357d1b9f02ce674713b2d9114.dir
       size: 826860
@@ -22,11 +22,11 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-10-19-fips06/fit-metrics.json
-      md5: e3fef10a0f9d7a978fc6437c5da0520a
-      size: 358
+      md5: ea86c5909eb25118ef4753e21ccd9a79
+      size: 359
     - path: fits/2020-10-19-fips06/fit.RData
-      md5: a0bff3ad651071727bbabeca9aa10b76
-      size: 20502
+      md5: 124fc067cc3ff75151de0be20d4d2123
+      size: 20518
   forecast-2020-10-19-06:
     cmd: fdt=2020-10-19 loc=06 Rscript write-formatted-forecast.R
     deps:
@@ -34,17 +34,17 @@ stages:
       md5: b70262ce34aa57caea5db6e7f128ce1d
       size: 23929
     - path: fits/2020-10-19-fips06/fit.RData
-      md5: a0bff3ad651071727bbabeca9aa10b76
-      size: 20502
+      md5: 124fc067cc3ff75151de0be20d4d2123
+      size: 20518
     - path: write-formatted-forecast.R
       md5: e6862be3808a56bd01d248990c7a71fd
       size: 24595
     outs:
     - path: forecasts/2020-10-19-fips06
-      md5: 5818c2bf09c93451eb9b498e4f78e267.dir
-      size: 53554
+      md5: 31a1443156b384c995df466c81ce344d.dir
+      size: 52882
       nfiles: 1
     - path: plots/2020-10-19-fips06
-      md5: d52b9c5bde5a48e8b12d0efd07b07ba3.dir
-      size: 1760770
+      md5: d8b90e2279e5f197646a4ef962a13b46.dir
+      size: 1356881
       nfiles: 12

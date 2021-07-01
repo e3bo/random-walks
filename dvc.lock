@@ -426,8 +426,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2020-11-16/06
-      md5: b94f7b9c6a4e67457b48aeea603d019d.dir
-      size: 78375
+      md5: 135123cea335069dfdf04cf5ebde6db3.dir
+      size: 80688
       nfiles: 1
   healthdata-2020-11-16-08:
     cmd: fdt=2020-11-16 loc=08 ./pull-healthdata-ts-from-date.R
@@ -965,8 +965,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2020-11-23/06
-      md5: 56f0e134367f4a2869b84be643e221f0.dir
-      size: 80722
+      md5: 5d1f91019889b1da4dd1759ecf0da707.dir
+      size: 83089
       nfiles: 1
   safegraph-hp-2020-11-30:
     cmd: fdt=2020-11-30 ./pull-safegraph-ts-from-date.R
@@ -998,8 +998,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2020-11-30/06
-      md5: 5398240fd0fcabef208f448c8f7c96af.dir
-      size: 82854
+      md5: a2f6c6dafa8b51539e5483a0d2e4489f.dir
+      size: 85320
       nfiles: 1
   safegraph-hp-2020-12-07:
     cmd: fdt=2020-12-07 ./pull-safegraph-ts-from-date.R
@@ -1031,8 +1031,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2020-12-07/06
-      md5: ca64a1a0927608634b393a765ca6670d.dir
-      size: 85386
+      md5: f5c24ab7af34cf6358734fb2e5119b03.dir
+      size: 87944
       nfiles: 1
   safegraph-hp-2020-12-14:
     cmd: fdt=2020-12-14 ./pull-safegraph-ts-from-date.R
@@ -1064,8 +1064,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2020-12-14/06
-      md5: 830603e25379b66b6b8bb8be1932e1b0.dir
-      size: 87767
+      md5: fae60bb27d97c781594fad414e7f82fe.dir
+      size: 90400
       nfiles: 1
   safegraph-hp-2020-12-21:
     cmd: fdt=2020-12-21 ./pull-safegraph-ts-from-date.R
@@ -1097,8 +1097,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2020-12-21/06
-      md5: 5868e898cceb6e9507e593d78817e2df.dir
-      size: 90499
+      md5: 4271e3e8e12871e744d452eafde8e43c.dir
+      size: 93233
       nfiles: 1
   safegraph-hp-2020-06-28:
     cmd: fdt=2020-06-28 ./pull-safegraph-ts-from-date.R
@@ -1229,8 +1229,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2020-12-28/06
-      md5: c9d5ef73042ef01a7c0a69bcd483566d.dir
-      size: 92875
+      md5: 802f3d170a21495c2bf91469c9f59a4b.dir
+      size: 95688
       nfiles: 1
   safegraph-hp-2021-01-04:
     cmd: fdt=2021-01-04 ./pull-safegraph-ts-from-date.R
@@ -2044,13 +2044,13 @@ stages:
       md5: b70262ce34aa57caea5db6e7f128ce1d
       size: 23929
     - path: forecasts
-      md5: c7c9e69725bfcab428cc18fdc7740cc9.dir
-      size: 271425258
+      md5: 009a111496a0e57131808bf6553603ff.dir
+      size: 271423914
       nfiles: 11981
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 6f23ff0022b2c997e386c860db8deabd.dir
-      size: 2550082
+      md5: 15354aeb2fd5b89991fc31b7d18d7850.dir
+      size: 2548853
       nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
@@ -2064,8 +2064,8 @@ stages:
       size: 9346644
       nfiles: 8
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 6f23ff0022b2c997e386c860db8deabd.dir
-      size: 2550082
+      md5: 15354aeb2fd5b89991fc31b7d18d7850.dir
+      size: 2548853
       nfiles: 48
     - path: make-trajectory-plots.R
       md5: 1e12cc99e81f43b752b731d1b002483d
@@ -2075,8 +2075,8 @@ stages:
       size: 141985
     outs:
     - path: trajectories-all
-      md5: 52c39941cda6c32138f2c9c78e7949a0.dir
-      size: 2649941
+      md5: 26c34afe62e20c5821201556f82f8db9.dir
+      size: 2646682
       nfiles: 3
   analyze-scores:
     cmd: ./analyze-scores.R
@@ -2085,25 +2085,25 @@ stages:
       md5: b33e7fbc85aaf065f987365e1645cd22
       size: 4491
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 6f23ff0022b2c997e386c860db8deabd.dir
-      size: 2550082
+      md5: 15354aeb2fd5b89991fc31b7d18d7850.dir
+      size: 2548853
       nfiles: 48
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: cases-deaths-wis-by-date.png
-      md5: 302bc85b8138e07d682cf3aa1ac1d02d
-      size: 1066929
+      md5: 6848d3959ef5841baedfdaeeef947391
+      size: 1063674
     - path: cases-deaths-wis.png
-      md5: 1c8c3d1fac55d9798e35e506c18cea74
-      size: 366625
+      md5: 324171ce6af637c90d89b40b8a0672c9
+      size: 366228
     - path: hosp-wis-by-date.png
-      md5: 90bfe30ce5e42c0ebbc6b21facee7577
-      size: 1176356
+      md5: c0e88d47c26f6c7a4ebd443020144a85
+      size: 1176021
     - path: hosp-wis.png
-      md5: 32149204f57fbcc41386d4e371b7774b
-      size: 322228
+      md5: 9cab46a267743c4be9d026b8ae38fec5
+      size: 321604
   lookup-wayback-urls:
     cmd: ./lookup-wayback-urls.R
     deps:

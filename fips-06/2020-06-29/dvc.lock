@@ -4,11 +4,11 @@ stages:
     cmd: fdtstart=2020-06-29 fdt=2020-06-29 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: f23ed76edf6441b81ad37d635de7100e
+      size: 24065
     - path: fit-infection-kalman.R
-      md5: b223cd270a97fe798bab1c390a60d9a3
-      size: 11220
+      md5: 373cf9b7b9e35567e59199a6b05c1042
+      size: 11953
     - path: google-mobility-reports-wayback/2020-06-29
       md5: 99f0500b63e66e016959e6a0f819e142.dir
       size: 438581
@@ -19,11 +19,11 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-06-29-fips06/fit-metrics.json
-      md5: 14988a2fb4e52489b0c1a7db9bf7c955
+      md5: 97ad140c31f7c3c5315dcf0bf7fe0755
       size: 362
     - path: fits/2020-06-29-fips06/fit.RData
-      md5: c11e46131af98fea65e915d4be356bb8
-      size: 9218
+      md5: 3997e0263fd418ecdf1fce0612083082
+      size: 9605
   forecast-2020-06-29-06:
     cmd: fdt=2020-06-29 loc=06 Rscript write-formatted-forecast.R
     deps:
