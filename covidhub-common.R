@@ -446,6 +446,7 @@ name_params <- function(w, z, cov, f, trans = TRUE){
   } else if(ncol(z) == 2 && !"hospitalizations" %in% names(z)) {
     p$τ_h <- f$τ_h
     p$p_h <- f$p_h
+    p$p_hweekend <- f$p_hweekend
     p$np_h <- 0
     z$hospitalizations <- NA
     w2 <- w

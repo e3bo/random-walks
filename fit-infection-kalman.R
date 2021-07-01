@@ -95,6 +95,7 @@ wfixed <- c(
   γ_d = 365.25 / (case_to_death_lag / 2),
   γ_z = 365.25 / 1, 
   p_h = 0.03,
+  p_hweekend = 0.9,
   τ_h = 10, # wfixed p_h and τ_h values only are used if there are no hospitalization data, otherwise they are estimated
   η = 365.25 / 4
 )
