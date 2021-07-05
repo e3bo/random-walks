@@ -239,7 +239,7 @@ if (forecast_date_start == forecast_date) {
   if (forecast_date > "2021-02-08" &&
       forecast_date_start <= "2021-02-08"){
     # add parameter for doseeffect
-    winit <- c(winit[1:4], -1, winit[5:length(winit)])
+    winit <- c(winit[1:5], -1, winit[6:length(winit)])
   }
   
   nτ_c <- x$τ_cmap[wsize]
