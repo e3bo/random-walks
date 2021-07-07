@@ -85,43 +85,40 @@ make_params_tab <- function(w, h, cov, z, f, dir){
   
 }
 
-calc_rt <- function(ft, cov, no_hosps, susceptibles, wfixed) {
+calc_rt <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
   nβ_0 <- tail(cov$β_0map, 1)
   np <- length(ft$par)
   inds <- seq(np - nβ_0 + 1, np)
   intercept <- ft$par[inds][cov$β_0map]
   
+  p <- name_params(ft$par, z, cov, as.list(wfixed))[[1]]
+  
   if ("doses_scaled" %in% names(cov)){
     X <- cbind(cov$residential, cov$doses_scaled)
-    effects <- ft$par[c(4, 5)]
+    effects <- unlist(p[c("residentialeffect", "doseeffect")])
   } else {
     X <- cbind(cov$residential)
-    if (no_hosps){
-      effects <- ft$par[3]
-    } else {
-      effects <- ft$par[4]
-    }
+    effects <- p[["residentialeffect"]]
   }
+  
   (exp(intercept + X %*% effects) / wfixed["γ"] * susceptibles / wfixed["N"]) %>% as.numeric()
 }
 
-make_rt_plot <- function(ft, cov, no_hosps, susceptibles, wfixed) {
+make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
   par(mfrow = c(1, 1))
   nβ_0 <- tail(cov$β_0map, 1)
   np <- length(ft$par)
   inds <- seq(np - nβ_0 + 1, np)
   intercept <- ft$par[inds][cov$β_0map]
   
+  p <- name_params(ft$par, z, cov, as.list(wfixed))[[1]]
+  
   if ("doses_scaled" %in% names(cov)){
     X <- cbind(cov$residential, cov$doses_scaled)
-    effects <- ft$par[c(4, 5)]
+    effects <- unlist(p[c("residentialeffect", "doseeffect")])
   } else {
     X <- cbind(cov$residential)
-    if (no_hosps){
-      effects <- ft$par[3]
-    } else {
-      effects <- ft$par[4]
-    }
+    effects <- p[["residentialeffect"]]
   }
 
   num_all <- exp(intercept + X %*% effects)
@@ -359,7 +356,7 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
 
   
   no_hosps <- all(is.na(dets$ytilde_k[2, ]))
-  rt <- calc_rt(fit, cov_all, no_hosps, susceptibles = dets$xhat_kk[1,], wfixed)
+  rt <- calc_rt(fit, z, cov_all, no_hosps, susceptibles = dets$xhat_kk[1,], wfixed)
   
   ret[[10]] <- gendf(
     mean = rt,
@@ -721,7 +718,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
     units = "in",
     res = 90
   )
-  make_rt_plot(fit, cov, no_hosps, susceptibles = dets$xhat_kk[1, ], wfixed)
+  make_rt_plot(fit, z, cov, no_hosps, susceptibles = dets$xhat_kk[1, ], wfixed)
   dev.off()
   
   plot_path7 <- file.path(plot_dir, "params-tab-1.png")  
