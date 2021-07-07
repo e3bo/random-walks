@@ -18,6 +18,7 @@ make_params_tab <- function(w, h, cov, z, f, dir){
       "γ_d34",
       "γ_z17",
       "τ_h",
+      "p_hweekend",
       "τ_d"
     )
   
@@ -31,11 +32,18 @@ make_params_tab <- function(w, h, cov, z, f, dir){
       "$\\log \\gamma_{d,3} = \\log \\gamma_{d,4}$",
       "$\\log \\gamma_{z,1} = \\log \\gamma_{z,7}$",
       "$\\log \\tau_h$",
+      "$\\operatorname{logit} p_{h,\\textrm{weekend}}$",
       "$\\log \\tau_d$"
     )
   if (!"doses_scaled" %in% names(cov)){
-    pnames <- pnames[-1]
-    pnames_pretty <- pnames_pretty[-1]
+    linds <- !grepl("doseeffect", pnames)
+    pnames <- pnames[linds]
+    pnames_pretty <- pnames_pretty[linds]
+  }
+  if (all(is.na(z$hospitalizations))){
+    linds <- !grepl("p_hweekend", pnames)
+    pnames <- pnames[linds]
+    pnames_pretty <- pnames_pretty[linds]
   }
   
   tibble(
