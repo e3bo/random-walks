@@ -25,14 +25,14 @@ stages:
     cmd: fdtstart=2020-11-30 fdt=2020-12-07 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: f23ed76edf6441b81ad37d635de7100e
+      size: 24065
     - path: fit-infection-kalman.R
-      md5: a5540998c7cd3bd0174e95bd86c70c38
-      size: 11822
+      md5: 373cf9b7b9e35567e59199a6b05c1042
+      size: 11953
     - path: fits/2020-11-30-fips06/fit.RData
-      md5: b2c96091757f31b51738550eb8302154
-      size: 34293
+      md5: a09e794ffc486611f1a871e35d9a1233
+      size: 36077
     - path: google-mobility-reports-wayback/2020-12-07
       md5: f1613e08ca68f57fff0c694bcfb95882.dir
       size: 996240
@@ -43,8 +43,8 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-12-07-fips06/fit-metrics.json
-      md5: 014b70edab64c79313a5c7e16bb965bd
-      size: 367
+      md5: ac4d96386229c5d659cf9bb75df2617b
+      size: 366
     - path: fits/2020-12-07-fips06/fit.RData
-      md5: 090789429624017fb8950f420d223db7
-      size: 36060
+      md5: 0e2847dad097b07c7bc1a8f7ed43cfc2
+      size: 37159

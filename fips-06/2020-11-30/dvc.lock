@@ -4,35 +4,35 @@ stages:
     cmd: fdt=2020-11-30 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: f23ed76edf6441b81ad37d635de7100e
+      size: 24065
     - path: fits/2020-11-30-fips06/fit.RData
-      md5: b2c96091757f31b51738550eb8302154
-      size: 34293
+      md5: a09e794ffc486611f1a871e35d9a1233
+      size: 36077
     - path: write-formatted-forecast.R
       md5: e6862be3808a56bd01d248990c7a71fd
       size: 24595
     outs:
     - path: forecasts/2020-11-30-fips06
-      md5: 98ce8b11e62fa4de12cd5a54d2383446.dir
+      md5: 2b88ecaabb0fed5a4e262264fb2f57f7.dir
       size: 52338
       nfiles: 1
     - path: plots/2020-11-30-fips06
-      md5: 4e69d77e668ee84464c77f6a3dc0da0e.dir
-      size: 1681915
+      md5: 94f93ef707e7aa27d102ffa8ccdde5ab.dir
+      size: 1655320
       nfiles: 12
   fit-2020-11-30-06:
     cmd: fdtstart=2020-11-23 fdt=2020-11-30 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: f23ed76edf6441b81ad37d635de7100e
+      size: 24065
     - path: fit-infection-kalman.R
-      md5: b223cd270a97fe798bab1c390a60d9a3
-      size: 11220
+      md5: 373cf9b7b9e35567e59199a6b05c1042
+      size: 11953
     - path: fits/2020-11-23-fips06/fit.RData
-      md5: 5c3b298c5acd4b9d13ddd108c0949424
-      size: 33441
+      md5: 00d344c82661a8db4197ee183955261e
+      size: 35107
     - path: google-mobility-reports-wayback/2020-11-30
       md5: 0c533e05215e463b53a859d466cd7f9b.dir
       size: 971716
@@ -43,8 +43,8 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2020-11-30-fips06/fit-metrics.json
-      md5: 440151abdce2cb6482d20f6886058c7c
-      size: 367
+      md5: 635e2d1abd7a9c6a451b56146f7c68c0
+      size: 365
     - path: fits/2020-11-30-fips06/fit.RData
-      md5: b2c96091757f31b51738550eb8302154
-      size: 34293
+      md5: a09e794ffc486611f1a871e35d9a1233
+      size: 36077
