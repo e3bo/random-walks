@@ -4,14 +4,14 @@ stages:
     cmd: fdtstart=2021-03-08 fdt=2021-03-15 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: f23ed76edf6441b81ad37d635de7100e
+      size: 24065
     - path: fit-infection-kalman.R
-      md5: 0eb208ee25b1a9ee3a5bf1df945074f5
-      size: 10865
+      md5: 3662218ee117500f261e0939c0be90ae
+      size: 11953
     - path: fits/2021-03-08-fips06/fit.RData
-      md5: 8a0a6a28ec8ef2e88863d741428f8910
-      size: 62434
+      md5: 91b51728e6b54bcc547818d69533a8df
+      size: 64923
     - path: google-mobility-reports-wayback/2021-03-15
       md5: 6c4de00187d0aad06afb53859853e232.dir
       size: 1894761
@@ -22,29 +22,29 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2021-03-15-fips06/fit-metrics.json
-      md5: 2b92e09b93601adb2fa7cdae9771ec07
-      size: 366
+      md5: 389d39748230e3bbeac3b6ca17b4ad22
+      size: 367
     - path: fits/2021-03-15-fips06/fit.RData
-      md5: 76db4e60ab6d35ee78c333ba7cde3fc4
-      size: 63977
+      md5: ce907bba61947be0f1c7329534b81b19
+      size: 66533
   forecast-2021-03-15-06:
     cmd: fdt=2021-03-15 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: f23ed76edf6441b81ad37d635de7100e
+      size: 24065
     - path: fits/2021-03-15-fips06/fit.RData
-      md5: 76db4e60ab6d35ee78c333ba7cde3fc4
-      size: 63977
+      md5: ce907bba61947be0f1c7329534b81b19
+      size: 66533
     - path: write-formatted-forecast.R
       md5: e6862be3808a56bd01d248990c7a71fd
       size: 24595
     outs:
     - path: forecasts/2021-03-15-fips06
-      md5: 970a9f4d8a4f9df818ab637c97c6d8a2.dir
-      size: 55058
+      md5: c394f48139f61018ed0ea3acc5ca69f8.dir
+      size: 55762
       nfiles: 1
     - path: plots/2021-03-15-fips06
-      md5: f33d68223e1df205ffc064140c587d8d.dir
-      size: 1864464
+      md5: b027bfcedb01a370484481dd541aaf45.dir
+      size: 1971564
       nfiles: 12
