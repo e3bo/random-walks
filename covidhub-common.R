@@ -468,7 +468,9 @@ name_params <- function(w, z, cov, f, trans = TRUE){
 advance_proc <- function(p, f, cov, xhat_init, PNinit, t){
   
   u0 <- cbind(xhat_init, PNinit)
-  if ("doses_scaled" %in% names(cov)) {
+  if ("β" %in% names(cov)){
+    β <- cov$β[t]
+  } else if ("doses_scaled" %in% names(cov)) {
     β   <-
       exp(p$β_0[cov$β_0map[t]] + p$residentialeffect * cov$residential[t] + p$doseeffect * cov$doses_scaled[t])
   } else {

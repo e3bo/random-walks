@@ -776,6 +776,9 @@ target_end_dates <- seq(from = ti, to = tf, by = "day")
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
 
+
+
+
 if ("doses_scaled" %in% names(x)){
   doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
   weekly_sim_doses <- tail(x$doses_scaled, n = 1) + seq_len(length(target_end_dates)) * doses_slope
@@ -801,6 +804,20 @@ if ("doses_scaled" %in% names(x)){
     ρ = tail(x$ρ, 1)
   )
 }
+
+p <- name_params(fit1$par, z, x, as.list(wfixed))[[1]]
+if ("doses_scaled" %in% names(x)) {
+  β   <-
+    exp(p$β_0[x$β_0map] + p$residentialeffect * x$residential + p$doseeffect * x$doses_scaled)
+} else {
+  β   <-
+    exp(p$β_0[x$β_0map] + p$residentialeffect * x$residential)
+}
+
+include <- x$time > 2020.3
+ar1ts <- β[include] - wfixed["γ"]
+mod <- arima(ar1ts, order = c(1, 0, 0), include.mean = FALSE)
+cov_weekly_fcst$β <- predict(mod, n.ahead = nrow(cov_weekly_fcst))$pred + wfixed["γ"]
 
 write_forecasts(
   fit = fit1,
