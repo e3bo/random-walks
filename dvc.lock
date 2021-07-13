@@ -2041,16 +2041,16 @@ stages:
       md5: de21c9867a3d62cedcc964d37900b0a7
       size: 1027
     - path: covidhub-common.R
-      md5: f23ed76edf6441b81ad37d635de7100e
-      size: 24065
+      md5: 4035c0102c7a76875a36f76b080c479c
+      size: 24121
     - path: forecasts
-      md5: 02473fcd6ae3c45fc6160f93f5c6ff60.dir
-      size: 271417130
+      md5: 15a0c0bfec2338c0f98b1225ae0f3c72.dir
+      size: 271411754
       nfiles: 11981
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 5958a72908b6767a3a6dcbf7000b2331.dir
-      size: 2545524
+      md5: 41646307aea204cffd82bf8485b7cdcc.dir
+      size: 2542991
       nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
@@ -2064,8 +2064,8 @@ stages:
       size: 9346644
       nfiles: 8
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 5958a72908b6767a3a6dcbf7000b2331.dir
-      size: 2545524
+      md5: 41646307aea204cffd82bf8485b7cdcc.dir
+      size: 2542991
       nfiles: 48
     - path: make-trajectory-plots.R
       md5: 1e12cc99e81f43b752b731d1b002483d
@@ -2075,8 +2075,8 @@ stages:
       size: 141985
     outs:
     - path: trajectories-all
-      md5: 7a477fd8ffb6139904b8cfe6ac0c50bf.dir
-      size: 2546395
+      md5: becf3dfed95478eca8203b5f7e8329d7.dir
+      size: 2786789
       nfiles: 3
   analyze-scores:
     cmd: ./analyze-scores.R
@@ -2085,25 +2085,25 @@ stages:
       md5: b33e7fbc85aaf065f987365e1645cd22
       size: 4491
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 5958a72908b6767a3a6dcbf7000b2331.dir
-      size: 2545524
+      md5: 41646307aea204cffd82bf8485b7cdcc.dir
+      size: 2542991
       nfiles: 48
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: cases-deaths-wis-by-date.png
-      md5: 9508c8ca17d44c16af7dfcdfea87f18d
-      size: 1059707
+      md5: 736d987bdcb8c74b4a1ce7f02bdf9547
+      size: 1060992
     - path: cases-deaths-wis.png
-      md5: 2a7db8d03ed79efd46b1d09d3ec51f8d
-      size: 371300
+      md5: 31e4975853d2785f4b200f20e670502f
+      size: 355925
     - path: hosp-wis-by-date.png
-      md5: 347eebb2eb3f32373d1cca41780539e6
-      size: 1161735
+      md5: c904c877759ae57ec26f8dcb11ff2b51
+      size: 1170178
     - path: hosp-wis.png
-      md5: cbe626964478c851c90c807c1f24f791
-      size: 296438
+      md5: cb184ae660c22005e2226b2cdeacdd04
+      size: 300316
   lookup-wayback-urls:
     cmd: ./lookup-wayback-urls.R
     deps:
