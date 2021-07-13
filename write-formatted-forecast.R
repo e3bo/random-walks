@@ -819,7 +819,7 @@ if ("doses_scaled" %in% names(x)) {
     exp(p$β_0[x$β_0map] + p$residentialeffect * x$residential)
 }
 
-include <- x$time > 2020.3
+include <- x$target_end_date > "2020-05-01"
 ar1ts <- β[include] - wfixed["γ"]
 mod <- arima(ar1ts, order = c(1, 0, 0), include.mean = FALSE)
 cov_weekly_fcst$β <- predict(mod, n.ahead = nrow(cov_weekly_fcst))$pred + wfixed["γ"]
