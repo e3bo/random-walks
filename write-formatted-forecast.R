@@ -3,10 +3,12 @@
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-make_params_tab <- function(w, h, cov, z, f, dir){
+make_params_tab <- function(w, h, cov, z, f, dir, Rtmod){
   ests <- name_params(w, z, cov, f, trans = FALSE)[[1]]
   sevec <- sqrt(diag(solve(h)))
   sd <- name_params(sevec, z, cov, f, trans = FALSE)[[1]]
+  ests$ϕ <- coef(Rtmod) %>% unname()
+  sd$ϕ <- vcov(Rtmod) %>% sqrt() %>% unname()
   
   pnames <-
     c(
@@ -19,7 +21,8 @@ make_params_tab <- function(w, h, cov, z, f, dir){
       "γ_z17",
       "τ_h",
       "p_hweekend",
-      "τ_d"
+      "τ_d",
+      "ϕ"
     )
   
   pnames_pretty <-
@@ -33,7 +36,8 @@ make_params_tab <- function(w, h, cov, z, f, dir){
       "$\\log \\gamma_{z,1} = \\log \\gamma_{z,7}$",
       "$\\log \\tau_h$",
       "$\\operatorname{logit} p_{h,\\textrm{weekend}}$",
-      "$\\log \\tau_d$"
+      "$\\log \\tau_d$",
+      "$\\phi$"
     )
   if (!"doses_scaled" %in% names(cov)){
     linds <- !grepl("doseeffect", pnames)
@@ -456,7 +460,7 @@ write_scenarios <- function(fit,
 
 write_forecasts <-
   function(fit, cov, z, winit, wfixed, hess, cov_sim, p_hsd, β_0sd, τ_csd, fdt, 
-           forecast_loc) {
+           forecast_loc, Rtmod) {
     
     dets <-
       calc_kf_nll_r(
@@ -562,12 +566,13 @@ write_forecasts <-
       fit = fit,
       wfixed = wfixed,
       cov_sim = cov_sim,
-      z
+      z,
+      Rtmod = Rtmod
     )
 }
 
 make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, 
-                           forecast_loc, fit, wfixed, cov_sim, z) {
+                           forecast_loc, fit, wfixed, cov_sim, z, Rtmod) {
   plot_dir <-
     file.path("plots",
               paste0(fdt,
@@ -579,7 +584,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
   
-  make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir)
+  make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir, Rtmod)
   
   no_hosps <- all(is.na(dets$ytilde_k[2,]))
   
@@ -831,7 +836,8 @@ write_forecasts(
   τ_csd = τ_csd,
   cov_sim = cov_weekly_fcst,
   fdt = forecast_date,
-  forecast_loc = forecast_loc
+  forecast_loc = forecast_loc,
+  Rtmod = mod
 )
 
 q("no")
