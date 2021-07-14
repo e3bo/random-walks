@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -e
+
+for nm in $(dvc repro --dry combine | grep Running | grep :forecast | cut -d' ' -f3 | cut -d\' -f2); do dvc remove $nm; done
