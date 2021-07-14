@@ -771,6 +771,15 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
       labs(x = "Date", y = "Doses administered")
     ggsave(pvac_path, pvac, dpi = 600, width = 5.2)
   }
+  
+  prhot <- cov %>% filter(target_end_date < "2020-07-20") %>% 
+    ggplot(aes(x = target_end_date, y = ρ)) + geom_line() +
+    xlab("Date") +
+    ylab(expression(paste(rho[t]," = Pr(Removal is reported)"))) +
+    theme_minimal()
+  
+  prhot_path <- file.path(plot_dir, "rhot-estimate.png")
+  ggsave(prhot_path, prhot, dpi = 600, width = 5.2)
 }
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
