@@ -583,7 +583,11 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
+
   
+  
+  
+    
   make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir, Rtmod)
   
   no_hosps <- all(is.na(dets$ytilde_k[2,]))
@@ -754,10 +758,20 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
       res = 90)
   gridExtra::grid.table(est_tab[, -t1inds])
   dev.off()
+  
+  plot_path9 <- file.path(plot_dir, "mobility.png")
+  
+  pmob <- cov %>% ggplot(aes(x = target_end_date, y = residential_pcb)) + 
+    geom_point(color = "grey") + 
+    geom_point(aes(y = residential * 100)) + 
+    theme_minimal() + 
+    labs(x = "Date", y = "Percent increase in time spent\nin residential areas")
+  ggsave(plot_path9, pmob,  dpi = 600, width = 5.2)
+  
 }
 
-forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
-forecast_loc <- Sys.getenv("loc", unset = "36")
+forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
+forecast_loc <- Sys.getenv("loc", unset = "06")
 
 fit_dir <-
   file.path("fits",
@@ -780,9 +794,6 @@ tf <- lubridate::ymd(forecast_date) + lubridate::ddays(sim_weekly_days)
 target_end_dates <- seq(from = ti, to = tf, by = "day")
 target_end_times <- lubridate::decimal_date(target_end_dates)
 target_wday <- lubridate::wday(target_end_dates)
-
-
-
 
 if ("doses_scaled" %in% names(x)){
   doses_slope <- mean(diff(tail(x$doses_scaled, n = 7)))
@@ -809,6 +820,8 @@ if ("doses_scaled" %in% names(x)){
     ρ = tail(x$ρ, 1)
   )
 }
+
+# AR-1 modeling of R_t
 
 p <- name_params(fit1$par, z, x, as.list(wfixed))[[1]]
 if ("doses_scaled" %in% names(x)) {
