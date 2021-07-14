@@ -19,7 +19,6 @@ if [ ${fdtstart} == ${fdt} ]; then
       -d hopkins/$fdt \
       -d google-mobility-reports-wayback/$fdt \
       -o fits/${fdt}-fips${loc}/fit.RData \
-      -o fits/${fdt}-fips${loc}/mobility.png \
       -M fits/${fdt}-fips${loc}/fit-metrics.json \
       --force \
       -n fit-$fdt-$loc \
