@@ -10,16 +10,16 @@ stages:
       md5: 255f4cefc0e63a164f974cdeee73229f
       size: 41158
     - path: write-formatted-forecast.R
-      md5: 14339d42e03f5709c0690b788647be41
-      size: 25472
+      md5: 6e0ec8383370468d272686d20d53e79f
+      size: 25667
     outs:
     - path: forecasts/2020-12-21-fips06
-      md5: f20015cd7648e95683faa9020ea48916.dir
+      md5: 598bd8987a83d8a2938172b904586fb4.dir
       size: 52146
       nfiles: 1
     - path: plots/2020-12-21-fips06
-      md5: ff4996e899245c73751ff0f1ff7a383d.dir
-      size: 1973545
+      md5: 45312dbf25a5305bcb8286d121e42c6c.dir
+      size: 1985742
       nfiles: 12
   fit-2020-12-21-06:
     cmd: fdtstart=2020-12-14 fdt=2020-12-21 loc=06 Rscript fit-infection-kalman.R
