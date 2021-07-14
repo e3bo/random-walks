@@ -583,17 +583,12 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
-
-  
-  
-  
     
   make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir, Rtmod)
   
   no_hosps <- all(is.na(dets$ytilde_k[2,]))
   
   plot_path1 <- file.path(plot_dir, "qqplots.png")
-  
   png(
     plot_path1,
     width = 7.5,
@@ -601,7 +596,6 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
     units = "in",
     res = 90
   )
-  
   par(mfrow = c(3, 1))
   qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1, 1,]), sub = "Cases")
   abline(0, 1)
@@ -760,7 +754,6 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   dev.off()
   
   plot_path9 <- file.path(plot_dir, "mobility.png")
-  
   pmob <- cov %>% ggplot(aes(x = target_end_date, y = residential_pcb)) + 
     geom_point(color = "grey") + 
     geom_point(aes(y = residential * 100)) + 
@@ -768,6 +761,16 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
     labs(x = "Date", y = "Percent increase in time spent\nin residential areas")
   ggsave(plot_path9, pmob,  dpi = 600, width = 5.2)
   
+  if ("doses" %in% names(cov)){
+    pvac_path <- file.path(plot_dir, "doses.png")
+    pvac <- cov %>% 
+      filter(target_end_date >= "2020-12-01") %>% 
+      ggplot(aes(x = target_end_date, y = doses)) + 
+      geom_line() + 
+      theme_minimal() + 
+      labs(x = "Date", y = "Doses administered")
+    ggsave(pvac_path, pvac, dpi = 600, width = 5.2)
+  }
 }
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
