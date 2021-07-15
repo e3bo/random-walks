@@ -572,7 +572,7 @@ write_forecasts <-
 }
 
 make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, 
-                           forecast_loc, fit, wfixed, cov_sim, z, Rtmod) {
+                          forecast_loc, fit, wfixed, cov_sim, z, Rtmod) {
   plot_dir <-
     file.path("plots",
               paste0(fdt,
@@ -587,27 +587,31 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir, Rtmod)
   
   no_hosps <- all(is.na(dets$ytilde_k[2,]))
+
+  qqpath <- file.path(plot_dir, "qqplots.png")
+  dfc <- data.frame(y = dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]))
+  qqc <-
+    ggplot(dfc, aes(sample = y)) + stat_qq() + stat_qq_line() +
+    ylab("Quantile of residuals\nof case predictions") +
+    xlab("Theoretical quantile") +
+    theme_minimal()
   
-  plot_path1 <- file.path(plot_dir, "qqplots.png")
-  png(
-    plot_path1,
-    width = 7.5,
-    height = 10,
-    units = "in",
-    res = 90
-  )
-  par(mfrow = c(3, 1))
-  qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1, 1,]), sub = "Cases")
-  abline(0, 1)
-  if(no_hosps){
-    plot.new()
-  } else {
-    qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2, 2,]), sub = "Hospitalizations")
-    abline(0, 1)
-  }
-  qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3, 3,]), sub = "Deaths")
-  abline(0, 1)
-  dev.off()
+  dfh <- data.frame(y = dets$ytilde_k[2, ] / sqrt(dets$S[2, 2, ]))
+  qqh <-
+    ggplot(dfh, aes(sample = y)) + stat_qq() + stat_qq_line() +
+    ylab("Quantile of residuals\nof hospital admission predictions") +
+    xlab("Theoretical quantiles") +
+    theme_minimal()
+  
+  dfd <- data.frame(y = dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]))
+  qqd <-
+    ggplot(dfd, aes(sample = y)) + stat_qq() + stat_qq_line() +
+    ylab("Quantile of residuals\nof death predictions") +
+    xlab("Theoretical quantiles") +
+    theme_minimal()
+  
+  pqq <- cowplot::plot_grid(qqc, qqh, qqd, ncol = 1)
+  ggsave(qqpath, pqq, dpi = 600, width = 5.2, height = 7)
   
   plot_path2 <- file.path(plot_dir, "fitted-time-series.png")
   png(
