@@ -131,7 +131,7 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
   }
 
   ndf <-
-    data.frame(time = cov$time, 
+    data.frame(Date = cov$target_end_date, 
                num = exp(intercept + X %*% effects), model = "Full")
   values <- c("Full")
   labels <- expression("Full")
@@ -141,7 +141,7 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
       zero1[i] <- 0
       ndf <- bind_rows(ndf,
                        data.frame(
-                         time = cov$time,
+                         Date = cov$target_end_date,
                          num = exp(intercept + X %*% zero1),
                          model = vnames[i])
                        )
@@ -151,7 +151,7 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
     }
   }
   ndf <- bind_rows(ndf,
-                   data.frame(time = cov$time, 
+                   data.frame(Date = cov$target_end_date, 
                               num = exp(intercept), model = "Intercept only"))
   values <- c(values, "Intercept only")
   labels <- c(labels, expression("Intercept only"))
@@ -160,9 +160,10 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
   
   factor <- 1 / wfixed["γ"] * susceptibles / wfixed["N"]
   
-  p <- ggplot(ndf, aes(x = time, y = num * factor, color = model)) + 
+  p <- ggplot(ndf, aes(x = lubridate::ymd(Date), 
+                       y = num * factor, color = model)) + 
     geom_line() + 
-    xlab("Time") +
+    xlab("Date") +
     ylab(expression(paste("Effective reproduction number ", R[e]))) +
     theme_minimal() + 
     ggthemes::scale_colour_colorblind(name = "Regression model", 
