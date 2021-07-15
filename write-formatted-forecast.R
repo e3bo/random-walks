@@ -105,11 +105,12 @@ calc_rt <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
     effects <- p[["residentialeffect"]]
   }
   
-  (exp(intercept + X %*% effects) / wfixed["γ"] * susceptibles / wfixed["N"]) %>% as.numeric()
+  (exp(intercept + X %*% effects) / wfixed["γ"] * susceptibles / wfixed["N"]) %>% 
+    as.numeric()
 }
 
 make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
-  par(mfrow = c(1, 1))
+  
   nβ_0 <- tail(cov$β_0map, 1)
   np <- length(ft$par)
   inds <- seq(np - nβ_0 + 1, np)
@@ -119,66 +120,45 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
   
   if ("doses_scaled" %in% names(cov)){
     X <- cbind(cov$residential, cov$doses_scaled)
-    effects <- unlist(p[c("residentialeffect", "doseeffect")])
+    vnames <- c("residentialeffect", "doseeffect")
+    symb_names <- c(expression(beta[res]), expression(beta[dose]))
+    effects <- unlist(p[vnames])
   } else {
     X <- cbind(cov$residential)
-    effects <- p[["residentialeffect"]]
+    vnames <- "residentialeffect"
+    symb_names <- expression(beta[res])
+    effects <- p[[vnames]]
   }
 
-  num_all <- exp(intercept + X %*% effects)
-  factor <- 1 / wfixed["γ"] * susceptibles / wfixed["N"]
-  plot(
-    cov$time,
-    num_all * factor,
-    type = 'l',
-    xlab = "Time",
-    ylab = expression(paste("Effective reproduction number ", R[e]))
-  )
-  abline(h = 1000 / wfixed["γ"])
-  if (length(effects) == 2) {
-    legend(
-      "top",
-      col = c(1, "orange", "blue", "grey"),
-      lty = 1,
-      legend = c(
-        "MLE estimate",
-        "MLE - (effect of mobility)",
-        "MLE - (effect of vaccine)",
-        "MLE random walk intercept"
-      )
-    )
-    effects_no_dose <- effects_no_mob <- effects
-    effects_no_mob[1] <- 0
-    num_nomob <- exp(intercept + X %*% effects_no_mob)
-    lines(cov$time,
-          num_nomob * factor,
-          col = "orange")
-    effects_no_dose[2] <- 0
-    num_nodose <- exp(intercept + X %*% effects_no_dose)
-    lines(cov$time,
-          num_nodose / wfixed["γ"],
-          col = "blue")
-  } else {
-    legend(
-      "top",
-      col = c(1, "orange", "grey"),
-      lty = 1,
-      legend = c(
-        "MLE estimate",
-        "MLE - (effect of mobility)",
-        "MLE random walk intercept"
-      )
-    )
-    effects_no_mob <- effects
-    effects_no_mob[1] <- 0
-    num_nomob <- exp(intercept + X %*% effects_no_mob)
-    lines(cov$time,
-          num_nomob * factor,
-          col = "orange")
+  ndf <-
+    data.frame(time = cov$time, 
+               num = exp(intercept + X %*% effects), model = "Full")
+  if (length(effects) > 1) {
+    for (i in length(effects)) {
+      zero1 <- effects
+      zero1[i] <- 0
+      ndf <- bind_rows(ndf,
+                       data.frame(
+                         time = cov$time,
+                         num = exp(intercept + X %*% zero1),
+                         model = expression(paste0("Zeroed ", symb_names[i]))
+                       ))
+    }
   }
-  lines(cov$time,
-        exp(intercept) * factor,
-        col = "grey")
+  ndf <- bind_rows(ndf,
+                   data.frame(time = cov$time, 
+                              num = exp(intercept), model = "Intercept only"))
+  ndf$num <- ifelse(ndf$num < 1000, ndf$num, 1000)
+  
+  factor <- 1 / wfixed["γ"] * susceptibles / wfixed["N"]
+  
+  p <- ggplot(ndf, aes(x = time, y = num * factor, color = model)) + 
+    geom_line() + 
+    xlab("Time") +
+    ylab(expression(paste("Effective reproduction number ", R[e]))) +
+    theme_minimal() + 
+    ggthemes::scale_colour_colorblind(name = "Regression model")
+  p
 }
 
 create_forecast_df <- function(means,
@@ -717,16 +697,9 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   
   ggsave(filename = plot_path5, plot = p5)
   
-  plot_path6 <- file.path(plot_dir, "Rt-time-series.png")
-  png(
-    plot_path6,
-    width = 7.5,
-    height = 7,
-    units = "in",
-    res = 90
-  )
-  make_rt_plot(fit, z, cov, no_hosps, susceptibles = dets$xhat_kk[1, ], wfixed)
-  dev.off()
+  pathrt <- file.path(plot_dir, "Rt-time-series.png")
+  prt <- make_rt_plot(fit, z, cov, no_hosps, susceptibles = dets$xhat_kk[1, ], wfixed)
+  ggsave(pathrt, prt, dpi = 600, width = 5.2, height = 4)
   
   plot_path7 <- file.path(plot_dir, "params-tab-1.png")  
   png(plot_path7,
