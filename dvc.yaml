@@ -927,3 +927,11 @@ stages:
     - pull-hopkins-vaccine-ts-from-date.R
     outs:
     - hopkins-vaccine/2021-06-21
+  make-metrics-plots:
+    cmd: ./plot-metrics.R
+    deps:
+    - fits
+    - plot-metrics.R
+    outs:
+    - california-fitting-time.png
+    - california-mase.png

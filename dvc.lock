@@ -2667,12 +2667,12 @@ stages:
       size: 414103429
       nfiles: 392
     - path: study-indicators-revisions.R
-      md5: 3e26727fed5f1f0f04d6a1aae6598009
-      size: 1874
+      md5: b275e0db50fe888eb45546da83004255
+      size: 2133
     outs:
     - path: indicators-revisions-cal.png
-      md5: cdb8cfb06299993c9ac908ba49791de9
-      size: 86238
+      md5: 9f4dc11d5e78732fa501971b788d579f
+      size: 210278
   hopkins-2021-06-21:
     cmd: fdt=2021-06-21 ./pull-hopkins-ts-from-date.R
     deps:
@@ -2706,3 +2706,20 @@ stages:
       md5: 53621964cafc4bf7eff789d4b6c2f1c8.dir
       size: 6040988
       nfiles: 3
+  make-metrics-plots:
+    cmd: ./plot-metrics.R
+    deps:
+    - path: fits
+      md5: c39b7c04e367159094675b6d4d412823.dir
+      size: 11300506
+      nfiles: 146
+    - path: plot-metrics.R
+      md5: da55e191376a793a8d2a4bccb349c134
+      size: 1803
+    outs:
+    - path: california-fitting-time.png
+      md5: 62624ed5e2dc1a04ce0d2f13bd605209
+      size: 125773
+    - path: california-mase.png
+      md5: cec819d2f49188f8a80690b5661a3892
+      size: 156998
