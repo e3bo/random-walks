@@ -121,33 +121,41 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
   if ("doses_scaled" %in% names(cov)){
     X <- cbind(cov$residential, cov$doses_scaled)
     vnames <- c("residentialeffect", "doseeffect")
-    symb_names <- c(expression(beta[res]), expression(beta[dose]))
+    symb_names <- c(expression(beta[res] == 0), expression(beta[dose] == 0))
     effects <- unlist(p[vnames])
   } else {
     X <- cbind(cov$residential)
     vnames <- "residentialeffect"
-    symb_names <- expression(beta[res])
+    symb_names <- expression(beta[res] == 0)
     effects <- p[[vnames]]
   }
 
   ndf <-
     data.frame(time = cov$time, 
                num = exp(intercept + X %*% effects), model = "Full")
+  values <- c("Full")
+  labels <- expression("Full")
   if (length(effects) > 1) {
-    for (i in length(effects)) {
+    for (i in seq_along(effects)) {
       zero1 <- effects
       zero1[i] <- 0
       ndf <- bind_rows(ndf,
                        data.frame(
                          time = cov$time,
                          num = exp(intercept + X %*% zero1),
-                         model = expression(paste0("Zeroed ", symb_names[i]))
-                       ))
+                         model = vnames[i])
+                       )
+      values <- c(values, vnames[i])
+      labels <- c(labels, symb_names[i])
+      
     }
   }
   ndf <- bind_rows(ndf,
                    data.frame(time = cov$time, 
                               num = exp(intercept), model = "Intercept only"))
+  values <- c(values, "Intercept only")
+  labels <- c(labels, expression("Intercept only"))
+  
   ndf$num <- ifelse(ndf$num < 1000, ndf$num, 1000)
   
   factor <- 1 / wfixed["γ"] * susceptibles / wfixed["N"]
@@ -157,7 +165,9 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
     xlab("Time") +
     ylab(expression(paste("Effective reproduction number ", R[e]))) +
     theme_minimal() + 
-    ggthemes::scale_colour_colorblind(name = "Regression model")
+    ggthemes::scale_colour_colorblind(name = "Regression model", 
+                                      breaks = values,
+                                      labels = labels)
   p
 }
 
