@@ -12,7 +12,8 @@ mets <- read.table("metrics.csv", header = TRUE, na.strings = "-") %>%
 
 m2 <- mets %>% 
   filter(wday == "Mon" & loc2 == "06") %>% 
-  filter(fit1hessposdef == "True") 
+  filter(date >= "2020-06-29" & date <= "2021-04-26") %>%
+  filter(fit1hessposdef == "True")
 
 m3 <- m2 %>%
   select(date, fit1mase_cases, fit1mase_cases_w, 
@@ -24,15 +25,20 @@ m3 <- m2 %>%
          var2 = str_remove(var, "^_"),
          var3 = case_when(var2 == "cases" ~ "Cases", 
                           var2 == "death" ~ "Deaths", 
-                          var2 == "hosps" ~ "Hospital admissions"))
+                          var2 == "hosps" ~ "Hospital admissions"),
+         var4 = factor(var3, 
+                       levels = c("Cases", "Hospital admissions", "Deaths")))
 
 p <- ggplot(filter(m3, !is.na(value)), 
        aes(x = lubridate::ymd(date), y = value, shape = Weekly)) + 
-  geom_point() + ylim(c(0, 1)) + facet_wrap(~var3, ncol = 1) + 
+  geom_point() + 
+  ylim(c(0, 1)) + 
+  facet_wrap(~var4, ncol = 1) + 
   labs(x = "Forecast date", y = "MASE") +
-  theme(legend.position="top")
+  theme(legend.position="top") +
+  theme_minimal()
 
-ggsave("california-mase.png", p, width = 3, units = "in")
+ggsave("california-mase.png", p, width = 5.2, dpi = 600, units = "in")
 
 m4 <- m2 %>% select(date, fit1walltime) %>% 
   mutate(date = lubridate::ymd(date),
@@ -43,4 +49,4 @@ p2 <- m4 %>% ggplot(aes(x = date, y = hours)) +
   labs(x = "Forecast date", y = "Fitting time (hours)") +
   theme_minimal()
 
-ggsave("california-fitting-time.png", p2, width = 3, height = 4, units = "in")
+ggsave("california-fitting-time.png", p2, dpi = 600, width = 5.2, units = "in")
