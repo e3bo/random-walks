@@ -935,3 +935,11 @@ stages:
     outs:
     - california-fitting-time.png
     - california-mase.png
+  make-plot-of-betares-by-fdt:
+    cmd: ./compare-params-by-forecast-date.R
+    deps:
+    - compare-params-by-forecast-date.R
+    - covidhub-common.R
+    - fits
+    outs:
+    - res-effect-by-forecast-date.png

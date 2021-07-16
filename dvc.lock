@@ -2723,3 +2723,20 @@ stages:
     - path: california-mase.png
       md5: cec819d2f49188f8a80690b5661a3892
       size: 156998
+  make-plot-of-betares-by-fdt:
+    cmd: ./compare-params-by-forecast-date.R
+    deps:
+    - path: compare-params-by-forecast-date.R
+      md5: 155401726bebad2596d6588c218c9adf
+      size: 1011
+    - path: covidhub-common.R
+      md5: 4035c0102c7a76875a36f76b080c479c
+      size: 24121
+    - path: fits
+      md5: cab238a4871b1a542780cec527566149.dir
+      size: 11310111
+      nfiles: 147
+    outs:
+    - path: res-effect-by-forecast-date.png
+      md5: 8f280f9524cc0fe9dd5a9c042068172e
+      size: 93729
