@@ -76,7 +76,7 @@ pscores_cd_by_date <- (
 ) %>%
   add_theme_mods()
 
-ggsave("cases-deaths-wis-by-date.png", pscores_cd_by_date, width = 7.5, 
+ggsave("cases-deaths-wis-by-date.png", pscores_cd_by_date, width = 5.2, 
        height = 7.5, dpi = 600)
 
 pscores_h_by_date <-
@@ -93,8 +93,7 @@ pscores_h_by_date <-
       labs(x = "Observation date", y = "Weighted interval score")
   ) %>%
   add_theme_mods()
-ggsave("hosp-wis-by-date.png", pscores_h_by_date, width = 7.5, 
-       height = 8.75, dpi = 600)
+ggsave("hosp-wis-by-date.png", pscores_h_by_date, width = 5.2, dpi = 600)
 
 ssums <- scores %>%
   filter(facet_var %in% c("Incident cases", "Incident deaths")) %>% 
@@ -118,7 +117,7 @@ pscores_cd <-
       labs(x = "Forecast horizon (weeks)", y = "Mean weighted interval score")
   ) %>%
   add_theme_mods()
-ggsave("cases-deaths-wis.png", pscores_cd, width = 5.2, dpi = 600)
+ggsave("cases-deaths-wis.png", pscores_cd, width = 5.2, height=4, dpi = 600)
 
 pscores_h <- (
   ssumsh %>%
