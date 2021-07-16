@@ -253,7 +253,8 @@ create_forecast_df <- function(means,
                                       value)
 }
 
-make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_sim){
+make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, 
+                                 cov_sim){
   abb <- covidcast::fips_to_abbr(paste0(forecast_loc, "000"))
   snm <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
   pop <- covidHubUtils::hub_locations %>%
@@ -357,7 +358,8 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
 
   
   no_hosps <- all(is.na(dets$ytilde_k[2, ]))
-  rt <- calc_rt(fit, z, cov_all, no_hosps, susceptibles = dets$xhat_kk[1,], wfixed)
+  rt <- calc_rt(fit, z, cov_all, no_hosps, susceptibles = dets$xhat_kk[1,], 
+                wfixed)
   
   ret[[10]] <- gendf(
     mean = rt,
@@ -486,7 +488,8 @@ write_forecasts <-
       inds <- seq(from = x, to = y)
       sum(dets$sim_R[varno, varno, inds])
     }
-    case_obs_vars <- purrr::map2_dbl(week_start_inds, case_inds, sum_seq, varno = 1)
+    case_obs_vars <- purrr::map2_dbl(week_start_inds, case_inds, sum_seq, 
+                                     varno = 1)
     case_proc_vars <- dets$sim_P[1,1, case_inds]
     case_Sigma <- case_obs_vars + case_proc_vars
     
@@ -520,7 +523,8 @@ write_forecasts <-
     death_inds <- case_inds
     week_start_inds2 <- death_inds - 6
     
-    death_obs_vars <- purrr::map2_dbl(week_start_inds2, death_inds, sum_seq, varno = 3)
+    death_obs_vars <- purrr::map2_dbl(week_start_inds2, death_inds, sum_seq, 
+                                      varno = 3)
     death_proc_vars <- dets$sim_P[3,3, death_inds]
     death_Sigma <- death_obs_vars + death_proc_vars
 
@@ -715,7 +719,8 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   ggsave(filename = plot_path5, plot = p5)
   
   pathrt <- file.path(plot_dir, "Rt-time-series.png")
-  prt <- make_rt_plot(fit, z, cov, no_hosps, susceptibles = dets$xhat_kk[1, ], wfixed)
+  prt <- make_rt_plot(fit, z, cov, no_hosps, susceptibles = dets$xhat_kk[1, ],
+                      wfixed)
   ggsave(pathrt, prt, dpi = 600, width = 5.2, height = 4)
   
   plot_path7 <- file.path(plot_dir, "params-tab-1.png")  
