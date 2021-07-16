@@ -1724,8 +1724,8 @@ stages:
       size: 1130
     outs:
     - path: healthdata/2021-03-29/06
-      md5: 294e387e1aef16637ad7eb10008b5962.dir
-      size: 123095
+      md5: 700fb1dfa24680699e2f1ec75ff9078a.dir
+      size: 124405
       nfiles: 1
   hopkins-vaccine-2021-03-29:
     cmd: fdt=2021-03-29 ./pull-hopkins-vaccine-ts-from-date.R
@@ -2041,16 +2041,16 @@ stages:
       md5: de21c9867a3d62cedcc964d37900b0a7
       size: 1027
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: 4035c0102c7a76875a36f76b080c479c
+      size: 24121
     - path: forecasts
-      md5: 009a111496a0e57131808bf6553603ff.dir
-      size: 271423914
+      md5: 15a0c0bfec2338c0f98b1225ae0f3c72.dir
+      size: 271411754
       nfiles: 11981
     outs:
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 15354aeb2fd5b89991fc31b7d18d7850.dir
-      size: 2548853
+      md5: 41646307aea204cffd82bf8485b7cdcc.dir
+      size: 2542991
       nfiles: 48
   make-trajectory-plots:
     cmd: ./make-trajectory-plots.R
@@ -2064,46 +2064,46 @@ stages:
       size: 9346644
       nfiles: 8
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 15354aeb2fd5b89991fc31b7d18d7850.dir
-      size: 2548853
+      md5: 41646307aea204cffd82bf8485b7cdcc.dir
+      size: 2542991
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 1e12cc99e81f43b752b731d1b002483d
-      size: 4930
+      md5: e816c9a33a04fab36faa24a4dd64e56f
+      size: 5099
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: trajectories-all
-      md5: 26c34afe62e20c5821201556f82f8db9.dir
-      size: 2646682
-      nfiles: 3
+      md5: 5e5ad050b287271eaa47e3c7740763ca.dir
+      size: 1072476
+      nfiles: 1
   analyze-scores:
     cmd: ./analyze-scores.R
     deps:
     - path: analyze-scores.R
-      md5: b33e7fbc85aaf065f987365e1645cd22
-      size: 4491
+      md5: d73dcdfcf53f862edae9e00710fbb2dc
+      size: 4478
     - path: lambda020.00-status-quo-CEID-InfectionKalman
-      md5: 15354aeb2fd5b89991fc31b7d18d7850.dir
-      size: 2548853
+      md5: 41646307aea204cffd82bf8485b7cdcc.dir
+      size: 2542991
       nfiles: 48
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: cases-deaths-wis-by-date.png
-      md5: 6848d3959ef5841baedfdaeeef947391
-      size: 1063674
+      md5: 872a883becb0f23b3ee472cbb8bf678f
+      size: 874744
     - path: cases-deaths-wis.png
-      md5: 324171ce6af637c90d89b40b8a0672c9
-      size: 366228
+      md5: 9a0b15d90e71a0cf696a0c5f4a396814
+      size: 282673
     - path: hosp-wis-by-date.png
-      md5: c0e88d47c26f6c7a4ebd443020144a85
-      size: 1176021
+      md5: 64922156ec96187fb1ae35b4f9e0aa35
+      size: 1065888
     - path: hosp-wis.png
-      md5: 9cab46a267743c4be9d026b8ae38fec5
-      size: 321604
+      md5: cb184ae660c22005e2226b2cdeacdd04
+      size: 300316
   lookup-wayback-urls:
     cmd: ./lookup-wayback-urls.R
     deps:
@@ -2660,19 +2660,19 @@ stages:
     cmd: ./study-indicators-revisions.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: 4035c0102c7a76875a36f76b080c479c
+      size: 24121
     - path: hopkins
       md5: af80702171815794863dfe7aea7f4b65.dir
       size: 414103429
       nfiles: 392
     - path: study-indicators-revisions.R
-      md5: 3e26727fed5f1f0f04d6a1aae6598009
-      size: 1874
+      md5: b275e0db50fe888eb45546da83004255
+      size: 2133
     outs:
     - path: indicators-revisions-cal.png
-      md5: cdb8cfb06299993c9ac908ba49791de9
-      size: 86238
+      md5: 9f4dc11d5e78732fa501971b788d579f
+      size: 210278
   hopkins-2021-06-21:
     cmd: fdt=2021-06-21 ./pull-hopkins-ts-from-date.R
     deps:
@@ -2706,3 +2706,37 @@ stages:
       md5: 53621964cafc4bf7eff789d4b6c2f1c8.dir
       size: 6040988
       nfiles: 3
+  make-metrics-plots:
+    cmd: ./plot-metrics.R
+    deps:
+    - path: fits
+      md5: c39b7c04e367159094675b6d4d412823.dir
+      size: 11300506
+      nfiles: 146
+    - path: plot-metrics.R
+      md5: da55e191376a793a8d2a4bccb349c134
+      size: 1803
+    outs:
+    - path: california-fitting-time.png
+      md5: 62624ed5e2dc1a04ce0d2f13bd605209
+      size: 125773
+    - path: california-mase.png
+      md5: cec819d2f49188f8a80690b5661a3892
+      size: 156998
+  make-plot-of-betares-by-fdt:
+    cmd: ./compare-params-by-forecast-date.R
+    deps:
+    - path: compare-params-by-forecast-date.R
+      md5: 155401726bebad2596d6588c218c9adf
+      size: 1011
+    - path: covidhub-common.R
+      md5: 4035c0102c7a76875a36f76b080c479c
+      size: 24121
+    - path: fits
+      md5: cab238a4871b1a542780cec527566149.dir
+      size: 11310111
+      nfiles: 147
+    outs:
+    - path: res-effect-by-forecast-date.png
+      md5: 8f280f9524cc0fe9dd5a9c042068172e
+      size: 93729

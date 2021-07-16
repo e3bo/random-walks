@@ -22,7 +22,7 @@ ressds <- map(pars, 2) %>% map_dbl("residentialeffect")
 
 q <- qnorm(1 - 0.05 / 2)
 
-dph <- tibble(x = lubridate::ymd(fdts[-16]), y = resests, 
+dph <- tibble(x = lubridate::ymd(fdts), y = resests, 
               lower = resests - ressds * q,
               upper = resests + ressds * q)
 
@@ -31,4 +31,4 @@ p <- ggplot(dph, aes(x, y)) +
   labs(x = "Forecast date", y = expression(beta[res])) + 
   theme_minimal()
 
-ggsave("res-effect-by-forecast-date.png", p, width=5.2, dpi=600)
+ggsave("res-effect-by-forecast-date.png", p, width=5.2, height=4, dpi=600)

@@ -3,10 +3,12 @@
 suppressPackageStartupMessages(library(tidyverse))
 source("covidhub-common.R")
 
-make_params_tab <- function(w, h, cov, z, f, dir){
+make_params_tab <- function(w, h, cov, z, f, dir, Rtmod){
   ests <- name_params(w, z, cov, f, trans = FALSE)[[1]]
   sevec <- sqrt(diag(solve(h)))
   sd <- name_params(sevec, z, cov, f, trans = FALSE)[[1]]
+  ests$ϕ <- coef(Rtmod) %>% unname()
+  sd$ϕ <- vcov(Rtmod) %>% sqrt() %>% unname()
   
   pnames <-
     c(
@@ -19,7 +21,8 @@ make_params_tab <- function(w, h, cov, z, f, dir){
       "γ_z17",
       "τ_h",
       "p_hweekend",
-      "τ_d"
+      "τ_d",
+      "ϕ"
     )
   
   pnames_pretty <-
@@ -33,7 +36,8 @@ make_params_tab <- function(w, h, cov, z, f, dir){
       "$\\log \\gamma_{z,1} = \\log \\gamma_{z,7}$",
       "$\\log \\tau_h$",
       "$\\operatorname{logit} p_{h,\\textrm{weekend}}$",
-      "$\\log \\tau_d$"
+      "$\\log \\tau_d$",
+      "$\\phi$"
     )
   if (!"doses_scaled" %in% names(cov)){
     linds <- !grepl("doseeffect", pnames)
@@ -60,9 +64,11 @@ make_params_tab <- function(w, h, cov, z, f, dir){
                 upper = ests$p_h + sd$p_h * q)
   p <- ggplot(dph, aes(x, y)) + 
     geom_pointrange(aes(ymin = lower, ymax = upper)) + 
-    labs(x = "Start of 4 week period", y = expression(paste("logit ", p[h])))
+    labs(x = "Start of 4 week period", y = expression(paste("logit ", p[h]))) +
+    theme_minimal()
   
-  ggsave(filename = file.path(dir, "p_h-plot.png"), plot = p)
+  ggsave(filename = file.path(dir, "p_h-plot.png"), plot = p, dpi = 600, 
+         width = 5.2, height = 4)
 
   start2 <- x %>% group_by(τ_cmap) %>% slice(1) %>% pull(target_end_date)
   dtc <- tibble(x = start2, y = ests$τ_c, 
@@ -70,8 +76,10 @@ make_params_tab <- function(w, h, cov, z, f, dir){
                 upper = ests$τ_c + sd$τ_c * q)
   ptc <- ggplot(dtc, aes(x, y)) + 
     geom_pointrange(aes(ymin = lower, ymax = upper)) + 
-    labs(x = "Start of 4 week period", y = expression(paste("log ", tau[c])))
-  ggsave(filename = file.path(dir, "tauc-plot.png"), plot = ptc)
+    labs(x = "Start of 4 week period", y = expression(paste("log ", tau[c]))) +
+    theme_minimal()
+  ggsave(filename = file.path(dir, "tauc-plot.png"), plot = ptc, dpi = 600,
+         width = 5.2, height = 4)
   
   start3 <- x %>% group_by(β_0map) %>% slice(1) %>% pull(target_end_date)
   db0 <- tibble(x = start3, y = ests$β_0, 
@@ -79,8 +87,10 @@ make_params_tab <- function(w, h, cov, z, f, dir){
                 upper = ests$β_0 + sd$β_0 * q)
   pb0 <- ggplot(db0, aes(x, y)) + 
     geom_pointrange(aes(ymin = lower, ymax = upper)) + 
-    labs(x = "Start of 1 week period", y = expression(paste("log ", beta[0])))
-  ggsave(filename = file.path(dir, "b0-plot.png"), plot = pb0)
+    labs(x = "Start of 1 week period", y = expression(paste("log ", beta[0]))) +
+    theme_minimal()
+  ggsave(filename = file.path(dir, "b0-plot.png"), plot = pb0, dpi = 600,
+         width = 5.2, height = 4)
   
   
 }
@@ -101,11 +111,12 @@ calc_rt <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
     effects <- p[["residentialeffect"]]
   }
   
-  (exp(intercept + X %*% effects) / wfixed["γ"] * susceptibles / wfixed["N"]) %>% as.numeric()
+  (exp(intercept + X %*% effects) / wfixed["γ"] * susceptibles / wfixed["N"]) %>% 
+    as.numeric()
 }
 
 make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
-  par(mfrow = c(1, 1))
+  
   nβ_0 <- tail(cov$β_0map, 1)
   np <- length(ft$par)
   inds <- seq(np - nβ_0 + 1, np)
@@ -115,66 +126,56 @@ make_rt_plot <- function(ft, z, cov, no_hosps, susceptibles, wfixed) {
   
   if ("doses_scaled" %in% names(cov)){
     X <- cbind(cov$residential, cov$doses_scaled)
-    effects <- unlist(p[c("residentialeffect", "doseeffect")])
+    vnames <- c("residentialeffect", "doseeffect")
+    symb_names <- c(expression(beta[res] == 0), expression(beta[dose] == 0))
+    effects <- unlist(p[vnames])
   } else {
     X <- cbind(cov$residential)
-    effects <- p[["residentialeffect"]]
+    vnames <- "residentialeffect"
+    symb_names <- expression(beta[res] == 0)
+    effects <- p[[vnames]]
   }
 
-  num_all <- exp(intercept + X %*% effects)
-  factor <- 1 / wfixed["γ"] * susceptibles / wfixed["N"]
-  plot(
-    cov$time,
-    num_all * factor,
-    type = 'l',
-    xlab = "Time",
-    ylab = expression(paste("Effective reproduction number ", R[e]))
-  )
-  abline(h = 1000 / wfixed["γ"])
-  if (length(effects) == 2) {
-    legend(
-      "top",
-      col = c(1, "orange", "blue", "grey"),
-      lty = 1,
-      legend = c(
-        "MLE estimate",
-        "MLE - (effect of mobility)",
-        "MLE - (effect of vaccine)",
-        "MLE random walk intercept"
-      )
-    )
-    effects_no_dose <- effects_no_mob <- effects
-    effects_no_mob[1] <- 0
-    num_nomob <- exp(intercept + X %*% effects_no_mob)
-    lines(cov$time,
-          num_nomob * factor,
-          col = "orange")
-    effects_no_dose[2] <- 0
-    num_nodose <- exp(intercept + X %*% effects_no_dose)
-    lines(cov$time,
-          num_nodose / wfixed["γ"],
-          col = "blue")
-  } else {
-    legend(
-      "top",
-      col = c(1, "orange", "grey"),
-      lty = 1,
-      legend = c(
-        "MLE estimate",
-        "MLE - (effect of mobility)",
-        "MLE random walk intercept"
-      )
-    )
-    effects_no_mob <- effects
-    effects_no_mob[1] <- 0
-    num_nomob <- exp(intercept + X %*% effects_no_mob)
-    lines(cov$time,
-          num_nomob * factor,
-          col = "orange")
+  ndf <-
+    data.frame(Date = cov$target_end_date, 
+               num = exp(intercept + X %*% effects), model = "Full")
+  values <- c("Full")
+  labels <- expression("Full")
+  if (length(effects) > 1) {
+    for (i in seq_along(effects)) {
+      zero1 <- effects
+      zero1[i] <- 0
+      ndf <- bind_rows(ndf,
+                       data.frame(
+                         Date = cov$target_end_date,
+                         num = exp(intercept + X %*% zero1),
+                         model = vnames[i])
+                       )
+      values <- c(values, vnames[i])
+      labels <- c(labels, symb_names[i])
+      
+    }
   }
-  lines(cov$time,
-        exp(intercept) * factor,
-        col = "grey")
+  ndf <- bind_rows(ndf,
+                   data.frame(Date = cov$target_end_date, 
+                              num = exp(intercept), model = "Intercept only"))
+  values <- c(values, "Intercept only")
+  labels <- c(labels, expression("Intercept only"))
+  
+  ndf$num <- ifelse(ndf$num < 1000, ndf$num, 1000)
+  
+  factor <- 1 / wfixed["γ"] * susceptibles / wfixed["N"]
+  
+  p <- ggplot(ndf, aes(x = lubridate::ymd(Date), 
+                       y = num * factor, color = model)) + 
+    geom_line() + 
+    xlab("Date") +
+    ylab(expression(paste("Effective reproduction number ", R[e]))) +
+    theme_minimal() + 
+    ggthemes::scale_colour_colorblind(name = "Regression model", 
+                                      breaks = values,
+                                      labels = labels)
+  p
 }
 
 create_forecast_df <- function(means,
@@ -252,7 +253,8 @@ create_forecast_df <- function(means,
                                       value)
 }
 
-make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_sim){
+make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, 
+                                 cov_sim){
   abb <- covidcast::fips_to_abbr(paste0(forecast_loc, "000"))
   snm <- covidcast::fips_to_name(paste0(forecast_loc, "000"))
   pop <- covidHubUtils::hub_locations %>%
@@ -356,7 +358,8 @@ make_dashboard_input <- function(dets, cov, z, forecast_loc, fit, wfixed, cov_si
 
   
   no_hosps <- all(is.na(dets$ytilde_k[2, ]))
-  rt <- calc_rt(fit, z, cov_all, no_hosps, susceptibles = dets$xhat_kk[1,], wfixed)
+  rt <- calc_rt(fit, z, cov_all, no_hosps, susceptibles = dets$xhat_kk[1,], 
+                wfixed)
   
   ret[[10]] <- gendf(
     mean = rt,
@@ -456,7 +459,7 @@ write_scenarios <- function(fit,
 
 write_forecasts <-
   function(fit, cov, z, winit, wfixed, hess, cov_sim, p_hsd, β_0sd, τ_csd, fdt, 
-           forecast_loc) {
+           forecast_loc, Rtmod) {
     
     dets <-
       calc_kf_nll_r(
@@ -485,7 +488,8 @@ write_forecasts <-
       inds <- seq(from = x, to = y)
       sum(dets$sim_R[varno, varno, inds])
     }
-    case_obs_vars <- purrr::map2_dbl(week_start_inds, case_inds, sum_seq, varno = 1)
+    case_obs_vars <- purrr::map2_dbl(week_start_inds, case_inds, sum_seq, 
+                                     varno = 1)
     case_proc_vars <- dets$sim_P[1,1, case_inds]
     case_Sigma <- case_obs_vars + case_proc_vars
     
@@ -519,7 +523,8 @@ write_forecasts <-
     death_inds <- case_inds
     week_start_inds2 <- death_inds - 6
     
-    death_obs_vars <- purrr::map2_dbl(week_start_inds2, death_inds, sum_seq, varno = 3)
+    death_obs_vars <- purrr::map2_dbl(week_start_inds2, death_inds, sum_seq, 
+                                      varno = 3)
     death_proc_vars <- dets$sim_P[3,3, death_inds]
     death_Sigma <- death_obs_vars + death_proc_vars
 
@@ -562,12 +567,13 @@ write_forecasts <-
       fit = fit,
       wfixed = wfixed,
       cov_sim = cov_sim,
-      z
+      z,
+      Rtmod = Rtmod
     )
 }
 
 make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt, 
-                           forecast_loc, fit, wfixed, cov_sim, z) {
+                          forecast_loc, fit, wfixed, cov_sim, z, Rtmod) {
   plot_dir <-
     file.path("plots",
               paste0(fdt,
@@ -578,33 +584,35 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   
   if (!dir.exists(plot_dir))
     dir.create(plot_dir, recursive = TRUE)
-  
-  make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir)
+    
+  make_params_tab(fit$par, h, cov, z, as.list(wfixed), plot_dir, Rtmod)
   
   no_hosps <- all(is.na(dets$ytilde_k[2,]))
+
+  qqpath <- file.path(plot_dir, "qqplots.png")
+  dfc <- data.frame(y = dets$ytilde_k[1, ] / sqrt(dets$S[1, 1, ]))
+  qqc <-
+    ggplot(dfc, aes(sample = y)) + stat_qq() + stat_qq_line() +
+    ylab("Quantile of residuals\nof case predictions") +
+    xlab("Theoretical quantile") +
+    theme_minimal()
   
-  plot_path1 <- file.path(plot_dir, "qqplots.png")
+  dfh <- data.frame(y = dets$ytilde_k[2, ] / sqrt(dets$S[2, 2, ]))
+  qqh <-
+    ggplot(dfh, aes(sample = y)) + stat_qq() + stat_qq_line() +
+    ylab("Quantile of residuals\nof hospital admission predictions") +
+    xlab("Theoretical quantiles") +
+    theme_minimal()
   
-  png(
-    plot_path1,
-    width = 7.5,
-    height = 10,
-    units = "in",
-    res = 90
-  )
+  dfd <- data.frame(y = dets$ytilde_k[3, ] / sqrt(dets$S[3, 3, ]))
+  qqd <-
+    ggplot(dfd, aes(sample = y)) + stat_qq() + stat_qq_line() +
+    ylab("Quantile of residuals\nof death predictions") +
+    xlab("Theoretical quantiles") +
+    theme_minimal()
   
-  par(mfrow = c(3, 1))
-  qqnorm(dets$ytilde_k[1,] / sqrt(dets$S[1, 1,]), sub = "Cases")
-  abline(0, 1)
-  if(no_hosps){
-    plot.new()
-  } else {
-    qqnorm(dets$ytilde_k[2,] / sqrt(dets$S[2, 2,]), sub = "Hospitalizations")
-    abline(0, 1)
-  }
-  qqnorm(dets$ytilde_k[3,] / sqrt(dets$S[3, 3,]), sub = "Deaths")
-  abline(0, 1)
-  dev.off()
+  pqq <- cowplot::plot_grid(qqc, qqh, qqd, ncol = 1)
+  ggsave(qqpath, pqq, dpi = 600, width = 5.2, height = 7)
   
   plot_path2 <- file.path(plot_dir, "fitted-time-series.png")
   png(
@@ -710,16 +718,10 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
   
   ggsave(filename = plot_path5, plot = p5)
   
-  plot_path6 <- file.path(plot_dir, "Rt-time-series.png")
-  png(
-    plot_path6,
-    width = 7.5,
-    height = 7,
-    units = "in",
-    res = 90
-  )
-  make_rt_plot(fit, z, cov, no_hosps, susceptibles = dets$xhat_kk[1, ], wfixed)
-  dev.off()
+  pathrt <- file.path(plot_dir, "Rt-time-series.png")
+  prt <- make_rt_plot(fit, z, cov, no_hosps, susceptibles = dets$xhat_kk[1, ],
+                      wfixed)
+  ggsave(pathrt, prt, dpi = 600, width = 5.2, height = 4)
   
   plot_path7 <- file.path(plot_dir, "params-tab-1.png")  
   png(plot_path7,
@@ -749,10 +751,38 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
       res = 90)
   gridExtra::grid.table(est_tab[, -t1inds])
   dev.off()
+  
+  plot_path9 <- file.path(plot_dir, "mobility.png")
+  pmob <- cov %>% ggplot(aes(x = target_end_date, y = residential_pcb)) + 
+    geom_point(color = "grey") + 
+    geom_point(aes(y = residential * 100)) + 
+    theme_minimal() + 
+    labs(x = "Date", y = "Percent increase in time spent\nin residential areas")
+  ggsave(plot_path9, pmob,  dpi = 600, width = 5.2, height = 4)
+  
+  if ("doses" %in% names(cov)){
+    pvac_path <- file.path(plot_dir, "doses.png")
+    pvac <- cov %>% 
+      filter(target_end_date >= "2020-12-01") %>% 
+      ggplot(aes(x = target_end_date, y = doses)) + 
+      geom_line() + 
+      theme_minimal() + 
+      labs(x = "Date", y = "Doses administered")
+    ggsave(pvac_path, pvac, dpi = 600, width = 5.2, height = 4)
+  }
+  
+  prhot <- cov %>% filter(target_end_date < "2020-07-20") %>% 
+    ggplot(aes(x = target_end_date, y = ρ)) + geom_line() +
+    xlab("Date") +
+    ylab(expression(paste(rho[t]," = Pr(Removal is reported)"))) +
+    theme_minimal()
+  
+  prhot_path <- file.path(plot_dir, "rhot-estimate.png")
+  ggsave(prhot_path, prhot, dpi = 600, width = 5.2, height = 4)
 }
 
-forecast_date <- Sys.getenv("fdt", unset = "2021-03-29")
-forecast_loc <- Sys.getenv("loc", unset = "36")
+forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
+forecast_loc <- Sys.getenv("loc", unset = "06")
 
 fit_dir <-
   file.path("fits",
@@ -802,6 +832,22 @@ if ("doses_scaled" %in% names(x)){
   )
 }
 
+# AR-1 modeling of R_t
+
+p <- name_params(fit1$par, z, x, as.list(wfixed))[[1]]
+if ("doses_scaled" %in% names(x)) {
+  β   <-
+    exp(p$β_0[x$β_0map] + p$residentialeffect * x$residential + p$doseeffect * x$doses_scaled)
+} else {
+  β   <-
+    exp(p$β_0[x$β_0map] + p$residentialeffect * x$residential)
+}
+
+include <- x$target_end_date > "2020-05-01"
+ar1ts <- β[include] - wfixed["γ"]
+mod <- arima(ar1ts, order = c(1, 0, 0), include.mean = FALSE)
+cov_weekly_fcst$β <- predict(mod, n.ahead = nrow(cov_weekly_fcst))$pred + wfixed["γ"]
+
 write_forecasts(
   fit = fit1,
   cov = x,
@@ -814,7 +860,8 @@ write_forecasts(
   τ_csd = τ_csd,
   cov_sim = cov_weekly_fcst,
   fdt = forecast_date,
-  forecast_loc = forecast_loc
+  forecast_loc = forecast_loc,
+  Rtmod = mod
 )
 
 q("no")

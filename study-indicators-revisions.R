@@ -44,7 +44,11 @@ allsum <- all %>%
   arrange(issue_date) %>%
   summarise(min = min(value),
             max = max(value),
-            last = value[n()])
+            last = value[n()]) %>%
+  mutate(facet_label = factor(variable, 
+                              levels = c("cases", "hospitalizations", "deaths"),
+                              labels = c("Cases", "Hospital admissions", 
+                                         "Deaths")))
 
 p <- allsum %>%
   ggplot(aes(
@@ -53,9 +57,10 @@ p <- allsum %>%
     ymax = max,
     y = last
   )) +
-  geom_linerange() + geom_point() + facet_grid(variable ~ ., scales = "free_y") +
+  geom_linerange() + geom_point() + 
+  facet_grid(facet_label ~ ., scales = "free_y") +
   theme_minimal() +
   labs(x = "Date", y = "Count")
 
 ggsave("indicators-revisions-cal.png", plot = p, width = 5.2, height = 6, 
-       dpi = 300)
+       dpi = 600)

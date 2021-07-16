@@ -4,14 +4,14 @@ stages:
     cmd: fdtstart=2021-03-01 fdt=2021-03-08 loc=06 Rscript fit-infection-kalman.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: f23ed76edf6441b81ad37d635de7100e
+      size: 24065
     - path: fit-infection-kalman.R
-      md5: 0eb208ee25b1a9ee3a5bf1df945074f5
-      size: 10865
+      md5: 3662218ee117500f261e0939c0be90ae
+      size: 11953
     - path: fits/2021-03-01-fips06/fit.RData
-      md5: 77e6e116c4f33b921f87662ca41aa9d9
-      size: 58216
+      md5: 1629ec2ee2e9a7fa14d67f51e3387cb7
+      size: 60803
     - path: google-mobility-reports-wayback/2021-03-08
       md5: 4fa697c0306a5928309c59d55b32d613.dir
       size: 1860834
@@ -22,29 +22,29 @@ stages:
       nfiles: 8
     outs:
     - path: fits/2021-03-08-fips06/fit-metrics.json
-      md5: fc82b03f09247a8e3b0afad96caf56b5
-      size: 367
+      md5: 00db36093ca1df1f9fae9b108cf27ef1
+      size: 369
     - path: fits/2021-03-08-fips06/fit.RData
-      md5: 8a0a6a28ec8ef2e88863d741428f8910
-      size: 62434
+      md5: 91b51728e6b54bcc547818d69533a8df
+      size: 64923
   forecast-2021-03-08-06:
     cmd: fdt=2021-03-08 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: 4035c0102c7a76875a36f76b080c479c
+      size: 24121
     - path: fits/2021-03-08-fips06/fit.RData
-      md5: 8a0a6a28ec8ef2e88863d741428f8910
-      size: 62434
+      md5: 91b51728e6b54bcc547818d69533a8df
+      size: 64923
     - path: write-formatted-forecast.R
-      md5: e6862be3808a56bd01d248990c7a71fd
-      size: 24595
+      md5: 6e0ec8383370468d272686d20d53e79f
+      size: 25667
     outs:
     - path: forecasts/2021-03-08-fips06
-      md5: 5f578e22c8bb6d6bc23f68b36aced0ce.dir
-      size: 54994
+      md5: 453f4cf2fa31fa7640a5e26e0c5ad5da.dir
+      size: 53650
       nfiles: 1
     - path: plots/2021-03-08-fips06
-      md5: debff6c0ec2bfd673975d0aabb4e69b5.dir
-      size: 2009810
+      md5: 8f4a9f70eda7ec5f765bbc0dbf73f109.dir
+      size: 2063965
       nfiles: 12

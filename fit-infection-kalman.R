@@ -137,12 +137,6 @@ x0 <- x00 %>%
                          residential_pcb, sdavimp) / 100
   )
 
-pmob <- x0 %>% ggplot(aes(x = target_end_date, y = residential_pcb)) + 
-  geom_point(color = "grey") + 
-  geom_point(aes(y = residential * 100)) + 
-  theme_minimal() + 
-  labs(x = "Date", y = "Percent increase in time spent\nin residential areas")
-
 x0$β_0map <- rep(seq_len(ceiling(wsize / 7)), each = 7) %>% head(wsize) %>% as.integer()
 x0$τ_cmap <- rep(seq_len(ceiling(wsize / 28)), each = 28) %>% head(wsize) %>% as.integer()
 
@@ -332,11 +326,6 @@ if (!dir.exists(fit_dir))
 
 the_file <- file.path(fit_dir, "fit.RData")
 save(x, z, winit, wfixed, fit1, h1, p_hsd, β_0sd, τ_csd, file = the_file)
-
-## Save plots
-
-mob_plot_path <- file.path(fit_dir, "mobility.png")
-ggsave(mob_plot_path, plot = pmob, dpi = 600, width = 5.2)
 
 ## Save metrics
 

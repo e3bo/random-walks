@@ -6,6 +6,7 @@ suppressPackageStartupMessages(library(tidyverse))
 
 ## load forecasts
 lambda <- 20
+loc <- "06"
 par2name <- function(lambda){
   paste0("lambda", sprintf("%06.2f", lambda), 
          "-status-quo",
@@ -24,7 +25,8 @@ fdat2 <- map_dfr(dirnames, load_from_dir) %>%
   mutate(model = ifelse(model == "lambda020.00-status-quo-CEID-InfectionKalman", 
                         "GISST", model))
 
-GISSTstart <- fdat2 %>% filter(model == "GISST") %>% pull(forecast_date) %>% min()
+GISSTstart <- fdat2 %>% filter(model == "GISST") %>% pull(forecast_date) %>% 
+  min()
 date_ranges <-
   fdat2 %>% filter(model == "COVIDhub-ensemble") %>%
   group_by(target_variable) %>%
@@ -36,16 +38,16 @@ fdat22 <- fdat2 %>% left_join(date_ranges, by = "target_variable")
 
 fdat3 <- fdat22 %>% filter(target_variable == "inc case") %>%
   filter(forecast_date >= start & forecast_date <= stop)
-splt_cases <- split(fdat3, fdat3$location)
+splt_cases <- fdat3 %>% filter(location == loc)
 
 fdat4 <- fdat22 %>% filter(target_variable == "inc hosp") %>%
   filter(forecast_date >= start & forecast_date <= stop)
 
-splt_hosp <- split(fdat4, fdat4$location)
+splt_hosp <- fdat4 %>% filter(location == loc)
 
 fdat5 <- fdat22 %>% filter(target_variable == "inc death") %>% 
   filter(forecast_date >= start & forecast_date <= stop) 
-splt_death <- split(fdat5, fdat5$location)
+splt_death <- fdat5 %>% filter(location == loc)
 
 ## load JHU data
 data_date <- Sys.getenv("ddt", unset = "2021-06-21")
@@ -88,28 +90,29 @@ healthdata <-
 ## make the plots
 plot_forecast_grid <- function(locdata, tv = "inc case"){
   xname <- "Year-Epiweek"
-  db <- "2 weeks"
+  db <- "4 weeks"
   labf <- function(x) {
     wk <- sprintf("%02d", lubridate::epiweek(x))
     yr <- lubridate::epiyear(x)
     paste(yr, wk, sep = '-')
   }
   if (tv == "inc case"){
-    yname <- "Incident cases"
+    yname <- "Cases"
     truth <- tdat2
   } else if (tv == "inc death") {
-    yname <- "Incident deaths"
+    yname <- "Deaths"
     truth <- tdat3
   } else {
-    xname <- "Date"
-    yname <- "Incident hospitalizations"
-    db <- "7 days"
+    xname <- "Day"
+    yname <- "Hospital admissions"
+    db <- "14 days"
     labf <- waiver()
     truth <- healthdata
   }
   locdata %>% left_join(truth, by = c("location", "target_end_date")) %>%
   filter(quantile %in% c(0.025, 0.5, 0.975)) %>%
-  ggplot(aes(x = target_end_date, y = value, group = interaction(forecast_date, model), color = model)) + 
+  ggplot(aes(x = target_end_date, y = value, 
+             group = interaction(forecast_date, model), color = model)) + 
   geom_line(aes(y = true_value), color = "grey", size = 2, alpha = 0.5) + 
   geom_point(aes(y = true_value), color = "grey", size = 3, alpha = 0.5) +
   geom_line() + 
@@ -129,17 +132,30 @@ plot_forecast_grid <- function(locdata, tv = "inc case"){
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 }
 
-plots_cases <- map(splt_cases, plot_forecast_grid)
-plots_hosp <- map(splt_hosp, plot_forecast_grid, tv = "inc hosp")
-plots_deaths <- map(splt_death, plot_forecast_grid, tv = "inc death")
+plots_cases <- plot_forecast_grid(splt_cases)
+plots_hosp <- plot_forecast_grid(splt_hosp, tv = "inc hosp")
+plots_deaths <- plot_forecast_grid(splt_death, tv = "inc death")
 
-plot_writer <- function(p, loc, pref){
-  plot_name <- paste0("trajectories-all/", pref, loc, ".png")
-  ggsave(plot_name, p, width = 5.2, height = 8.75, dpi = 600)
-}
 if (!dir.exists("trajectories-all")){
   dir.create("trajectories-all")
 }
-map2(plots_cases, names(plots_cases), plot_writer, pref = "cases")
-map2(plots_hosp, names(plots_hosp), plot_writer, pref = "hosp")
-map2(plots_deaths, names(plots_deaths), plot_writer, pref = "death")
+
+prow <- cowplot::plot_grid(
+  plots_cases + theme(legend.position="none"),
+  plots_hosp + theme(legend.position="none"),
+  plots_deaths + theme(legend.position="none"),
+  align = 'vh',
+  labels = c("A", "B", "C"),
+  nrow = 1
+)
+prow
+
+leg <- cowplot::get_legend(
+  plots_cases + 
+    guides(color = guide_legend(nrow = 1)) +
+    theme(legend.position = "top")
+)
+
+pall <- cowplot::plot_grid(leg, prow, ncol = 1, rel_heights = c(0.1, 1))
+ggsave(file.path("trajectories-all", "traj.png"), plot = pall, width = 7.3, 
+       dpi = 600)

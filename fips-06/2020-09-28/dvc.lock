@@ -31,20 +31,20 @@ stages:
     cmd: fdt=2020-09-28 loc=06 Rscript write-formatted-forecast.R
     deps:
     - path: covidhub-common.R
-      md5: b70262ce34aa57caea5db6e7f128ce1d
-      size: 23929
+      md5: 4035c0102c7a76875a36f76b080c479c
+      size: 24121
     - path: fits/2020-09-28-fips06/fit.RData
-      md5: 713a207a43e21bc51c095972ed9fe221
-      size: 17934
+      md5: d646dc27fafe0f705963cf098b168ddb
+      size: 18553
     - path: write-formatted-forecast.R
-      md5: e6862be3808a56bd01d248990c7a71fd
-      size: 24595
+      md5: 6e0ec8383370468d272686d20d53e79f
+      size: 25667
     outs:
     - path: forecasts/2020-09-28-fips06
-      md5: 1a06334edaae092c8ef7e8bd64f731f5.dir
+      md5: 6efca900df6eff8317eff04ab4f5e914.dir
       size: 52882
       nfiles: 1
     - path: plots/2020-09-28-fips06
-      md5: a57f1097027dc47841f9df3d08208db2.dir
-      size: 1591329
+      md5: 31d9be60abf5bcc09a85fdd7dc1df12f.dir
+      size: 1827721
       nfiles: 12
