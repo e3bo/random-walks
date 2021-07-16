@@ -48,8 +48,8 @@ scores <-
   select(model, forecast_date, horizon, location, target_variable, 
          target_end_date, coverage_50, coverage_95, abs_error, wis) %>%
   mutate(facet_var = fct_recode(target_variable, 
-                                "Incident cases" = "inc case",
-                                "Incident deaths" = "inc death",
+                                "Cases" = "inc case",
+                                "Deaths" = "inc death",
                                 "Hospital admissions" = "inc hosp")) %>%
   filter(model != "CEID-Walk") %>% 
   group_by(forecast_date, horizon, location, target_variable) %>%
@@ -96,7 +96,7 @@ pscores_h_by_date <-
 ggsave("hosp-wis-by-date.png", pscores_h_by_date, width = 5.2, dpi = 600)
 
 ssums <- scores %>%
-  filter(facet_var %in% c("Incident cases", "Incident deaths")) %>% 
+  filter(facet_var %in% c("Cases", "Deaths")) %>% 
   group_by(horizon, model, facet_var) %>% 
   summarize(meanw = mean(wis), .groups = "drop")
 

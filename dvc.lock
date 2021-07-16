@@ -2082,8 +2082,8 @@ stages:
     cmd: ./analyze-scores.R
     deps:
     - path: analyze-scores.R
-      md5: d73dcdfcf53f862edae9e00710fbb2dc
-      size: 4478
+      md5: 78cd64fd237b1f299c54c683976008b9
+      size: 4442
     - path: lambda020.00-status-quo-CEID-InfectionKalman
       md5: 41646307aea204cffd82bf8485b7cdcc.dir
       size: 2542991
@@ -2093,11 +2093,11 @@ stages:
       size: 141985
     outs:
     - path: cases-deaths-wis-by-date.png
-      md5: 872a883becb0f23b3ee472cbb8bf678f
-      size: 874744
+      md5: 227994403721d7dbe1399410e0dc79e0
+      size: 873753
     - path: cases-deaths-wis.png
-      md5: 9a0b15d90e71a0cf696a0c5f4a396814
-      size: 282673
+      md5: afafa22aa04bc7429237cf3e8546db7e
+      size: 270645
     - path: hosp-wis-by-date.png
       md5: 64922156ec96187fb1ae35b4f9e0aa35
       size: 1065888
