@@ -2068,22 +2068,22 @@ stages:
       size: 2542991
       nfiles: 48
     - path: make-trajectory-plots.R
-      md5: 1e12cc99e81f43b752b731d1b002483d
-      size: 4930
+      md5: e816c9a33a04fab36faa24a4dd64e56f
+      size: 5099
     - path: other-model-forecasts.rds
       md5: bb6012b15586c0843a28fed88c33a239
       size: 141985
     outs:
     - path: trajectories-all
-      md5: becf3dfed95478eca8203b5f7e8329d7.dir
-      size: 2786789
-      nfiles: 3
+      md5: 5e5ad050b287271eaa47e3c7740763ca.dir
+      size: 1072476
+      nfiles: 1
   analyze-scores:
     cmd: ./analyze-scores.R
     deps:
     - path: analyze-scores.R
-      md5: b33e7fbc85aaf065f987365e1645cd22
-      size: 4491
+      md5: d73dcdfcf53f862edae9e00710fbb2dc
+      size: 4478
     - path: lambda020.00-status-quo-CEID-InfectionKalman
       md5: 41646307aea204cffd82bf8485b7cdcc.dir
       size: 2542991
@@ -2093,14 +2093,14 @@ stages:
       size: 141985
     outs:
     - path: cases-deaths-wis-by-date.png
-      md5: 736d987bdcb8c74b4a1ce7f02bdf9547
-      size: 1060992
+      md5: 872a883becb0f23b3ee472cbb8bf678f
+      size: 874744
     - path: cases-deaths-wis.png
-      md5: 31e4975853d2785f4b200f20e670502f
-      size: 355925
+      md5: 9a0b15d90e71a0cf696a0c5f4a396814
+      size: 282673
     - path: hosp-wis-by-date.png
-      md5: c904c877759ae57ec26f8dcb11ff2b51
-      size: 1170178
+      md5: 64922156ec96187fb1ae35b4f9e0aa35
+      size: 1065888
     - path: hosp-wis.png
       md5: cb184ae660c22005e2226b2cdeacdd04
       size: 300316
