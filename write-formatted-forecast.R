@@ -747,7 +747,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
     geom_point(aes(y = residential * 100)) + 
     theme_minimal() + 
     labs(x = "Date", y = "Percent increase in time spent\nin residential areas")
-  ggsave(plot_path9, pmob,  dpi = 600, width = 5.2)
+  ggsave(plot_path9, pmob,  dpi = 600, width = 5.2, height = 4)
   
   if ("doses" %in% names(cov)){
     pvac_path <- file.path(plot_dir, "doses.png")
@@ -757,7 +757,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
       geom_line() + 
       theme_minimal() + 
       labs(x = "Date", y = "Doses administered")
-    ggsave(pvac_path, pvac, dpi = 600, width = 5.2)
+    ggsave(pvac_path, pvac, dpi = 600, width = 5.2, height = 4)
   }
   
   prhot <- cov %>% filter(target_end_date < "2020-07-20") %>% 
@@ -767,7 +767,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
     theme_minimal()
   
   prhot_path <- file.path(plot_dir, "rhot-estimate.png")
-  ggsave(prhot_path, prhot, dpi = 600, width = 5.2)
+  ggsave(prhot_path, prhot, dpi = 600, width = 5.2, height = 4)
 }
 
 forecast_date <- Sys.getenv("fdt", unset = "2020-06-29")
