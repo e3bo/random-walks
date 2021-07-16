@@ -64,9 +64,11 @@ make_params_tab <- function(w, h, cov, z, f, dir, Rtmod){
                 upper = ests$p_h + sd$p_h * q)
   p <- ggplot(dph, aes(x, y)) + 
     geom_pointrange(aes(ymin = lower, ymax = upper)) + 
-    labs(x = "Start of 4 week period", y = expression(paste("logit ", p[h])))
+    labs(x = "Start of 4 week period", y = expression(paste("logit ", p[h]))) +
+    theme_minimal()
   
-  ggsave(filename = file.path(dir, "p_h-plot.png"), plot = p)
+  ggsave(filename = file.path(dir, "p_h-plot.png"), plot = p, dpi = 600, 
+         width = 5.2, height = 4)
 
   start2 <- x %>% group_by(τ_cmap) %>% slice(1) %>% pull(target_end_date)
   dtc <- tibble(x = start2, y = ests$τ_c, 
@@ -74,8 +76,10 @@ make_params_tab <- function(w, h, cov, z, f, dir, Rtmod){
                 upper = ests$τ_c + sd$τ_c * q)
   ptc <- ggplot(dtc, aes(x, y)) + 
     geom_pointrange(aes(ymin = lower, ymax = upper)) + 
-    labs(x = "Start of 4 week period", y = expression(paste("log ", tau[c])))
-  ggsave(filename = file.path(dir, "tauc-plot.png"), plot = ptc)
+    labs(x = "Start of 4 week period", y = expression(paste("log ", tau[c]))) +
+    theme_minimal()
+  ggsave(filename = file.path(dir, "tauc-plot.png"), plot = ptc, dpi = 600,
+         width = 5.2, height = 4)
   
   start3 <- x %>% group_by(β_0map) %>% slice(1) %>% pull(target_end_date)
   db0 <- tibble(x = start3, y = ests$β_0, 
@@ -83,8 +87,10 @@ make_params_tab <- function(w, h, cov, z, f, dir, Rtmod){
                 upper = ests$β_0 + sd$β_0 * q)
   pb0 <- ggplot(db0, aes(x, y)) + 
     geom_pointrange(aes(ymin = lower, ymax = upper)) + 
-    labs(x = "Start of 1 week period", y = expression(paste("log ", beta[0])))
-  ggsave(filename = file.path(dir, "b0-plot.png"), plot = pb0)
+    labs(x = "Start of 1 week period", y = expression(paste("log ", beta[0]))) +
+    theme_minimal()
+  ggsave(filename = file.path(dir, "b0-plot.png"), plot = pb0, dpi = 600,
+         width = 5.2, height = 4)
   
   
 }
