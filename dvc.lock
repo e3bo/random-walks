@@ -2082,8 +2082,8 @@ stages:
     cmd: ./analyze-scores.R
     deps:
     - path: analyze-scores.R
-      md5: 78cd64fd237b1f299c54c683976008b9
-      size: 4442
+      md5: b449d9651c106536bd406c47a6ec4881
+      size: 4522
     - path: lambda020.00-status-quo-CEID-InfectionKalman
       md5: 41646307aea204cffd82bf8485b7cdcc.dir
       size: 2542991
@@ -2099,11 +2099,11 @@ stages:
       md5: afafa22aa04bc7429237cf3e8546db7e
       size: 270645
     - path: hosp-wis-by-date.png
-      md5: 64922156ec96187fb1ae35b4f9e0aa35
-      size: 1065888
+      md5: 792f955c798920eb4cb972586393f7e1
+      size: 281322
     - path: hosp-wis.png
-      md5: cb184ae660c22005e2226b2cdeacdd04
-      size: 300316
+      md5: 4eb4de38d98ea20a4c865503046e7807
+      size: 239453
   lookup-wayback-urls:
     cmd: ./lookup-wayback-urls.R
     deps:

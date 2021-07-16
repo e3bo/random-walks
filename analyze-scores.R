@@ -81,7 +81,8 @@ ggsave("cases-deaths-wis-by-date.png", pscores_cd_by_date, width = 5.2,
 
 pscores_h_by_date <-
   (
-    scores %>%
+    scores %>% 
+      filter(horizon %in% c(7, 14, 21, 28)) %>%
       filter(target_variable %in% c("inc hosp")) %>%
       ggplot(aes(
         x = target_end_date, y = wis, color = model
@@ -93,7 +94,8 @@ pscores_h_by_date <-
       labs(x = "Observation date", y = "Weighted interval score")
   ) %>%
   add_theme_mods()
-ggsave("hosp-wis-by-date.png", pscores_h_by_date, width = 5.2, dpi = 600)
+ggsave("hosp-wis-by-date.png", pscores_h_by_date, width = 5.2, 
+       height =4, dpi = 600)
 
 ssums <- scores %>%
   filter(facet_var %in% c("Cases", "Deaths")) %>% 
@@ -132,4 +134,4 @@ pscores_h <- (
 ) %>%
   add_theme_mods()
 
-ggsave("hosp-wis.png", pscores_h, width = 5.2, dpi = 600)
+ggsave("hosp-wis.png", pscores_h, width = 5.2, height = 4, dpi = 600)
