@@ -88,7 +88,7 @@ pscores_h_by_date <-
         x = target_end_date, y = wis, color = model
       )) +
       geom_point() +
-      scale_y_log10(breaks = c(10, 1000)) +
+      scale_y_log10(breaks = c(10, 100, 1000)) +
       coord_cartesian(clip = 'off') +
       facet_grid(as.integer(horizon) ~ .) +
       labs(x = "Observation date", y = "Weighted interval score")
