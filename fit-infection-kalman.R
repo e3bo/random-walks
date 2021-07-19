@@ -252,8 +252,8 @@ if (forecast_date_start == forecast_date) {
 if (forecast_date == forecast_date_start || # starting cold 
     (forecast_date >= "2020-11-16" &&
     forecast_date_start < "2020-11-16" )|| # or adding hosp data
-    (forecast_date >= "2020-02-15" &&
-     forecast_date_start < "2020-02-15")){ # or adding vaccine data
+    (forecast_date >= "2021-02-15" &&
+     forecast_date_start < "2021-02-15")){ # or adding vaccine data
   iter1 <- 1000
 } else {
   iter1 <- 100
