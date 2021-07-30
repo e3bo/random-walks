@@ -2646,15 +2646,15 @@ stages:
     cmd: ./analyze-google-mob-revisions.R
     deps:
     - path: analyze-google-mob-revisions.R
-      md5: 55a63f0671d63303978f63fe07baefff
-      size: 1453
+      md5: 1d26b78922aafd65aff24637558c09c9
+      size: 973
     - path: google-mobility-reports-wayback
       md5: 21133a35195a7a07f39fe5e24d72f24a.dir
       size: 47934695
       nfiles: 89
     outs:
     - path: residential-mobility-plot.pdf
-      md5: 76b5d240cb17f6c66ed4bc3799dceda6
+      md5: fd92ae90223d1fde05dff007a1fd8e98
       size: 25927
   make-revisions-plot:
     cmd: ./study-indicators-revisions.R
@@ -2667,12 +2667,12 @@ stages:
       size: 414103429
       nfiles: 392
     - path: study-indicators-revisions.R
-      md5: b275e0db50fe888eb45546da83004255
-      size: 2133
+      md5: 6b8e1c42e930d86311e9eaa55bdcbd9e
+      size: 2143
     outs:
     - path: indicators-revisions-cal.png
-      md5: 9f4dc11d5e78732fa501971b788d579f
-      size: 210278
+      md5: 237b433492a5e419f33621b85b3f6cf6
+      size: 225819
   hopkins-2021-06-21:
     cmd: fdt=2021-06-21 ./pull-hopkins-ts-from-date.R
     deps:
