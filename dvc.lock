@@ -2710,19 +2710,19 @@ stages:
     cmd: ./plot-metrics.R
     deps:
     - path: fits
-      md5: c39b7c04e367159094675b6d4d412823.dir
-      size: 11300506
+      md5: 279c0577ce355ee00b18608ef7460867.dir
+      size: 11301226
       nfiles: 146
     - path: plot-metrics.R
-      md5: da55e191376a793a8d2a4bccb349c134
-      size: 1803
+      md5: 8a5e7d5e78328dd128502eb2d80ba617
+      size: 1822
     outs:
     - path: california-fitting-time.png
-      md5: 62624ed5e2dc1a04ce0d2f13bd605209
-      size: 125773
+      md5: d7d2e20f7f510f120aa6b987cbd15ace
+      size: 85719
     - path: california-mase.png
-      md5: cec819d2f49188f8a80690b5661a3892
-      size: 156998
+      md5: a7b06bb01a45ffa0da6f20a83b966358
+      size: 155647
   make-plot-of-betares-by-fdt:
     cmd: ./compare-params-by-forecast-date.R
     deps:
@@ -2733,9 +2733,9 @@ stages:
       md5: 4035c0102c7a76875a36f76b080c479c
       size: 24121
     - path: fits
-      md5: cab238a4871b1a542780cec527566149.dir
-      size: 11310111
-      nfiles: 147
+      md5: 279c0577ce355ee00b18608ef7460867.dir
+      size: 11301226
+      nfiles: 146
     outs:
     - path: res-effect-by-forecast-date.png
       md5: 8f280f9524cc0fe9dd5a9c042068172e
