@@ -49,4 +49,5 @@ p2 <- m4 %>% ggplot(aes(x = date, y = hours)) +
   labs(x = "Forecast date", y = "Fitting time (hours)") +
   theme_minimal()
 
-ggsave("california-fitting-time.png", p2, dpi = 600, width = 5.2, units = "in")
+ggsave("california-fitting-time.png", p2, dpi = 600, width = 5.2, units = "in",
+       height = 4)

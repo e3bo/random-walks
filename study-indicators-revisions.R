@@ -57,7 +57,7 @@ p <- allsum %>%
     ymax = max,
     y = last
   )) +
-  geom_linerange() + geom_point() + 
+  geom_linerange() + geom_point(size = 0.5) + 
   facet_grid(facet_label ~ ., scales = "free_y") +
   theme_minimal() +
   labs(x = "Date", y = "Count")

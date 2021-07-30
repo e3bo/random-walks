@@ -48,8 +48,8 @@ scores <-
   select(model, forecast_date, horizon, location, target_variable, 
          target_end_date, coverage_50, coverage_95, abs_error, wis) %>%
   mutate(facet_var = fct_recode(target_variable, 
-                                "Incident cases" = "inc case",
-                                "Incident deaths" = "inc death",
+                                "Cases" = "inc case",
+                                "Deaths" = "inc death",
                                 "Hospital admissions" = "inc hosp")) %>%
   filter(model != "CEID-Walk") %>% 
   group_by(forecast_date, horizon, location, target_variable) %>%
@@ -81,22 +81,24 @@ ggsave("cases-deaths-wis-by-date.png", pscores_cd_by_date, width = 5.2,
 
 pscores_h_by_date <-
   (
-    scores %>%
+    scores %>% 
+      filter(horizon %in% c(7, 14, 21, 28)) %>%
       filter(target_variable %in% c("inc hosp")) %>%
       ggplot(aes(
         x = target_end_date, y = wis, color = model
       )) +
       geom_point() +
-      scale_y_log10(breaks = c(10, 1000)) +
+      scale_y_log10(breaks = c(10, 100, 1000)) +
       coord_cartesian(clip = 'off') +
       facet_grid(as.integer(horizon) ~ .) +
       labs(x = "Observation date", y = "Weighted interval score")
   ) %>%
   add_theme_mods()
-ggsave("hosp-wis-by-date.png", pscores_h_by_date, width = 5.2, dpi = 600)
+ggsave("hosp-wis-by-date.png", pscores_h_by_date, width = 5.2, 
+       height =4, dpi = 600)
 
 ssums <- scores %>%
-  filter(facet_var %in% c("Incident cases", "Incident deaths")) %>% 
+  filter(facet_var %in% c("Cases", "Deaths")) %>% 
   group_by(horizon, model, facet_var) %>% 
   summarize(meanw = mean(wis), .groups = "drop")
 
@@ -132,4 +134,4 @@ pscores_h <- (
 ) %>%
   add_theme_mods()
 
-ggsave("hosp-wis.png", pscores_h, width = 5.2, dpi = 600)
+ggsave("hosp-wis.png", pscores_h, width = 5.2, height = 4, dpi = 600)
