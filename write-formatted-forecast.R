@@ -767,7 +767,7 @@ make_fit_plots <- function(dets, cov, winit, h, p_hsd, β_0sd, τ_csd, fdt,
       ggplot(aes(x = target_end_date, y = doses)) + 
       geom_line() + 
       theme_minimal() + 
-      labs(x = "Date", y = "Doses administered")
+      labs(x = "Date", y = "Cumulative doses administered")
     ggsave(pvac_path, pvac, dpi = 600, width = 5.2, height = 4)
   }
   
