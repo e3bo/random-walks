@@ -42,8 +42,6 @@ rev_iterator = rev_paginator.paginate(DataSetId=sourceid)
 rids = []
 for page in rev_iterator:
     for revision in page['Revisions']:
-        rcomments.append(revision['Comment'])
-        rupdate.append(revision['UpdatedAt'])
         rids.append(revision['Id'])
 
 
