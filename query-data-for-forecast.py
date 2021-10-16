@@ -6,6 +6,7 @@
 
 import boto3
 import datetime
+import time
 
 client = boto3.client('athena')
 
@@ -15,41 +16,70 @@ client = boto3.client('athena')
 
 def gen_query(asof):
     query = """
-WITH h AS (SELECT date,
-           partition_1 AS fips,
-           previous_day_admission_adult_covid_confirmed, 
-           previous_day_admission_pediatric_covid_confirmed, 
-           previous_day_admission_adult_covid_confirmed_coverage,
-           partition_0 AS asof 
-           FROM healthdata 
-           WHERE partition_1='06' AND partition_0='{asof}'),
-d AS (SELECT CAST(DATE_FORMAT(target_end_date, '%Y%m%d') AS BIGINT) AS date, 
-      location AS fips,
-      value AS deaths, 
-      partition_0 AS asof 
-      FROM hopkins_reformatted 
-      WHERE target_type='day ahead inc death' AND location='06' AND partition_0='{asof}'),
-c AS (SELECT CAST(DATE_FORMAT(target_end_date, '%Y%m%d') AS BIGINT) AS date, 
-      location AS fips,
-      value AS cases, 
-      partition_0 AS asof 
-      FROM hopkins_reformatted 
-      WHERE target_type='day ahead inc case' AND location='06' AND partition_0='{asof}')
-SELECT fips,
-       asof, 
-       date, 
-       d.deaths, 
-       c.cases,
-       h.previous_day_admission_adult_covid_confirmed,
-       h.previous_day_admission_pediatric_covid_confirmed,
-       h.previous_day_admission_adult_covid_confirmed_coverage
-FROM h
-FULL OUTER JOIN d
-USING (fips, asof, date)
-FULL OUTER JOIN c
-USING (fips, asof, date)
-WHERE date >= 20200301
-ORDER BY date;""".format(asof = asof)
+WITH g AS (
+	SELECT DATE_FORMAT(date, '%Y%m%d') AS date2,
+		residential_percent_change_from_baseline AS res,
+		REPLACE(iso_3166_2_code, 'US-', '') as state,
+		partition_0 AS asof
+	FROM google_mobility_reports_wayback_parquet
+	WHERE partition_0 = '{asof}'
+),
+g2 AS (
+	SELECT g.date2 AS time_value,
+		res,
+		state,
+		asof,
+		state_code AS fips
+	FROM g
+		LEFT JOIN state_fips_lookup USING (state)
+),
+d AS (
+	SELECT DATE_FORMAT(target_end_date, '%Y%m%d') AS time_value,
+		location AS fips,
+		value AS deaths,
+		partition_0 AS asof
+	FROM hopkins_reformatted
+	WHERE target_type = 'day ahead inc death'
+		AND location = '06'
+		AND partition_0 = '{asof}'
+),
+c AS (
+	SELECT DATE_FORMAT(target_end_date, '%Y%m%d') AS time_value,
+		location AS fips,
+		value AS cases,
+		partition_0 AS asof
+	FROM hopkins_reformatted
+	WHERE target_type = 'day ahead inc case'
+		AND location = '06'
+		AND partition_0 = '{asof}'
+),
+h AS (
+	SELECT CAST(date AS VARCHAR) AS time_value,
+		partition_1 AS fips,
+		previous_day_admission_adult_covid_confirmed,
+		previous_day_admission_pediatric_covid_confirmed,
+		previous_day_admission_adult_covid_confirmed_coverage,
+		partition_0 AS asof
+	FROM healthdata
+	WHERE partition_1 = '06'
+		AND partition_0 = '{asof}'
+)
+SELECT time_value,
+	asof,
+	fips,
+	g2.res,
+	c.cases,
+	d.deaths,
+	h.previous_day_admission_adult_covid_confirmed,
+	h.previous_day_admission_pediatric_covid_confirmed,
+	h.previous_day_admission_adult_covid_confirmed_coverage
+FROM d
+	FULL JOIN g2 USING (time_value, asof, fips)
+	FULL JOIN c USING (time_value, asof, fips)
+	FULL JOIN h USING (time_value, asof, fips)
+WHERE fips = '06'
+	AND time_value > '20200301'
+ORDER BY time_value;""".format(asof = asof)
     return query
 
 
@@ -79,4 +109,5 @@ for date in date_list:
         }
     )
     responses.append(resp)
+    time.sleep(1)
 
