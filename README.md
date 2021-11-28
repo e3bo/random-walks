@@ -22,5 +22,5 @@ Note that an R version of the log likelihood function is used to calculate some 
 The R and Julia functions should be identical for the outputs which they both produce, while the R version produces additional outputs that are not needed during the optimization.
 The creation of forecasts in the COVID-19 Forecast Hub format is done by `write-formatted-forecast.R`, which also contains code for making a table of parameter estimates and many plots of the forecasts.
 Calculation of weighted interval scores is done in `analyze-scores.R`.
-See the data-pull.sh bash script for an example for how to pull the cases, deaths, and hosptalization data for a particular week.
+See the `data-pull.sh` bash script for an example for how to pull the cases, deaths, and hosptalization data for a particular week.
 The URLs of the Google Community Mobility reports used are obtained with `lookup-wayback-urls.R`, then the files are downloaded and filtered to US state data (to save space) by `download-google-mob.R`.
